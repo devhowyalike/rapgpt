@@ -174,8 +174,12 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
       if (!response.ok) throw new Error("Failed to submit comment");
 
       const { comment } = await response.json();
-      // Comment will be fetched on next poll or we can add it optimistically
-      await saveBattle();
+
+      // Update local battle state with the new comment
+      setBattle({
+        ...battle,
+        comments: [...battle.comments, comment],
+      });
     } catch (error) {
       console.error("Error commenting:", error);
     }
