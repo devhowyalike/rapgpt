@@ -37,18 +37,18 @@ export function VerseDisplay({
                 key={`${verse.id}-${index}`}
                 initial={{ opacity: 1 }}
                 animate={{ opacity: 1 }}
-                className="verse-line"
+                className="verse-line flex"
               >
+                <span
+                  className="text-sm opacity-50 w-8 flex-shrink-0"
+                  style={{ color: persona.accentColor }}
+                >
+                  {index + 1}.
+                </span>
                 <p
-                  className="text-lg md:text-xl text-white font-medium leading-relaxed"
+                  className="text-lg md:text-xl text-white font-medium leading-relaxed flex-1"
                   style={{ textShadow: `0 0 10px ${persona.accentColor}40` }}
                 >
-                  <span
-                    className="text-sm mr-2 opacity-50"
-                    style={{ color: persona.accentColor }}
-                  >
-                    {index + 1}.
-                  </span>
                   {bar.text}
                 </p>
               </motion.div>
@@ -61,17 +61,18 @@ export function VerseDisplay({
                 initial={{ opacity: 0, x: position === "left" ? -20 : 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05, duration: 0.2 }}
+                className="flex"
               >
+                <span
+                  className="text-sm opacity-50 w-8 flex-shrink-0"
+                  style={{ color: persona.accentColor }}
+                >
+                  {index + 1}.
+                </span>
                 <p
-                  className="text-lg md:text-xl text-white font-medium leading-relaxed"
+                  className="text-lg md:text-xl text-white font-medium leading-relaxed flex-1"
                   style={{ textShadow: `0 0 10px ${persona.accentColor}40` }}
                 >
-                  <span
-                    className="text-sm mr-2 opacity-50"
-                    style={{ color: persona.accentColor }}
-                  >
-                    {index + 1}.
-                  </span>
                   {line}
                 </p>
               </motion.div>
