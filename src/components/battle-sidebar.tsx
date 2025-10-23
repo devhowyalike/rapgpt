@@ -285,6 +285,23 @@ export function BattleSidebar({
                 const rightScore =
                   roundScore.personaScores[battle.personas.right.id];
 
+                // Create array of personas with their scores and sort by votes (highest first)
+                const sortedPersonas = [
+                  {
+                    persona: battle.personas.left,
+                    score: leftScore,
+                    hoverBorderColor: "hover:border-blue-500",
+                  },
+                  {
+                    persona: battle.personas.right,
+                    score: rightScore,
+                    hoverBorderColor: "hover:border-purple-500",
+                  },
+                ].sort(
+                  (a, b) =>
+                    (b.score?.userVotes || 0) - (a.score?.userVotes || 0)
+                );
+
                 return (
                   <motion.div
                     key={roundScore.round}
@@ -297,95 +314,50 @@ export function BattleSidebar({
                     </h3>
 
                     <div className="space-y-3">
-                      {/* Left Persona Vote */}
-                      <button
-                        onClick={() =>
-                          handleVote(roundScore.round, battle.personas.left.id)
-                        }
-                        disabled={
-                          !canVoteOnRound(roundScore.round) ||
-                          userVotes.has(
-                            `${roundScore.round}-${battle.personas.left.id}`
-                          )
-                        }
-                        className={`
-                        w-full p-3 rounded-lg border-2 transition-all
-                        ${
-                          userVotes.has(
-                            `${roundScore.round}-${battle.personas.left.id}`
-                          )
-                            ? "bg-gray-700 border-yellow-400 cursor-not-allowed"
-                            : !canVoteOnRound(roundScore.round)
-                            ? "bg-gray-700 border-gray-600 cursor-not-allowed"
-                            : "hover:bg-gray-700 border-gray-600 hover:border-blue-500"
-                        }
-                      `}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span
-                            className="font-medium"
-                            style={{ color: battle.personas.left.accentColor }}
+                      {sortedPersonas.map(
+                        ({ persona, score, hoverBorderColor }) => (
+                          <button
+                            key={persona.id}
+                            onClick={() =>
+                              handleVote(roundScore.round, persona.id)
+                            }
+                            disabled={
+                              !canVoteOnRound(roundScore.round) ||
+                              userVotes.has(`${roundScore.round}-${persona.id}`)
+                            }
+                            className={`
+                          w-full p-3 rounded-lg border-2 transition-all
+                          ${
+                            userVotes.has(`${roundScore.round}-${persona.id}`)
+                              ? "bg-gray-700 border-yellow-400 cursor-not-allowed"
+                              : !canVoteOnRound(roundScore.round)
+                              ? "bg-gray-700 border-gray-600 cursor-not-allowed"
+                              : `hover:bg-gray-700 border-gray-600 ${hoverBorderColor}`
+                          }
+                        `}
                           >
-                            {battle.personas.left.name}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-400">
-                              {leftScore?.userVotes || 0} votes
-                            </span>
-                            {roundScore.winner === battle.personas.left.id && (
-                              <span>🏆</span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="text-sm text-gray-400 mt-1">
-                          Score: {leftScore?.totalScore.toFixed(1)}
-                        </div>
-                      </button>
-
-                      {/* Right Persona Vote */}
-                      <button
-                        onClick={() =>
-                          handleVote(roundScore.round, battle.personas.right.id)
-                        }
-                        disabled={
-                          !canVoteOnRound(roundScore.round) ||
-                          userVotes.has(
-                            `${roundScore.round}-${battle.personas.right.id}`
-                          )
-                        }
-                        className={`
-                        w-full p-3 rounded-lg border-2 transition-all
-                        ${
-                          userVotes.has(
-                            `${roundScore.round}-${battle.personas.right.id}`
-                          )
-                            ? "bg-gray-700 border-yellow-400 cursor-not-allowed"
-                            : !canVoteOnRound(roundScore.round)
-                            ? "bg-gray-700 border-gray-600 cursor-not-allowed"
-                            : "hover:bg-gray-700 border-gray-600 hover:border-purple-500"
-                        }
-                      `}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span
-                            className="font-medium"
-                            style={{ color: battle.personas.right.accentColor }}
-                          >
-                            {battle.personas.right.name}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-400">
-                              {rightScore?.userVotes || 0} votes
-                            </span>
-                            {roundScore.winner === battle.personas.right.id && (
-                              <span>🏆</span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="text-sm text-gray-400 mt-1">
-                          Score: {rightScore?.totalScore.toFixed(1)}
-                        </div>
-                      </button>
+                            <div className="flex items-center justify-between">
+                              <span
+                                className="font-medium"
+                                style={{ color: persona.accentColor }}
+                              >
+                                {persona.name}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-400">
+                                  {score?.userVotes || 0} votes
+                                </span>
+                                {roundScore.winner === persona.id && (
+                                  <span>🏆</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-400 mt-1">
+                              Score: {score?.totalScore.toFixed(1)}
+                            </div>
+                          </button>
+                        )
+                      )}
                     </div>
                   </motion.div>
                 );
