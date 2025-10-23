@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { getAllBattles } from "@/lib/battle-storage";
 
-// Revalidate every 60 seconds to show fresh data
-export const revalidate = 60;
+// Always fetch fresh data to immediately reflect battle completions
+export const revalidate = 0;
 
 export default async function ArchivePage() {
   const battles = await getAllBattles();
