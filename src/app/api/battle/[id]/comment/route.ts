@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getBattleById, saveBattle } from '@/lib/battle-storage';
 import type { Comment } from '@/lib/shared';
 import { MAX_COMMENTS } from '@/lib/shared';
@@ -54,6 +55,10 @@ export async function POST(
     battle.updatedAt = Date.now();
 
     await saveBattle(battle);
+
+    // Revalidate the archive page and battle page to show fresh data
+    revalidatePath('/archive');
+    revalidatePath(`/battle/${id}`);
 
     return new Response(JSON.stringify({ success: true, comment }), {
       status: 200,

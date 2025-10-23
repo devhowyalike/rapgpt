@@ -2,6 +2,9 @@ import { getBattleById } from "@/lib/battle-storage";
 import { BattleController } from "@/components/battle-controller";
 import { notFound } from "next/navigation";
 
+// Revalidate every 10 seconds for active battles
+export const revalidate = 10;
+
 export default async function BattlePage({
   params,
 }: {

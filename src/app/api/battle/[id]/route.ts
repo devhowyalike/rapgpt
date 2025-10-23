@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getBattleById, saveBattle } from '@/lib/battle-storage';
 import type { Battle } from '@/lib/shared';
 
@@ -46,6 +47,10 @@ export async function PUT(
     }
 
     await saveBattle(battle);
+
+    // Revalidate the archive page and battle page to show fresh data
+    revalidatePath('/archive');
+    revalidatePath(`/battle/${id}`);
 
     return new Response(JSON.stringify(battle), {
       status: 200,
