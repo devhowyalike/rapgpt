@@ -33,10 +33,10 @@ export function BattleStage({
   return (
     <div className="flex flex-col min-h-0 md:h-full bg-linear-to-b from-stage-darker to-stage-dark">
       {/* Header with Round Tracker */}
-      <div className="p-4 md:p-6 border-b border-gray-800">
+      <div className="fixed md:relative top-[52px] md:top-0 left-0 right-0 z-20 p-4 md:p-6 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none">
         <div className="max-w-7xl mx-auto">
           <motion.h1
-            className="text-4xl md:text-6xl font-bold text-center mb-6 tracking-wider"
+            className="text-3xl md:text-4xl lg:text-6xl font-bold text-center mb-4 md:mb-6 tracking-wider"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
           >
@@ -52,12 +52,12 @@ export function BattleStage({
 
           {battle.status === "completed" && battle.winner && (
             <motion.div
-              className="mt-6 text-center"
+              className="mt-4 md:mt-6 text-center"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.5 }}
             >
-              <div className="text-2xl md:text-3xl font-bold text-yellow-400 font-[family-name:var(--font-bebas-neue)]">
+              <div className="text-xl md:text-2xl lg:text-3xl font-bold text-yellow-400 font-[family-name:var(--font-bebas-neue)]">
                 🏆 WINNER:{" "}
                 {battle.personas.left.id === battle.winner
                   ? battle.personas.left.name
@@ -68,6 +68,15 @@ export function BattleStage({
           )}
         </div>
       </div>
+
+      {/* Spacer for mobile fixed header */}
+      <div
+        className="md:hidden"
+        style={{
+          height:
+            battle.status === "completed" && battle.winner ? "220px" : "180px",
+        }}
+      />
 
       {/* Split Screen Stage */}
       <div className="flex-1 md:overflow-y-auto">

@@ -30,6 +30,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
       <body className={`${inter.variable} ${bebasNeue.variable} antialiased`}>
         <SiteHeader />
+        <div style={{ height: "52px" }} />
         {children}
       </body>
     </html>
