@@ -106,6 +106,14 @@ export function isBattleComplete(battle: Battle): boolean {
 }
 
 /**
+ * Determine if a battle is archived (completed or incomplete)
+ * Archived battles should not accept new comments or votes
+ */
+export function isBattleArchived(battle: Battle): boolean {
+  return battle.status === 'completed' || battle.status === 'incomplete';
+}
+
+/**
  * Get the next persona to perform
  */
 export function getNextPerformer(battle: Battle): PersonaPosition | null {

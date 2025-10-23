@@ -59,3 +59,18 @@ export function validate<T extends ZodType>(
   return { success: true, data: validation.data };
 }
 
+/**
+ * Creates a 403 Forbidden response for archived battles
+ * Used when users try to comment or vote on completed/incomplete battles
+ */
+export function createArchivedBattleResponse(action: 'comment' | 'vote'): Response {
+  const actionText = action === 'comment' ? 'Comments are' : 'Voting is';
+  return new Response(
+    JSON.stringify({ error: `${actionText} disabled for archived battles` }), 
+    {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' },
+    }
+  );
+}
+
