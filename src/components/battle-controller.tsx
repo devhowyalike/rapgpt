@@ -19,6 +19,8 @@ import {
   RotateCcw,
   AlertTriangle,
   X,
+  MessageSquare,
+  ThumbsUp,
 } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
@@ -319,12 +321,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   if (battle.status === "completed" || battle.status === "incomplete") {
     return (
       <>
-        <SiteHeader
-          showMobileActions={true}
-          onCommentsClick={handleMobileCommentsClick}
-          onVotingClick={handleMobileVotingClick}
-          activeTab={showMobileDrawer ? mobileActiveTab : undefined}
-        />
+        <SiteHeader />
         <div style={{ height: "52px" }} />
         <div className="flex flex-col md:h-[calc(100vh-3.5rem)] md:flex-row">
           {/* Main Stage */}
@@ -369,6 +366,36 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
           </div>
         </div>
 
+        {/* Mobile Floating Action Buttons */}
+        <div className="fixed top-20 right-4 flex flex-col items-center gap-2 md:hidden z-40">
+          <button
+            onClick={handleMobileCommentsClick}
+            className={`
+              w-11 h-11 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+              ${
+                showMobileDrawer && mobileActiveTab === "comments"
+                  ? "bg-blue-600/80 text-white border-blue-400/50 scale-110"
+                  : "bg-gray-800/60 text-gray-300 border-gray-700/50 hover:bg-blue-600/80 hover:text-white hover:border-blue-500/50 hover:scale-105"
+              }
+            `}
+          >
+            <MessageSquare className="w-5 h-5" strokeWidth={2.5} />
+          </button>
+          <button
+            onClick={handleMobileVotingClick}
+            className={`
+              w-11 h-11 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+              ${
+                showMobileDrawer && mobileActiveTab === "voting"
+                  ? "bg-purple-600/80 text-white border-purple-400/50 scale-110"
+                  : "bg-gray-800/60 text-gray-300 border-gray-700/50 hover:bg-purple-600/80 hover:text-white hover:border-purple-500/50 hover:scale-105"
+              }
+            `}
+          >
+            <ThumbsUp className="w-5 h-5" strokeWidth={2.5} />
+          </button>
+        </div>
+
         {/* Mobile Drawer */}
         <Dialog.Root open={showMobileDrawer} onOpenChange={setShowMobileDrawer}>
           <Dialog.Portal>
@@ -404,12 +431,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   // Live battle mode
   return (
     <>
-      <SiteHeader
-        showMobileActions={true}
-        onCommentsClick={handleMobileCommentsClick}
-        onVotingClick={handleMobileVotingClick}
-        activeTab={showMobileDrawer ? mobileActiveTab : undefined}
-      />
+      <SiteHeader />
       <div style={{ height: "52px" }} />
       <div className="flex flex-col md:h-[calc(100vh-3.5rem)] md:flex-row">
         {/* Main Stage */}
@@ -528,6 +550,36 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
             votingCompletedRound={votingCompletedRound}
           />
         </div>
+      </div>
+
+      {/* Mobile Floating Action Buttons */}
+      <div className="fixed top-20 right-4 flex flex-col items-center gap-2 md:hidden z-40">
+        <button
+          onClick={handleMobileCommentsClick}
+          className={`
+            w-11 h-11 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+            ${
+              showMobileDrawer && mobileActiveTab === "comments"
+                ? "bg-blue-600/80 text-white border-blue-400/50 scale-110"
+                : "bg-gray-800/60 text-gray-300 border-gray-700/50 hover:bg-blue-600/80 hover:text-white hover:border-blue-500/50 hover:scale-105"
+            }
+          `}
+        >
+          <MessageSquare className="w-5 h-5" strokeWidth={2.5} />
+        </button>
+        <button
+          onClick={handleMobileVotingClick}
+          className={`
+            w-11 h-11 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+            ${
+              showMobileDrawer && mobileActiveTab === "voting"
+                ? "bg-purple-600/80 text-white border-purple-400/50 scale-110"
+                : "bg-gray-800/60 text-gray-300 border-gray-700/50 hover:bg-purple-600/80 hover:text-white hover:border-purple-500/50 hover:scale-105"
+            }
+          `}
+        >
+          <ThumbsUp className="w-5 h-5" strokeWidth={2.5} />
+        </button>
       </div>
 
       {/* Mobile Drawer */}
