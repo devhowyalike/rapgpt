@@ -2,26 +2,17 @@
 
 # dependencies
 /node_modules
-**/node_modules
-/.pnp
-.pnp.*
-.pnpm-store/
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+/.pnpm-store
 
 # testing
 /coverage
 
 # next.js
-.next/
+/.next/
 /out/
 
 # production
 /build
-/dist
 
 # misc
 .DS_Store
@@ -31,11 +22,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env.local
+# local env files
 .env*.local
+.env
 
 # vercel
 .vercel
@@ -44,13 +34,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Expo (mobile app)
-.expo/
-.expo-shared/
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-*.orig.*
-web-build/
+# drizzle
+/drizzle

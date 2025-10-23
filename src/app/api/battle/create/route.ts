@@ -2,26 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { Battle } from '@/lib/shared';
 import { getPersona } from '@/lib/shared/personas';
 import { saveBattle } from '@/lib/battle-storage';
+import { createBattleRequestSchema } from '@/lib/validations/battle';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { leftPersonaId, rightPersonaId } = body;
-
-    // Validate input
-    if (!leftPersonaId || !rightPersonaId) {
+    
+    // Validate input with Zod
+    const validation = createBattleRequestSchema.safeParse(body);
+    
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Both leftPersonaId and rightPersonaId are required' },
+        { error: 'Invalid request', details: validation.error.issues },
         { status: 400 }
       );
     }
-
-    if (leftPersonaId === rightPersonaId) {
-      return NextResponse.json(
-        { error: 'Cannot battle the same persona' },
-        { status: 400 }
-      );
-    }
+    
+    const { leftPersonaId, rightPersonaId } = validation.data;
 
     // Get personas
     const leftPersona = getPersona(leftPersonaId);

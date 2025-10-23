@@ -1,12 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getBattleById, saveBattle } from '@/lib/battle-storage';
 import { updateScoreWithVotes } from '@/lib/battle-engine';
-
-interface VoteRequest {
-  round: number;
-  personaId: string;
-  userId: string;
-}
+import { voteRequestSchema } from '@/lib/validations/battle';
 
 export async function POST(
   request: NextRequest,
@@ -14,7 +9,22 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const { round, personaId, userId }: VoteRequest = await request.json();
+    const body = await request.json();
+    
+    // Validate input with Zod
+    const validation = voteRequestSchema.safeParse(body);
+    
+    if (!validation.success) {
+      return new Response(JSON.stringify({ 
+        error: 'Invalid request', 
+        details: validation.error.issues 
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    
+    const { round, personaId, userId } = validation.data;
 
     const battle = await getBattleById(id);
 
