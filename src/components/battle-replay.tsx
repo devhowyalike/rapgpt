@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { Battle } from "@/lib/shared";
 import { PersonaCard } from "./persona-card";
 import { VerseDisplay } from "./verse-display";
@@ -22,6 +22,21 @@ export function BattleReplay({ battle }: BattleReplayProps) {
   const roundVerses = getRoundVerses(battle, selectedRound);
   const roundScore = battle.scores.find((s) => s.round === selectedRound);
 
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(120);
+
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      if (headerRef.current) {
+        setHeaderHeight(headerRef.current.offsetHeight);
+      }
+    };
+
+    updateHeaderHeight();
+    window.addEventListener("resize", updateHeaderHeight);
+    return () => window.removeEventListener("resize", updateHeaderHeight);
+  }, []);
+
   const canGoPrev = selectedRound > 1;
   const canGoNext = selectedRound < 3;
 
@@ -36,7 +51,10 @@ export function BattleReplay({ battle }: BattleReplayProps) {
   return (
     <div className="flex flex-col min-h-0 md:h-full bg-linear-to-b from-stage-darker to-stage-dark">
       {/* Header with Replay Controls */}
-      <div className="fixed md:relative top-[52px] md:top-0 left-0 right-0 z-20 p-4 md:p-6 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none">
+      <div
+        ref={headerRef}
+        className="fixed md:relative top-[52px] md:top-0 left-0 right-0 z-20 p-4 md:p-6 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none"
+      >
         <div className="max-w-7xl mx-auto">
           {/* Mobile: Stacked Layout */}
           <div className="md:hidden flex flex-col gap-3">
@@ -147,7 +165,7 @@ export function BattleReplay({ battle }: BattleReplayProps) {
       </div>
 
       {/* Spacer for mobile fixed header */}
-      <div className="md:hidden" style={{ height: "140px" }} />
+      <div className="md:hidden" style={{ height: headerHeight }} />
 
       {/* Split Screen Stage */}
       <div className="flex-1 md:overflow-y-auto">
