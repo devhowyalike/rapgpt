@@ -33,7 +33,21 @@ export function BattleSidebar({
   const [username, setUsername] = useState("");
   const [usernameConfirmed, setUsernameConfirmed] = useState(false);
   const [comment, setComment] = useState("");
-  const [userVotes, setUserVotes] = useState<Set<string>>(new Set());
+  const [userVotes, setUserVotes] = useState<Set<string>>(() => {
+    // Load votes from localStorage on mount
+    if (typeof window !== "undefined") {
+      const storageKey = `battle-votes-${battle.id}`;
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        try {
+          return new Set(JSON.parse(stored));
+        } catch {
+          return new Set();
+        }
+      }
+    }
+    return new Set();
+  });
 
   // Automatically switch to voting tab when voting begins
   useEffect(() => {
@@ -60,7 +74,15 @@ export function BattleSidebar({
 
     const voteKey = `${round}-${personaId}`;
     onVote(round, personaId);
-    setUserVotes((prev) => new Set(prev).add(voteKey));
+    setUserVotes((prev) => {
+      const newVotes = new Set(prev).add(voteKey);
+      // Persist to localStorage
+      if (typeof window !== "undefined") {
+        const storageKey = `battle-votes-${battle.id}`;
+        localStorage.setItem(storageKey, JSON.stringify(Array.from(newVotes)));
+      }
+      return newVotes;
+    });
   };
 
   // Helper function to check if user has already voted in a round
