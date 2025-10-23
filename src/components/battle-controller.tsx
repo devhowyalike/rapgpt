@@ -307,7 +307,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
             {/* Resume Button for Incomplete Battles */}
             {battle.status === "incomplete" && (
-              <div className="p-4 bg-gray-900 border-t border-gray-800">
+              <div className="p-4 pb-24 md:pb-4 bg-gray-900 border-t border-gray-800">
                 <div className="max-w-4xl mx-auto">
                   <button
                     onClick={handleResumeBattle}
@@ -344,32 +344,32 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
         </div>
 
         {/* Mobile Floating Action Buttons */}
-        <div className="fixed top-20 right-4 flex flex-col items-center gap-2 md:hidden z-40">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40">
           <button
             onClick={handleMobileCommentsClick}
             className={`
-              w-11 h-11 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+              w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
               ${
                 showMobileDrawer && mobileActiveTab === "comments"
-                  ? "bg-blue-600/80 text-white border-blue-400/50 scale-110"
-                  : "bg-gray-800/60 text-gray-300 border-gray-700/50 hover:bg-blue-600/80 hover:text-white hover:border-blue-500/50 hover:scale-105"
+                  ? "bg-blue-600/90 text-white border-blue-400/50 scale-110"
+                  : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-blue-600/90 hover:text-white hover:border-blue-500/50 hover:scale-105"
               }
             `}
           >
-            <MessageSquare className="w-5 h-5" strokeWidth={2.5} />
+            <MessageSquare className="w-6 h-6" strokeWidth={2.5} />
           </button>
           <button
             onClick={handleMobileVotingClick}
             className={`
-              w-11 h-11 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+              w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
               ${
                 showMobileDrawer && mobileActiveTab === "voting"
-                  ? "bg-purple-600/80 text-white border-purple-400/50 scale-110"
-                  : "bg-gray-800/60 text-gray-300 border-gray-700/50 hover:bg-purple-600/80 hover:text-white hover:border-purple-500/50 hover:scale-105"
+                  ? "bg-purple-600/90 text-white border-purple-400/50 scale-110"
+                  : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-purple-600/90 hover:text-white hover:border-purple-500/50 hover:scale-105"
               }
             `}
           >
-            <ThumbsUp className="w-5 h-5" strokeWidth={2.5} />
+            <ThumbsUp className="w-6 h-6" strokeWidth={2.5} />
           </button>
         </div>
 
@@ -421,7 +421,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
           {/* Control Bar */}
           {canGenerate && (
-            <div className="p-4 bg-gray-900 border-t border-gray-800">
+            <div className="p-4 pb-24 md:pb-4 bg-gray-900 border-t border-gray-800">
               <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={handleGenerateVerse}
@@ -454,7 +454,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
           {/* Voting Timer Display */}
           {isVotingPhase && votingTimeRemaining !== null && (
-            <div className="p-4 bg-gray-900 border-t border-gray-800">
+            <div className="p-4 pb-24 md:pb-4 bg-gray-900 border-t border-gray-800">
               <div className="max-w-4xl mx-auto">
                 <div className="bg-linear-to-r from-purple-600 to-blue-600 rounded-lg p-6 text-center">
                   <div className="text-white text-lg font-medium mb-2">
@@ -479,7 +479,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
           {/* Advance Round Button */}
           {canAdvance && (
-            <div className="p-4 bg-gray-900 border-t border-gray-800">
+            <div className="p-4 pb-24 md:pb-4 bg-gray-900 border-t border-gray-800">
               <div className="max-w-4xl mx-auto space-y-3">
                 {/* Voting Ended Message */}
                 <div className="bg-gray-800 rounded-lg p-4 text-center border-2 border-green-500/30">
@@ -530,32 +530,32 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
       </div>
 
       {/* Mobile Floating Action Buttons */}
-      <div className="fixed top-20 right-4 flex flex-col items-center gap-2 md:hidden z-40">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40">
         <button
           onClick={handleMobileCommentsClick}
           className={`
-            w-11 h-11 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+            w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
             ${
               showMobileDrawer && mobileActiveTab === "comments"
-                ? "bg-blue-600/80 text-white border-blue-400/50 scale-110"
-                : "bg-gray-800/60 text-gray-300 border-gray-700/50 hover:bg-blue-600/80 hover:text-white hover:border-blue-500/50 hover:scale-105"
+                ? "bg-blue-600/90 text-white border-blue-400/50 scale-110"
+                : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-blue-600/90 hover:text-white hover:border-blue-500/50 hover:scale-105"
             }
           `}
         >
-          <MessageSquare className="w-5 h-5" strokeWidth={2.5} />
+          <MessageSquare className="w-6 h-6" strokeWidth={2.5} />
         </button>
         <button
           onClick={handleMobileVotingClick}
           className={`
-            w-11 h-11 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+            w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
             ${
               showMobileDrawer && mobileActiveTab === "voting"
-                ? "bg-purple-600/80 text-white border-purple-400/50 scale-110"
-                : "bg-gray-800/60 text-gray-300 border-gray-700/50 hover:bg-purple-600/80 hover:text-white hover:border-purple-500/50 hover:scale-105"
+                ? "bg-purple-600/90 text-white border-purple-400/50 scale-110"
+                : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-purple-600/90 hover:text-white hover:border-purple-500/50 hover:scale-105"
             }
           `}
         >
-          <ThumbsUp className="w-5 h-5" strokeWidth={2.5} />
+          <ThumbsUp className="w-6 h-6" strokeWidth={2.5} />
         </button>
       </div>
 

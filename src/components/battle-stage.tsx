@@ -91,6 +91,9 @@ export function BattleStage({
                   battle.currentTurn === "left" ||
                   streamingPersonaId === battle.personas.left.id
                 }
+                isRoundWinner={
+                  currentRoundScore?.winner === battle.personas.left.id
+                }
               />
             </div>
 
@@ -115,6 +118,9 @@ export function BattleStage({
                   battle.currentTurn === "right" ||
                   streamingPersonaId === battle.personas.right.id
                 }
+                isRoundWinner={
+                  currentRoundScore?.winner === battle.personas.right.id
+                }
               />
             </div>
 
@@ -133,7 +139,7 @@ export function BattleStage({
 
       {/* Score Display (when round is complete) */}
       {currentRoundScore && (
-        <div className="p-4 md:p-6 border-t border-gray-800 bg-gray-900/30">
+        <div className="p-4 md:p-6 pb-24 md:pb-6 border-t border-gray-800 bg-gray-900/30">
           <div className="max-w-4xl mx-auto">
             <h3 className="text-xl md:text-2xl font-[family-name:var(--font-bebas-neue)] text-center mb-4 text-yellow-400">
               ROUND {currentRoundScore.round} SCORES

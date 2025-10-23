@@ -39,11 +39,11 @@ export function BattleReplay({ battle }: BattleReplayProps) {
       <div className="fixed md:relative top-[52px] md:top-0 left-0 right-0 z-20 p-4 md:p-6 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none">
         <div className="max-w-7xl mx-auto">
           {/* Mobile: Stacked Layout */}
-          <div className="md:hidden">
+          <div className="md:hidden flex flex-col gap-3">
             {/* Battle Winner at Top */}
             {battle.status === "incomplete" ? (
               <motion.div
-                className="text-center mb-3"
+                className="text-center"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
@@ -53,7 +53,7 @@ export function BattleReplay({ battle }: BattleReplayProps) {
               </motion.div>
             ) : battle.winner ? (
               <motion.div
-                className="text-center mb-3"
+                className="text-center"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
@@ -68,7 +68,7 @@ export function BattleReplay({ battle }: BattleReplayProps) {
             ) : null}
 
             {/* Replay Controls - Round Counter */}
-            <div className="flex items-center justify-center gap-3 mb-3">
+            <div className="flex items-center justify-center gap-3">
               <button
                 onClick={handlePrevRound}
                 disabled={!canGoPrev}
@@ -89,30 +89,6 @@ export function BattleReplay({ battle }: BattleReplayProps) {
                 <ChevronRight className="w-4 h-4 text-white" />
               </button>
             </div>
-
-            {/* Round Winner Below Counter */}
-            {roundScore?.winner && (
-              <motion.div
-                className="text-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                <span className="text-xs text-gray-400">Round Winner: </span>
-                <span
-                  className="text-sm font-bold font-(family-name:--font-bebas-neue)"
-                  style={{
-                    color:
-                      battle.personas.left.id === roundScore.winner
-                        ? battle.personas.left.accentColor
-                        : battle.personas.right.accentColor,
-                  }}
-                >
-                  {battle.personas.left.id === roundScore.winner
-                    ? battle.personas.left.name
-                    : battle.personas.right.name}
-                </span>
-              </motion.div>
-            )}
           </div>
 
           {/* Desktop: Horizontal Layout */}
@@ -144,68 +120,34 @@ export function BattleReplay({ battle }: BattleReplayProps) {
               ) : null}
             </div>
 
-            {/* Right Side: Round Controls and Winner */}
-            <div className="flex items-center gap-6">
-              {/* Replay Controls - Round Counter */}
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={handlePrevRound}
-                  disabled={!canGoPrev}
-                  className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                  title="Previous Round"
-                >
-                  <ChevronLeft className="w-5 h-5 text-white" />
-                </button>
-                <div className="px-6 py-2 rounded-lg bg-linear-to-r from-blue-600 to-purple-600 text-white font-bold font-(family-name:--font-bebas-neue) text-xl whitespace-nowrap">
-                  Round {selectedRound} of 3
-                </div>
-                <button
-                  onClick={handleNextRound}
-                  disabled={!canGoNext}
-                  className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                  title="Next Round"
-                >
-                  <ChevronRight className="w-5 h-5 text-white" />
-                </button>
-              </div>
-
-              {/* Round Winner */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: roundScore?.winner ? 1 : 0 }}
-                className="whitespace-nowrap min-w-[200px]"
+            {/* Right Side: Round Controls */}
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handlePrevRound}
+                disabled={!canGoPrev}
+                className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                title="Previous Round"
               >
-                <span className="text-sm text-gray-400">Round Winner: </span>
-                <span
-                  className="text-lg font-bold font-(family-name:--font-bebas-neue)"
-                  style={{
-                    color:
-                      roundScore?.winner &&
-                      battle.personas.left.id === roundScore.winner
-                        ? battle.personas.left.accentColor
-                        : roundScore?.winner &&
-                          battle.personas.right.id === roundScore.winner
-                        ? battle.personas.right.accentColor
-                        : "transparent",
-                  }}
-                >
-                  {roundScore?.winner
-                    ? battle.personas.left.id === roundScore.winner
-                      ? battle.personas.left.name
-                      : battle.personas.right.name
-                    : "\u00A0"}
-                </span>
-              </motion.div>
+                <ChevronLeft className="w-5 h-5 text-white" />
+              </button>
+              <div className="px-6 py-2 rounded-lg bg-linear-to-r from-blue-600 to-purple-600 text-white font-bold font-(family-name:--font-bebas-neue) text-xl whitespace-nowrap">
+                Round {selectedRound} of 3
+              </div>
+              <button
+                onClick={handleNextRound}
+                disabled={!canGoNext}
+                className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                title="Next Round"
+              >
+                <ChevronRight className="w-5 h-5 text-white" />
+              </button>
             </div>
           </div>
         </div>
       </div>
 
       {/* Spacer for mobile fixed header */}
-      <div
-        className="md:hidden"
-        style={{ height: roundScore?.winner ? "160px" : "140px" }}
-      />
+      <div className="md:hidden" style={{ height: "140px" }} />
 
       {/* Split Screen Stage */}
       <div className="flex-1 md:overflow-y-auto">
@@ -217,6 +159,7 @@ export function BattleReplay({ battle }: BattleReplayProps) {
                 persona={battle.personas.left}
                 position="left"
                 isActive={false}
+                isRoundWinner={roundScore?.winner === battle.personas.left.id}
               />
             </div>
 
@@ -236,6 +179,7 @@ export function BattleReplay({ battle }: BattleReplayProps) {
                 persona={battle.personas.right}
                 position="right"
                 isActive={false}
+                isRoundWinner={roundScore?.winner === battle.personas.right.id}
               />
             </div>
 
@@ -252,7 +196,7 @@ export function BattleReplay({ battle }: BattleReplayProps) {
 
       {/* Score Display */}
       {roundScore && (
-        <div className="p-4 md:p-6 border-t border-gray-800 bg-gray-900/30">
+        <div className="p-4 md:p-6 pb-24 md:pb-6 border-t border-gray-800 bg-gray-900/30">
           <div className="max-w-4xl mx-auto">
             <h3 className="text-xl md:text-2xl font-(family-name:--font-bebas-neue) text-center mb-4 text-yellow-400">
               ROUND {roundScore.round} SCORES

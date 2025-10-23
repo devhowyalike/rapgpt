@@ -12,6 +12,7 @@ interface PersonaCardProps {
   persona: Persona;
   position: "left" | "right";
   isActive?: boolean;
+  isRoundWinner?: boolean;
   className?: string;
 }
 
@@ -19,6 +20,7 @@ export function PersonaCard({
   persona,
   position,
   isActive,
+  isRoundWinner,
   className = "",
 }: PersonaCardProps) {
   return (
@@ -67,12 +69,25 @@ export function PersonaCard({
       </motion.div>
 
       <div className="text-left flex-1">
-        <h3
-          className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
-          style={{ color: persona.accentColor }}
-        >
-          {persona.name}
-        </h3>
+        <div className="flex items-center gap-2">
+          <h3
+            className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
+            style={{ color: persona.accentColor }}
+          >
+            {persona.name}
+          </h3>
+          {isRoundWinner && (
+            <motion.div
+              className="px-2.5 py-0.5 rounded-full bg-linear-to-r from-purple-600 to-purple-800 text-white font-bold text-xs flex items-center gap-1"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <span>Round</span>
+              <span className="text-sm">👑</span>
+            </motion.div>
+          )}
+        </div>
         <p className="text-xs md:text-sm text-gray-400">{persona.style}</p>
         <p className="text-xs md:text-sm text-gray-300 mt-1 w-full">
           {persona.bio}
