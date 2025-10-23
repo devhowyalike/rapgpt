@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getAllBattles } from "@/lib/battle-storage";
+import { SiteHeader } from "@/components/site-header";
 
 // Always fetch fresh data to immediately reflect battle completions
 export const revalidate = 0;
@@ -8,7 +9,10 @@ export default async function ArchivePage() {
   const battles = await getAllBattles();
 
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] bg-linear-to-b from-stage-darker to-stage-dark">
+    <>
+      <SiteHeader />
+      <div style={{ height: "52px" }} />
+      <div className="min-h-[calc(100vh-3.5rem)] bg-linear-to-b from-stage-darker to-stage-dark">
       <div className="max-w-6xl mx-auto p-6">
         {/* Header */}
         <div className="mb-12">
@@ -207,6 +211,7 @@ export default async function ArchivePage() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

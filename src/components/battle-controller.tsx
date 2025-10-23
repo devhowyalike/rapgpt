@@ -9,6 +9,7 @@ import type { Battle } from "@/lib/shared";
 import { BattleStage } from "./battle-stage";
 import { BattleReplay } from "./battle-replay";
 import { BattleSidebar } from "./battle-sidebar";
+import { SiteHeader } from "./site-header";
 import { useBattleStore } from "@/lib/battle-store";
 import { getNextPerformer, isRoundComplete } from "@/lib/battle-engine";
 import {
@@ -17,6 +18,7 @@ import {
   XCircle,
   RotateCcw,
   AlertTriangle,
+  X,
 } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
@@ -49,6 +51,10 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   const [isResuming, setIsResuming] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+  const [showMobileDrawer, setShowMobileDrawer] = useState(false);
+  const [mobileActiveTab, setMobileActiveTab] = useState<"comments" | "voting">(
+    "comments"
+  );
 
   // Navigation guard - prevent leaving page during ongoing battle
   const { NavigationDialog } = useNavigationGuard({
@@ -299,57 +305,112 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     battle.status === "ongoing" &&
     !isVotingPhase;
 
+  const handleMobileCommentsClick = () => {
+    setMobileActiveTab("comments");
+    setShowMobileDrawer(true);
+  };
+
+  const handleMobileVotingClick = () => {
+    setMobileActiveTab("voting");
+    setShowMobileDrawer(true);
+  };
+
   // If battle is completed or incomplete, use full replay mode
   if (battle.status === "completed" || battle.status === "incomplete") {
     return (
-      <div className="flex flex-col md:h-[calc(100vh-3.5rem)] md:flex-row">
-        {/* Main Stage */}
-        <div className="flex-1 flex flex-col min-h-0">
-          <BattleReplay battle={battle} />
+      <>
+        <SiteHeader
+          showMobileActions={true}
+          onCommentsClick={handleMobileCommentsClick}
+          onVotingClick={handleMobileVotingClick}
+          activeTab={showMobileDrawer ? mobileActiveTab : undefined}
+        />
+        <div style={{ height: "52px" }} />
+        <div className="flex flex-col md:h-[calc(100vh-3.5rem)] md:flex-row">
+          {/* Main Stage */}
+          <div className="flex-1 flex flex-col min-h-0">
+            <BattleReplay battle={battle} />
 
-          {/* Resume Button for Incomplete Battles */}
-          {battle.status === "incomplete" && (
-            <div className="p-4 bg-gray-900 border-t border-gray-800">
-              <div className="max-w-4xl mx-auto">
-                <button
-                  onClick={handleResumeBattle}
-                  disabled={isResuming}
-                  className="w-full md:w-auto px-6 py-3 bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all mx-auto"
-                >
-                  {isResuming ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Resuming...
-                    </>
-                  ) : (
-                    <>
-                      <RotateCcw className="w-5 h-5" />
-                      Resume Match
-                    </>
-                  )}
-                </button>
+            {/* Resume Button for Incomplete Battles */}
+            {battle.status === "incomplete" && (
+              <div className="p-4 bg-gray-900 border-t border-gray-800">
+                <div className="max-w-4xl mx-auto">
+                  <button
+                    onClick={handleResumeBattle}
+                    disabled={isResuming}
+                    className="w-full md:w-auto px-6 py-3 bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all mx-auto"
+                  >
+                    {isResuming ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Resuming...
+                      </>
+                    ) : (
+                      <>
+                        <RotateCcw className="w-5 h-5" />
+                        Resume Match
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+
+          {/* Desktop Sidebar */}
+          <div className="hidden md:block w-96">
+            <BattleSidebar
+              battle={battle}
+              onVote={handleVote}
+              onComment={handleComment}
+              isArchived={true}
+              votingCompletedRound={votingCompletedRound}
+            />
+          </div>
         </div>
 
-        {/* Sidebar */}
-        <div className="w-full md:w-96">
-          <BattleSidebar
-            battle={battle}
-            onVote={handleVote}
-            onComment={handleComment}
-            isArchived={true}
-            votingCompletedRound={votingCompletedRound}
-          />
-        </div>
-      </div>
+        {/* Mobile Drawer */}
+        <Dialog.Root open={showMobileDrawer} onOpenChange={setShowMobileDrawer}>
+          <Dialog.Portal>
+            <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in" />
+            <Dialog.Content className="fixed inset-x-0 bottom-0 z-50 md:hidden bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom h-[85vh] flex flex-col">
+              <div className="flex items-center justify-between p-4 border-b border-gray-800 shrink-0">
+                <Dialog.Title className="text-lg font-bold text-white">
+                  {mobileActiveTab === "comments" ? "Comments" : "Voting"}
+                </Dialog.Title>
+                <Dialog.Close asChild>
+                  <button className="p-2 text-gray-400 hover:text-white transition-colors">
+                    <X className="w-5 h-5" />
+                  </button>
+                </Dialog.Close>
+              </div>
+              <div className="flex-1 overflow-y-auto min-h-0">
+                <BattleSidebar
+                  battle={battle}
+                  onVote={handleVote}
+                  onComment={handleComment}
+                  isArchived={true}
+                  votingCompletedRound={votingCompletedRound}
+                  defaultTab={mobileActiveTab}
+                />
+              </div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+      </>
     );
   }
 
   // Live battle mode
   return (
     <>
+      <SiteHeader
+        showMobileActions={true}
+        onCommentsClick={handleMobileCommentsClick}
+        onVotingClick={handleMobileVotingClick}
+        activeTab={showMobileDrawer ? mobileActiveTab : undefined}
+      />
+      <div style={{ height: "52px" }} />
       <div className="flex flex-col md:h-[calc(100vh-3.5rem)] md:flex-row">
         {/* Main Stage */}
         <div className="flex-1 flex flex-col min-h-0">
@@ -456,8 +517,8 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
           )}
         </div>
 
-        {/* Sidebar */}
-        <div className="w-full md:w-96">
+        {/* Desktop Sidebar */}
+        <div className="hidden md:block w-96">
           <BattleSidebar
             battle={battle}
             onVote={handleVote}
@@ -468,6 +529,36 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
           />
         </div>
       </div>
+
+      {/* Mobile Drawer */}
+      <Dialog.Root open={showMobileDrawer} onOpenChange={setShowMobileDrawer}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in" />
+          <Dialog.Content className="fixed inset-x-0 bottom-0 z-50 md:hidden bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-gray-800 shrink-0">
+              <Dialog.Title className="text-lg font-bold text-white">
+                {mobileActiveTab === "comments" ? "Comments" : "Voting"}
+              </Dialog.Title>
+              <Dialog.Close asChild>
+                <button className="p-2 text-gray-400 hover:text-white transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </Dialog.Close>
+            </div>
+            <div className="flex-1 overflow-y-auto min-h-0">
+              <BattleSidebar
+                battle={battle}
+                onVote={handleVote}
+                onComment={handleComment}
+                isVotingPhase={isVotingPhase}
+                votingTimeRemaining={votingTimeRemaining}
+                votingCompletedRound={votingCompletedRound}
+                defaultTab={mobileActiveTab}
+              />
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
 
       {/* Cancel Match Dialog */}
       <Dialog.Root open={showCancelDialog} onOpenChange={setShowCancelDialog}>

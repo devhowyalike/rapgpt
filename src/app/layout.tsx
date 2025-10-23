@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Bebas_Neue, Inter } from "next/font/google";
 import "./globals.css";
 import { APP_TITLE } from "@/lib/constants";
-import { SiteHeader } from "@/components/site-header";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,8 +28,6 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
       <body className={`${inter.variable} ${bebasNeue.variable} antialiased`}>
-        <SiteHeader />
-        <div style={{ height: "52px" }} />
         {children}
       </body>
     </html>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { getAllPersonas } from "@/lib/shared/personas";
 import type { Persona } from "@/lib/shared/battle-types";
 import { useRouter } from "next/navigation";
+import { SiteHeader } from "./site-header";
 
 export function CharacterSelect() {
   const [player1, setPlayer1] = useState<Persona | null>(null);
@@ -89,7 +90,10 @@ export function CharacterSelect() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] bg-linear-to-b from-gray-950 via-gray-900 to-black flex flex-col items-center justify-center p-6">
+    <>
+      <SiteHeader />
+      <div style={{ height: "52px" }} />
+      <div className="min-h-[calc(100vh-3.5rem)] bg-linear-to-b from-gray-950 via-gray-900 to-black flex flex-col items-center justify-center p-6">
       {/* Header */}
       <div className="w-full max-w-7xl mx-auto mb-8">
         <h1 className="text-5xl md:text-7xl font-bold text-center mb-4">
@@ -298,6 +302,7 @@ export function CharacterSelect() {
           ← Back to Home
         </a>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
