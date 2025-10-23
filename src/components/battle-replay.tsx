@@ -170,28 +170,32 @@ export function BattleReplay({ battle }: BattleReplayProps) {
               </div>
 
               {/* Round Winner */}
-              {roundScore?.winner && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="whitespace-nowrap"
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: roundScore?.winner ? 1 : 0 }}
+                className="whitespace-nowrap min-w-[200px]"
+              >
+                <span className="text-sm text-gray-400">Round Winner: </span>
+                <span
+                  className="text-lg font-bold font-(family-name:--font-bebas-neue)"
+                  style={{
+                    color:
+                      roundScore?.winner &&
+                      battle.personas.left.id === roundScore.winner
+                        ? battle.personas.left.accentColor
+                        : roundScore?.winner &&
+                          battle.personas.right.id === roundScore.winner
+                        ? battle.personas.right.accentColor
+                        : "transparent",
+                  }}
                 >
-                  <span className="text-sm text-gray-400">Round Winner: </span>
-                  <span
-                    className="text-lg font-bold font-(family-name:--font-bebas-neue)"
-                    style={{
-                      color:
-                        battle.personas.left.id === roundScore.winner
-                          ? battle.personas.left.accentColor
-                          : battle.personas.right.accentColor,
-                    }}
-                  >
-                    {battle.personas.left.id === roundScore.winner
+                  {roundScore?.winner
+                    ? battle.personas.left.id === roundScore.winner
                       ? battle.personas.left.name
-                      : battle.personas.right.name}
-                  </span>
-                </motion.div>
-              )}
+                      : battle.personas.right.name
+                    : "\u00A0"}
+                </span>
+              </motion.div>
             </div>
           </div>
         </div>
