@@ -12,11 +12,18 @@ interface BattleStore {
   error: string | null;
   streamingVerse: string | null;
   streamingPersonaId: string | null;
+  votingTimeRemaining: number | null;
+  isVotingPhase: boolean;
+  votingCompletedRound: number | null;
   
   setBattle: (battle: Battle) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   setStreamingVerse: (verse: string | null, personaId: string | null) => void;
+  setVotingTimeRemaining: (time: number | null) => void;
+  setIsVotingPhase: (isVoting: boolean) => void;
+  setVotingCompletedRound: (round: number | null) => void;
+  completeVotingPhase: (round: number) => void;
   
   addVerse: (personaId: string, verse: string) => void;
   advanceRound: () => void;
@@ -35,12 +42,24 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
   error: null,
   streamingVerse: null,
   streamingPersonaId: null,
+  votingTimeRemaining: null,
+  isVotingPhase: false,
+  votingCompletedRound: null,
 
   setBattle: (battle) => set({ battle }),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
   setStreamingVerse: (verse, personaId) => 
     set({ streamingVerse: verse, streamingPersonaId: personaId }),
+  setVotingTimeRemaining: (time) => set({ votingTimeRemaining: time }),
+  setIsVotingPhase: (isVoting) => set({ isVotingPhase: isVoting }),
+  setVotingCompletedRound: (round) => set({ votingCompletedRound: round }),
+  completeVotingPhase: (round) =>
+    set({
+      isVotingPhase: false,
+      votingTimeRemaining: null,
+      votingCompletedRound: round,
+    }),
 
   addVerse: (personaId, verse) => {
     const { battle } = get();

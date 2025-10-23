@@ -37,6 +37,12 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     saveBattle,
     cancelBattle,
     resumeBattle,
+    votingTimeRemaining,
+    setVotingTimeRemaining,
+    isVotingPhase,
+    setIsVotingPhase,
+    votingCompletedRound,
+    completeVotingPhase,
   } = useBattleStore();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
@@ -60,6 +66,59 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   useEffect(() => {
     setBattle(initialBattle);
   }, [initialBattle, setBattle]);
+
+  // Voting timer effect - starts when round is complete
+  useEffect(() => {
+    if (!battle) return;
+
+    const roundComplete = isRoundComplete(battle, battle.currentRound);
+    const nextPerformer = getNextPerformer(battle);
+
+    // Start voting phase when round is complete and we're not already in voting phase
+    if (
+      roundComplete &&
+      !nextPerformer &&
+      battle.status === "ongoing" &&
+      !isVotingPhase &&
+      votingCompletedRound !== battle.currentRound
+    ) {
+      setIsVotingPhase(true);
+      setVotingTimeRemaining(10); // 10 seconds for voting
+    }
+  }, [
+    battle,
+    isVotingPhase,
+    setIsVotingPhase,
+    setVotingTimeRemaining,
+    votingCompletedRound,
+  ]);
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (
+      !isVotingPhase ||
+      votingTimeRemaining === null ||
+      votingTimeRemaining <= 0
+    ) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      const next = (votingTimeRemaining ?? 0) - 1;
+      setVotingTimeRemaining(next);
+      if (next <= 0 && battle) {
+        completeVotingPhase(battle.currentRound);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [
+    votingTimeRemaining,
+    isVotingPhase,
+    setVotingTimeRemaining,
+    setIsVotingPhase,
+    battle,
+  ]);
 
   if (!battle) {
     return (
@@ -150,7 +209,12 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to submit vote");
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Vote failed:", errorData.error);
+        // Silently fail - the UI will prevent invalid votes anyway
+        return;
+      }
 
       const { battle: updatedBattle } = await response.json();
       setBattle(updatedBattle);
@@ -186,6 +250,9 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   };
 
   const handleAdvanceRound = async () => {
+    // Reset voting phase when advancing
+    setIsVotingPhase(false);
+    setVotingTimeRemaining(null);
     advanceRound();
     await saveBattle();
   };
@@ -227,7 +294,10 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   const canGenerate =
     nextPerformer && !isGenerating && battle.status === "ongoing";
   const canAdvance =
-    roundComplete && !nextPerformer && battle.status === "ongoing";
+    roundComplete &&
+    !nextPerformer &&
+    battle.status === "ongoing" &&
+    !isVotingPhase;
 
   // If battle is completed or incomplete, use full replay mode
   if (battle.status === "completed" || battle.status === "incomplete") {
@@ -270,6 +340,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
             onVote={handleVote}
             onComment={handleComment}
             isArchived={true}
+            votingCompletedRound={votingCompletedRound}
           />
         </div>
       </div>
@@ -321,27 +392,65 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
             </div>
           )}
 
+          {/* Voting Timer Display */}
+          {isVotingPhase && votingTimeRemaining !== null && (
+            <div className="p-4 bg-gray-900 border-t border-gray-800">
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-linear-to-r from-purple-600 to-blue-600 rounded-lg p-6 text-center">
+                  <div className="text-white text-lg font-medium mb-2">
+                    ⏱️ Vote Now!
+                  </div>
+                  <div className="text-5xl font-bold text-white mb-2 font-bebas-neue">
+                    {votingTimeRemaining}
+                  </div>
+                  <div className="text-white/80 text-sm">
+                    seconds remaining to cast your vote
+                  </div>
+                  <div className="mt-4 h-2 bg-white/20 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
+                      style={{ width: `${(votingTimeRemaining / 10) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Advance Round Button */}
           {canAdvance && (
             <div className="p-4 bg-gray-900 border-t border-gray-800">
-              <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={handleAdvanceRound}
-                  className="flex-1 px-6 py-3 bg-linear-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all animate-pulse"
-                >
-                  <ArrowRight className="w-5 h-5" />
-                  {battle.currentRound === 3
-                    ? "Reveal Winner"
-                    : "Continue to Next Round"}
-                </button>
-                <button
-                  onClick={handleCancelBattle}
-                  disabled={isCanceling}
-                  className="px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
-                >
-                  <XCircle className="w-5 h-5" />
-                  Cancel Match
-                </button>
+              <div className="max-w-4xl mx-auto space-y-3">
+                {/* Voting Ended Message */}
+                <div className="bg-gray-800 rounded-lg p-4 text-center border-2 border-green-500/30">
+                  <div className="text-green-400 font-medium text-lg mb-1">
+                    ✓ Voting has ended
+                  </div>
+                  <div className="text-gray-400 text-sm">
+                    Round {battle.currentRound} is complete
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={handleAdvanceRound}
+                    className="flex-1 px-6 py-3 bg-linear-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all animate-pulse"
+                  >
+                    <ArrowRight className="w-5 h-5" />
+                    {battle.currentRound === 3
+                      ? "Reveal Winner"
+                      : "Continue to Next Round"}
+                  </button>
+                  <button
+                    onClick={handleCancelBattle}
+                    disabled={isCanceling}
+                    className="px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
+                  >
+                    <XCircle className="w-5 h-5" />
+                    Cancel Match
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -353,6 +462,9 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
             battle={battle}
             onVote={handleVote}
             onComment={handleComment}
+            isVotingPhase={isVotingPhase}
+            votingTimeRemaining={votingTimeRemaining}
+            votingCompletedRound={votingCompletedRound}
           />
         </div>
       </div>

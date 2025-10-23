@@ -4,8 +4,9 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Battle, Comment } from "@/lib/shared";
+import { ROUNDS_PER_BATTLE } from "@/lib/shared";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, Send, ThumbsUp } from "lucide-react";
 
@@ -14,6 +15,9 @@ interface BattleSidebarProps {
   onVote: (round: number, personaId: string) => void;
   onComment: (username: string, content: string) => void;
   isArchived?: boolean;
+  isVotingPhase?: boolean;
+  votingTimeRemaining?: number | null;
+  votingCompletedRound?: number | null;
 }
 
 export function BattleSidebar({
@@ -21,12 +25,36 @@ export function BattleSidebar({
   onVote,
   onComment,
   isArchived = false,
+  isVotingPhase = false,
+  votingTimeRemaining = null,
+  votingCompletedRound = null,
 }: BattleSidebarProps) {
   const [activeTab, setActiveTab] = useState<"comments" | "voting">("comments");
   const [username, setUsername] = useState("");
   const [usernameConfirmed, setUsernameConfirmed] = useState(false);
   const [comment, setComment] = useState("");
-  const [userVotes, setUserVotes] = useState<Set<string>>(new Set());
+  const [userVotes, setUserVotes] = useState<Set<string>>(() => {
+    // Load votes from localStorage on mount
+    if (typeof window !== "undefined") {
+      const storageKey = `battle-votes-${battle.id}`;
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        try {
+          return new Set(JSON.parse(stored));
+        } catch {
+          return new Set();
+        }
+      }
+    }
+    return new Set();
+  });
+
+  // Automatically switch to voting tab when voting begins
+  useEffect(() => {
+    if (isVotingPhase) {
+      setActiveTab("voting");
+    }
+  }, [isVotingPhase]);
 
   const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,11 +66,49 @@ export function BattleSidebar({
   };
 
   const handleVote = (round: number, personaId: string) => {
-    const voteKey = `${round}-${personaId}`;
-    if (userVotes.has(voteKey)) return;
+    // Check if user has already voted in this round (for either persona)
+    const hasVotedInRound = Array.from(userVotes).some((voteKey) =>
+      voteKey.startsWith(`${round}-`)
+    );
+    if (hasVotedInRound) return;
 
+    const voteKey = `${round}-${personaId}`;
     onVote(round, personaId);
-    setUserVotes((prev) => new Set(prev).add(voteKey));
+    setUserVotes((prev) => {
+      const newVotes = new Set(prev).add(voteKey);
+      // Persist to localStorage
+      if (typeof window !== "undefined") {
+        const storageKey = `battle-votes-${battle.id}`;
+        localStorage.setItem(storageKey, JSON.stringify(Array.from(newVotes)));
+      }
+      return newVotes;
+    });
+  };
+
+  // Helper function to check if user has already voted in a round
+  const hasVotedInRound = (round: number): boolean => {
+    return Array.from(userVotes).some((voteKey) =>
+      voteKey.startsWith(`${round}-`)
+    );
+  };
+
+  // Helper function to check if voting is allowed for a specific round
+  const canVoteOnRound = (round: number): boolean => {
+    // Archived battles cannot be voted on
+    if (isArchived) return false;
+
+    // Can't vote if already voted in this round
+    if (hasVotedInRound(round)) return false;
+
+    // Can only vote on the current round during its voting phase
+    if (isVotingPhase && battle.currentRound === round) return true;
+
+    // Can vote on completed rounds that haven't been advanced yet
+    // (i.e., after voting phase ends but before advancing to next round)
+    if (votingCompletedRound === round && battle.currentRound === round)
+      return true;
+
+    return false;
   };
 
   return (
@@ -174,125 +240,128 @@ export function BattleSidebar({
               </div>
             )}
 
-            {battle.scores.map((roundScore) => {
-              const leftScore =
-                roundScore.personaScores[battle.personas.left.id];
-              const rightScore =
-                roundScore.personaScores[battle.personas.right.id];
+            {/* Message when voting hasn't started yet */}
+            {!isArchived && !isVotingPhase && battle.scores.length > 0 && (
+              <div className="bg-gray-800 rounded-lg p-3 mb-4">
+                <p className="text-center text-white text-sm">
+                  {battle.currentRound === ROUNDS_PER_BATTLE
+                    ? "Voting has ended"
+                    : "Voting will begin at the end of the round"}
+                </p>
+              </div>
+            )}
 
-              return (
-                <motion.div
-                  key={roundScore.round}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-gray-800 rounded-lg p-4"
-                >
-                  <h3 className="font-[family-name:var(--font-bebas-neue)] text-xl text-yellow-400 mb-4">
-                    ROUND {roundScore.round}
-                  </h3>
-
-                  <div className="space-y-3">
-                    {/* Left Persona Vote */}
-                    <button
-                      onClick={() =>
-                        handleVote(roundScore.round, battle.personas.left.id)
-                      }
-                      disabled={
-                        isArchived ||
-                        userVotes.has(
-                          `${roundScore.round}-${battle.personas.left.id}`
-                        )
-                      }
-                      className={`
-                        w-full p-3 rounded-lg border-2 transition-all
-                        ${
-                          isArchived ||
-                          userVotes.has(
-                            `${roundScore.round}-${battle.personas.left.id}`
-                          )
-                            ? "bg-gray-700 border-gray-600 cursor-not-allowed"
-                            : "hover:bg-gray-700 border-gray-600 hover:border-blue-500"
-                        }
-                        ${
-                          roundScore.winner === battle.personas.left.id
-                            ? "ring-2 ring-yellow-400"
-                            : ""
-                        }
-                      `}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span
-                          className="font-medium"
-                          style={{ color: battle.personas.left.accentColor }}
-                        >
-                          {battle.personas.left.name}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-400">
-                            {leftScore?.userVotes || 0} votes
-                          </span>
-                          {roundScore.winner === battle.personas.left.id && (
-                            <span>🏆</span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-sm text-gray-400 mt-1">
-                        Score: {leftScore?.totalScore.toFixed(1)}
-                      </div>
-                    </button>
-
-                    {/* Right Persona Vote */}
-                    <button
-                      onClick={() =>
-                        handleVote(roundScore.round, battle.personas.right.id)
-                      }
-                      disabled={
-                        isArchived ||
-                        userVotes.has(
-                          `${roundScore.round}-${battle.personas.right.id}`
-                        )
-                      }
-                      className={`
-                        w-full p-3 rounded-lg border-2 transition-all
-                        ${
-                          isArchived ||
-                          userVotes.has(
-                            `${roundScore.round}-${battle.personas.right.id}`
-                          )
-                            ? "bg-gray-700 border-gray-600 cursor-not-allowed"
-                            : "hover:bg-gray-700 border-gray-600 hover:border-purple-500"
-                        }
-                        ${
-                          roundScore.winner === battle.personas.right.id
-                            ? "ring-2 ring-yellow-400"
-                            : ""
-                        }
-                      `}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span
-                          className="font-medium"
-                          style={{ color: battle.personas.right.accentColor }}
-                        >
-                          {battle.personas.right.name}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-400">
-                            {rightScore?.userVotes || 0} votes
-                          </span>
-                          {roundScore.winner === battle.personas.right.id && (
-                            <span>🏆</span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-sm text-gray-400 mt-1">
-                        Score: {rightScore?.totalScore.toFixed(1)}
-                      </div>
-                    </button>
+            {/* Voting Timer in Sidebar */}
+            {isVotingPhase && votingTimeRemaining !== null && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-linear-to-r from-purple-600 to-blue-600 rounded-lg p-4 mb-4"
+              >
+                <div className="text-center">
+                  <div className="text-white text-sm font-medium mb-1">
+                    ⏱️ VOTING ACTIVE
                   </div>
-                </motion.div>
-              );
-            })}
+                  <div className="text-3xl font-bold text-white mb-1 font-bebas-neue">
+                    {votingTimeRemaining}s
+                  </div>
+                  <div className="text-white/80 text-xs">Vote now!</div>
+                  <div className="mt-3 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
+                      style={{ width: `${(votingTimeRemaining / 10) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {battle.scores
+              .slice()
+              .reverse()
+              .map((roundScore) => {
+                const leftScore =
+                  roundScore.personaScores[battle.personas.left.id];
+                const rightScore =
+                  roundScore.personaScores[battle.personas.right.id];
+
+                // Create array of personas with their scores and sort by votes (highest first)
+                const sortedPersonas = [
+                  {
+                    persona: battle.personas.left,
+                    score: leftScore,
+                    hoverBorderColor: "hover:border-blue-500",
+                  },
+                  {
+                    persona: battle.personas.right,
+                    score: rightScore,
+                    hoverBorderColor: "hover:border-purple-500",
+                  },
+                ].sort(
+                  (a, b) =>
+                    (b.score?.userVotes || 0) - (a.score?.userVotes || 0)
+                );
+
+                return (
+                  <motion.div
+                    key={roundScore.round}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-gray-800 rounded-lg p-4"
+                  >
+                    <h3 className="font-[family-name:var(--font-bebas-neue)] text-xl text-yellow-400 mb-4">
+                      ROUND {roundScore.round}
+                    </h3>
+
+                    <div className="space-y-3">
+                      {sortedPersonas.map(
+                        ({ persona, score, hoverBorderColor }) => (
+                          <button
+                            key={persona.id}
+                            onClick={() =>
+                              handleVote(roundScore.round, persona.id)
+                            }
+                            disabled={
+                              !canVoteOnRound(roundScore.round) ||
+                              userVotes.has(`${roundScore.round}-${persona.id}`)
+                            }
+                            className={`
+                          w-full p-3 rounded-lg border-2 transition-all
+                          ${
+                            userVotes.has(`${roundScore.round}-${persona.id}`)
+                              ? "bg-gray-700 border-yellow-400 cursor-not-allowed"
+                              : !canVoteOnRound(roundScore.round)
+                              ? "bg-gray-700 border-gray-600 cursor-not-allowed"
+                              : `hover:bg-gray-700 border-gray-600 ${hoverBorderColor}`
+                          }
+                        `}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span
+                                className="font-medium"
+                                style={{ color: persona.accentColor }}
+                              >
+                                {persona.name}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-400">
+                                  {score?.userVotes || 0} votes
+                                </span>
+                                {roundScore.winner === persona.id && (
+                                  <span>🏆</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-400 mt-1">
+                              Score: {score?.totalScore.toFixed(1)}
+                            </div>
+                          </button>
+                        )
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
 
             {battle.scores.length === 0 && (
               <div className="text-center text-gray-500 py-8">

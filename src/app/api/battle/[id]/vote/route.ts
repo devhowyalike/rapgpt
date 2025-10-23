@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { getBattleById, saveBattle } from '@/lib/battle-storage';
-import { updateScoreWithVotes, isBattleArchived } from '@/lib/battle-engine';
+import { updateScoreWithVotes, isBattleArchived, isRoundComplete } from '@/lib/battle-engine';
 import { voteRequestSchema } from '@/lib/validations/battle';
 import { createArchivedBattleResponse } from '@/lib/validations/utils';
 
@@ -40,6 +40,28 @@ export async function POST(
     // Prevent votes on archived battles
     if (isBattleArchived(battle)) {
       return createArchivedBattleResponse('vote');
+    }
+
+    // Only allow voting on the current round
+    if (round !== battle.currentRound) {
+      return new Response(JSON.stringify({ 
+        error: 'Can only vote on the current round',
+        currentRound: battle.currentRound,
+        attemptedRound: round
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Only allow voting if the round is complete (both personas have performed)
+    if (!isRoundComplete(battle, round)) {
+      return new Response(JSON.stringify({ 
+        error: 'Round is not complete yet. Wait for both personas to perform.' 
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // Find the round score
