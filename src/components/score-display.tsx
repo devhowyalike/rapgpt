@@ -32,7 +32,7 @@ export function ScoreDisplay({
       {/* Collapse Toggle Button */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-center gap-2 mb-3 text-gray-400 hover:text-white transition-colors group"
+        className="w-full flex items-center justify-center gap-2 mb-2 md:mb-1.5 text-gray-400 hover:text-white transition-colors group"
       >
         <span className="text-sm font-medium">
           {isExpanded ? "Hide Details" : "Show Details"}
@@ -45,21 +45,21 @@ export function ScoreDisplay({
       </button>
 
       {isExpanded ? (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-2 md:gap-4">
           {/* Left Score - Expanded */}
           <div
-            className="bg-gray-900/50 rounded-lg p-4 border-2"
+            className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2"
             style={{ borderColor: leftPersona.accentColor + "40" }}
           >
             <div className="text-center">
               <div
-                className="text-sm font-medium mb-2 opacity-80"
+                className="text-xs font-medium mb-1 md:mb-2 opacity-80"
                 style={{ color: leftPersona.accentColor }}
               >
                 {leftPersona.name}
               </div>
               <div
-                className="text-3xl font-bold font-[family-name:var(--font-bebas-neue)]"
+                className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
                 style={{ color: leftPersona.accentColor }}
               >
                 {leftScore.totalScore.toFixed(1)}
@@ -70,7 +70,7 @@ export function ScoreDisplay({
               </div>
 
               {/* Score Breakdown */}
-              <div className="mt-3 space-y-1 text-xs text-left">
+              <div className="mt-2 md:mt-3 space-y-0.5 md:space-y-1 text-xs text-left">
                 <div className="flex justify-between">
                   <span className="text-gray-400">Rhyme:</span>
                   <span className="text-white">
@@ -95,18 +95,18 @@ export function ScoreDisplay({
 
           {/* Right Score - Expanded */}
           <div
-            className="bg-gray-900/50 rounded-lg p-4 border-2"
+            className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2"
             style={{ borderColor: rightPersona.accentColor + "40" }}
           >
             <div className="text-center">
               <div
-                className="text-sm font-medium mb-2 opacity-80"
+                className="text-xs font-medium mb-1 md:mb-2 opacity-80"
                 style={{ color: rightPersona.accentColor }}
               >
                 {rightPersona.name}
               </div>
               <div
-                className="text-3xl font-bold font-[family-name:var(--font-bebas-neue)]"
+                className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
                 style={{ color: rightPersona.accentColor }}
               >
                 {rightScore.totalScore.toFixed(1)}
@@ -117,7 +117,7 @@ export function ScoreDisplay({
               </div>
 
               {/* Score Breakdown */}
-              <div className="mt-3 space-y-1 text-xs text-left">
+              <div className="mt-2 md:mt-3 space-y-0.5 md:space-y-1 text-xs text-left">
                 <div className="flex justify-between">
                   <span className="text-gray-400">Rhyme:</span>
                   <span className="text-white">
@@ -141,10 +141,10 @@ export function ScoreDisplay({
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-2 md:gap-3">
           {/* Left Score - Collapsed */}
           <div
-            className="bg-gray-900/50 rounded-lg p-3 border-2 flex flex-col items-center justify-center"
+            className="bg-gray-900/50 rounded-lg p-2 md:p-3 border-2 flex flex-col items-center justify-center"
             style={{ borderColor: leftPersona.accentColor + "40" }}
           >
             <div
@@ -154,7 +154,7 @@ export function ScoreDisplay({
               {leftPersona.name}
             </div>
             <div
-              className="text-2xl font-bold font-[family-name:var(--font-bebas-neue)]"
+              className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
               style={{ color: leftPersona.accentColor }}
             >
               {leftScore.totalScore.toFixed(1)}
@@ -163,7 +163,7 @@ export function ScoreDisplay({
 
           {/* Right Score - Collapsed */}
           <div
-            className="bg-gray-900/50 rounded-lg p-3 border-2 flex flex-col items-center justify-center"
+            className="bg-gray-900/50 rounded-lg p-2 md:p-3 border-2 flex flex-col items-center justify-center"
             style={{ borderColor: rightPersona.accentColor + "40" }}
           >
             <div
@@ -173,7 +173,7 @@ export function ScoreDisplay({
               {rightPersona.name}
             </div>
             <div
-              className="text-2xl font-bold font-[family-name:var(--font-bebas-neue)]"
+              className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
               style={{ color: rightPersona.accentColor }}
             >
               {rightScore.totalScore.toFixed(1)}

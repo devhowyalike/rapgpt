@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCurrentBattle } from "@/lib/battle-storage";
 import { BattleController } from "@/components/battle-controller";
+import { SiteHeader } from "@/components/site-header";
 import { APP_TITLE, TAGLINE } from "@/lib/constants";
 
 export default async function Home() {
@@ -11,7 +12,10 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center justify-center p-6">
+    <>
+      <SiteHeader />
+      <div style={{ height: "52px" }} />
+      <div className="min-h-[calc(100vh-3.5rem)] bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center justify-center p-6">
       <div className="max-w-4xl mx-auto text-center space-y-8">
         {/* Logo */}
         <h1 className="text-6xl md:text-8xl font-bold tracking-wider">
@@ -83,6 +87,7 @@ export default async function Home() {
           <p className="text-gray-500 text-lg">{TAGLINE}&trade;</p>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

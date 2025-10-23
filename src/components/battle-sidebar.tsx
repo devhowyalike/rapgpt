@@ -18,6 +18,7 @@ interface BattleSidebarProps {
   isVotingPhase?: boolean;
   votingTimeRemaining?: number | null;
   votingCompletedRound?: number | null;
+  defaultTab?: "comments" | "voting";
 }
 
 export function BattleSidebar({
@@ -28,8 +29,18 @@ export function BattleSidebar({
   isVotingPhase = false,
   votingTimeRemaining = null,
   votingCompletedRound = null,
+  defaultTab,
 }: BattleSidebarProps) {
-  const [activeTab, setActiveTab] = useState<"comments" | "voting">("comments");
+  const [activeTab, setActiveTab] = useState<"comments" | "voting">(
+    defaultTab || "comments"
+  );
+
+  // Update activeTab when defaultTab changes (for mobile drawer)
+  useEffect(() => {
+    if (defaultTab) {
+      setActiveTab(defaultTab);
+    }
+  }, [defaultTab]);
   const [username, setUsername] = useState("");
   const [usernameConfirmed, setUsernameConfirmed] = useState(false);
   const [comment, setComment] = useState("");
@@ -112,9 +123,17 @@ export function BattleSidebar({
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-900 border-l border-gray-800">
-      {/* Tabs */}
-      <div className="flex border-b border-gray-800">
+    <div
+      className={`flex flex-col bg-gray-900 md:border-l border-gray-800 ${
+        defaultTab ? "" : "h-full"
+      }`}
+    >
+      {/* Tabs - Hidden on mobile when in drawer mode */}
+      <div
+        className={`flex border-b border-gray-800 ${
+          defaultTab ? "hidden" : ""
+        }`}
+      >
         <button
           onClick={() => setActiveTab("comments")}
           className={`
@@ -170,7 +189,7 @@ export function BattleSidebar({
                     className="bg-gray-800 rounded-lg p-3"
                   >
                     <div className="flex items-start gap-2">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
                         {comment.username.charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -184,7 +203,7 @@ export function BattleSidebar({
                             </span>
                           )}
                         </div>
-                        <p className="text-gray-300 text-sm mt-1 break-words">
+                        <p className="text-gray-300 text-sm mt-1 wrap-break-word">
                           {comment.content}
                         </p>
                       </div>
@@ -312,7 +331,7 @@ export function BattleSidebar({
                     animate={{ opacity: 1, y: 0 }}
                     className="bg-gray-800 rounded-lg p-4"
                   >
-                    <h3 className="font-[family-name:var(--font-bebas-neue)] text-xl text-yellow-400 mb-4">
+                    <h3 className="font-(family-name:--font-bebas-neue) text-xl text-yellow-400 mb-4">
                       ROUND {roundScore.round}
                     </h3>
 
