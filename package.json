@@ -8,7 +8,11 @@
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
-    "create-battle": "tsx scripts/create-battle.ts"
+    "create-battle": "tsx scripts/create-battle.ts",
+    "db:generate": "dotenv -e .env.local -- drizzle-kit generate",
+    "db:migrate": "dotenv -e .env.local -- drizzle-kit migrate",
+    "db:push": "dotenv -e .env.local -- drizzle-kit push",
+    "db:studio": "dotenv -e .env.local -- drizzle-kit studio"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.26",
@@ -16,7 +20,9 @@
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-progress": "^1.1.1",
     "@radix-ui/react-tabs": "^1.1.1",
+    "@vercel/postgres": "^0.10.0",
     "ai": "^5.0.68",
+    "drizzle-orm": "^0.44.6",
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.545.0",
     "next": "15.5.4",
@@ -31,9 +37,12 @@
     "@types/node": "^20",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19",
+    "dotenv-cli": "^10.0.0",
+    "drizzle-kit": "^0.31.5",
     "postcss": "^8.5.6",
     "tailwindcss": "^4",
     "tsx": "^4.19.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vercel": "^48.5.0"
   }
 }

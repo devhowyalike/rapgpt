@@ -2,12 +2,7 @@ import { NextRequest } from 'next/server';
 import { getBattleById, saveBattle } from '@/lib/battle-storage';
 import type { Comment } from '@/lib/shared';
 import { MAX_COMMENTS } from '@/lib/shared';
-
-interface CommentRequest {
-  username: string;
-  content: string;
-  round?: number;
-}
+import { commentRequestSchema } from '@/lib/validations/battle';
 
 export async function POST(
   request: NextRequest,
@@ -15,14 +10,22 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const { username, content, round }: CommentRequest = await request.json();
-
-    if (!username || !content) {
-      return new Response(JSON.stringify({ error: 'Username and content required' }), {
+    const body = await request.json();
+    
+    // Validate input with Zod
+    const validation = commentRequestSchema.safeParse(body);
+    
+    if (!validation.success) {
+      return new Response(JSON.stringify({ 
+        error: 'Invalid request', 
+        details: validation.error.issues 
+      }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
     }
+    
+    const { username, content, round } = validation.data;
 
     const battle = await getBattleById(id);
 
@@ -35,8 +38,8 @@ export async function POST(
 
     const comment: Comment = {
       id: `${id}-comment-${Date.now()}-${Math.random()}`,
-      username: username.trim().slice(0, 50),
-      content: content.trim().slice(0, 500),
+      username, // Already trimmed and validated by Zod
+      content, // Already trimmed and validated by Zod
       timestamp: Date.now(),
       round,
     };

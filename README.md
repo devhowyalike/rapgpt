@@ -13,9 +13,9 @@ rapgpt/               # Next.js web application
       archive/            # Battle archive
     components/           # React components
     lib/                  # Utilities and logic
+      db/                 # Database schema and client (Drizzle ORM)
+      validations/        # Zod validation schemas
       shared/             # Shared code (personas, types, etc.)
-  data/
-    battles/              # Battle data storage (JSON files)
   scripts/
     create-battle.ts      # Interactive battle creation script
 ```
@@ -179,27 +179,78 @@ Modify weights in `src/lib/scoring.ts`:
 ### Scripts
 
 ```bash
+# Development
 pnpm dev            # Start dev server
 pnpm build          # Build for production
 pnpm start          # Start production server
+
+# Code Quality
 pnpm lint           # Check code with Biome
 pnpm format         # Format code with Biome
+
+# Database
+pnpm db:push        # Push schema to database (development)
+pnpm db:generate    # Generate migration files
+pnpm db:migrate     # Run migrations
+pnpm db:studio      # Open Drizzle Studio
+
+# Utilities
 pnpm create-battle  # Create new battle
 ```
 
+## Database Setup
+
+This project uses **Vercel Postgres** with **Drizzle ORM** for data persistence.
+
+### Quick Start
+
+1. Create a Vercel Postgres database in your [Vercel Dashboard](https://vercel.com/dashboard)
+2. Pull environment variables:
+   ```bash
+   pnpm vercel env pull .env.local
+   ```
+3. Push database schema:
+   ```bash
+   pnpm db:push
+   ```
+
+See [DATABASE_SETUP.md](./DATABASE_SETUP.md) for detailed instructions.
+
 ## Environment Variables
 
-Create a `.env.local` file:
+Create a `.env.local` file (or pull from Vercel):
 
-```
+```bash
+# Anthropic API (for AI verse generation)
 ANTHROPIC_API_KEY=your_api_key_here
+
+# Vercel Postgres (automatically added when you connect database)
+POSTGRES_URL=your_postgres_url
+POSTGRES_PRISMA_URL=your_prisma_url
+POSTGRES_URL_NO_SSL=your_no_ssl_url
+POSTGRES_URL_NON_POOLING=your_non_pooling_url
+POSTGRES_USER=your_user
+POSTGRES_HOST=your_host
+POSTGRES_PASSWORD=your_password
+POSTGRES_DATABASE=your_database
 ```
+
+## Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Database**: Vercel Postgres + Drizzle ORM
+- **Validation**: Zod
+- **AI**: Anthropic Claude (via AI SDK)
+- **Styling**: Tailwind CSS 4
+- **State Management**: Zustand
+- **Animation**: Framer Motion
 
 ## Future Enhancements
 
-- [ ] User authentication
+- [x] Database migration (Vercel Postgres + Drizzle ORM)
+- [x] Request validation with Zod
+- [ ] User authentication (NextAuth.js or Clerk)
 - [ ] Admin interface for battle management
-- [ ] Database migration (PostgreSQL/Supabase)
 - [ ] WebSocket for real-time updates
 - [ ] More personas (expand the roster)
 - [ ] Tournament mode (bracket-style competitions)
@@ -207,8 +258,12 @@ ANTHROPIC_API_KEY=your_api_key_here
 - [ ] Audio generation (text-to-speech for verses)
 - [ ] Social sharing features
 - [ ] Battle replays with commentary
+- [ ] Vote tracking per user (prevent double voting)
+- [ ] Battle scheduling system
+- [ ] Persona stats and leaderboards
 
 ## License
 
 MIT
+
 # rapgpt

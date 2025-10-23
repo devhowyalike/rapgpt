@@ -3,18 +3,35 @@ import { streamText } from 'ai';
 import { getPersona } from '@/lib/shared';
 import type { Battle, Verse } from '@/lib/shared';
 import { buildSystemPrompt, getFirstVerseMessage } from '@/lib/context-overrides';
+import { battleSchema } from '@/lib/validations/battle';
+import { z } from 'zod';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
-interface GenerateVerseRequest {
-  battle: Battle;
-  personaId: string;
-}
+const generateVerseRequestSchema = z.object({
+  battle: battleSchema,
+  personaId: z.string(),
+});
 
 export async function POST(req: Request) {
   try {
-    const { battle, personaId }: GenerateVerseRequest = await req.json();
+    const body = await req.json();
+    
+    // Validate input with Zod
+    const validation = generateVerseRequestSchema.safeParse(body);
+    
+    if (!validation.success) {
+      return new Response(JSON.stringify({ 
+        error: 'Invalid request', 
+        details: validation.error.issues 
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    
+    const { battle, personaId } = validation.data;
 
     const persona = getPersona(personaId);
     if (!persona) {

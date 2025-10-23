@@ -1,48 +1,84 @@
 /**
- * Battle storage using JSON files
- * For production, migrate to a database
+ * Battle storage using Vercel Postgres with Drizzle ORM
  */
 
 import type { Battle } from '@/lib/shared';
-import { promises as fs } from 'fs';
-import path from 'path';
-
-const DATA_DIR = path.join(process.cwd(), 'data', 'battles');
-
-// Ensure data directory exists
-async function ensureDataDir() {
-  try {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-  } catch (error) {
-    console.error('Error creating data directory:', error);
-  }
-}
+import { db } from '@/lib/db/client';
+import { battles } from '@/lib/db/schema';
+import { eq, desc } from 'drizzle-orm';
 
 /**
  * Get battle by ID
  */
 export async function getBattleById(id: string): Promise<Battle | null> {
   try {
-    await ensureDataDir();
-    const filePath = path.join(DATA_DIR, `${id}.json`);
-    const data = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+    const result = await db.select().from(battles).where(eq(battles.id, id)).limit(1);
+    
+    if (result.length === 0) {
       return null;
     }
-    throw error;
+    
+    const battle = result[0];
+    
+    // Transform database format back to Battle type
+    return {
+      id: battle.id,
+      title: battle.title,
+      month: battle.month,
+      year: battle.year,
+      status: battle.status as Battle['status'],
+      personas: {
+        left: battle.leftPersona,
+        right: battle.rightPersona,
+      },
+      currentRound: battle.currentRound,
+      currentTurn: battle.currentTurn as Battle['currentTurn'],
+      verses: battle.verses,
+      scores: battle.scores,
+      comments: battle.comments,
+      winner: battle.winner,
+      createdAt: battle.createdAt.getTime(),
+      updatedAt: battle.updatedAt.getTime(),
+    };
+  } catch (error) {
+    console.error('Error getting battle by ID:', error);
+    return null;
   }
 }
 
 /**
- * Save battle
+ * Save battle (create or update)
  */
 export async function saveBattle(battle: Battle): Promise<void> {
   try {
-    await ensureDataDir();
-    const filePath = path.join(DATA_DIR, `${battle.id}.json`);
-    await fs.writeFile(filePath, JSON.stringify(battle, null, 2), 'utf-8');
+    // Check if battle exists
+    const existing = await db.select().from(battles).where(eq(battles.id, battle.id)).limit(1);
+    
+    const battleData = {
+      id: battle.id,
+      title: battle.title,
+      month: battle.month,
+      year: battle.year,
+      status: battle.status,
+      leftPersona: battle.personas.left,
+      rightPersona: battle.personas.right,
+      currentRound: battle.currentRound,
+      currentTurn: battle.currentTurn,
+      verses: battle.verses,
+      scores: battle.scores,
+      comments: battle.comments,
+      winner: battle.winner,
+      createdAt: new Date(battle.createdAt),
+      updatedAt: new Date(Date.now()),
+    };
+    
+    if (existing.length === 0) {
+      // Insert new battle
+      await db.insert(battles).values(battleData);
+    } else {
+      // Update existing battle
+      await db.update(battles).set(battleData).where(eq(battles.id, battle.id));
+    }
   } catch (error) {
     console.error('Error saving battle:', error);
     throw error;
@@ -54,20 +90,28 @@ export async function saveBattle(battle: Battle): Promise<void> {
  */
 export async function getAllBattles(): Promise<Battle[]> {
   try {
-    await ensureDataDir();
-    const files = await fs.readdir(DATA_DIR);
-    const battles: Battle[] = [];
-
-    for (const file of files) {
-      if (file.endsWith('.json')) {
-        const filePath = path.join(DATA_DIR, file);
-        const data = await fs.readFile(filePath, 'utf-8');
-        battles.push(JSON.parse(data));
-      }
-    }
-
-    // Sort by creation date, newest first
-    return battles.sort((a, b) => b.createdAt - a.createdAt);
+    const result = await db.select().from(battles).orderBy(desc(battles.createdAt));
+    
+    // Transform database format back to Battle type
+    return result.map(battle => ({
+      id: battle.id,
+      title: battle.title,
+      month: battle.month,
+      year: battle.year,
+      status: battle.status as Battle['status'],
+      personas: {
+        left: battle.leftPersona,
+        right: battle.rightPersona,
+      },
+      currentRound: battle.currentRound,
+      currentTurn: battle.currentTurn as Battle['currentTurn'],
+      verses: battle.verses,
+      scores: battle.scores,
+      comments: battle.comments,
+      winner: battle.winner,
+      createdAt: battle.createdAt.getTime(),
+      updatedAt: battle.updatedAt.getTime(),
+    }));
   } catch (error) {
     console.error('Error getting all battles:', error);
     return [];
@@ -78,8 +122,20 @@ export async function getAllBattles(): Promise<Battle[]> {
  * Get current month's battle
  */
 export async function getCurrentBattle(): Promise<Battle | null> {
-  const battles = await getAllBattles();
+  const allBattles = await getAllBattles();
   // Only return ongoing battles, not completed ones
-  return battles.find(b => b.status === 'ongoing') || null;
+  return allBattles.find(b => b.status === 'ongoing') || null;
 }
 
+/**
+ * Delete battle by ID (for admin use)
+ */
+export async function deleteBattle(id: string): Promise<boolean> {
+  try {
+    await db.delete(battles).where(eq(battles.id, id));
+    return true;
+  } catch (error) {
+    console.error('Error deleting battle:', error);
+    return false;
+  }
+}
