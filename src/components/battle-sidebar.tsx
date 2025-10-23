@@ -149,6 +149,15 @@ export function BattleSidebar({
       <div className="flex-1 overflow-y-auto">
         {activeTab === "comments" && (
           <div className="flex flex-col h-full">
+            {/* Archived Message - Always visible at top */}
+            {isArchived && (
+              <div className="bg-gray-800 rounded-lg p-3 m-4 mb-0">
+                <p className="text-center text-white text-sm">
+                  Comments are disabled for archived battles
+                </p>
+              </div>
+            )}
+
             {/* Comments List */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               <AnimatePresence initial={false}>
@@ -186,13 +195,7 @@ export function BattleSidebar({
             </div>
 
             {/* Comment Input */}
-            {isArchived ? (
-              <div className="p-4 border-t border-gray-800 bg-gray-900">
-                <div className="text-center text-white py-3">
-                  Comments are disabled for archived battles
-                </div>
-              </div>
-            ) : (
+            {!isArchived && (
               <form
                 onSubmit={handleSubmitComment}
                 className="p-4 border-t border-gray-800 bg-gray-900"
@@ -364,8 +367,10 @@ export function BattleSidebar({
               })}
 
             {battle.scores.length === 0 && (
-              <div className="text-center text-gray-500 py-8">
-                No rounds completed yet. Check back after the first round!
+              <div className="text-center text-white py-8">
+                No rounds completed yet.
+                <br />
+                Check back after the first round!
               </div>
             )}
           </div>
