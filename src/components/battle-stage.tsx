@@ -12,6 +12,7 @@ import { ScoreDisplay } from "./score-display";
 import { getRoundVerses, getBattleProgress } from "@/lib/battle-engine";
 import { motion } from "framer-motion";
 import { APP_TITLE } from "@/lib/constants";
+import { BattleBell } from "./battle-bell";
 
 interface BattleStageProps {
   battle: Battle;
@@ -35,9 +36,9 @@ export function BattleStage({
       {/* Header with Round Tracker */}
       <div className="fixed md:relative top-[52px] md:top-0 left-0 right-0 z-20 px-4 py-5 md:px-6 md:py-5 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">
+          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
             <motion.h1
-              className="text-3xl md:text-4xl lg:text-6xl font-bold text-center md:text-left tracking-wider leading-none"
+              className="text-3xl md:text-4xl lg:text-6xl font-bold text-center md:text-left tracking-wider leading-none md:flex-1"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
             >
@@ -46,10 +47,17 @@ export function BattleStage({
               </span>
             </motion.h1>
 
-            <RoundTracker
+            <BattleBell
               currentRound={battle.currentRound}
               completedRounds={progress.completedRounds}
             />
+
+            <div className="md:flex-1 md:flex md:justify-end">
+              <RoundTracker
+                currentRound={battle.currentRound}
+                completedRounds={progress.completedRounds}
+              />
+            </div>
           </div>
 
           {battle.status === "completed" && battle.winner && (
