@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import type { Battle, Comment } from "@/lib/shared";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, Send, ThumbsUp } from "lucide-react";
@@ -25,11 +25,6 @@ export function BattleSidebar({
   const [usernameConfirmed, setUsernameConfirmed] = useState(false);
   const [comment, setComment] = useState("");
   const [userVotes, setUserVotes] = useState<Set<string>>(new Set());
-  const commentsEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    commentsEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [battle.comments.length]);
 
   const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,7 +115,6 @@ export function BattleSidebar({
                   </motion.div>
                 ))}
               </AnimatePresence>
-              <div ref={commentsEndRef} />
             </div>
 
             {/* Comment Input */}

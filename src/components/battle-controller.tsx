@@ -260,7 +260,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
         </div>
 
         {/* Sidebar */}
-        <div className="w-full md:w-96 min-h-[400px] md:h-auto">
+        <div className="w-full md:w-96">
           <BattleSidebar
             battle={battle}
             onVote={handleVote}
@@ -343,7 +343,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
         </div>
 
         {/* Sidebar */}
-        <div className="w-full md:w-96 min-h-[400px] md:h-auto">
+        <div className="w-full md:w-96">
           <BattleSidebar
             battle={battle}
             onVote={handleVote}
