@@ -132,9 +132,15 @@ export function ScoreDisplay({
         <div className="grid grid-cols-2 gap-4">
           {/* Left Score - Collapsed */}
           <div
-            className="bg-gray-900/50 rounded-lg p-3 border-2 flex items-center justify-center"
+            className="bg-gray-900/50 rounded-lg p-3 border-2 flex flex-col items-center justify-center"
             style={{ borderColor: leftPersona.accentColor + "40" }}
           >
+            <div
+              className="text-xs font-medium mb-1 opacity-80"
+              style={{ color: leftPersona.accentColor }}
+            >
+              {leftPersona.name}
+            </div>
             <div
               className="text-2xl font-bold font-[family-name:var(--font-bebas-neue)]"
               style={{ color: leftPersona.accentColor }}
@@ -145,9 +151,15 @@ export function ScoreDisplay({
 
           {/* Right Score - Collapsed */}
           <div
-            className="bg-gray-900/50 rounded-lg p-3 border-2 flex items-center justify-center"
+            className="bg-gray-900/50 rounded-lg p-3 border-2 flex flex-col items-center justify-center"
             style={{ borderColor: rightPersona.accentColor + "40" }}
           >
+            <div
+              className="text-xs font-medium mb-1 opacity-80"
+              style={{ color: rightPersona.accentColor }}
+            >
+              {rightPersona.name}
+            </div>
             <div
               className="text-2xl font-bold font-[family-name:var(--font-bebas-neue)]"
               style={{ color: rightPersona.accentColor }}
