@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { getAllBattles } from "@/lib/battle-storage";
+import { getFeaturedBattles } from "@/lib/battle-storage";
 import { SiteHeader } from "@/components/site-header";
 
 // Always fetch fresh data to immediately reflect battle completions
 export const revalidate = 0;
 
 export default async function ArchivePage() {
-  const battles = await getAllBattles();
+  // Only show featured battles in archive
+  const battles = await getFeaturedBattles();
 
   return (
     <>
