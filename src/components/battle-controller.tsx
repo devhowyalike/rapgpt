@@ -265,6 +265,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
             battle={battle}
             onVote={handleVote}
             onComment={handleComment}
+            isArchived={true}
           />
         </div>
       </div>

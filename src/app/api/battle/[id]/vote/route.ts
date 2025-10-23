@@ -1,8 +1,9 @@
 import { NextRequest } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { getBattleById, saveBattle } from '@/lib/battle-storage';
-import { updateScoreWithVotes } from '@/lib/battle-engine';
+import { updateScoreWithVotes, isBattleArchived } from '@/lib/battle-engine';
 import { voteRequestSchema } from '@/lib/validations/battle';
+import { createArchivedBattleResponse } from '@/lib/validations/utils';
 
 export async function POST(
   request: NextRequest,
@@ -34,6 +35,11 @@ export async function POST(
         status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
+    }
+
+    // Prevent votes on archived battles
+    if (isBattleArchived(battle)) {
+      return createArchivedBattleResponse('vote');
     }
 
     // Find the round score

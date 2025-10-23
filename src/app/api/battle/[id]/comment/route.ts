@@ -4,6 +4,8 @@ import { getBattleById, saveBattle } from '@/lib/battle-storage';
 import type { Comment } from '@/lib/shared';
 import { MAX_COMMENTS } from '@/lib/shared';
 import { commentRequestSchema } from '@/lib/validations/battle';
+import { isBattleArchived } from '@/lib/battle-engine';
+import { createArchivedBattleResponse } from '@/lib/validations/utils';
 
 export async function POST(
   request: NextRequest,
@@ -35,6 +37,11 @@ export async function POST(
         status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
+    }
+
+    // Prevent comments on archived battles
+    if (isBattleArchived(battle)) {
+      return createArchivedBattleResponse('comment');
     }
 
     const comment: Comment = {

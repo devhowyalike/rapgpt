@@ -13,12 +13,14 @@ interface BattleSidebarProps {
   battle: Battle;
   onVote: (round: number, personaId: string) => void;
   onComment: (username: string, content: string) => void;
+  isArchived?: boolean;
 }
 
 export function BattleSidebar({
   battle,
   onVote,
   onComment,
+  isArchived = false,
 }: BattleSidebarProps) {
   const [activeTab, setActiveTab] = useState<"comments" | "voting">("comments");
   const [username, setUsername] = useState("");
@@ -118,44 +120,60 @@ export function BattleSidebar({
             </div>
 
             {/* Comment Input */}
-            <form
-              onSubmit={handleSubmitComment}
-              className="p-4 border-t border-gray-800 bg-gray-900"
-            >
-              {!usernameConfirmed && (
-                <input
-                  type="text"
-                  placeholder="Your name..."
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-3 py-2 mb-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  maxLength={50}
-                />
-              )}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Drop a comment..."
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  disabled={!username.trim()}
-                  className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                  maxLength={500}
-                />
-                <button
-                  type="submit"
-                  disabled={!username.trim() || !comment.trim()}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg text-white transition-colors"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
+            {isArchived ? (
+              <div className="p-4 border-t border-gray-800 bg-gray-900">
+                <div className="text-center text-white py-3">
+                  Comments are disabled for archived battles
+                </div>
               </div>
-            </form>
+            ) : (
+              <form
+                onSubmit={handleSubmitComment}
+                className="p-4 border-t border-gray-800 bg-gray-900"
+              >
+                {!usernameConfirmed && (
+                  <input
+                    type="text"
+                    placeholder="Your name..."
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full px-3 py-2 mb-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    maxLength={50}
+                  />
+                )}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Drop a comment..."
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    disabled={!username.trim()}
+                    className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                    maxLength={500}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!username.trim() || !comment.trim()}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg text-white transition-colors"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         )}
 
         {activeTab === "voting" && (
           <div className="p-4 space-y-6">
+            {isArchived && battle.scores.length > 0 && (
+              <div className="bg-gray-800 rounded-lg p-3 mb-4">
+                <p className="text-center text-white text-sm">
+                  Voting is disabled for archived battles
+                </p>
+              </div>
+            )}
+
             {battle.scores.map((roundScore) => {
               const leftScore =
                 roundScore.personaScores[battle.personas.left.id];
@@ -179,12 +197,16 @@ export function BattleSidebar({
                       onClick={() =>
                         handleVote(roundScore.round, battle.personas.left.id)
                       }
-                      disabled={userVotes.has(
-                        `${roundScore.round}-${battle.personas.left.id}`
-                      )}
+                      disabled={
+                        isArchived ||
+                        userVotes.has(
+                          `${roundScore.round}-${battle.personas.left.id}`
+                        )
+                      }
                       className={`
                         w-full p-3 rounded-lg border-2 transition-all
                         ${
+                          isArchived ||
                           userVotes.has(
                             `${roundScore.round}-${battle.personas.left.id}`
                           )
@@ -224,12 +246,16 @@ export function BattleSidebar({
                       onClick={() =>
                         handleVote(roundScore.round, battle.personas.right.id)
                       }
-                      disabled={userVotes.has(
-                        `${roundScore.round}-${battle.personas.right.id}`
-                      )}
+                      disabled={
+                        isArchived ||
+                        userVotes.has(
+                          `${roundScore.round}-${battle.personas.right.id}`
+                        )
+                      }
                       className={`
                         w-full p-3 rounded-lg border-2 transition-all
                         ${
+                          isArchived ||
                           userVotes.has(
                             `${roundScore.round}-${battle.personas.right.id}`
                           )
