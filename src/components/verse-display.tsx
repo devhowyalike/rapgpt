@@ -40,7 +40,7 @@ export function VerseDisplay({
                 className="verse-line flex"
               >
                 <span
-                  className="text-sm opacity-50 w-8 flex-shrink-0"
+                  className="text-sm opacity-50 w-8 shrink-0"
                   style={{ color: persona.accentColor }}
                 >
                   {index + 1}.
@@ -64,7 +64,7 @@ export function VerseDisplay({
                 className="flex"
               >
                 <span
-                  className="text-sm opacity-50 w-8 flex-shrink-0"
+                  className="text-sm opacity-50 w-8 shrink-0"
                   style={{ color: persona.accentColor }}
                 >
                   {index + 1}.
