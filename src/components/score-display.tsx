@@ -53,6 +53,12 @@ export function ScoreDisplay({
           >
             <div className="text-center">
               <div
+                className="text-sm font-medium mb-2 opacity-80"
+                style={{ color: leftPersona.accentColor }}
+              >
+                {leftPersona.name}
+              </div>
+              <div
                 className="text-3xl font-bold font-[family-name:var(--font-bebas-neue)]"
                 style={{ color: leftPersona.accentColor }}
               >
@@ -93,6 +99,12 @@ export function ScoreDisplay({
             style={{ borderColor: rightPersona.accentColor + "40" }}
           >
             <div className="text-center">
+              <div
+                className="text-sm font-medium mb-2 opacity-80"
+                style={{ color: rightPersona.accentColor }}
+              >
+                {rightPersona.name}
+              </div>
               <div
                 className="text-3xl font-bold font-[family-name:var(--font-bebas-neue)]"
                 style={{ color: rightPersona.accentColor }}
