@@ -19,7 +19,7 @@ export function RoundTracker({
   className = "",
 }: RoundTrackerProps) {
   return (
-    <div className={`flex items-center justify-center gap-4 ${className}`}>
+    <div className={`flex items-center justify-center gap-3 pt-2 ${className}`}>
       {Array.from({ length: ROUNDS_PER_BATTLE }).map((_, index) => {
         const round = index + 1;
         const isCompleted = round <= completedRounds;
@@ -28,7 +28,7 @@ export function RoundTracker({
         return (
           <motion.div
             key={round}
-            className="flex flex-col items-center gap-2"
+            className="flex flex-col items-center gap-1"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
