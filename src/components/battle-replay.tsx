@@ -38,7 +38,34 @@ export function BattleReplay({ battle }: BattleReplayProps) {
       {/* Header with Replay Controls */}
       <div className="p-4 md:p-6 border-b border-gray-800">
         <div className="max-w-7xl mx-auto">
-          {/* Replay Controls */}
+          {/* Battle Winner at Top */}
+          {battle.status === "incomplete" ? (
+            <motion.div
+              className="text-center mb-4"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <div className="text-xl md:text-2xl font-bold text-red-400 font-(family-name:--font-bebas-neue)">
+                ⚠️ MATCH CANCELLED - INCOMPLETE ⚠️
+              </div>
+            </motion.div>
+          ) : battle.winner ? (
+            <motion.div
+              className="text-center mb-4"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <div className="text-xl md:text-2xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue)">
+                🏆 WINNER:{" "}
+                {battle.personas.left.id === battle.winner
+                  ? battle.personas.left.name
+                  : battle.personas.right.name}{" "}
+                🏆
+              </div>
+            </motion.div>
+          ) : null}
+
+          {/* Replay Controls - Round Counter */}
           <div className="flex items-center justify-center gap-4 mb-4">
             <button
               onClick={handlePrevRound}
@@ -48,7 +75,7 @@ export function BattleReplay({ battle }: BattleReplayProps) {
             >
               <ChevronLeft className="w-5 h-5 text-white" />
             </button>
-            <div className="px-6 py-2 rounded-lg bg-linear-to-r from-blue-600 to-purple-600 text-white font-bold font-[family-name:var(--font-bebas-neue)] text-xl">
+            <div className="px-6 py-2 rounded-lg bg-linear-to-r from-blue-600 to-purple-600 text-white font-bold font-(family-name:--font-bebas-neue) text-xl">
               Round {selectedRound} of 3
             </div>
             <button
@@ -61,31 +88,29 @@ export function BattleReplay({ battle }: BattleReplayProps) {
             </button>
           </div>
 
-          {battle.status === "incomplete" ? (
+          {/* Round Winner Below Counter */}
+          {roundScore?.winner && (
             <motion.div
-              className="text-center mt-4"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
+              className="text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
             >
-              <div className="text-xl md:text-2xl font-bold text-red-400 font-[family-name:var(--font-bebas-neue)]">
-                ⚠️ MATCH CANCELLED - INCOMPLETE ⚠️
-              </div>
-            </motion.div>
-          ) : battle.winner ? (
-            <motion.div
-              className="text-center mt-4"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-            >
-              <div className="text-xl md:text-2xl font-bold text-yellow-400 font-[family-name:var(--font-bebas-neue)]">
-                🏆 WINNER:{" "}
-                {battle.personas.left.id === battle.winner
+              <span className="text-sm text-gray-400">Round Winner: </span>
+              <span
+                className="text-lg font-bold font-(family-name:--font-bebas-neue)"
+                style={{
+                  color:
+                    battle.personas.left.id === roundScore.winner
+                      ? battle.personas.left.accentColor
+                      : battle.personas.right.accentColor,
+                }}
+              >
+                {battle.personas.left.id === roundScore.winner
                   ? battle.personas.left.name
-                  : battle.personas.right.name}{" "}
-                🏆
-              </div>
+                  : battle.personas.right.name}
+              </span>
             </motion.div>
-          ) : null}
+          )}
         </div>
       </div>
 
@@ -136,7 +161,7 @@ export function BattleReplay({ battle }: BattleReplayProps) {
       {roundScore && (
         <div className="p-4 md:p-6 border-t border-gray-800 bg-gray-900/30">
           <div className="max-w-4xl mx-auto">
-            <h3 className="text-xl md:text-2xl font-[family-name:var(--font-bebas-neue)] text-center mb-4 text-yellow-400">
+            <h3 className="text-xl md:text-2xl font-(family-name:--font-bebas-neue) text-center mb-4 text-yellow-400">
               ROUND {roundScore.round} SCORES
             </h3>
             <ScoreDisplay
