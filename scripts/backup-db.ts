@@ -13,10 +13,11 @@ import { execSync } from 'node:child_process';
 import { existsSync, mkdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-// Ensure POSTGRES_URL is set
-const postgresUrl = process.env.POSTGRES_URL;
+// Ensure POSTGRES_URL is set (check both standard and QA_ prefix)
+const postgresUrl = process.env.POSTGRES_URL || process.env.QA_POSTGRES_URL;
 if (!postgresUrl) {
-  console.error('❌ Error: POSTGRES_URL environment variable is not set');
+  console.error('❌ Error: POSTGRES_URL or QA_POSTGRES_URL environment variable is not set');
+  console.error('💡 Make sure you have .env.production file with POSTGRES_URL or QA_POSTGRES_URL');
   process.exit(1);
 }
 

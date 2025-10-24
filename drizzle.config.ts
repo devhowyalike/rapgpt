@@ -5,7 +5,8 @@ export default defineConfig({
   out: './drizzle',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.POSTGRES_URL!,
+    // Check QA_POSTGRES_URL first (for QA database), fallback to POSTGRES_URL (for local/prod)
+    url: process.env.QA_POSTGRES_URL || process.env.POSTGRES_URL!,
   },
   verbose: true,
   strict: true,

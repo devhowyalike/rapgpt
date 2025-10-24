@@ -31,11 +31,11 @@ if (!backupFilename) {
   process.exit(1);
 }
 
-// Ensure POSTGRES_URL is set
-const postgresUrl = process.env.POSTGRES_URL;
+// Ensure POSTGRES_URL is set (check both standard and QA_ prefix)
+const postgresUrl = process.env.POSTGRES_URL || process.env.QA_POSTGRES_URL;
 if (!postgresUrl) {
-  console.error('❌ Error: POSTGRES_URL environment variable is not set');
-  console.error('💡 Make sure you have .env.local file with POSTGRES_URL');
+  console.error('❌ Error: POSTGRES_URL or QA_POSTGRES_URL environment variable is not set');
+  console.error('💡 Make sure you have .env.local file with POSTGRES_URL or QA_POSTGRES_URL');
   process.exit(1);
 }
 
@@ -62,12 +62,15 @@ console.log('');
 console.log('Press Ctrl+C to cancel, or wait 3 seconds to continue...');
 
 // Give user time to cancel
-await new Promise(resolve => setTimeout(resolve, 3000));
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-console.log('');
-console.log('🔄 Starting database restore...');
+async function restore() {
+  await sleep(3000);
 
-try {
+  console.log('');
+  console.log('🔄 Starting database restore...');
+
+  try {
   // Build pg_restore command with:
   // -d: database connection string
   // --clean: drop existing objects before recreating
@@ -94,18 +97,22 @@ try {
     env: process.env,
   });
 
-  console.log('');
-  console.log('✅ Database restore completed successfully!');
-  console.log('💡 You can verify the data using: pnpm db:studio');
-  
-} catch (error) {
-  console.error('');
-  console.error('❌ Restore failed:', error);
-  console.error('');
-  console.error('Troubleshooting tips:');
-  console.error('1. Make sure pg_restore is installed (comes with PostgreSQL)');
-  console.error('2. Verify your POSTGRES_URL is correct in .env.local');
-  console.error('3. Check that the backup file is not corrupted');
-  process.exit(1);
+    console.log('');
+    console.log('✅ Database restore completed successfully!');
+    console.log('💡 You can verify the data using: pnpm db:studio');
+    
+  } catch (error) {
+    console.error('');
+    console.error('❌ Restore failed:', error);
+    console.error('');
+    console.error('Troubleshooting tips:');
+    console.error('1. Make sure pg_restore is installed (comes with PostgreSQL)');
+    console.error('2. Verify your POSTGRES_URL is correct in .env.local');
+    console.error('3. Check that the backup file is not corrupted');
+    process.exit(1);
+  }
 }
+
+// Run the restore
+restore();
 
