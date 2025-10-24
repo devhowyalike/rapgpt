@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Share2, Trash2, ExternalLink } from "lucide-react";
+import { Share2, Trash2, AlertTriangle } from "lucide-react";
+import * as Dialog from "@radix-ui/react-dialog";
 
 interface MyBattleCardProps {
   battle: {
@@ -11,11 +13,16 @@ interface MyBattleCardProps {
     createdAt: Date;
     leftPersona: any;
     rightPersona: any;
+    currentRound?: number;
+    verses?: any[];
   };
   shareUrl: string;
 }
 
 export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const personas = {
     left: battle.leftPersona as any,
     right: battle.rightPersona as any,
@@ -29,17 +36,22 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
   };
 
   const handleDelete = async () => {
-    if (
-      confirm(
-        "Are you sure you want to delete this battle? This will also delete all votes and comments."
-      )
-    ) {
+    setIsDeleting(true);
+    try {
       await fetch(`/api/battle/${battle.id}/delete`, {
         method: "DELETE",
       });
       window.location.reload();
+    } catch (error) {
+      console.error("Failed to delete battle:", error);
+      setIsDeleting(false);
     }
   };
+
+  // Calculate battle progress stats for paused battles
+  const isPaused = battle.status === "incomplete";
+  const currentRound = battle.currentRound || 1;
+  const versesCount = battle.verses?.length || 0;
 
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-colors">
@@ -47,15 +59,18 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
         <div className="flex-1">
           <Link
             href={`/battle/${battle.id}`}
-            className="font-bebas text-3xl text-white hover:text-purple-400 transition-colors flex items-center gap-2"
+            className="font-bebas text-3xl text-white hover:text-purple-400 transition-colors"
           >
             {battle.title}
-            <ExternalLink size={20} />
           </Link>
-          <p className="text-gray-400 mt-1">
-            {personas.left.name} vs {personas.right.name}
-          </p>
         </div>
+        <button
+          onClick={handleShare}
+          className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+          title="Share Link"
+        >
+          <Share2 size={18} />
+        </button>
       </div>
 
       <div className="flex items-center gap-2 text-sm mb-4">
@@ -77,30 +92,76 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
         </span>
       </div>
 
-      <div className="flex items-center gap-3">
-        <button
-          onClick={handleShare}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-        >
-          <Share2 size={16} />
-          Share Link
-        </button>
+      {isPaused && (
+        <div className="mb-4 p-3 bg-gray-900/50 rounded-lg border border-orange-500/20">
+          <p className="text-sm font-semibold text-orange-400 mb-2">
+            Battle Progress:
+          </p>
+          <ul className="text-sm text-gray-300 space-y-1">
+            <li>• Round {currentRound} of 3</li>
+            <li>
+              • {versesCount} {versesCount === 1 ? "verse" : "verses"} completed
+            </li>
+          </ul>
+        </div>
+      )}
 
+      <div className="flex items-center gap-3">
         <Link
           href={`/battle/${battle.id}`}
           className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
         >
-          {battle.status === "incomplete" ? "Resume Battle" : "View Battle"}
+          {battle.status === "incomplete" ? "Resume Beef" : "View Battle"}
         </Link>
 
         <button
-          onClick={handleDelete}
-          className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors ml-auto"
+          onClick={() => setShowDeleteDialog(true)}
+          className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors ml-auto"
+          title="Delete Battle"
         >
-          <Trash2 size={16} />
-          Delete
+          <Trash2 size={18} />
         </button>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog.Root open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-gray-900 border border-gray-800 rounded-lg shadow-2xl p-6 animate-in fade-in zoom-in-95">
+            <div className="flex items-start gap-4">
+              <div className="shrink-0 w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-red-500" />
+              </div>
+              <div className="flex-1">
+                <Dialog.Title className="text-xl font-bold text-white mb-2">
+                  Delete Battle?
+                </Dialog.Title>
+                <Dialog.Description className="text-gray-400 mb-4">
+                  Are you sure you want to delete this beef? This will also
+                  delete all votes and comments. This action cannot be undone.
+                </Dialog.Description>
+
+                <div className="flex gap-3 justify-end">
+                  <button
+                    onClick={() => setShowDeleteDialog(false)}
+                    disabled={isDeleting}
+                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    {isDeleting ? "Deleting..." : "Delete Battle"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }

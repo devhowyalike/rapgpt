@@ -38,7 +38,7 @@ export default async function MyBattlesPage() {
       <div className="max-w-6xl mx-auto px-4 py-24">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="font-bebas text-6xl text-white mb-2">My Battles</h1>
+            <h1 className="font-bebas text-6xl text-white mb-2">My e-Beefs</h1>
             <p className="text-gray-400 text-lg">
               Create and manage your personal battles
             </p>
@@ -69,7 +69,7 @@ export default async function MyBattlesPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {myBattles.map((battle) => (
               <MyBattleCard
                 key={battle.id}

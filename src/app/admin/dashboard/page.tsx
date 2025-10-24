@@ -134,7 +134,7 @@ export default async function AdminDashboardPage() {
                         onClick={() => {
                           if (
                             confirm(
-                              "Are you sure you want to delete this battle? This will also delete all votes and comments."
+                              "Are you sure you want to delete this beef? This will also delete all votes and comments."
                             )
                           ) {
                             fetch(`/api/battle/${battle.id}/delete`, {

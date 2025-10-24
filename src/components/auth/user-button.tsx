@@ -28,7 +28,7 @@ export function UserButton() {
         href="/my-battles"
         className="text-gray-300 hover:text-white transition-colors hidden sm:inline"
       >
-        My Battles
+        My e-Beefs
       </Link>
 
       <ClerkUserButton
@@ -46,7 +46,7 @@ export function UserButton() {
       >
         <ClerkUserButton.MenuItems>
           <ClerkUserButton.Link
-            label="My Battles"
+            label="My eBeefs"
             labelIcon={<User size={16} />}
             href="/my-battles"
           />
