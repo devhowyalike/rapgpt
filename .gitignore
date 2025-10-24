@@ -25,6 +25,7 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env*.production
 .env
 
 # vercel
@@ -39,3 +40,6 @@ next-env.d.ts
 
 # database backups
 /backups
+
+# clerk configuration (can include secrets)
+/.clerk/

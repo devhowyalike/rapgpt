@@ -4,6 +4,9 @@
  * PostgreSQL Database Backup Script
  * Creates a full backup of the production database using pg_dump
  * Backup format: Custom compressed format (.dump)
+ * 
+ * Environment: Uses .env.production (via pnpm db:backup:prod)
+ * This ensures you're backing up the production database, not dev
  */
 
 import { execSync } from 'node:child_process';
