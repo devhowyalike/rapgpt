@@ -1,10 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db/client";
-import { battles, users } from "@/lib/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { battles } from "@/lib/db/schema";
+import { and, desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { Plus, Share2, Trash2, ExternalLink } from "lucide-react";
+import { getOrCreateUser } from "@/lib/auth/sync-user";
 
 export default async function MyBattlesPage() {
   // Require authentication
@@ -14,22 +15,8 @@ export default async function MyBattlesPage() {
     redirect("/sign-in");
   }
 
-  // Get user from database
-  const user = await db.query.users.findFirst({
-    where: eq(users.clerkId, clerkUserId),
-  });
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-linear-to-br from-gray-900 via-purple-900 to-black flex items-center justify-center">
-        <div className="text-white text-center">
-          <p className="text-xl">
-            User not found. Please try signing out and back in.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Get or create user from database (syncs from Clerk if needed)
+  const user = await getOrCreateUser(clerkUserId);
 
   // Fetch user's battles
   const myBattles = await db

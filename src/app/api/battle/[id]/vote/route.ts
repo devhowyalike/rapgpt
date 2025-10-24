@@ -6,9 +6,10 @@ import { updateScoreWithVotes, isBattleArchived, isRoundComplete } from '@/lib/b
 import { voteRequestSchema } from '@/lib/validations/battle';
 import { createArchivedBattleResponse } from '@/lib/validations/utils';
 import { db } from '@/lib/db/client';
-import { votes, users } from '@/lib/db/schema';
+import { votes } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
+import { getOrCreateUser } from '@/lib/auth/sync-user';
 
 export async function POST(
   request: NextRequest,
@@ -27,19 +28,8 @@ export async function POST(
       });
     }
 
-    // Get user from database
-    const user = await db.query.users.findFirst({
-      where: eq(users.clerkId, clerkUserId),
-    });
-
-    if (!user) {
-      return new Response(JSON.stringify({ 
-        error: 'User not found' 
-      }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    // Get or create user from database (syncs from Clerk if needed)
+    const user = await getOrCreateUser(clerkUserId);
 
     const { id } = await params;
     const body = await request.json();

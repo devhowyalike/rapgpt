@@ -7,8 +7,9 @@ import { NextRequest } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db/client';
-import { battles, users } from '@/lib/db/schema';
+import { battles } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { getOrCreateUser } from '@/lib/auth/sync-user';
 
 export async function DELETE(
   request: NextRequest,
@@ -27,19 +28,8 @@ export async function DELETE(
       });
     }
 
-    // Get user from database
-    const user = await db.query.users.findFirst({
-      where: eq(users.clerkId, clerkUserId),
-    });
-
-    if (!user) {
-      return new Response(JSON.stringify({ 
-        error: 'User not found' 
-      }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    // Get or create user from database (syncs from Clerk if needed)
+    const user = await getOrCreateUser(clerkUserId);
 
     const { id } = await params;
 

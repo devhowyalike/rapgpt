@@ -4,9 +4,7 @@ import type { Battle } from '@/lib/shared';
 import { getPersona } from '@/lib/shared/personas';
 import { saveBattle } from '@/lib/battle-storage';
 import { createBattleRequestSchema } from '@/lib/validations/battle';
-import { db } from '@/lib/db/client';
-import { users } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { getOrCreateUser } from '@/lib/auth/sync-user';
 import { z } from 'zod';
 
 // Extended schema to include isFeatured
@@ -26,17 +24,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user from database
-    const user = await db.query.users.findFirst({
-      where: eq(users.clerkId, clerkUserId),
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
+    // Get or create user from database (syncs from Clerk if needed)
+    const user = await getOrCreateUser(clerkUserId);
 
     const body = await request.json();
     
