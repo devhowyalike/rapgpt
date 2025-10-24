@@ -69,7 +69,7 @@ export default async function MyBattlesPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
             {myBattles.map((battle) => (
               <MyBattleCard
                 key={battle.id}

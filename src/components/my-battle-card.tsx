@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Share2, Trash2, AlertTriangle } from "lucide-react";
+import { Share2, Trash2, AlertTriangle, MoreVertical } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
 interface MyBattleCardProps {
   battle: {
@@ -54,7 +55,7 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
   const versesCount = battle.verses?.length || 0;
 
   return (
-    <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-colors">
+    <div className="h-full flex flex-col bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-colors">
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <Link
@@ -64,13 +65,38 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
             {battle.title}
           </Link>
         </div>
-        <button
-          onClick={handleShare}
-          className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-          title="Share Link"
-        >
-          <Share2 size={18} />
-        </button>
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger asChild>
+            <button
+              className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+              title="More options"
+            >
+              <MoreVertical size={18} />
+            </button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content
+              className="min-w-[180px] bg-gray-800 border border-gray-700 rounded-lg p-1 shadow-xl z-50"
+              sideOffset={5}
+              align="end"
+            >
+              <DropdownMenu.Item
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 rounded cursor-pointer outline-none"
+                onClick={handleShare}
+              >
+                <Share2 size={16} />
+                Share Link
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-gray-700 rounded cursor-pointer outline-none"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash2 size={16} />
+                Delete Battle
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
       </div>
 
       <div className="flex items-center gap-2 text-sm mb-4">
@@ -106,6 +132,9 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
         </div>
       )}
 
+      {/* Flexible spacer to push buttons to bottom */}
+      <div className="flex-1" />
+
       <div className="flex items-center gap-3">
         <Link
           href={`/battle/${battle.id}`}
@@ -117,14 +146,6 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
             ? "Replay Battle"
             : "View Battle"}
         </Link>
-
-        <button
-          onClick={() => setShowDeleteDialog(true)}
-          className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors ml-auto"
-          title="Delete Battle"
-        >
-          <Trash2 size={18} />
-        </button>
       </div>
 
       {/* Delete Confirmation Dialog */}
