@@ -57,7 +57,7 @@ This document tracks the implementation of Clerk authentication with role-based 
 - ✅ List user's personal battles
 - ✅ Share links and delete functionality
 - ✅ User battle creation page (`src/app/my-battles/new/page.tsx`)
-- ✅ Creates personal battles (isFeatured: false)
+  - ✅ Creates personal battles (isFeatured: false)
 
 ### Phase 8: Homepage & Archive
 
@@ -153,7 +153,7 @@ battles (deleted) → votes (deleted)
 - Vote on battles (once per round)
 - Comment on battles
 - Create personal battles at `/my-battles/new`
-- Manage own battles
+  - Manage own battles
 
 ### Admin (Authenticated)
 
@@ -277,8 +277,8 @@ ANTHROPIC_API_KEY=
 
 - `src/app/sign-in/[[...sign-in]]/page.tsx`
 - `src/app/admin/dashboard/page.tsx`
-- `src/app/admin/battles/new/page.tsx`
-- `src/app/my-battles/page.tsx`
+  - `src/app/admin/battles/new/page.tsx`
+  - `src/app/my-battles/page.tsx`
 - `src/app/my-battles/new/page.tsx`
 
 ### API Routes

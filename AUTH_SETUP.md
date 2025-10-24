@@ -200,7 +200,7 @@ The admin dashboard has a user management interface prepared. You can extend it 
 - ✅ Vote on battles
 - ✅ Comment on battles
 - ✅ Create personal battles at `/my-battles/new`
-- ✅ Share battle links
+  - ✅ Share battle links
 - ❌ Cannot create featured battles
 - ❌ Cannot access admin dashboard
 
