@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Share2, Trash2, AlertTriangle, MoreVertical } from "lucide-react";
+import {
+  Share2,
+  Trash2,
+  AlertTriangle,
+  MoreVertical,
+  Crown,
+} from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
@@ -16,6 +22,8 @@ interface MyBattleCardProps {
     rightPersona: any;
     currentRound?: number;
     verses?: any[];
+    winner?: string | null;
+    scores?: any[];
   };
   shareUrl: string;
 }
@@ -51,8 +59,39 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
 
   // Calculate battle progress stats for paused battles
   const isPaused = battle.status === "incomplete";
+  const isCompleted = battle.status === "completed";
   const currentRound = battle.currentRound || 1;
   const versesCount = battle.verses?.length || 0;
+
+  // Calculate final stats for completed battles
+  const calculateFinalStats = () => {
+    if (!isCompleted || !battle.scores) return null;
+
+    const totalRounds = battle.scores.length;
+    let leftTotalScore = 0;
+    let rightTotalScore = 0;
+
+    const leftPersonaId = personas.left.id;
+    const rightPersonaId = personas.right.id;
+
+    for (const roundScore of battle.scores) {
+      if (roundScore.personaScores) {
+        leftTotalScore +=
+          roundScore.personaScores[leftPersonaId]?.totalScore || 0;
+        rightTotalScore +=
+          roundScore.personaScores[rightPersonaId]?.totalScore || 0;
+      }
+    }
+
+    return {
+      totalRounds,
+      leftTotalScore: Math.round(leftTotalScore),
+      rightTotalScore: Math.round(rightTotalScore),
+      winner: battle.winner,
+    };
+  };
+
+  const finalStats = calculateFinalStats();
 
   return (
     <div className="h-full flex flex-col bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-colors">
@@ -128,6 +167,38 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
             <li>
               • {versesCount} {versesCount === 1 ? "verse" : "verses"} completed
             </li>
+          </ul>
+        </div>
+      )}
+
+      {isCompleted && finalStats && (
+        <div className="mb-4 p-3 bg-gray-900/50 rounded-lg border border-green-500/20">
+          <p className="text-sm font-semibold text-green-400 mb-2">
+            Battle Results:
+          </p>
+          <ul className="text-sm text-gray-300 space-y-1">
+            <li className="flex items-center gap-1">
+              • Winner:{" "}
+              <span className="text-green-400 font-semibold flex items-center gap-1">
+                {finalStats.winner === personas.left.id
+                  ? personas.left.name
+                  : finalStats.winner === personas.right.id
+                  ? personas.right.name
+                  : finalStats.winner
+                  ? finalStats.winner
+                  : "Tie"}
+                {finalStats.winner && finalStats.winner !== "tie" ? (
+                  <>
+                    <Crown size={14} className="inline text-yellow-400" />
+                  </>
+                ) : null}
+              </span>
+            </li>
+            <li>
+              • Final Score: {finalStats.leftTotalScore} -{" "}
+              {finalStats.rightTotalScore}
+            </li>
+            <li>• {finalStats.totalRounds} rounds completed</li>
           </ul>
         </div>
       )}
