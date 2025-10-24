@@ -8,9 +8,12 @@ import { getOrCreateUser } from '@/lib/auth/sync-user';
 import { z } from 'zod';
 
 // Extended schema to include isFeatured
-const extendedBattleRequestSchema = createBattleRequestSchema.extend({
-  isFeatured: z.boolean().optional().default(false),
-});
+// Use .merge() instead of .extend() because createBattleRequestSchema contains refinements
+const extendedBattleRequestSchema = createBattleRequestSchema.merge(
+  z.object({
+    isFeatured: z.boolean().optional().default(false),
+  })
+);
 
 export async function POST(request: NextRequest) {
   try {
