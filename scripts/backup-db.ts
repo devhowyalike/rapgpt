@@ -2,11 +2,12 @@
 
 /**
  * PostgreSQL Database Backup Script
- * Creates a full backup of the production database using pg_dump
+ * Creates a full backup of the database using pg_dump
  * Backup format: Custom compressed format (.dump)
  * 
- * Environment: Uses .env.production (via pnpm db:backup:prod)
- * This ensures you're backing up the production database, not dev
+ * Environment: 
+ *  - pnpm db:backup:prod - backs up production (.env.production) → rapgpt_prod_*.dump
+ *  - pnpm db:backup:dev  - backs up dev (.env.local) → rapgpt_dev_*.dump
  */
 
 import { execSync } from 'node:child_process';
@@ -28,14 +29,17 @@ if (!existsSync(backupsDir)) {
   console.log(`📁 Created backups directory: ${backupsDir}`);
 }
 
+// Determine environment from BACKUP_ENV variable (defaults to 'prod')
+const environment = process.env.BACKUP_ENV || 'prod';
+
 // Generate timestamp for filename
 const timestamp = new Date()
   .toISOString()
   .replace(/:/g, '-')
   .replace(/\..+/, '');
 
-// Backup filename with _prod_ identifier
-const backupFilename = `rapgpt_prod_${timestamp}.dump`;
+// Backup filename with environment identifier
+const backupFilename = `rapgpt_${environment}_${timestamp}.dump`;
 const backupPath = join(backupsDir, backupFilename);
 
 console.log('🔄 Starting database backup...');
