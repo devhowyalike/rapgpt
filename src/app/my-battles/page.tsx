@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { MyBattleCard } from "@/components/my-battle-card";
+import { SiteHeader } from "@/components/site-header";
 
 export default async function MyBattlesPage() {
   // Require authentication
@@ -33,6 +34,7 @@ export default async function MyBattlesPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-900 via-purple-900 to-black">
+      <SiteHeader />
       <div className="max-w-6xl mx-auto px-4 py-24">
         <div className="mb-8 flex items-center justify-between">
           <div>
