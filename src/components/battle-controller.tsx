@@ -59,6 +59,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   const [mobileActiveTab, setMobileActiveTab] = useState<"comments" | "voting">(
     "comments"
   );
+  const [isLeaving, setIsLeaving] = useState(false);
 
   // Navigation guard - prevent leaving page during ongoing battle
   const { NavigationDialog } = useNavigationGuard({
@@ -68,7 +69,10 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
       "Are you sure you want to leave? The match will be paused and marked as incomplete in the archive.",
     onConfirm: async () => {
       if (battle) {
+        setIsLeaving(true);
         await cancelBattle();
+        // Redirect immediately to prevent flash of battle page
+        window.location.href = "/my-battles";
       }
     },
   });
@@ -130,7 +134,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     battle,
   ]);
 
-  if (!battle) {
+  if (!battle || isLeaving) {
     return <BattleLoading />;
   }
 
@@ -250,6 +254,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
   const confirmCancelBattle = async () => {
     setIsCanceling(true);
+    setIsLeaving(true);
     setCancelError(null);
     try {
       await cancelBattle();
@@ -259,6 +264,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
       console.error("Error canceling battle:", error);
       setCancelError("Failed to cancel battle. Please try again.");
       setIsCanceling(false);
+      setIsLeaving(false);
     }
   };
 
