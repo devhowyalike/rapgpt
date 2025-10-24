@@ -252,8 +252,8 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     setCancelError(null);
     try {
       await cancelBattle();
-      // Redirect to archive after canceling
-      window.location.href = "/archive";
+      // Redirect to my battles page after canceling
+      window.location.href = "/my-battles";
     } catch (error) {
       console.error("Error canceling battle:", error);
       setCancelError("Failed to cancel battle. Please try again.");
