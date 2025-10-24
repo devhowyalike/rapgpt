@@ -63,6 +63,8 @@ export interface Comment {
   content: string;
   timestamp: number;
   round?: number;
+  userId?: string;
+  imageUrl?: string | null;
 }
 
 export interface Battle {

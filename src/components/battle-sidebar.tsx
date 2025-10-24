@@ -9,11 +9,13 @@ import type { Battle, Comment } from "@/lib/shared";
 import { ROUNDS_PER_BATTLE } from "@/lib/shared";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, Send, ThumbsUp } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
+import Link from "next/link";
 
 interface BattleSidebarProps {
   battle: Battle;
   onVote: (round: number, personaId: string) => void;
-  onComment: (username: string, content: string) => void;
+  onComment: (content: string) => void;
   isArchived?: boolean;
   isVotingPhase?: boolean;
   votingTimeRemaining?: number | null;
@@ -31,6 +33,7 @@ export function BattleSidebar({
   votingCompletedRound = null,
   defaultTab,
 }: BattleSidebarProps) {
+  const { user, isLoaded } = useUser();
   const [activeTab, setActiveTab] = useState<"comments" | "voting">(
     defaultTab || "comments"
   );
@@ -41,8 +44,6 @@ export function BattleSidebar({
       setActiveTab(defaultTab);
     }
   }, [defaultTab]);
-  const [username, setUsername] = useState("");
-  const [usernameConfirmed, setUsernameConfirmed] = useState(false);
   const [comment, setComment] = useState("");
   const [userVotes, setUserVotes] = useState<Set<string>>(() => {
     // Load votes from localStorage on mount
@@ -69,11 +70,10 @@ export function BattleSidebar({
 
   const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim() || !comment.trim()) return;
+    if (!comment.trim() || !user) return;
 
-    onComment(username.trim(), comment.trim());
+    onComment(comment.trim());
     setComment("");
-    setUsernameConfirmed(true);
   };
 
   const handleVote = (round: number, personaId: string) => {
@@ -191,9 +191,17 @@ export function BattleSidebar({
                     className="bg-gray-800 rounded-lg p-3"
                   >
                     <div className="flex items-start gap-2">
-                      <div className="w-8 h-8 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
-                        {comment.username.charAt(0).toUpperCase()}
-                      </div>
+                      {comment.imageUrl ? (
+                        <img
+                          src={comment.imageUrl}
+                          alt={comment.username}
+                          className="w-8 h-8 rounded-full shrink-0"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                          {comment.username.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-baseline gap-2">
                           <span className="font-medium text-white text-sm">
@@ -217,39 +225,41 @@ export function BattleSidebar({
 
             {/* Comment Input */}
             {!isArchived && (
-              <form
-                onSubmit={handleSubmitComment}
-                className="p-4 border-t border-gray-800 bg-gray-900"
-              >
-                {!usernameConfirmed && (
-                  <input
-                    type="text"
-                    placeholder="Your name..."
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full px-3 py-2 mb-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    maxLength={50}
-                  />
+              <div className="p-4 border-t border-gray-800 bg-gray-900">
+                {isLoaded && !user ? (
+                  <div className="text-center py-3">
+                    <p className="text-gray-400 text-sm mb-3">
+                      Sign in to leave a comment
+                    </p>
+                    <Link
+                      href="/sign-in"
+                      className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-colors text-sm font-medium"
+                    >
+                      Sign In
+                    </Link>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmitComment}>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Drop a comment..."
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        maxLength={500}
+                      />
+                      <button
+                        type="submit"
+                        disabled={!comment.trim()}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg text-white transition-colors"
+                      >
+                        <Send className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </form>
                 )}
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Drop a comment..."
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    disabled={!username.trim()}
-                    className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                    maxLength={500}
-                  />
-                  <button
-                    type="submit"
-                    disabled={!username.trim() || !comment.trim()}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg text-white transition-colors"
-                  >
-                    <Send className="w-4 h-4" />
-                  </button>
-                </div>
-              </form>
+              </div>
             )}
           </div>
         )}

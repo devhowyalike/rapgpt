@@ -213,13 +213,12 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     }
   };
 
-  const handleComment = async (username: string, content: string) => {
+  const handleComment = async (content: string) => {
     try {
       const response = await fetch(`/api/battle/${battle.id}/comment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username,
           content,
           round: battle.currentRound,
         }),
