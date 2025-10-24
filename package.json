@@ -12,7 +12,10 @@
     "db:generate": "dotenv -e .env.local -- drizzle-kit generate",
     "db:migrate": "dotenv -e .env.local -- drizzle-kit migrate",
     "db:push": "dotenv -e .env.local -- drizzle-kit push",
-    "db:studio": "dotenv -e .env.local -- drizzle-kit studio"
+    "db:studio": "dotenv -e .env.local -- drizzle-kit studio",
+    "db:backup:prod": "BACKUP_ENV=prod dotenv -e .env.production -- tsx scripts/backup-db.ts",
+    "db:backup:dev": "BACKUP_ENV=dev dotenv -e .env.local -- tsx scripts/backup-db.ts",
+    "db:restore:dev": "dotenv -e .env.local -- tsx scripts/restore-db.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.26",
