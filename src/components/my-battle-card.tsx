@@ -65,10 +65,12 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
               ? "bg-green-600/30 text-green-300"
               : battle.status === "ongoing"
               ? "bg-yellow-600/30 text-yellow-300"
+              : battle.status === "incomplete"
+              ? "bg-orange-600/30 text-orange-300"
               : "bg-gray-600/30 text-gray-400"
           }`}
         >
-          {battle.status}
+          {battle.status === "incomplete" ? "paused" : battle.status}
         </span>
         <span className="text-gray-500">
           Created {new Date(battle.createdAt).toLocaleDateString()}
@@ -88,7 +90,7 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
           href={`/battle/${battle.id}`}
           className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
         >
-          View Battle
+          {battle.status === "incomplete" ? "Resume Battle" : "View Battle"}
         </Link>
 
         <button

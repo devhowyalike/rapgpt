@@ -65,8 +65,8 @@ export function BattleReplay({ battle }: BattleReplayProps) {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
-                <div className="text-lg font-bold text-red-400 font-(family-name:--font-bebas-neue)">
-                  ⚠️ MATCH CANCELLED ⚠️
+                <div className="text-lg font-bold text-orange-400 font-(family-name:--font-bebas-neue)">
+                  ⏸️ MATCH PAUSED ⏸️
                 </div>
               </motion.div>
             ) : battle.winner ? (
@@ -118,8 +118,8 @@ export function BattleReplay({ battle }: BattleReplayProps) {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                 >
-                  <div className="text-xl lg:text-2xl font-bold text-red-400 font-(family-name:--font-bebas-neue) whitespace-nowrap">
-                    ⚠️ MATCH CANCELLED - INCOMPLETE ⚠️
+                  <div className="text-xl lg:text-2xl font-bold text-orange-400 font-(family-name:--font-bebas-neue) whitespace-nowrap">
+                    ⏸️ MATCH PAUSED ⏸️
                   </div>
                 </motion.div>
               ) : battle.winner ? (

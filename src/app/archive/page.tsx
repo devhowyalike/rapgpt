@@ -93,13 +93,13 @@ export default async function ArchivePage() {
                         }
                         ${
                           battle.status === "incomplete"
-                            ? "bg-red-900 text-red-300"
+                            ? "bg-orange-900 text-orange-300"
                             : ""
                         }
                       `}
                       >
                         {battle.status === "incomplete"
-                          ? "INCOMPLETE"
+                          ? "PAUSED"
                           : battle.status.toUpperCase()}
                       </div>
                     </div>
@@ -155,15 +155,15 @@ export default async function ArchivePage() {
                       </div>
                     </div>
 
-                    {/* Winner or Incomplete Notice */}
+                    {/* Winner or Paused Notice */}
                     {battle.status === "incomplete" ? (
                       <div className="border-t border-gray-800 pt-4 mt-4">
                         <div className="flex items-center gap-2">
-                          <span className="text-2xl">⚠️</span>
+                          <span className="text-2xl">⏸️</span>
                           <div>
                             <div className="text-xs text-gray-400">STATUS</div>
-                            <div className="font-bold text-lg text-red-400">
-                              Match was cancelled
+                            <div className="font-bold text-lg text-orange-400">
+                              Match paused
                             </div>
                           </div>
                         </div>
