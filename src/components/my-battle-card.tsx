@@ -111,7 +111,11 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
           href={`/battle/${battle.id}`}
           className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
         >
-          {battle.status === "incomplete" ? "Resume Beef" : "View Battle"}
+          {battle.status === "incomplete"
+            ? "Resume Beef"
+            : battle.status === "completed"
+            ? "Replay Battle"
+            : "View Battle"}
         </Link>
 
         <button
