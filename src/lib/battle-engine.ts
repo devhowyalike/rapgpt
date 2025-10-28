@@ -15,16 +15,11 @@ export function parseVerseToBars(verseText: string): Bar[] {
     .map(line => line.trim())
     .filter(line => line.length > 0);
 
-  // Take up to 8 bars
+  // Take only up to BARS_PER_VERSE bars (don't pad with empty bars)
   const bars: Bar[] = lines.slice(0, BARS_PER_VERSE).map((text, index) => ({
     text,
     index,
   }));
-
-  // Pad with empty bars if needed
-  while (bars.length < BARS_PER_VERSE) {
-    bars.push({ text: '', index: bars.length });
-  }
 
   return bars;
 }
@@ -149,7 +144,12 @@ export function addVerseToBattle(
   const bars = parseVerseToBars(verseText);
   
   if (!validateVerse(bars)) {
-    throw new Error('Invalid verse: must have exactly 8 non-empty bars');
+    const barCount = bars.length;
+    const emptyBars = bars.filter(bar => bar.text.trim().length === 0).length;
+    throw new Error(
+      `Invalid verse: must have exactly ${BARS_PER_VERSE} non-empty bars. ` +
+      `Received ${barCount} bars with ${emptyBars} empty.`
+    );
   }
 
   const verse: Verse = {

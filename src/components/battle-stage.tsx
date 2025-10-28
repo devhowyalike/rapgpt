@@ -19,18 +19,29 @@ interface BattleStageProps {
   battle: Battle;
   streamingPersonaId?: string | null;
   streamingText?: string | null;
+  isReadingPhase?: boolean;
+  isVotingPhase?: boolean;
+  votingCompletedRound?: number | null;
 }
 
 export function BattleStage({
   battle,
   streamingPersonaId,
   streamingText,
+  isReadingPhase = false,
+  isVotingPhase = false,
+  votingCompletedRound = null,
 }: BattleStageProps) {
   const progress = getBattleProgress(battle);
   const currentRoundVerses = getRoundVerses(battle, battle.currentRound);
   const currentRoundScore = battle.scores.find(
     (s) => s.round === battle.currentRound
   );
+
+  // Only show scores after voting is complete for the current round
+  // Scores should be hidden during reading and voting phases
+  const shouldShowScores =
+    currentRoundScore && !isReadingPhase && !isVotingPhase;
 
   return (
     <div className="flex flex-col min-h-0 md:h-full bg-linear-to-b from-stage-darker to-stage-dark">
@@ -149,20 +160,30 @@ export function BattleStage({
         </div>
       </div>
 
-      {/* Score Display (when round is complete) */}
-      {currentRoundScore && (
-        <div className="p-4 md:p-6 pb-24 md:pb-6 border-t border-gray-800 bg-gray-900/30">
+      {/* Score Display (when round is complete and voting is done) */}
+      {shouldShowScores && currentRoundScore && (
+        <motion.div
+          className="p-4 md:p-6 pb-24 md:pb-6 border-t border-gray-800 bg-gray-900/30"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
           <div className="max-w-4xl mx-auto">
-            <h3 className="text-xl md:text-2xl font-[family-name:var(--font-bebas-neue)] text-center mb-4 text-yellow-400">
+            <motion.h3
+              className="text-xl md:text-2xl font-(family-name:--font-bebas-neue) text-center mb-4 text-yellow-400"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            >
               ROUND {currentRoundScore.round} SCORES
-            </h3>
+            </motion.h3>
             <ScoreDisplay
               roundScore={currentRoundScore}
               leftPersona={battle.personas.left}
               rightPersona={battle.personas.right}
             />
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );

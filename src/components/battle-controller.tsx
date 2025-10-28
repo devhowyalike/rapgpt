@@ -493,30 +493,121 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
             battle={battle}
             streamingPersonaId={streamingPersonaId}
             streamingText={streamingVerse}
+            isReadingPhase={isReadingPhase}
+            isVotingPhase={isVotingPhase}
+            votingCompletedRound={votingCompletedRound}
           />
 
-          {/* Control Bar */}
-          {canGenerate && (
+          {/* Control Bar - Always visible during ongoing battles */}
+          {battle.status === "ongoing" && (
             <div className="p-4 pb-24 md:pb-4 bg-gray-900 border-t border-gray-800">
               <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-3">
+                {/* Primary Action Button - Changes based on state */}
                 <button
-                  onClick={handleGenerateVerse}
-                  disabled={isGenerating}
-                  className="flex-1 px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
+                  onClick={
+                    canAdvance
+                      ? handleAdvanceRound
+                      : canGenerate
+                      ? handleGenerateVerse
+                      : undefined
+                  }
+                  disabled={
+                    isGenerating ||
+                    isReadingPhase ||
+                    isVotingPhase ||
+                    (!canGenerate && !canAdvance)
+                  }
+                  className={`
+                    flex-1 px-6 py-3 rounded-lg text-white font-bold transition-all
+                    ${
+                      isReadingPhase
+                        ? "bg-linear-to-r from-cyan-600 to-blue-600"
+                        : isVotingPhase
+                        ? "bg-linear-to-r from-purple-600 to-pink-600 animate-pulse"
+                        : canAdvance
+                        ? "bg-linear-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 animate-pulse"
+                        : "bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    }
+                    ${
+                      isGenerating ||
+                      isReadingPhase ||
+                      isVotingPhase ||
+                      (!canGenerate && !canAdvance)
+                        ? "cursor-not-allowed"
+                        : ""
+                    }
+                  `}
                 >
                   {isGenerating ? (
-                    <>
+                    <div className="flex items-center justify-center gap-2">
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Generating...
-                    </>
+                    </div>
+                  ) : isReadingPhase && readingTimeRemaining !== null ? (
+                    <div className="flex items-center justify-between gap-4 w-full">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">📖</span>
+                        <span className="text-lg font-medium">
+                          Reading Time
+                        </span>
+                        <span className="text-2xl font-bebas-neue">
+                          {readingTimeRemaining}s
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 flex-1 max-w-md">
+                        <span className="text-sm text-white/80 whitespace-nowrap">
+                          Voting starts in {readingTimeRemaining} seconds
+                        </span>
+                        <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden min-w-[100px]">
+                          <div
+                            className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
+                            style={{
+                              width: `${(readingTimeRemaining / 20) * 100}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ) : isVotingPhase && votingTimeRemaining !== null ? (
+                    <div className="flex items-center justify-between gap-4 w-full">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">⏱️</span>
+                        <span className="text-lg font-medium">Vote Now!</span>
+                        <span className="text-2xl font-bebas-neue">
+                          {votingTimeRemaining}s
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 flex-1 max-w-md">
+                        <span className="text-sm text-white/80 whitespace-nowrap">
+                          Cast your vote in the sidebar →
+                        </span>
+                        <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden min-w-[100px]">
+                          <div
+                            className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
+                            style={{
+                              width: `${(votingTimeRemaining / 10) * 100}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ) : canAdvance ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <ArrowRight className="w-5 h-5" />
+                      {battle.currentRound === 3
+                        ? "Reveal Winner"
+                        : "Continue to Next Round"}
+                    </div>
                   ) : (
-                    <>
+                    <div className="flex items-center justify-center gap-2">
                       <Play className="w-5 h-5" />
                       {battle.verses.length === 0 ? "First up:" : "Next:"}{" "}
-                      {battle.personas[nextPerformer].name}
-                    </>
+                      {nextPerformer && battle.personas[nextPerformer].name}
+                    </div>
                   )}
                 </button>
+
+                {/* Pause Battle Button */}
                 <button
                   onClick={handleCancelBattle}
                   disabled={isCanceling || isGenerating}
@@ -525,94 +616,6 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                   <Pause className="w-5 h-5" />
                   Pause Battle
                 </button>
-              </div>
-            </div>
-          )}
-
-          {/* Reading Phase Timer Display */}
-          {isReadingPhase && readingTimeRemaining !== null && (
-            <div className="p-4 pb-24 md:pb-4 bg-gray-900 border-t border-gray-800">
-              <div className="max-w-4xl mx-auto">
-                <div className="bg-linear-to-r from-cyan-600 to-blue-600 rounded-lg p-6 text-center">
-                  <div className="text-white text-lg font-medium mb-2">
-                    📖 Reading Time
-                  </div>
-                  <div className="text-5xl font-bold text-white mb-2 font-bebas-neue">
-                    {readingTimeRemaining}
-                  </div>
-                  <div className="text-white/80 text-sm">
-                    Voting will begin in {readingTimeRemaining} seconds
-                  </div>
-                  <div className="mt-4 h-2 bg-white/20 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
-                      style={{ width: `${(readingTimeRemaining / 20) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Voting Timer Display */}
-          {isVotingPhase && votingTimeRemaining !== null && (
-            <div className="p-4 pb-24 md:pb-4 bg-gray-900 border-t border-gray-800">
-              <div className="max-w-4xl mx-auto">
-                <div className="bg-linear-to-r from-purple-600 to-blue-600 rounded-lg p-6 text-center">
-                  <div className="text-white text-lg font-medium mb-2">
-                    ⏱️ Vote Now!
-                  </div>
-                  <div className="text-5xl font-bold text-white mb-2 font-bebas-neue">
-                    {votingTimeRemaining}
-                  </div>
-                  <div className="text-white/80 text-sm">
-                    seconds remaining to cast your vote
-                  </div>
-                  <div className="mt-4 h-2 bg-white/20 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
-                      style={{ width: `${(votingTimeRemaining / 10) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Advance Round Button */}
-          {canAdvance && (
-            <div className="p-4 pb-24 md:pb-4 bg-gray-900 border-t border-gray-800">
-              <div className="max-w-4xl mx-auto space-y-3">
-                {/* Voting Ended Message */}
-                <div className="bg-gray-800 rounded-lg p-4 text-center border-2 border-green-500/30">
-                  <div className="text-green-400 font-medium text-lg mb-1">
-                    ✓ Voting has ended
-                  </div>
-                  <div className="text-gray-400 text-sm">
-                    Round {battle.currentRound} is complete
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <button
-                    onClick={handleAdvanceRound}
-                    className="flex-1 px-6 py-3 bg-linear-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all animate-pulse"
-                  >
-                    <ArrowRight className="w-5 h-5" />
-                    {battle.currentRound === 3
-                      ? "Reveal Winner"
-                      : "Continue to Next Round"}
-                  </button>
-                  <button
-                    onClick={handleCancelBattle}
-                    disabled={isCanceling}
-                    className="px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
-                  >
-                    <Pause className="w-5 h-5" />
-                    Pause Battle
-                  </button>
-                </div>
               </div>
             </div>
           )}

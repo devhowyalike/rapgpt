@@ -7,6 +7,7 @@
 import { useState } from "react";
 import type { RoundScore, Persona } from "@/lib/shared";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface ScoreDisplayProps {
   roundScore: RoundScore;
@@ -47,9 +48,12 @@ export function ScoreDisplay({
       {isExpanded ? (
         <div className="grid grid-cols-2 gap-2 md:gap-4">
           {/* Left Score - Expanded */}
-          <div
+          <motion.div
             className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2"
             style={{ borderColor: leftPersona.accentColor + "40" }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
           >
             <div className="text-center">
               <div
@@ -91,12 +95,15 @@ export function ScoreDisplay({
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Score - Expanded */}
-          <div
+          <motion.div
             className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2"
             style={{ borderColor: rightPersona.accentColor + "40" }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
           >
             <div className="text-center">
               <div
@@ -138,14 +145,17 @@ export function ScoreDisplay({
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-2 md:gap-3">
           {/* Left Score - Collapsed */}
-          <div
+          <motion.div
             className="bg-gray-900/50 rounded-lg p-2 md:p-3 border-2 flex flex-col items-center justify-center"
             style={{ borderColor: leftPersona.accentColor + "40" }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
           >
             <div
               className="text-xs font-medium mb-1 opacity-80"
@@ -159,12 +169,15 @@ export function ScoreDisplay({
             >
               {leftScore.totalScore.toFixed(1)}
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Score - Collapsed */}
-          <div
+          <motion.div
             className="bg-gray-900/50 rounded-lg p-2 md:p-3 border-2 flex flex-col items-center justify-center"
             style={{ borderColor: rightPersona.accentColor + "40" }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
           >
             <div
               className="text-xs font-medium mb-1 opacity-80"
@@ -178,7 +191,7 @@ export function ScoreDisplay({
             >
               {rightScore.totalScore.toFixed(1)}
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
     </div>
