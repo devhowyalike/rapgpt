@@ -367,10 +367,10 @@ export function BattleSidebar({
                           w-full p-3 rounded-lg border-2 transition-all
                           ${
                             userVotes.has(`${roundScore.round}-${persona.id}`)
-                              ? "bg-gray-700 border-yellow-400 cursor-not-allowed"
+                              ? "bg-linear-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400 shadow-lg shadow-yellow-400/20 cursor-not-allowed"
                               : !canVoteOnRound(roundScore.round)
                               ? "bg-gray-700 border-gray-600 cursor-not-allowed"
-                              : `hover:bg-gray-700 border-gray-600 ${hoverBorderColor}`
+                              : `hover:scale-[1.02] hover:shadow-lg border-gray-600 ${hoverBorderColor}`
                           }
                         `}
                           >

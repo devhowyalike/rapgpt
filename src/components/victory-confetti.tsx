@@ -22,7 +22,7 @@ export function VictoryConfetti({ trigger }: VictoryConfettiProps) {
   if (!showConfetti) return null;
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+    <div className="absolute inset-0 pointer-events-none overflow-visible z-50">
       {/* Generate more confetti particles for a grander effect */}
       {Array.from({ length: 80 }).map((_, i) => {
         // Randomize starting position across the width

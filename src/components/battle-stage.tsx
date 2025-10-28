@@ -43,6 +43,11 @@ export function BattleStage({
   const shouldShowScores =
     currentRoundScore && !isReadingPhase && !isVotingPhase;
 
+  // Only show round winner badge after voting has been completed for the current round
+  const shouldShowRoundWinner =
+    votingCompletedRound !== null &&
+    votingCompletedRound >= battle.currentRound;
+
   return (
     <div className="flex flex-col min-h-0 md:h-full bg-linear-to-b from-stage-darker to-stage-dark">
       {/* Header with Round Tracker */}
@@ -80,7 +85,7 @@ export function BattleStage({
               transition={{ delay: 0.5 }}
             >
               <VictoryConfetti trigger={true} />
-              <div className="text-xl md:text-2xl lg:text-3xl font-bold text-yellow-400 font-[family-name:var(--font-bebas-neue)] relative z-10">
+              <div className="text-xl md:text-2xl lg:text-3xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue) relative z-10">
                 🏆 WINNER:{" "}
                 {battle.personas.left.id === battle.winner
                   ? battle.personas.left.name
@@ -115,6 +120,7 @@ export function BattleStage({
                   streamingPersonaId === battle.personas.left.id
                 }
                 isRoundWinner={
+                  shouldShowRoundWinner &&
                   currentRoundScore?.winner === battle.personas.left.id
                 }
               />
@@ -142,6 +148,7 @@ export function BattleStage({
                   streamingPersonaId === battle.personas.right.id
                 }
                 isRoundWinner={
+                  shouldShowRoundWinner &&
                   currentRoundScore?.winner === battle.personas.right.id
                 }
               />

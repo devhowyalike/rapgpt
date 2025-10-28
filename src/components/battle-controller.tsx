@@ -550,7 +550,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">📖</span>
                         <span className="text-lg font-medium">
-                          Reading Time
+                          Reviewing lyrics...
                         </span>
                         <span className="text-2xl font-bebas-neue">
                           {readingTimeRemaining}s
