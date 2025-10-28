@@ -114,6 +114,7 @@ export async function POST(req: Request) {
           .set({
             encryptedEmail,
             encryptedName,
+            encryptedDisplayName: encryptedName, // Sync display name with updated name
             imageUrl: image_url || null,
             updatedAt: new Date(),
           })

@@ -64,33 +64,134 @@ Copy the output and add it to your `.env.local` as `ENCRYPTION_KEY`.
 
 ## Step 5: Set Up Clerk Webhook
 
-The webhook syncs Clerk user data to your database and assigns roles.
+The webhook is **critical** for syncing Clerk user data to your database. It handles:
 
-### 5.1 Get Your Webhook URL
+- User creation and role assignment
+- **Profile updates (name, email, image)** - without this, name changes won't reflect in comments
+- User deletion and cleanup
 
-Your webhook endpoint is:
+### 5.1 Set Up ngrok (Local Development)
 
-- **Local Development:** Use [ngrok](https://ngrok.com) or similar to expose localhost
+For local development, you need to expose your localhost to the internet so Clerk can send webhooks.
 
-  ```bash
-  ngrok http 3000
-  # Your webhook URL will be: https://your-ngrok-url.ngrok.io/api/webhooks/clerk
-  ```
+#### Install ngrok
 
-- **Production:** `https://your-domain.com/api/webhooks/clerk`
+If you don't have ngrok installed:
+
+```bash
+# Using Homebrew (macOS)
+brew install ngrok
+
+# Or download from https://ngrok.com/download
+```
+
+#### Configure ngrok
+
+1. Sign up for a free ngrok account at https://dashboard.ngrok.com
+2. Get your authtoken from the dashboard
+3. Configure ngrok:
+
+```bash
+ngrok config add-authtoken YOUR_AUTHTOKEN
+```
+
+#### Fix ngrok Config (if needed)
+
+If you see an error about "unknown version '3'", fix your config file:
+
+```bash
+# Edit the config file
+nano ~/Library/Application\ Support/ngrok/ngrok.yml
+
+# Change version: "3" to version: "2"
+# The file should look like:
+# authtoken: YOUR_TOKEN
+# version: "2"
+```
+
+#### Start ngrok
+
+```bash
+# Start your Next.js dev server first
+pnpm dev
+
+# In a separate terminal, start ngrok
+ngrok http 3000 --domain=YOUR_DOMAIN.ngrok.app  # if you have a custom domain
+# OR
+ngrok http 3000  # for a random domain
+```
+
+You'll see output like:
+
+```
+Forwarding  https://abc123.ngrok.app -> http://localhost:3000
+```
+
+Your webhook URL will be: `https://YOUR_DOMAIN.ngrok.app/api/webhooks/clerk`
+
+**Note:** Keep both the dev server and ngrok running while developing!
 
 ### 5.2 Configure Webhook in Clerk Dashboard
 
-1. Go to **Webhooks** in your Clerk Dashboard
-2. Click "Add Endpoint"
-3. Enter your webhook URL: `https://your-domain.com/api/webhooks/clerk`
-4. Select the following events:
-   - `user.created`
-   - `user.updated`
-   - `user.deleted`
-5. Click "Create"
-6. Copy the **Signing Secret** (starts with `whsec_`)
-7. Add it to your `.env.local` as `CLERK_WEBHOOK_SECRET`
+1. Go to [Clerk Dashboard](https://dashboard.clerk.com)
+2. Select your application
+3. Navigate to **Webhooks** in the left sidebar
+4. Click **"Add Endpoint"** (or "+ Add" button)
+5. **Enter your webhook URL:**
+   - Local: `https://YOUR_DOMAIN.ngrok.app/api/webhooks/clerk`
+   - Production: `https://your-domain.com/api/webhooks/clerk`
+6. **Subscribe to events** - Check these three:
+   - ✅ `user.created` - Creates user in database
+   - ✅ `user.updated` - **Syncs profile changes (name, email, image)**
+   - ✅ `user.deleted` - Removes user and their data
+7. Click **"Create"**
+8. Copy the **Signing Secret** (starts with `whsec_`)
+9. Add it to your `.env.local`:
+
+```bash
+CLERK_WEBHOOK_SECRET=whsec_your_secret_here
+```
+
+10. **Restart your dev server** to load the new environment variable
+
+### 5.3 Test the Webhook
+
+1. With ngrok and your dev server running, update your profile in Clerk:
+
+   - Go to your app and click "Manage account"
+   - Change your name
+   - Click "Save"
+
+2. Check your terminal logs for:
+
+   ```
+   ✅ User updated: user_xxxxx
+   POST /api/webhooks/clerk 200
+   ```
+
+3. If you see the above, the webhook is working! Profile changes will now sync automatically.
+
+### 5.4 Webhook Troubleshooting
+
+**Problem: Profile changes don't sync to comments**
+
+- **Cause:** Webhook not configured or `CLERK_WEBHOOK_SECRET` missing
+- **Solution:** Follow steps 5.1-5.2 above
+
+**Problem: Webhook returns 400 error**
+
+- **Cause:** Wrong signing secret or webhook secret not loaded
+- **Solution:** Verify `CLERK_WEBHOOK_SECRET` in `.env.local` and restart dev server
+
+**Problem: ngrok tunnel closed**
+
+- **Cause:** Free ngrok tunnels expire after 2 hours
+- **Solution:** Restart ngrok (free plan) or upgrade to keep persistent URLs
+
+**Check Webhook Logs:**
+
+- Go to Clerk Dashboard > Webhooks > Your Endpoint
+- Click on individual webhook events to see request/response details
 
 ## Step 6: Run Database Migrations
 
@@ -226,6 +327,19 @@ The admin dashboard has a user management interface prepared. You can extend it 
 
 **Solution:** Check that your webhook is properly configured and receiving events. The webhook creates the user in your database. Check Clerk Dashboard > Webhooks > Logs.
 
+### Username doesn't update in comments after changing profile
+
+**Cause:** Webhook not configured or `user.updated` event not subscribed.
+
+**Solution:**
+
+1. Verify webhook is configured in Clerk Dashboard
+2. Ensure `user.updated` event is checked
+3. Verify `CLERK_WEBHOOK_SECRET` is in `.env.local`
+4. Restart your dev server
+5. Test by changing your name in "Manage account"
+6. Check terminal logs for: `✅ User updated: user_xxxxx`
+
 ### First user not getting admin role
 
 **Solution:** Ensure the webhook fired for `user.created`. Check your webhook logs. You can manually set the role in the database if needed.
@@ -256,11 +370,18 @@ The admin dashboard has a user management interface prepared. You can extend it 
    - Go to Project Settings > Environment Variables
    - Add all variables from `.env.local`
    - Include `ENCRYPTION_KEY` and `CLERK_WEBHOOK_SECRET`
+   - **Important:** Use the same `CLERK_WEBHOOK_SECRET` from development
 
-2. **Update Webhook URL:**
+2. **Update Webhook URL in Clerk Dashboard:**
 
-   - In Clerk Dashboard, update webhook endpoint to production URL
-   - `https://your-domain.vercel.app/api/webhooks/clerk`
+   - Go to [Clerk Dashboard](https://dashboard.clerk.com) > Webhooks
+   - Either **edit your existing webhook** or **create a new one** for production
+   - Update the endpoint URL to: `https://your-domain.vercel.app/api/webhooks/clerk`
+   - Ensure these events are selected:
+     - ✅ `user.created`
+     - ✅ `user.updated`
+     - ✅ `user.deleted`
+   - Keep the same signing secret (or add the new one to production env vars)
 
 3. **Run Migrations:**
 
@@ -269,13 +390,42 @@ The admin dashboard has a user management interface prepared. You can extend it 
    ```
 
 4. **Deploy:**
+
    ```bash
    vercel --prod
    ```
 
+5. **Test Production Webhook:**
+   - Sign in to your production app
+   - Go to "Manage account" and change your name
+   - Check Clerk Dashboard > Webhooks > Logs to verify the webhook fired
+   - Post a comment to verify your updated name appears
+
 ### First Production User
 
 Sign up on production as soon as deployed to claim the admin role!
+
+### Development vs Production Webhooks
+
+You can have separate webhook endpoints for development and production:
+
+- **Development:** `https://YOUR_DOMAIN.ngrok.app/api/webhooks/clerk`
+- **Production:** `https://your-domain.vercel.app/api/webhooks/clerk`
+
+Both can use the same `CLERK_WEBHOOK_SECRET` or you can create separate secrets for each environment.
+
+### Manual User Profile Sync (Emergency)
+
+If you need to manually sync a user's profile from Clerk (e.g., webhook missed an update):
+
+```bash
+tsx scripts/sync-user-profile.ts <clerk-user-id>
+```
+
+This script fetches the latest user data from Clerk and updates your database. Find the Clerk user ID in:
+
+- Clerk Dashboard > Users > Select user > Copy User ID
+- Or in your database `users.clerk_id` column
 
 ## Additional Resources
 

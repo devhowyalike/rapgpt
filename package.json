@@ -40,10 +40,12 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
+    "@clerk/backend": "^2.19.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19",
+    "dotenv": "^17.2.3",
     "dotenv-cli": "^10.0.0",
     "drizzle-kit": "^0.31.5",
     "postcss": "^8.5.6",
