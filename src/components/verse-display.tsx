@@ -4,6 +4,7 @@
 
 "use client";
 
+import { useRef, useEffect } from "react";
 import type { Verse, Persona } from "@/lib/shared";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -26,6 +27,14 @@ export function VerseDisplay({
   const streamingBars =
     streamingText?.split("\n").filter((line) => line.trim()) || [];
 
+  // Track if we just finished streaming to prevent re-animation
+  const previousStreamingRef = useRef(false);
+  const justFinishedStreaming = previousStreamingRef.current && !isStreaming;
+
+  useEffect(() => {
+    previousStreamingRef.current = isStreaming || false;
+  }, [isStreaming]);
+
   return (
     <div className="flex-1 p-6 md:p-8">
       <AnimatePresence mode="wait">
@@ -41,9 +50,16 @@ export function VerseDisplay({
             {bars.map((bar, index) => (
               <motion.div
                 key={`${verse.id}-${index}`}
-                initial={{ opacity: 0, y: 10 }}
+                initial={
+                  justFinishedStreaming
+                    ? { opacity: 1, y: 0 }
+                    : { opacity: 0, y: 10 }
+                }
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
+                transition={{
+                  duration: 0.3,
+                  delay: justFinishedStreaming ? 0 : index * 0.05,
+                }}
                 className="verse-line flex"
               >
                 <span

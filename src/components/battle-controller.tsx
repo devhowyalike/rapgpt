@@ -442,7 +442,8 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                   ) : (
                     <>
                       <Play className="w-5 h-5" />
-                      Next: {battle.personas[nextPerformer].name}
+                      {battle.verses.length === 0 ? "First up:" : "Next:"}{" "}
+                      {battle.personas[nextPerformer].name}
                     </>
                   )}
                 </button>

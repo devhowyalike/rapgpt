@@ -114,7 +114,7 @@ export function CharacterSelect() {
             <div className="text-blue-400 font-bold text-xl mb-4 text-center">
               PLAYER 1
             </div>
-            <div className="text-center min-h-[172px] flex flex-col items-center justify-center py-4">
+            <div className="text-center h-[220px] flex flex-col items-center justify-center py-4">
               {player1 ? (
                 <>
                   <div className="w-24 h-24 shrink-0 mb-4 rounded-full border-4 border-blue-500 overflow-hidden bg-gray-800 flex items-center justify-center text-4xl text-white">
@@ -130,8 +130,15 @@ export function CharacterSelect() {
                 </>
               ) : (
                 <>
-                  <div className="text-6xl mb-2 text-gray-600">?</div>
-                  <div className="text-gray-600">Waiting for selection...</div>
+                  <div className="w-24 h-24 shrink-0 mb-4 rounded-full border-4 border-gray-700 overflow-hidden bg-gray-800 flex items-center justify-center text-6xl text-gray-600">
+                    ?
+                  </div>
+                  <div className="text-gray-600 font-bold text-2xl mb-2">
+                    No Selection
+                  </div>
+                  <div className="text-gray-600 text-sm animate-pulse">
+                    Waiting for selection...
+                  </div>
                 </>
               )}
             </div>
@@ -142,7 +149,7 @@ export function CharacterSelect() {
             <div className="text-red-400 font-bold text-xl mb-4 text-center">
               PLAYER 2
             </div>
-            <div className="text-center min-h-[172px] flex flex-col items-center justify-center py-4">
+            <div className="text-center h-[220px] flex flex-col items-center justify-center py-4">
               {player2 ? (
                 <>
                   <div className="w-24 h-24 shrink-0 mb-4 rounded-full border-4 border-red-500 overflow-hidden bg-gray-800 flex items-center justify-center text-4xl text-white">
@@ -158,8 +165,15 @@ export function CharacterSelect() {
                 </>
               ) : (
                 <>
-                  <div className="text-6xl mb-2 text-gray-600">?</div>
-                  <div className="text-gray-600">Waiting for selection...</div>
+                  <div className="w-24 h-24 shrink-0 mb-4 rounded-full border-4 border-gray-700 overflow-hidden bg-gray-800 flex items-center justify-center text-6xl text-gray-600">
+                    ?
+                  </div>
+                  <div className="text-gray-600 font-bold text-2xl mb-2">
+                    No Selection
+                  </div>
+                  <div className="text-gray-600 text-sm animate-pulse">
+                    Waiting for selection...
+                  </div>
                 </>
               )}
             </div>
