@@ -22,6 +22,7 @@ import {
   X,
   MessageSquare,
   ThumbsUp,
+  Pause,
 } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
@@ -58,16 +59,20 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   const [mobileActiveTab, setMobileActiveTab] = useState<"comments" | "voting">(
     "comments"
   );
+  const [isLeaving, setIsLeaving] = useState(false);
 
   // Navigation guard - prevent leaving page during ongoing battle
   const { NavigationDialog } = useNavigationGuard({
     when: battle?.status === "ongoing",
-    title: "Cancel Match?",
+    title: "Pause Battle?",
     message:
-      "Are you sure you want to leave? The match will be marked as incomplete in the archive and cannot be resumed later.",
+      "Are you sure you want to leave? The match will be paused and marked as incomplete in the archive.",
     onConfirm: async () => {
       if (battle) {
+        setIsLeaving(true);
         await cancelBattle();
+        // Redirect immediately to prevent flash of battle page
+        window.location.href = "/my-battles";
       }
     },
   });
@@ -129,7 +134,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     battle,
   ]);
 
-  if (!battle) {
+  if (!battle || isLeaving) {
     return <BattleLoading />;
   }
 
@@ -208,13 +213,12 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     }
   };
 
-  const handleComment = async (username: string, content: string) => {
+  const handleComment = async (content: string) => {
     try {
       const response = await fetch(`/api/battle/${battle.id}/comment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username,
           content,
           round: battle.currentRound,
         }),
@@ -249,15 +253,17 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
   const confirmCancelBattle = async () => {
     setIsCanceling(true);
+    setIsLeaving(true);
     setCancelError(null);
     try {
       await cancelBattle();
-      // Redirect to archive after canceling
-      window.location.href = "/archive";
+      // Redirect to my battles page after canceling
+      window.location.href = "/my-battles";
     } catch (error) {
       console.error("Error canceling battle:", error);
       setCancelError("Failed to cancel battle. Please try again.");
       setIsCanceling(false);
+      setIsLeaving(false);
     }
   };
 
@@ -322,7 +328,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                     ) : (
                       <>
                         <RotateCcw className="w-5 h-5" />
-                        Resume Match
+                        Resume Battle
                       </>
                     )}
                   </button>
@@ -443,10 +449,10 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                 <button
                   onClick={handleCancelBattle}
                   disabled={isCanceling || isGenerating}
-                  className="px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
+                  className="px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
                 >
-                  <XCircle className="w-5 h-5" />
-                  Cancel Match
+                  <Pause className="w-5 h-5" />
+                  Pause Battle
                 </button>
               </div>
             </div>
@@ -505,10 +511,10 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                   <button
                     onClick={handleCancelBattle}
                     disabled={isCanceling}
-                    className="px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
+                    className="px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
                   >
-                    <XCircle className="w-5 h-5" />
-                    Cancel Match
+                    <Pause className="w-5 h-5" />
+                    Pause Battle
                   </button>
                 </div>
               </div>
@@ -589,22 +595,22 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
         </Dialog.Portal>
       </Dialog.Root>
 
-      {/* Cancel Match Dialog */}
+      {/* Pause Battle Dialog */}
       <Dialog.Root open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in" />
           <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-gray-900 border border-gray-800 rounded-lg shadow-2xl p-6 animate-in fade-in zoom-in-95">
             <div className="flex items-start gap-4">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-red-500" />
+              <div className="shrink-0 w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-orange-500" />
               </div>
               <div className="flex-1">
                 <Dialog.Title className="text-xl font-bold text-white mb-2">
-                  Cancel Match?
+                  Pause Battle?
                 </Dialog.Title>
                 <Dialog.Description className="text-gray-400 mb-4">
-                  Are you sure you want to cancel this match? It will be marked
-                  as incomplete in the archive and cannot be resumed later.
+                  Are you sure you want to chill this e-beef? It will be marked
+                  as paused in the archive and can be resumed later.
                 </Dialog.Description>
 
                 {cancelError && (
@@ -620,22 +626,22 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                       disabled={isCanceling}
                       className="px-4 py-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-medium transition-colors"
                     >
-                      Keep Match
+                      Keep Playing
                     </button>
                   </Dialog.Close>
                   <button
                     type="button"
                     onClick={confirmCancelBattle}
                     disabled={isCanceling}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-800 disabled:cursor-not-allowed rounded-lg text-white font-medium flex items-center gap-2 transition-colors"
+                    className="px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-800 disabled:cursor-not-allowed rounded-lg text-white font-medium flex items-center gap-2 transition-colors"
                   >
                     {isCanceling ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Canceling...
+                        Pausing...
                       </>
                     ) : (
-                      "Cancel Match"
+                      "Pause Battle"
                     )}
                   </button>
                 </div>

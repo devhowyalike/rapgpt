@@ -10,10 +10,12 @@ import Image from "next/image";
 
 interface PersonaCardProps {
   persona: Persona;
-  position: "left" | "right";
+  position?: "left" | "right";
   isActive?: boolean;
   isRoundWinner?: boolean;
   className?: string;
+  selected?: boolean;
+  label?: string;
 }
 
 export function PersonaCard({
@@ -22,11 +24,18 @@ export function PersonaCard({
   isActive,
   isRoundWinner,
   className = "",
+  selected,
+  label,
 }: PersonaCardProps) {
   return (
     <motion.div
-      className={`flex flex-row items-center gap-4 w-full ${className}`}
-      initial={{ opacity: 0, x: position === "left" ? -50 : 50 }}
+      className={`flex flex-row items-center gap-4 w-full ${
+        selected ? "ring-2 ring-purple-500" : ""
+      } ${className}`}
+      initial={{
+        opacity: 0,
+        x: position ? (position === "left" ? -50 : 50) : 0,
+      }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5 }}
     >
@@ -65,6 +74,12 @@ export function PersonaCard({
               ease: "easeInOut",
             }}
           />
+        )}
+
+        {label && (
+          <div className="absolute -top-2 -right-2 bg-purple-600 text-white text-xs font-bold rounded-full w-8 h-8 flex items-center justify-center">
+            {label}
+          </div>
         )}
       </motion.div>
 

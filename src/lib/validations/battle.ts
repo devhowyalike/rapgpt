@@ -105,13 +105,13 @@ export const createBattleResponseSchema = z.object({
 export const voteRequestSchema = z.object({
   personaId: z.string(),
   round: z.number().int().min(1).max(3),
-  userId: z.string(), // IP address or user ID
+  // userId removed - comes from authenticated session
 });
 
 export const commentRequestSchema = z.object({
-  username: z.string().min(1).max(50).trim(),
   content: z.string().min(1).max(500).trim(),
   round: z.number().int().min(1).max(3).optional(),
+  // username removed - comes from authenticated user
 });
 
 export const generateVerseRequestSchema = z.object({

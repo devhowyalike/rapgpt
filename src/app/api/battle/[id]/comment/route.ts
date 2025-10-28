@@ -1,17 +1,36 @@
 import { NextRequest } from 'next/server';
 import { revalidatePath } from 'next/cache';
+import { auth } from '@clerk/nextjs/server';
 import { getBattleById, saveBattle } from '@/lib/battle-storage';
-import type { Comment } from '@/lib/shared';
-import { MAX_COMMENTS } from '@/lib/shared';
 import { commentRequestSchema } from '@/lib/validations/battle';
 import { isBattleArchived } from '@/lib/battle-engine';
 import { createArchivedBattleResponse } from '@/lib/validations/utils';
+import { db } from '@/lib/db/client';
+import { comments } from '@/lib/db/schema';
+import { nanoid } from 'nanoid';
+import { decrypt } from '@/lib/auth/encryption';
+import { getOrCreateUser } from '@/lib/auth/sync-user';
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Require authentication
+    const { userId: clerkUserId } = await auth();
+    
+    if (!clerkUserId) {
+      return new Response(JSON.stringify({ 
+        error: 'Unauthorized: You must be signed in to comment' 
+      }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Get or create user from database (syncs from Clerk if needed)
+    const user = await getOrCreateUser(clerkUserId);
+
     const { id } = await params;
     const body = await request.json();
     
@@ -28,7 +47,7 @@ export async function POST(
       });
     }
     
-    const { username, content, round } = validation.data;
+    const { content, round } = validation.data;
 
     const battle = await getBattleById(id);
 
@@ -44,24 +63,37 @@ export async function POST(
       return createArchivedBattleResponse('comment');
     }
 
-    const comment: Comment = {
-      id: `${id}-comment-${Date.now()}-${Math.random()}`,
-      username, // Already trimmed and validated by Zod
-      content, // Already trimmed and validated by Zod
+    // Get display name for comment (use displayName or fallback to name)
+    const username = user.encryptedDisplayName 
+      ? decrypt(user.encryptedDisplayName)
+      : user.encryptedName 
+        ? decrypt(user.encryptedName)
+        : 'Anonymous';
+
+    // Insert comment into database
+    const commentId = nanoid();
+    await db.insert(comments).values({
+      id: commentId,
+      battleId: id,
+      userId: user.id,
+      content,
+      round: round || null,
+    });
+
+    // Update battle timestamp
+    battle.updatedAt = Date.now();
+    await saveBattle(battle);
+
+    // Return the comment with user info
+    const comment = {
+      id: commentId,
+      username,
+      content,
       timestamp: Date.now(),
       round,
+      userId: user.id,
+      imageUrl: user.imageUrl,
     };
-
-    battle.comments = [...battle.comments, comment];
-
-    // Limit total comments
-    if (battle.comments.length > MAX_COMMENTS) {
-      battle.comments = battle.comments.slice(-MAX_COMMENTS);
-    }
-
-    battle.updatedAt = Date.now();
-
-    await saveBattle(battle);
 
     // Revalidate the archive page and battle page to show fresh data
     revalidatePath('/archive');

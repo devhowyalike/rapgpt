@@ -134,6 +134,73 @@ With `--single-transaction`:
 - Verbose output (`-v`) shows restoration progress
 - After restore, verify data with `pnpm db:studio`
 
+## User Profile Sync
+
+### `sync-user-profile.ts`
+
+Manually syncs a user's profile from Clerk to the database. Useful when webhooks fail or for emergency profile updates.
+
+**Usage:**
+
+```bash
+# Sync a specific user by their Clerk user ID
+tsx scripts/sync-user-profile.ts user_xxxxxxxxxxxxx
+```
+
+**When to use:**
+
+- ✅ Webhook missed an update (network issues, downtime)
+- ✅ User profile is out of sync with Clerk
+- ✅ Emergency fix for incorrect user data
+- ✅ Testing profile sync without triggering webhooks
+
+**Features:**
+
+- Fetches latest user data from Clerk API
+- Updates encrypted email, name, and display name
+- Syncs profile image URL
+- Updates `updatedAt` timestamp
+
+**Requirements:**
+
+- `CLERK_SECRET_KEY` in `.env.local`
+- `POSTGRES_URL` in `.env.local`
+- `ENCRYPTION_KEY` in `.env.local`
+- Valid Clerk user ID
+
+**Finding the Clerk User ID:**
+
+1. **From Clerk Dashboard:**
+
+   - Go to Users > Select user
+   - Copy the User ID (starts with `user_`)
+
+2. **From Database:**
+   ```sql
+   SELECT clerk_id, encrypted_name FROM users;
+   ```
+
+**Example:**
+
+```bash
+tsx scripts/sync-user-profile.ts user_34WYWMOhEFXuIBoZ4YWkDIUBduW
+```
+
+**Output:**
+
+```
+🔄 Fetching user from Clerk: user_34WYWMOhEFXuIBoZ4YWkDIUBduW
+✅ Found Clerk user: John Doe
+🔄 Updating database record...
+✅ User profile synced successfully!
+   Name: John Doe
+   Email: john@example.com
+   Image: https://img.clerk.com/...
+✅ Done!
+```
+
+**Note:** This script is for emergency use. In normal operation, the Clerk webhook automatically syncs profile changes.
+
 ## Battle Creation
 
 ### `create-battle.ts`
