@@ -7,7 +7,7 @@ import {
   useUser,
 } from "@clerk/nextjs";
 import Link from "next/link";
-import { User } from "lucide-react";
+import { User, Swords } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function UserButton() {
@@ -51,11 +51,20 @@ export function UserButton() {
       {userId && (
         <Link
           href={`/profile/${userId}`}
-          className="text-gray-300 hover:text-white transition-colors hidden sm:inline"
+          className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm"
         >
-          My Profile
+          <User size={16} />
+          <span>Profile</span>
         </Link>
       )}
+
+      <Link
+        href="/new-battle"
+        className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
+      >
+        <Swords size={16} />
+        <span>Create Battle</span>
+      </Link>
 
       <ClerkUserButton
         appearance={{
@@ -71,13 +80,6 @@ export function UserButton() {
         }}
       >
         <ClerkUserButton.MenuItems>
-          {userId && (
-            <ClerkUserButton.Link
-              label="My Profile"
-              labelIcon={<User size={16} />}
-              href={`/profile/${userId}`}
-            />
-          )}
           <ClerkUserButton.Action label="manageAccount" />
         </ClerkUserButton.MenuItems>
       </ClerkUserButton>

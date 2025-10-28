@@ -9,7 +9,7 @@ import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { MyBattleCard } from "@/components/my-battle-card";
 import { ProfileHeaderMenu } from "@/components/profile-header-menu";
 import { GuestProfileCallout } from "@/components/guest-profile-callout";
-import { Lock, Globe, User as UserIcon } from "lucide-react";
+import { Lock, Globe, User as UserIcon, Swords } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -140,9 +140,20 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
         {/* Battles Section */}
         <div>
-          <h2 className="font-bebas text-4xl text-white mb-6">
-            {isOwnProfile ? "My e-Beefs" : "e-Beefs"}
-          </h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="font-bebas text-4xl text-white">
+              {isOwnProfile ? "My e-Beefs" : "e-Beefs"}
+            </h2>
+            {isOwnProfile && userBattles.length > 0 && (
+              <Link
+                href="/new-battle"
+                className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-semibold"
+              >
+                <Swords size={20} />
+                <span>Create Battle</span>
+              </Link>
+            )}
+          </div>
 
           {!profileUser.isProfilePublic && !isOwnProfile ? (
             <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-12 text-center">
