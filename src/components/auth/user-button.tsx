@@ -4,12 +4,36 @@ import {
   UserButton as ClerkUserButton,
   SignInButton,
   useAuth,
+  useUser,
 } from "@clerk/nextjs";
 import Link from "next/link";
 import { User } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function UserButton() {
   const { isSignedIn } = useAuth();
+  const { user } = useUser();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.id) {
+      // Fetch the database user ID from the public metadata
+      const dbUserId = user.publicMetadata?.dbUserId as string | undefined;
+      if (dbUserId) {
+        setUserId(dbUserId);
+      } else {
+        // Fallback: fetch from API
+        fetch("/api/user/me")
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.id) {
+              setUserId(data.id);
+            }
+          })
+          .catch(console.error);
+      }
+    }
+  }, [user]);
 
   if (!isSignedIn) {
     return (
@@ -45,6 +69,13 @@ export function UserButton() {
         }}
       >
         <ClerkUserButton.MenuItems>
+          {userId && (
+            <ClerkUserButton.Link
+              label="My Profile"
+              labelIcon={<User size={16} />}
+              href={`/profile/${userId}`}
+            />
+          )}
           <ClerkUserButton.Link
             label="My eBeefs"
             labelIcon={<User size={16} />}

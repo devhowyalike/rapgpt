@@ -8,6 +8,8 @@ import {
   AlertTriangle,
   MoreVertical,
   Crown,
+  Globe,
+  Lock,
 } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
@@ -24,6 +26,7 @@ interface MyBattleCardProps {
     verses?: any[];
     winner?: string | null;
     scores?: any[];
+    isPublic?: boolean;
   };
   shareUrl: string;
 }
@@ -31,6 +34,8 @@ interface MyBattleCardProps {
 export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isPublic, setIsPublic] = useState(battle.isPublic || false);
+  const [isTogglingPublic, setIsTogglingPublic] = useState(false);
 
   const personas = {
     left: battle.leftPersona as any,
@@ -42,6 +47,23 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
   const handleShare = () => {
     navigator.clipboard.writeText(battleUrl);
     alert("Link copied to clipboard!");
+  };
+
+  const handleTogglePublic = async () => {
+    setIsTogglingPublic(true);
+    try {
+      const response = await fetch(`/api/battle/${battle.id}/toggle-public`, {
+        method: "PATCH",
+      });
+      const data = await response.json();
+      if (data.success) {
+        setIsPublic(data.isPublic);
+      }
+    } catch (error) {
+      console.error("Failed to toggle battle public status:", error);
+    } finally {
+      setIsTogglingPublic(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -127,6 +149,23 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
                 Share Link
               </DropdownMenu.Item>
               <DropdownMenu.Item
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 rounded cursor-pointer outline-none"
+                onClick={handleTogglePublic}
+                disabled={isTogglingPublic}
+              >
+                {isPublic ? (
+                  <>
+                    <Lock size={16} />
+                    Unpublish Battle
+                  </>
+                ) : (
+                  <>
+                    <Globe size={16} />
+                    Publish Battle
+                  </>
+                )}
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
                 className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-gray-700 rounded cursor-pointer outline-none"
                 onClick={() => setShowDeleteDialog(true)}
               >
@@ -138,7 +177,7 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
         </DropdownMenu.Root>
       </div>
 
-      <div className="flex items-center gap-2 text-sm mb-4">
+      <div className="flex items-center gap-2 text-sm mb-4 flex-wrap">
         <span
           className={`px-3 py-1 rounded ${
             battle.status === "completed"
@@ -152,6 +191,12 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
         >
           {battle.status === "incomplete" ? "paused" : battle.status}
         </span>
+        {isPublic && (
+          <span className="px-3 py-1 rounded bg-blue-600/30 text-blue-300 flex items-center gap-1">
+            <Globe size={14} />
+            Public
+          </span>
+        )}
         <span className="text-gray-500">
           Created {new Date(battle.createdAt).toLocaleDateString()}
         </span>

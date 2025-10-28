@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Archive, Shield } from "lucide-react";
+import { Home, Archive, Shield, Users } from "lucide-react";
 import Link from "next/link";
 import { UserButton } from "./auth/user-button";
 import { useAuth } from "@clerk/nextjs";
@@ -26,6 +26,13 @@ export function SiteHeader() {
           >
             <Archive className="w-4 h-4" />
             <span className="hidden sm:inline">Archive</span>
+          </Link>
+          <Link
+            href="/community"
+            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-gray-800"
+          >
+            <Users className="w-4 h-4" />
+            <span className="hidden sm:inline">Community</span>
           </Link>
           {isAdmin && (
             <Link

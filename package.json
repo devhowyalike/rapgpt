@@ -9,6 +9,7 @@
     "lint": "biome check",
     "format": "biome format --write",
     "create-battle": "tsx scripts/create-battle.ts",
+    "ngrok": "ngrok http --domain=yameen.ngrok.app 3001",
     "db:generate": "dotenv -e .env.local -- drizzle-kit generate",
     "db:migrate": "dotenv -e .env.local -- drizzle-kit migrate",
     "db:push": "dotenv -e .env.local -- drizzle-kit push",
