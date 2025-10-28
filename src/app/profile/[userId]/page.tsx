@@ -17,10 +17,17 @@ interface ProfilePageProps {
   params: Promise<{
     userId: string;
   }>;
+  searchParams: Promise<{
+    viewAs?: string;
+  }>;
 }
 
-export default async function ProfilePage({ params }: ProfilePageProps) {
+export default async function ProfilePage({
+  params,
+  searchParams,
+}: ProfilePageProps) {
   const { userId: profileUserId } = await params;
+  const { viewAs } = await searchParams;
 
   // Get the profile user
   const profileUser = await db.query.users.findFirst({
@@ -48,9 +55,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     : "Anonymous User";
 
   // Determine what battles to show
+  const isViewingAsPublic = viewAs === "public";
   let userBattles: BattleDB[];
-  if (isOwnProfile) {
-    // Show all battles for own profile
+  if (isOwnProfile && !isViewingAsPublic) {
+    // Show all battles for own profile (normal view)
     userBattles = await db
       .select()
       .from(battles)
@@ -58,7 +66,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         and(eq(battles.createdBy, profileUserId), eq(battles.isFeatured, false))
       )
       .orderBy(desc(battles.createdAt));
-  } else if (profileUser.isProfilePublic) {
+  } else if (
+    profileUser.isProfilePublic ||
+    (isOwnProfile && isViewingAsPublic)
+  ) {
     // Show only public battles for public profiles
     userBattles = await db
       .select()
@@ -109,6 +120,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                 {isOwnProfile && (
                   <ProfileHeaderMenu
                     initialIsPublic={profileUser.isProfilePublic}
+                    userId={profileUserId}
                   />
                 )}
               </div>
@@ -121,7 +133,12 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               </p>
               {isOwnProfile && (
                 <div className="flex items-center gap-2 justify-center md:justify-start flex-wrap">
-                  {profileUser.isProfilePublic ? (
+                  {isViewingAsPublic ? (
+                    <span className="px-3 py-1 rounded bg-blue-600/30 text-blue-300 flex items-center gap-1 text-sm">
+                      <UserIcon size={14} />
+                      Viewing as Public
+                    </span>
+                  ) : profileUser.isProfilePublic ? (
                     <span className="px-3 py-1 rounded bg-green-600/30 text-green-300 flex items-center gap-1 text-sm">
                       <Globe size={14} />
                       Public Profile
@@ -192,6 +209,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   battle={battle}
                   shareUrl={shareUrl}
                   showManagement={isOwnProfile}
+                  userIsProfilePublic={profileUser.isProfilePublic}
                 />
               ))}
             </div>

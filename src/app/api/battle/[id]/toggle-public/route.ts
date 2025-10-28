@@ -40,6 +40,14 @@ export async function PATCH(
       );
     }
 
+    // Prevent publishing battles if user profile is private
+    if (!battle.isPublic && !user.isProfilePublic) {
+      return NextResponse.json(
+        { error: "Cannot publish battles with a private profile. Make your profile public first." },
+        { status: 400 }
+      );
+    }
+
     // Toggle the isPublic field
     const updatedBattle = await db
       .update(battles)

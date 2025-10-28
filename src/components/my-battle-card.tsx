@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Share2,
@@ -30,17 +30,20 @@ interface MyBattleCardProps {
   };
   shareUrl: string;
   showManagement?: boolean;
+  userIsProfilePublic?: boolean;
 }
 
 export function MyBattleCard({
   battle,
   shareUrl,
   showManagement = false,
+  userIsProfilePublic = true,
 }: MyBattleCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPublic, setIsPublic] = useState(battle.isPublic || false);
   const [isTogglingPublic, setIsTogglingPublic] = useState(false);
+  const [toggleError, setToggleError] = useState<string | null>(null);
 
   const personas = {
     left: battle.leftPersona as any,
@@ -49,6 +52,11 @@ export function MyBattleCard({
 
   const battleUrl = `${shareUrl}/battle/${battle.id}`;
 
+  // Sync local state with prop when battle.isPublic changes (e.g., after profile privacy toggle)
+  useEffect(() => {
+    setIsPublic(battle.isPublic || false);
+  }, [battle.isPublic]);
+
   const handleShare = () => {
     navigator.clipboard.writeText(battleUrl);
     alert("Link copied to clipboard!");
@@ -56,6 +64,7 @@ export function MyBattleCard({
 
   const handleTogglePublic = async () => {
     setIsTogglingPublic(true);
+    setToggleError(null);
     try {
       const response = await fetch(`/api/battle/${battle.id}/toggle-public`, {
         method: "PATCH",
@@ -63,9 +72,12 @@ export function MyBattleCard({
       const data = await response.json();
       if (data.success) {
         setIsPublic(data.isPublic);
+      } else if (data.error) {
+        setToggleError(data.error);
       }
     } catch (error) {
       console.error("Failed to toggle battle public status:", error);
+      setToggleError("Failed to update battle status");
     } finally {
       setIsTogglingPublic(false);
     }
@@ -171,14 +183,19 @@ export function MyBattleCard({
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   className={`flex items-center gap-2 px-3 py-2 text-sm rounded cursor-pointer outline-none ${
-                    !isPublic && isPaused
+                    !isPublic && (isPaused || !userIsProfilePublic)
                       ? "text-gray-500 cursor-not-allowed"
                       : "text-gray-200 hover:bg-gray-700"
                   }`}
                   onClick={
-                    !isPublic && isPaused ? undefined : handleTogglePublic
+                    !isPublic && (isPaused || !userIsProfilePublic)
+                      ? undefined
+                      : handleTogglePublic
                   }
-                  disabled={isTogglingPublic || (!isPublic && isPaused)}
+                  disabled={
+                    isTogglingPublic ||
+                    (!isPublic && (isPaused || !userIsProfilePublic))
+                  }
                 >
                   {isPublic ? (
                     <>
@@ -188,7 +205,11 @@ export function MyBattleCard({
                   ) : (
                     <>
                       <Globe size={16} />
-                      {isPaused ? "Cannot Publish (Paused)" : "Publish Battle"}
+                      {isPaused
+                        ? "Cannot Publish (Paused)"
+                        : !userIsProfilePublic
+                        ? "Cannot Publish (Private Profile)"
+                        : "Publish Battle"}
                     </>
                   )}
                 </DropdownMenu.Item>
@@ -269,6 +290,13 @@ export function MyBattleCard({
             </li>
             <li>• {finalStats.totalRounds} rounds completed</li>
           </ul>
+        </div>
+      )}
+
+      {/* Error message for toggle failures */}
+      {toggleError && (
+        <div className="mb-4 p-3 bg-red-900/30 rounded-lg border border-red-500/30">
+          <p className="text-sm text-red-300">{toggleError}</p>
         </div>
       )}
 
