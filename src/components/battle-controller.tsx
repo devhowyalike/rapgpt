@@ -525,8 +525,10 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                         : isVotingPhase
                         ? "bg-linear-to-r from-purple-600 to-pink-600 animate-pulse"
                         : canAdvance
-                        ? "bg-linear-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 animate-pulse"
-                        : "bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                        ? "bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 animate-pulse"
+                        : battle.verses.length === 0
+                        ? "bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                        : "bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"
                     }
                     ${
                       isGenerating ||
@@ -541,7 +543,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                   {isGenerating ? (
                     <div className="flex items-center justify-center gap-2">
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Generating...
+                      Kicking ballistics...
                     </div>
                   ) : isReadingPhase && readingTimeRemaining !== null ? (
                     <div className="flex items-center justify-between gap-4 w-full">

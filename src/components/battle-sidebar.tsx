@@ -82,7 +82,8 @@ export function BattleSidebar({
     if (hasVotedInRound) return;
 
     const voteKey = `${round}-${personaId}`;
-    onVote(round, personaId);
+
+    // Update local state FIRST for immediate UI feedback
     setUserVotes((prev) => {
       const newVotes = new Set(prev).add(voteKey);
       // Persist to localStorage
@@ -92,6 +93,9 @@ export function BattleSidebar({
       }
       return newVotes;
     });
+
+    // Then make the API call
+    onVote(round, personaId);
   };
 
   // Helper function to check if user has already voted in a round
