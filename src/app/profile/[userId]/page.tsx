@@ -161,7 +161,7 @@ export default async function ProfilePage({
             <h2 className="font-bebas text-4xl text-white">
               {isOwnProfile ? "My e-Beefs" : "e-Beefs"}
             </h2>
-            {isOwnProfile && userBattles.length > 0 && (
+            {isOwnProfile && !isViewingAsPublic && userBattles.length > 0 && (
               <Link
                 href="/new-battle"
                 className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-semibold"
@@ -215,6 +215,31 @@ export default async function ProfilePage({
             </div>
           )}
         </div>
+
+        {/* Create Your Own Battles CTA - Show to users viewing someone else's profile */}
+        {!isOwnProfile && (
+          <div className="mt-12 bg-linear-to-r from-purple-900/50 to-pink-900/50 backdrop-blur-sm border border-purple-500/30 rounded-lg p-8 text-center">
+            <h3 className="font-bebas text-4xl text-white mb-4">
+              Ready to Start Your Own e-Beefs?
+            </h3>
+            <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
+              {clerkUserId
+                ? "Create epic rap battles with AI-powered opponents and share them with the community."
+                : "Join RapGPT to create your own epic rap battles and challenge AI opponents."}
+            </p>
+            <Link
+              href={clerkUserId ? "/new-battle" : "/sign-in"}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-bold text-lg"
+            >
+              <Swords size={24} />
+              <span>
+                {clerkUserId
+                  ? "Create Your Battle"
+                  : "Sign Up to Create Battles"}
+              </span>
+            </Link>
+          </div>
+        )}
 
         {/* Guest Callout - Show to non-signed-in users */}
         {!clerkUserId && <GuestProfileCallout />}
