@@ -49,6 +49,10 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     setIsVotingPhase,
     votingCompletedRound,
     completeVotingPhase,
+    readingTimeRemaining,
+    setReadingTimeRemaining,
+    isReadingPhase,
+    setIsReadingPhase,
   } = useBattleStore();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
@@ -60,6 +64,15 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     "comments"
   );
   const [isLeaving, setIsLeaving] = useState(false);
+
+  // Automatically switch to voting tab when voting begins (for mobile)
+  useEffect(() => {
+    if (isVotingPhase) {
+      setMobileActiveTab("voting");
+      // Also open the drawer on mobile to make voting more visible
+      setShowMobileDrawer(true);
+    }
+  }, [isVotingPhase]);
 
   // Navigation guard - prevent leaving page during ongoing battle
   const { NavigationDialog } = useNavigationGuard({
@@ -81,33 +94,67 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     setBattle(initialBattle);
   }, [initialBattle, setBattle]);
 
-  // Voting timer effect - starts when round is complete
+  // Reading phase timer effect - starts when round is complete
   useEffect(() => {
     if (!battle) return;
 
     const roundComplete = isRoundComplete(battle, battle.currentRound);
     const nextPerformer = getNextPerformer(battle);
 
-    // Start voting phase when round is complete and we're not already in voting phase
+    // Start reading phase when round is complete and we're not already in reading/voting phase
     if (
       roundComplete &&
       !nextPerformer &&
       battle.status === "ongoing" &&
+      !isReadingPhase &&
       !isVotingPhase &&
       votingCompletedRound !== battle.currentRound
     ) {
-      setIsVotingPhase(true);
-      setVotingTimeRemaining(10); // 10 seconds for voting
+      setIsReadingPhase(true);
+      setReadingTimeRemaining(20); // 20 seconds to read the verse
     }
   }, [
     battle,
+    isReadingPhase,
     isVotingPhase,
-    setIsVotingPhase,
-    setVotingTimeRemaining,
+    setIsReadingPhase,
+    setReadingTimeRemaining,
     votingCompletedRound,
   ]);
 
-  // Countdown timer effect
+  // Reading countdown timer effect
+  useEffect(() => {
+    if (
+      !isReadingPhase ||
+      readingTimeRemaining === null ||
+      readingTimeRemaining <= 0
+    ) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      const next = (readingTimeRemaining ?? 0) - 1;
+      setReadingTimeRemaining(next);
+      if (next <= 0) {
+        // Reading phase complete, start voting phase
+        setIsReadingPhase(false);
+        setReadingTimeRemaining(null);
+        setIsVotingPhase(true);
+        setVotingTimeRemaining(10); // 10 seconds for voting
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [
+    readingTimeRemaining,
+    isReadingPhase,
+    setReadingTimeRemaining,
+    setIsReadingPhase,
+    setIsVotingPhase,
+    setVotingTimeRemaining,
+  ]);
+
+  // Voting countdown timer effect
   useEffect(() => {
     if (
       !isVotingPhase ||
@@ -161,7 +208,9 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let fullVerse = "";
+      let displayedVerse = "";
 
+      // First, buffer all incoming chunks
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
@@ -169,9 +218,27 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
           const chunk = decoder.decode(value);
           fullVerse += chunk;
-          setStreamingVerse(fullVerse, personaId);
         }
       }
+
+      // Now display the verse word by word at a controlled speed
+      const WORD_DELAY = 100; // Delay in milliseconds between words (100ms = 10 words per second)
+
+      // Split text while preserving whitespace and newlines
+      const tokens = fullVerse.split(/(\s+)/);
+
+      for (let i = 0; i < tokens.length; i++) {
+        displayedVerse += tokens[i];
+        setStreamingVerse(displayedVerse, personaId);
+
+        // Only delay on actual words (not whitespace)
+        if (tokens[i].trim()) {
+          await new Promise((resolve) => setTimeout(resolve, WORD_DELAY));
+        }
+      }
+
+      // Ensure the full verse is displayed
+      setStreamingVerse(fullVerse, personaId);
 
       // Add completed verse to battle
       addVerse(personaId, fullVerse);
@@ -239,7 +306,9 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   };
 
   const handleAdvanceRound = async () => {
-    // Reset voting phase when advancing
+    // Reset both reading and voting phases when advancing
+    setIsReadingPhase(false);
+    setReadingTimeRemaining(null);
     setIsVotingPhase(false);
     setVotingTimeRemaining(null);
     advanceRound();
@@ -288,6 +357,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     roundComplete &&
     !nextPerformer &&
     battle.status === "ongoing" &&
+    !isReadingPhase &&
     !isVotingPhase;
 
   const handleMobileCommentsClick = () => {
@@ -455,6 +525,31 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                   <Pause className="w-5 h-5" />
                   Pause Battle
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* Reading Phase Timer Display */}
+          {isReadingPhase && readingTimeRemaining !== null && (
+            <div className="p-4 pb-24 md:pb-4 bg-gray-900 border-t border-gray-800">
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-linear-to-r from-cyan-600 to-blue-600 rounded-lg p-6 text-center">
+                  <div className="text-white text-lg font-medium mb-2">
+                    📖 Reading Time
+                  </div>
+                  <div className="text-5xl font-bold text-white mb-2 font-bebas-neue">
+                    {readingTimeRemaining}
+                  </div>
+                  <div className="text-white/80 text-sm">
+                    Voting will begin in {readingTimeRemaining} seconds
+                  </div>
+                  <div className="mt-4 h-2 bg-white/20 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
+                      style={{ width: `${(readingTimeRemaining / 20) * 100}%` }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           )}

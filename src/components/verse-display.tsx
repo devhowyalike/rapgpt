@@ -41,10 +41,10 @@ export function VerseDisplay({
         {verse && !isStreaming && (
           <motion.div
             key={verse.id}
-            initial={{ opacity: 0 }}
+            initial={justFinishedStreaming ? { opacity: 1 } : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: justFinishedStreaming ? 0 : 0.2 }}
             className="space-y-3"
           >
             {bars.map((bar, index) => (
@@ -84,7 +84,7 @@ export function VerseDisplay({
             key="streaming"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 1 }}
             transition={{ duration: 0.2 }}
             className="space-y-3"
           >

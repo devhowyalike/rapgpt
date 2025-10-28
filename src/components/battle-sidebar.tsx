@@ -38,12 +38,6 @@ export function BattleSidebar({
     defaultTab || "comments"
   );
 
-  // Update activeTab when defaultTab changes (for mobile drawer)
-  useEffect(() => {
-    if (defaultTab) {
-      setActiveTab(defaultTab);
-    }
-  }, [defaultTab]);
   const [comment, setComment] = useState("");
   const [userVotes, setUserVotes] = useState<Set<string>>(() => {
     // Load votes from localStorage on mount
@@ -62,11 +56,15 @@ export function BattleSidebar({
   });
 
   // Automatically switch to voting tab when voting begins
+  // This takes priority over defaultTab when voting is active
   useEffect(() => {
     if (isVotingPhase) {
       setActiveTab("voting");
+    } else if (defaultTab) {
+      // Only respect defaultTab when not in voting phase
+      setActiveTab(defaultTab);
     }
-  }, [isVotingPhase]);
+  }, [isVotingPhase, defaultTab]);
 
   const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();

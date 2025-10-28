@@ -13,6 +13,7 @@ import { getRoundVerses } from "@/lib/battle-engine";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, User } from "lucide-react";
 import Link from "next/link";
+import { VictoryConfetti } from "./victory-confetti";
 
 interface BattleReplayProps {
   battle: Battle;
@@ -72,11 +73,12 @@ export function BattleReplay({ battle }: BattleReplayProps) {
               </motion.div>
             ) : battle.winner ? (
               <motion.div
-                className="text-center mt-2"
+                className="text-center mt-2 relative"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
-                <div className="text-3xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue)">
+                <VictoryConfetti trigger={true} />
+                <div className="text-3xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue) relative z-10">
                   🏆 WINNER:{" "}
                   {battle.personas.left.id === battle.winner
                     ? battle.personas.left.name
@@ -139,11 +141,12 @@ export function BattleReplay({ battle }: BattleReplayProps) {
                 </motion.div>
               ) : battle.winner ? (
                 <motion.div
-                  className="mt-2"
+                  className="mt-2 relative"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                 >
-                  <div className="text-4xl lg:text-5xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue) whitespace-nowrap">
+                  <VictoryConfetti trigger={true} />
+                  <div className="text-4xl lg:text-5xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue) whitespace-nowrap relative z-10">
                     🏆 WINNER:{" "}
                     {battle.personas.left.id === battle.winner
                       ? battle.personas.left.name

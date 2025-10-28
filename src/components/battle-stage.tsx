@@ -13,6 +13,7 @@ import { getRoundVerses, getBattleProgress } from "@/lib/battle-engine";
 import { motion } from "framer-motion";
 import { APP_TITLE } from "@/lib/constants";
 import { BattleBell } from "./battle-bell";
+import { VictoryConfetti } from "./victory-confetti";
 
 interface BattleStageProps {
   battle: Battle;
@@ -62,12 +63,13 @@ export function BattleStage({
 
           {battle.status === "completed" && battle.winner && (
             <motion.div
-              className="mt-4 md:mt-6 text-center"
+              className="mt-4 md:mt-6 text-center relative"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.5 }}
             >
-              <div className="text-xl md:text-2xl lg:text-3xl font-bold text-yellow-400 font-[family-name:var(--font-bebas-neue)]">
+              <VictoryConfetti trigger={true} />
+              <div className="text-xl md:text-2xl lg:text-3xl font-bold text-yellow-400 font-[family-name:var(--font-bebas-neue)] relative z-10">
                 🏆 WINNER:{" "}
                 {battle.personas.left.id === battle.winner
                   ? battle.personas.left.name
