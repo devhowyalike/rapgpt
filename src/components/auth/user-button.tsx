@@ -48,12 +48,14 @@ export function UserButton() {
 
   return (
     <div className="flex items-center gap-4">
-      <Link
-        href="/my-battles"
-        className="text-gray-300 hover:text-white transition-colors hidden sm:inline"
-      >
-        My e-Beefs
-      </Link>
+      {userId && (
+        <Link
+          href={`/profile/${userId}`}
+          className="text-gray-300 hover:text-white transition-colors hidden sm:inline"
+        >
+          My Profile
+        </Link>
+      )}
 
       <ClerkUserButton
         appearance={{
@@ -76,11 +78,6 @@ export function UserButton() {
               href={`/profile/${userId}`}
             />
           )}
-          <ClerkUserButton.Link
-            label="My eBeefs"
-            labelIcon={<User size={16} />}
-            href="/my-battles"
-          />
           <ClerkUserButton.Action label="manageAccount" />
         </ClerkUserButton.MenuItems>
       </ClerkUserButton>

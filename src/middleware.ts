@@ -6,6 +6,8 @@ const isPublicRoute = createRouteMatcher([
   '/',
   '/archive',
   '/battle/(.*)',
+  '/profile/(.*)',
+  '/community',
   '/sign-in(.*)',
   '/api/webhooks/(.*)', // Webhooks should be public
 ]);

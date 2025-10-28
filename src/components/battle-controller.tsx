@@ -71,8 +71,8 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
       if (battle) {
         setIsLeaving(true);
         await cancelBattle();
-        // Redirect immediately to prevent flash of battle page
-        window.location.href = "/my-battles";
+        // Redirect to the battle page itself (it will show as completed/paused)
+        window.location.href = `/battle/${battle.id}`;
       }
     },
   });
@@ -257,8 +257,8 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     setCancelError(null);
     try {
       await cancelBattle();
-      // Redirect to my battles page after canceling
-      window.location.href = "/my-battles";
+      // Redirect to the battle page itself (it will show as paused)
+      window.location.href = `/battle/${battle.id}`;
     } catch (error) {
       console.error("Error canceling battle:", error);
       setCancelError("Failed to cancel battle. Please try again.");

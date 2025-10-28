@@ -29,9 +29,14 @@ interface MyBattleCardProps {
     isPublic?: boolean;
   };
   shareUrl: string;
+  showManagement?: boolean;
 }
 
-export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
+export function MyBattleCard({
+  battle,
+  shareUrl,
+  showManagement = false,
+}: MyBattleCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPublic, setIsPublic] = useState(battle.isPublic || false);
@@ -126,75 +131,94 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
             {battle.title}
           </Link>
         </div>
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger asChild>
-            <button
-              className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-              title="More options"
-            >
-              <MoreVertical size={18} />
-            </button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Portal>
-            <DropdownMenu.Content
-              className="min-w-[180px] bg-gray-800 border border-gray-700 rounded-lg p-1 shadow-xl z-50"
-              sideOffset={5}
-              align="end"
-            >
-              <DropdownMenu.Item
-                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 rounded cursor-pointer outline-none"
-                onClick={handleShare}
-              >
-                <Share2 size={16} />
-                Share Link
-              </DropdownMenu.Item>
-              <DropdownMenu.Item
-                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 rounded cursor-pointer outline-none"
-                onClick={handleTogglePublic}
-                disabled={isTogglingPublic}
+        {showManagement && (
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <button
+                className={`px-3 py-1.5 rounded flex items-center gap-1.5 text-xs transition-colors ${
+                  isPublic
+                    ? "bg-blue-600/30 text-blue-300 hover:bg-blue-600/40"
+                    : "bg-gray-600/30 text-gray-300 hover:bg-gray-600/40"
+                }`}
+                title="Manage battle"
               >
                 {isPublic ? (
                   <>
-                    <Lock size={16} />
-                    Unpublish Battle
+                    <Globe size={12} />
+                    Public
                   </>
                 ) : (
                   <>
-                    <Globe size={16} />
-                    Publish Battle
+                    <Lock size={12} />
+                    Private
                   </>
                 )}
-              </DropdownMenu.Item>
-              <DropdownMenu.Item
-                className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-gray-700 rounded cursor-pointer outline-none"
-                onClick={() => setShowDeleteDialog(true)}
+                <MoreVertical size={12} className="ml-0.5" />
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                className="min-w-[180px] bg-gray-800 border border-gray-700 rounded-lg p-1 shadow-xl z-50"
+                sideOffset={5}
+                align="end"
               >
-                <Trash2 size={16} />
-                Delete Battle
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Portal>
-        </DropdownMenu.Root>
+                <DropdownMenu.Item
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 rounded cursor-pointer outline-none"
+                  onClick={handleShare}
+                >
+                  <Share2 size={16} />
+                  Share Link
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  className={`flex items-center gap-2 px-3 py-2 text-sm rounded cursor-pointer outline-none ${
+                    !isPublic && isPaused
+                      ? "text-gray-500 cursor-not-allowed"
+                      : "text-gray-200 hover:bg-gray-700"
+                  }`}
+                  onClick={
+                    !isPublic && isPaused ? undefined : handleTogglePublic
+                  }
+                  disabled={isTogglingPublic || (!isPublic && isPaused)}
+                >
+                  {isPublic ? (
+                    <>
+                      <Lock size={16} />
+                      Unpublish Battle
+                    </>
+                  ) : (
+                    <>
+                      <Globe size={16} />
+                      {isPaused ? "Cannot Publish (Paused)" : "Publish Battle"}
+                    </>
+                  )}
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-gray-700 rounded cursor-pointer outline-none"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash2 size={16} />
+                  Delete Battle
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
+        )}
       </div>
 
       <div className="flex items-center gap-2 text-sm mb-4 flex-wrap">
-        <span
-          className={`px-3 py-1 rounded ${
-            battle.status === "completed"
-              ? "bg-green-600/30 text-green-300"
-              : battle.status === "ongoing"
-              ? "bg-yellow-600/30 text-yellow-300"
-              : battle.status === "incomplete"
-              ? "bg-orange-600/30 text-orange-300"
-              : "bg-gray-600/30 text-gray-400"
-          }`}
-        >
-          {battle.status === "incomplete" ? "paused" : battle.status}
-        </span>
-        {isPublic && (
-          <span className="px-3 py-1 rounded bg-blue-600/30 text-blue-300 flex items-center gap-1">
-            <Globe size={14} />
-            Public
+        {showManagement && (
+          <span
+            className={`px-3 py-1 rounded ${
+              battle.status === "completed"
+                ? "bg-green-600/30 text-green-300"
+                : battle.status === "ongoing"
+                ? "bg-yellow-600/30 text-yellow-300"
+                : battle.status === "incomplete"
+                ? "bg-orange-600/30 text-orange-300"
+                : "bg-gray-600/30 text-gray-400"
+            }`}
+          >
+            {battle.status === "incomplete" ? "paused" : battle.status}
           </span>
         )}
         <span className="text-gray-500">
@@ -202,7 +226,7 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
         </span>
       </div>
 
-      {isPaused && (
+      {showManagement && isPaused && (
         <div className="mb-4 p-3 bg-gray-900/50 rounded-lg border border-orange-500/20">
           <p className="text-sm font-semibold text-orange-400 mb-2">
             Battle Progress:
@@ -216,7 +240,7 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
         </div>
       )}
 
-      {isCompleted && finalStats && (
+      {showManagement && isCompleted && finalStats && (
         <div className="mb-4 p-3 bg-gray-900/50 rounded-lg border border-green-500/20">
           <p className="text-sm font-semibold text-green-400 mb-2">
             Battle Results:

@@ -47,7 +47,7 @@ export default async function Home() {
               {isAuthenticated ? (
                 <>
                   <Link
-                    href="/my-battles/new"
+                    href="/new-battle"
                     className="inline-block px-6 py-3 bg-linear-to-r from-yellow-500 to-red-600 hover:from-yellow-600 hover:to-red-700 rounded-lg text-white font-bold transition-all"
                   >
                     Create Your Battle

@@ -7,7 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { decrypt } from "@/lib/auth/encryption";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { MyBattleCard } from "@/components/my-battle-card";
-import { ProfilePrivacyToggle } from "@/components/profile-privacy-toggle";
+import { ProfileHeaderMenu } from "@/components/profile-header-menu";
 import { Lock, Globe, User as UserIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -101,39 +101,38 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               </div>
             )}
             <div className="flex-1 text-center md:text-left">
-              <h1 className="font-bebas text-5xl text-white mb-2">
-                {displayName}
-              </h1>
-              <p className="text-gray-400 mb-4">
-                Member since{" "}
-                {new Date(profileUser.createdAt).toLocaleDateString()}
-              </p>
-              <div className="flex items-center gap-2 justify-center md:justify-start flex-wrap">
-                {profileUser.isProfilePublic ? (
-                  <span className="px-3 py-1 rounded bg-green-600/30 text-green-300 flex items-center gap-1 text-sm">
-                    <Globe size={14} />
-                    Public Profile
-                  </span>
-                ) : (
-                  <span className="px-3 py-1 rounded bg-gray-600/30 text-gray-300 flex items-center gap-1 text-sm">
-                    <Lock size={14} />
-                    Private Profile
-                  </span>
-                )}
+              <div className="flex items-start justify-between gap-4 mb-2">
+                <h1 className="font-bebas text-5xl text-white">
+                  {displayName}
+                </h1>
                 {isOwnProfile && (
-                  <>
-                    <ProfilePrivacyToggle
-                      initialIsPublic={profileUser.isProfilePublic}
-                    />
-                    <Link
-                      href="/my-battles"
-                      className="px-3 py-1 rounded bg-purple-600 hover:bg-purple-700 text-white text-sm transition-colors"
-                    >
-                      Manage Battles
-                    </Link>
-                  </>
+                  <ProfileHeaderMenu
+                    initialIsPublic={profileUser.isProfilePublic}
+                  />
                 )}
               </div>
+              <p className="text-gray-400 mb-4">
+                Member since{" "}
+                {new Date(profileUser.createdAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                })}
+              </p>
+              {isOwnProfile && (
+                <div className="flex items-center gap-2 justify-center md:justify-start flex-wrap">
+                  {profileUser.isProfilePublic ? (
+                    <span className="px-3 py-1 rounded bg-green-600/30 text-green-300 flex items-center gap-1 text-sm">
+                      <Globe size={14} />
+                      Public Profile
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1 rounded bg-gray-600/30 text-gray-300 flex items-center gap-1 text-sm">
+                      <Lock size={14} />
+                      Private Profile
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -141,7 +140,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         {/* Battles Section */}
         <div>
           <h2 className="font-bebas text-4xl text-white mb-6">
-            {isOwnProfile ? "My e-Beefs" : "Public e-Beefs"}
+            {isOwnProfile ? "My e-Beefs" : "e-Beefs"}
           </h2>
 
           {!profileUser.isProfilePublic && !isOwnProfile ? (
@@ -166,7 +165,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               </p>
               {isOwnProfile && (
                 <Link
-                  href="/my-battles/new"
+                  href="/new-battle"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-semibold"
                 >
                   Create Your First Battle
@@ -180,6 +179,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   key={battle.id}
                   battle={battle}
                   shareUrl={shareUrl}
+                  showManagement={isOwnProfile}
                 />
               ))}
             </div>
