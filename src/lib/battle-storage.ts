@@ -4,21 +4,48 @@
 
 import type { Battle } from '@/lib/shared';
 import { db } from '@/lib/db/client';
-import { battles } from '@/lib/db/schema';
+import { battles, users } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { decrypt } from '@/lib/auth/encryption';
 
 /**
  * Get battle by ID
  */
 export async function getBattleById(id: string): Promise<Battle | null> {
   try {
-    const result = await db.select().from(battles).where(eq(battles.id, id)).limit(1);
+    const result = await db
+      .select({
+        battle: battles,
+        creator: users,
+      })
+      .from(battles)
+      .leftJoin(users, eq(battles.createdBy, users.id))
+      .where(eq(battles.id, id))
+      .limit(1);
     
     if (result.length === 0) {
       return null;
     }
     
-    const battle = result[0];
+    const { battle, creator } = result[0];
+    
+    // Decrypt creator display name if available
+    let creatorInfo = null;
+    if (creator && creator.isProfilePublic) {
+      try {
+        const displayName = creator.encryptedDisplayName 
+          ? decrypt(creator.encryptedDisplayName)
+          : (creator.encryptedName ? decrypt(creator.encryptedName) : 'Anonymous');
+        
+        creatorInfo = {
+          userId: creator.id,
+          displayName,
+          imageUrl: creator.imageUrl,
+        };
+      } catch (error) {
+        console.error('Error decrypting creator info:', error);
+      }
+    }
     
     // Transform database format back to Battle type
     return {
@@ -39,6 +66,7 @@ export async function getBattleById(id: string): Promise<Battle | null> {
       winner: battle.winner,
       createdAt: battle.createdAt.getTime(),
       updatedAt: battle.updatedAt.getTime(),
+      creator: creatorInfo,
     };
   } catch (error) {
     console.error('Error getting battle by ID:', error);
@@ -104,28 +132,56 @@ export async function saveBattle(
  */
 export async function getAllBattles(): Promise<Battle[]> {
   try {
-    const result = await db.select().from(battles).orderBy(desc(battles.createdAt));
+    const result = await db
+      .select({
+        battle: battles,
+        creator: users,
+      })
+      .from(battles)
+      .leftJoin(users, eq(battles.createdBy, users.id))
+      .orderBy(desc(battles.createdAt));
     
     // Transform database format back to Battle type
-    return result.map(battle => ({
-      id: battle.id,
-      title: battle.title,
-      month: battle.month,
-      year: battle.year,
-      status: battle.status as Battle['status'],
-      personas: {
-        left: battle.leftPersona,
-        right: battle.rightPersona,
-      },
-      currentRound: battle.currentRound,
-      currentTurn: battle.currentTurn as Battle['currentTurn'],
-      verses: battle.verses,
-      scores: battle.scores,
-      comments: battle.comments,
-      winner: battle.winner,
-      createdAt: battle.createdAt.getTime(),
-      updatedAt: battle.updatedAt.getTime(),
-    }));
+    return result.map(({ battle, creator }) => {
+      // Decrypt creator display name if available
+      let creatorInfo = null;
+      if (creator && creator.isProfilePublic) {
+        try {
+          const displayName = creator.encryptedDisplayName 
+            ? decrypt(creator.encryptedDisplayName)
+            : (creator.encryptedName ? decrypt(creator.encryptedName) : 'Anonymous');
+          
+          creatorInfo = {
+            userId: creator.id,
+            displayName,
+            imageUrl: creator.imageUrl,
+          };
+        } catch (error) {
+          console.error('Error decrypting creator info:', error);
+        }
+      }
+      
+      return {
+        id: battle.id,
+        title: battle.title,
+        month: battle.month,
+        year: battle.year,
+        status: battle.status as Battle['status'],
+        personas: {
+          left: battle.leftPersona,
+          right: battle.rightPersona,
+        },
+        currentRound: battle.currentRound,
+        currentTurn: battle.currentTurn as Battle['currentTurn'],
+        verses: battle.verses,
+        scores: battle.scores,
+        comments: battle.comments,
+        winner: battle.winner,
+        createdAt: battle.createdAt.getTime(),
+        updatedAt: battle.updatedAt.getTime(),
+        creator: creatorInfo,
+      };
+    });
   } catch (error) {
     console.error('Error getting all battles:', error);
     return [];
@@ -138,31 +194,56 @@ export async function getAllBattles(): Promise<Battle[]> {
 export async function getFeaturedBattles(): Promise<Battle[]> {
   try {
     const result = await db
-      .select()
+      .select({
+        battle: battles,
+        creator: users,
+      })
       .from(battles)
+      .leftJoin(users, eq(battles.createdBy, users.id))
       .where(eq(battles.isFeatured, true))
       .orderBy(desc(battles.createdAt));
     
     // Transform database format back to Battle type
-    return result.map(battle => ({
-      id: battle.id,
-      title: battle.title,
-      month: battle.month,
-      year: battle.year,
-      status: battle.status as Battle['status'],
-      personas: {
-        left: battle.leftPersona,
-        right: battle.rightPersona,
-      },
-      currentRound: battle.currentRound,
-      currentTurn: battle.currentTurn as Battle['currentTurn'],
-      verses: battle.verses,
-      scores: battle.scores,
-      comments: battle.comments,
-      winner: battle.winner,
-      createdAt: battle.createdAt.getTime(),
-      updatedAt: battle.updatedAt.getTime(),
-    }));
+    return result.map(({ battle, creator }) => {
+      // Decrypt creator display name if available
+      let creatorInfo = null;
+      if (creator && creator.isProfilePublic) {
+        try {
+          const displayName = creator.encryptedDisplayName 
+            ? decrypt(creator.encryptedDisplayName)
+            : (creator.encryptedName ? decrypt(creator.encryptedName) : 'Anonymous');
+          
+          creatorInfo = {
+            userId: creator.id,
+            displayName,
+            imageUrl: creator.imageUrl,
+          };
+        } catch (error) {
+          console.error('Error decrypting creator info:', error);
+        }
+      }
+      
+      return {
+        id: battle.id,
+        title: battle.title,
+        month: battle.month,
+        year: battle.year,
+        status: battle.status as Battle['status'],
+        personas: {
+          left: battle.leftPersona,
+          right: battle.rightPersona,
+        },
+        currentRound: battle.currentRound,
+        currentTurn: battle.currentTurn as Battle['currentTurn'],
+        verses: battle.verses,
+        scores: battle.scores,
+        comments: battle.comments,
+        winner: battle.winner,
+        createdAt: battle.createdAt.getTime(),
+        updatedAt: battle.updatedAt.getTime(),
+        creator: creatorInfo,
+      };
+    });
   } catch (error) {
     console.error('Error getting featured battles:', error);
     return [];
