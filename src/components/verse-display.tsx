@@ -28,15 +28,22 @@ export function VerseDisplay({
 
   return (
     <div className="flex-1 p-6 md:p-8">
-      <div className="space-y-3">
-        <AnimatePresence initial={false}>
-          {verse &&
-            !isStreaming &&
-            bars.map((bar, index) => (
+      <AnimatePresence mode="wait">
+        {verse && !isStreaming && (
+          <motion.div
+            key={verse.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-3"
+          >
+            {bars.map((bar, index) => (
               <motion.div
                 key={`${verse.id}-${index}`}
-                initial={{ opacity: 1 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
                 className="verse-line flex"
               >
                 <span
@@ -53,9 +60,19 @@ export function VerseDisplay({
                 </p>
               </motion.div>
             ))}
+          </motion.div>
+        )}
 
-          {isStreaming &&
-            streamingBars.map((line, index) => (
+        {isStreaming && (
+          <motion.div
+            key="streaming"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-3"
+          >
+            {streamingBars.map((line, index) => (
               <motion.div
                 key={`streaming-${index}`}
                 initial={{ opacity: 0, x: position === "left" ? -20 : 20 }}
@@ -77,32 +94,33 @@ export function VerseDisplay({
                 </p>
               </motion.div>
             ))}
-        </AnimatePresence>
-
-        {!verse && !isStreaming && (
-          <div className="flex items-center justify-center h-48">
-            <p className="text-gray-500 text-center">
-              Waiting for {persona.name} to drop their verse...
-            </p>
-          </div>
-        )}
-
-        {isStreaming && (
-          <motion.div
-            className="flex items-center gap-2 mt-4"
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
-          >
-            <div
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: persona.accentColor }}
-            />
-            <span className="text-sm" style={{ color: persona.accentColor }}>
-              {persona.name} is spitting...
-            </span>
           </motion.div>
         )}
-      </div>
+      </AnimatePresence>
+
+      {!verse && !isStreaming && (
+        <div className="flex items-center justify-center h-48">
+          <p className="text-gray-500 text-center">
+            Waiting for {persona.name} to drop their verse...
+          </p>
+        </div>
+      )}
+
+      {isStreaming && (
+        <motion.div
+          className="flex items-center gap-2 mt-4"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+        >
+          <div
+            className="w-2 h-2 rounded-full"
+            style={{ backgroundColor: persona.accentColor }}
+          />
+          <span className="text-sm" style={{ color: persona.accentColor }}>
+            {persona.name} is spitting...
+          </span>
+        </motion.div>
+      )}
     </div>
   );
 }
