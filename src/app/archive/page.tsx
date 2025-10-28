@@ -26,7 +26,7 @@ export default async function ArchivePage() {
 
             <h1 className="text-5xl md:text-7xl font-(family-name:--font-bebas-neue) tracking-wider mb-4">
               <span className="bg-linear-to-r from-yellow-400 via-red-500 to-purple-600 text-transparent bg-clip-text">
-                Battle Archive
+                Live Battle Archive
               </span>
             </h1>
             <p className="text-gray-400 text-lg">
@@ -37,9 +37,15 @@ export default async function ArchivePage() {
           {/* Battles Grid */}
           {battles.length === 0 ? (
             <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-12 text-center">
-              <p className="text-gray-400 text-lg">
+              <p className="text-gray-400 text-lg mb-6">
                 No battles yet. Check back soon!
               </p>
+              <Link
+                href="/new-battle"
+                className="inline-block bg-linear-to-r from-yellow-400 via-red-500 to-purple-600 text-white font-bold py-3 px-8 rounded-lg hover:opacity-90 transition-opacity"
+              >
+                Create your own!
+              </Link>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-6">
