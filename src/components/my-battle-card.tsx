@@ -150,7 +150,7 @@ export function MyBattleCard({
                 ) : (
                   <>
                     <Lock size={12} />
-                    Private
+                    Unpublished
                   </>
                 )}
                 <MoreVertical size={12} className="ml-0.5" />
