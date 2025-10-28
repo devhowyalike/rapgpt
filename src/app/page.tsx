@@ -38,7 +38,7 @@ export default async function Home() {
           <div className="mt-8 bg-linear-to-r from-yellow-500/10 via-red-500/10 to-purple-600/10 border-2 border-yellow-500/30 rounded-lg p-8">
             <div className="text-5xl mb-4">🤖 🐄 🎤</div>
             <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-yellow-400 via-red-500 to-purple-600 mb-4">
-              Create Your Own e-Beef!
+              Cook Your Own e-Beef!
             </h2>
             <p className="text-gray-300 text-lg mb-6 max-w-2xl mx-auto">
               Choose your favorite rappers, former message board personalities,

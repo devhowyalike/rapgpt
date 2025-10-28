@@ -178,7 +178,7 @@ export function CharacterSelect() {
                   key={persona.id}
                   onClick={() => handlePersonaClick(persona)}
                   className={`
-                    relative group
+                    relative group flex flex-col h-full
                     bg-linear-to-b from-gray-800 to-gray-900
                     border-4 rounded-xl overflow-hidden
                     transition-all duration-300 transform
@@ -233,7 +233,7 @@ export function CharacterSelect() {
 
                   {/* Character Avatar */}
                   <div
-                    className="py-6 flex items-center justify-center text-6xl font-bold bg-gray-800 relative"
+                    className="h-40 flex items-center justify-center text-6xl font-bold bg-gray-800 relative"
                     style={{
                       background: `linear-gradient(135deg, ${persona.accentColor}22 0%, transparent 100%)`,
                     }}
@@ -250,7 +250,7 @@ export function CharacterSelect() {
                   </div>
 
                   {/* Character Info */}
-                  <div className="p-4 bg-gray-900/80 backdrop-blur">
+                  <div className="p-4 bg-gray-900/80 backdrop-blur flex-1 flex flex-col">
                     <h3 className="text-xl font-bold text-white mb-1 truncate">
                       {persona.name}
                     </h3>

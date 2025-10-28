@@ -30,7 +30,7 @@ export default async function ArchivePage() {
               </span>
             </h1>
             <p className="text-gray-400 text-lg">
-              Relive the greatest AI keystyle battles
+              Relive the greatest live AI keystyle battles
             </p>
           </div>
 
