@@ -8,6 +8,7 @@ import { decrypt } from "@/lib/auth/encryption";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { MyBattleCard } from "@/components/my-battle-card";
 import { ProfileHeaderMenu } from "@/components/profile-header-menu";
+import { GuestProfileCallout } from "@/components/guest-profile-callout";
 import { Lock, Globe, User as UserIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -185,6 +186,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             </div>
           )}
         </div>
+
+        {/* Guest Callout - Show to non-signed-in users */}
+        {!clerkUserId && <GuestProfileCallout />}
       </div>
     </div>
   );

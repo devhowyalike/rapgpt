@@ -226,7 +226,7 @@ export function MyBattleCard({
         </span>
       </div>
 
-      {showManagement && isPaused && (
+      {isPaused && (
         <div className="mb-4 p-3 bg-gray-900/50 rounded-lg border border-orange-500/20">
           <p className="text-sm font-semibold text-orange-400 mb-2">
             Battle Progress:
@@ -240,7 +240,7 @@ export function MyBattleCard({
         </div>
       )}
 
-      {showManagement && isCompleted && finalStats && (
+      {isCompleted && finalStats && (
         <div className="mb-4 p-3 bg-gray-900/50 rounded-lg border border-green-500/20">
           <p className="text-sm font-semibold text-green-400 mb-2">
             Battle Results:
