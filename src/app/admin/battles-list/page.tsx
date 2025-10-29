@@ -1,11 +1,20 @@
 import { getAllBattles } from "@/lib/battle-storage";
 import Link from "next/link";
 import { Radio } from "lucide-react";
+import { checkRole } from "@/lib/auth/roles";
+import { redirect } from "next/navigation";
 
 // Revalidate every 5 seconds to show live status
 export const revalidate = 5;
+export const dynamic = "force-dynamic";
 
 export default async function BattlesListPage() {
+  // Check if user is admin
+  const isAdmin = await checkRole("admin");
+  if (!isAdmin) {
+    redirect("/");
+  }
+
   const battles = await getAllBattles();
   const liveBattles = battles.filter((b) => b.isLive);
   const otherBattles = battles.filter((b) => !b.isLive);

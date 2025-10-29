@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 // Revalidate every 10 seconds for active battles
 export const revalidate = 10;
+export const dynamic = 'force-dynamic';
 
 export default async function BattlePage({
   params,
