@@ -1,5 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 
+export const dynamic = 'force-dynamic';
+
 export default async function DebugAuthPage() {
   const authData = await auth();
   const user = await currentUser();

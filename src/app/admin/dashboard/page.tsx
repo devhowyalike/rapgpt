@@ -8,6 +8,8 @@ import Link from "next/link";
 import { Shield, User, Star, Radio, Settings } from "lucide-react";
 import { DeleteBattleButton } from "@/components/admin/delete-battle-button";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboardPage() {
   try {
     // Check if user is admin

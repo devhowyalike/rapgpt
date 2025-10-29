@@ -8,6 +8,7 @@ import { Calendar } from "lucide-react";
 
 // Revalidate every 10 seconds to show live battles
 export const revalidate = 10;
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const liveBattles = await getLiveBattles();

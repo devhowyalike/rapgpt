@@ -10,6 +10,8 @@ import { notFound } from "next/navigation";
 import { AdminBattleControl } from "@/components/admin/admin-battle-control";
 import { AdminErrorBoundary } from "@/components/admin/error-boundary";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminBattleControlPage({
   params,
 }: {
