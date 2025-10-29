@@ -9,6 +9,7 @@ import Image from "next/image";
 
 // Revalidate every 5 minutes
 export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
 const PAGE_SIZE = 24;
 

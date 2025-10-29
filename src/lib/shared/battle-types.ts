@@ -90,6 +90,16 @@ export interface Battle {
     displayName: string;
     imageUrl?: string | null;
   } | null;
+  // Live battle fields
+  isLive?: boolean;
+  liveStartedAt?: number;
+  adminControlMode?: 'manual' | 'auto';
+  autoPlayConfig?: {
+    verseDelay?: number;
+    autoAdvance?: boolean;
+    readingDuration?: number;
+    votingDuration?: number;
+  };
 }
 
 export interface BattleState {

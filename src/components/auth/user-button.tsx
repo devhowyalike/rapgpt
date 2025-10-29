@@ -26,8 +26,8 @@ export function UserButton() {
         fetch("/api/user/me")
           .then((res) => res.json())
           .then((data) => {
-            if (data.id) {
-              setUserId(data.id);
+            if (data.user?.id) {
+              setUserId(data.user.id);
             }
           })
           .catch(console.error);

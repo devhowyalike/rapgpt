@@ -69,8 +69,8 @@ export default function NewAdminBattlePage() {
 
       const { battleId } = await response.json();
 
-      // Navigate to battle page
-      router.push(`/battle/${battleId}`);
+      // Navigate to admin control panel
+      router.push(`/admin/battles/${battleId}/control`);
     } catch (error) {
       console.error("Error creating battle:", error);
 

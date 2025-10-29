@@ -14,8 +14,11 @@ export async function GET() {
     const user = await getOrCreateUser(clerkUserId);
 
     return NextResponse.json({
-      id: user.id,
-      isProfilePublic: user.isProfilePublic,
+      user: {
+        id: user.id,
+        role: user.role,
+        isProfilePublic: user.isProfilePublic,
+      },
     });
   } catch (error) {
     console.error("Error fetching user:", error);

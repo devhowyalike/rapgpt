@@ -53,6 +53,17 @@ export const battles = pgTable('battles', {
   isFeatured: boolean('is_featured').notNull().default(false), // true = admin featured, false = user battle
   isPublic: boolean('is_public').notNull().default(false), // Battle visibility on user profiles
   
+  // Live battle fields
+  isLive: boolean('is_live').notNull().default(false), // Battle currently in live mode
+  liveStartedAt: timestamp('live_started_at', { mode: 'date' }), // When live mode started
+  adminControlMode: text('admin_control_mode').default('manual'), // 'manual' | 'auto'
+  autoPlayConfig: jsonb('auto_play_config').$type<{
+    verseDelay?: number;
+    autoAdvance?: boolean;
+    readingDuration?: number;
+    votingDuration?: number;
+  }>(), // Auto-play timing settings
+  
   createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow(),
 });

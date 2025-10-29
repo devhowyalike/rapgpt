@@ -1,30 +1,21 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
 
 // Define public routes that don't require authentication
 const isPublicRoute = createRouteMatcher([
   '/',
   '/archive',
-  '/battle/(.*)',
-  '/profile/(.*)',
+  '/battle(.*)',
+  '/profile(.*)',
   '/community',
   '/sign-in(.*)',
-  '/api/webhooks/(.*)', // Webhooks should be public
+  '/api/webhooks(.*)', // Webhooks should be public
+  '/api/battle(.*)/comment', // Comment routes handle their own auth
+  '/api/battle(.*)/vote', // Vote routes handle their own auth
 ]);
 
-// Define admin-only routes
-const isAdminRoute = createRouteMatcher(['/admin(.*)']);
-
 export default clerkMiddleware(async (auth, req) => {
-  // Protect admin routes with role check
-  if (isAdminRoute(req)) {
-    const { sessionClaims } = await auth();
-    
-    if (sessionClaims?.metadata?.role !== 'admin') {
-      const url = new URL('/', req.url);
-      return NextResponse.redirect(url);
-    }
-  }
+  // Admin route protection is handled at the page level using checkRole()
+  // This allows us to avoid database queries in middleware (Edge Runtime limitation)
   
   // Protect all non-public routes
   if (!isPublicRoute(req)) {

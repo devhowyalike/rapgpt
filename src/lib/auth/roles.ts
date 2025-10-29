@@ -10,11 +10,36 @@ import { eq } from 'drizzle-orm';
 
 /**
  * Check if the current user has a specific role
+ * Checks the database for the user's role
  */
 export async function checkRole(role: Roles): Promise<boolean> {
-  const { sessionClaims } = await auth();
+  const { userId } = await auth();
   
-  return sessionClaims?.metadata?.role === role;
+  if (!userId) {
+    return false;
+  }
+  
+  // Check database for user role
+  const dbUser = await db.query.users.findFirst({
+    where: eq(users.clerkId, userId),
+  });
+  
+  if (!dbUser) {
+    return false;
+  }
+  
+  return dbUser.role === role;
+}
+
+/**
+ * Check if a specific Clerk user ID has admin role
+ */
+export async function isAdmin(clerkUserId: string): Promise<boolean> {
+  const dbUser = await db.query.users.findFirst({
+    where: eq(users.clerkId, clerkUserId),
+  });
+  
+  return dbUser?.role === 'admin';
 }
 
 /**

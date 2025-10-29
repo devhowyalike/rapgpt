@@ -1,20 +1,20 @@
 import Link from "next/link";
-import { getCurrentBattle } from "@/lib/battle-storage";
-import { BattleController } from "@/components/battle-controller";
+import { getLiveBattles } from "@/lib/battle-storage";
 import { SiteHeader } from "@/components/site-header";
+import { LiveBattlesDisplay } from "@/components/live-battles-display";
 import { APP_TITLE, TAGLINE } from "@/lib/constants";
 import { auth } from "@clerk/nextjs/server";
 import { Calendar } from "lucide-react";
 
+// Revalidate every 10 seconds to show live battles
+export const revalidate = 10;
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
-  const currentBattle = await getCurrentBattle();
+  const liveBattles = await getLiveBattles();
   const { sessionClaims } = await auth();
   const isAdmin = sessionClaims?.metadata?.role === "admin";
   const isAuthenticated = !!sessionClaims;
-
-  if (currentBattle) {
-    return <BattleController initialBattle={currentBattle} />;
-  }
 
   return (
     <>
@@ -89,42 +89,46 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* Coming Soon / No Active Battle */}
-          <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-8 mt-12">
-            {/* Calendar Display */}
-            <div className="flex justify-center mb-6">
-              <Calendar
-                className="text-yellow-400 opacity-60"
-                size={120}
-                strokeWidth={1.5}
-              />
-            </div>
+          {/* Live Battles or Coming Soon */}
+          <LiveBattlesDisplay initialBattles={liveBattles} />
 
-            <h2 className="text-3xl font-(family-name:--font-bebas-neue) text-yellow-400 mb-4">
-              Upcoming Live Battles — Stay Tuned!
-            </h2>
-            <p className="text-gray-400 mb-6">
-              Participate in a live AI battle arena featuring surprise guests
-              and new roster additions.
-            </p>
+          {liveBattles.length === 0 && (
+            <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-8 mt-12">
+              {/* Calendar Display */}
+              <div className="flex justify-center mb-6">
+                <Calendar
+                  className="text-yellow-400 opacity-60"
+                  size={120}
+                  strokeWidth={1.5}
+                />
+              </div>
 
-            <div className="flex gap-4 justify-center flex-wrap">
-              {isAdmin && (
+              <h2 className="text-3xl font-(family-name:--font-bebas-neue) text-yellow-400 mb-4">
+                Upcoming Live Battles — Stay Tuned!
+              </h2>
+              <p className="text-gray-400 mb-6">
+                Participate in a live AI battle arena featuring surprise guests
+                and new roster additions.
+              </p>
+
+              <div className="flex gap-4 justify-center flex-wrap">
+                {isAdmin && (
+                  <Link
+                    href="/admin/battles/new"
+                    className="inline-block px-6 py-3 bg-linear-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 rounded-lg text-white font-bold transition-all"
+                  >
+                    Create Featured Battle
+                  </Link>
+                )}
                 <Link
-                  href="/admin/battles/new"
-                  className="inline-block px-6 py-3 bg-linear-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 rounded-lg text-white font-bold transition-all"
+                  href="/archive"
+                  className="inline-block px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg text-white font-bold transition-all"
                 >
-                  Create Featured Battle
+                  View Archive
                 </Link>
-              )}
-              <Link
-                href="/archive"
-                className="inline-block px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg text-white font-bold transition-all"
-              >
-                View Archive
-              </Link>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Tagline at bottom */}
           <div className="mt-12">
