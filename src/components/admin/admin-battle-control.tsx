@@ -34,6 +34,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
     setStreamingVerse,
     streamingVerse,
     streamingPersonaId,
+    saveBattle,
   } = useBattleStore();
 
   const [isGenerating, setIsGenerating] = useState(false);
@@ -67,6 +68,8 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
           setStreamingVerse(null, null);
           if (battle) {
             addVerse(event.personaId, event.verseText);
+            // Persist updated battle after adding the verse
+            void saveBattle();
           }
           break;
 
@@ -141,6 +144,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
 
     const personaId = battle.personas[nextPerformer].id;
     setIsGenerating(true);
+    // Indicate performer is about to stream; rely on WebSocket for actual text
     setStreamingVerse(null, personaId);
 
     try {
@@ -155,47 +159,9 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
       });
 
       if (!response.ok) throw new Error("Failed to generate verse");
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let fullVerse = "";
-      let displayedVerse = "";
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          fullVerse += chunk;
-        }
-      }
-
-      const WORD_DELAY = 100;
-      const tokens = fullVerse.split(/(\s+)/);
-
-      for (let i = 0; i < tokens.length; i++) {
-        displayedVerse += tokens[i];
-        setStreamingVerse(displayedVerse, personaId);
-
-        if (tokens[i].trim()) {
-          await new Promise((resolve) => setTimeout(resolve, WORD_DELAY));
-        }
-      }
-
-      setStreamingVerse(fullVerse, personaId);
-      addVerse(personaId, fullVerse);
-      setStreamingVerse(null, null);
-
-      const saveResponse = await fetch(`/api/battle/${battle.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(battle),
-      });
-
-      if (!saveResponse.ok) {
-        throw new Error("Failed to save battle");
-      }
+      // Do not locally stream or add the verse here; WebSocket events will handle UI updates and persistence
+      // We simply await the server to finish streaming
+      await response.text();
     } catch (error) {
       console.error("Error generating verse:", error);
       setStreamingVerse(null, null);
