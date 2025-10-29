@@ -385,22 +385,38 @@ export function BattleSidebar({
                 const rightScore =
                   roundScore.personaScores[battle.personas.right.id];
 
+                // Calculate optimistic vote counts by checking both server state and local state
+                const getOptimisticVoteCount = (personaId: string): number => {
+                  const serverVotes =
+                    roundScore.personaScores[personaId]?.userVotes || 0;
+                  // Count local votes for this persona in this round that aren't yet reflected in server state
+                  const localVoteKey = `${battle.id}-${roundScore.round}-${personaId}`;
+                  const hasLocalVote = userVotes.has(localVoteKey);
+
+                  // If we have a local vote that's being optimistically shown, ensure it's counted
+                  // Note: This assumes server votes don't yet include our local vote
+                  return hasLocalVote ? Math.max(serverVotes, 1) : serverVotes;
+                };
+
                 // Create array of personas with their scores and sort by votes (highest first)
                 const sortedPersonas = [
                   {
                     persona: battle.personas.left,
                     score: leftScore,
+                    optimisticVotes: getOptimisticVoteCount(
+                      battle.personas.left.id
+                    ),
                     hoverBorderColor: "hover:border-blue-500",
                   },
                   {
                     persona: battle.personas.right,
                     score: rightScore,
+                    optimisticVotes: getOptimisticVoteCount(
+                      battle.personas.right.id
+                    ),
                     hoverBorderColor: "hover:border-purple-500",
                   },
-                ].sort(
-                  (a, b) =>
-                    (b.score?.userVotes || 0) - (a.score?.userVotes || 0)
-                );
+                ].sort((a, b) => b.optimisticVotes - a.optimisticVotes);
 
                 return (
                   <motion.div
@@ -415,7 +431,12 @@ export function BattleSidebar({
 
                     <div className="space-y-3">
                       {sortedPersonas.map(
-                        ({ persona, score, hoverBorderColor }) => {
+                        ({
+                          persona,
+                          score,
+                          optimisticVotes,
+                          hoverBorderColor,
+                        }) => {
                           const voteKey = `${battle.id}-${roundScore.round}-${persona.id}`;
                           const isVoted = userVotes.has(voteKey);
                           const canVote = canVoteOnRound(roundScore.round);
@@ -455,7 +476,8 @@ export function BattleSidebar({
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <span className="text-sm text-gray-400">
-                                    {score?.userVotes || 0} votes
+                                    {optimisticVotes}{" "}
+                                    {optimisticVotes === 1 ? "vote" : "votes"}
                                   </span>
                                   {roundScore.winner === persona.id && (
                                     <span>🏆</span>
