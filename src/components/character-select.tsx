@@ -114,7 +114,7 @@ export function CharacterSelect() {
             <div className="text-blue-400 font-bold text-xl mb-4 text-center">
               PLAYER 1
             </div>
-            <div className="text-center min-h-[172px] flex flex-col items-center justify-center py-4">
+            <div className="text-center h-[220px] flex flex-col items-center justify-center py-4">
               {player1 ? (
                 <>
                   <div className="w-24 h-24 shrink-0 mb-4 rounded-full border-4 border-blue-500 overflow-hidden bg-gray-800 flex items-center justify-center text-4xl text-white">
@@ -130,8 +130,15 @@ export function CharacterSelect() {
                 </>
               ) : (
                 <>
-                  <div className="text-6xl mb-2 text-gray-600">?</div>
-                  <div className="text-gray-600">Waiting for selection...</div>
+                  <div className="w-24 h-24 shrink-0 mb-4 rounded-full border-4 border-gray-700 overflow-hidden bg-gray-800 flex items-center justify-center text-6xl text-gray-600">
+                    ?
+                  </div>
+                  <div className="text-gray-600 font-bold text-2xl mb-2">
+                    No Selection
+                  </div>
+                  <div className="text-gray-600 text-sm animate-pulse">
+                    Waiting for selection...
+                  </div>
                 </>
               )}
             </div>
@@ -142,7 +149,7 @@ export function CharacterSelect() {
             <div className="text-red-400 font-bold text-xl mb-4 text-center">
               PLAYER 2
             </div>
-            <div className="text-center min-h-[172px] flex flex-col items-center justify-center py-4">
+            <div className="text-center h-[220px] flex flex-col items-center justify-center py-4">
               {player2 ? (
                 <>
                   <div className="w-24 h-24 shrink-0 mb-4 rounded-full border-4 border-red-500 overflow-hidden bg-gray-800 flex items-center justify-center text-4xl text-white">
@@ -158,8 +165,15 @@ export function CharacterSelect() {
                 </>
               ) : (
                 <>
-                  <div className="text-6xl mb-2 text-gray-600">?</div>
-                  <div className="text-gray-600">Waiting for selection...</div>
+                  <div className="w-24 h-24 shrink-0 mb-4 rounded-full border-4 border-gray-700 overflow-hidden bg-gray-800 flex items-center justify-center text-6xl text-gray-600">
+                    ?
+                  </div>
+                  <div className="text-gray-600 font-bold text-2xl mb-2">
+                    No Selection
+                  </div>
+                  <div className="text-gray-600 text-sm animate-pulse">
+                    Waiting for selection...
+                  </div>
                 </>
               )}
             </div>
@@ -178,7 +192,7 @@ export function CharacterSelect() {
                   key={persona.id}
                   onClick={() => handlePersonaClick(persona)}
                   className={`
-                    relative group
+                    relative group flex flex-col h-full
                     bg-linear-to-b from-gray-800 to-gray-900
                     border-4 rounded-xl overflow-hidden
                     transition-all duration-300 transform
@@ -233,7 +247,7 @@ export function CharacterSelect() {
 
                   {/* Character Avatar */}
                   <div
-                    className="py-6 flex items-center justify-center text-6xl font-bold bg-gray-800 relative"
+                    className="h-40 flex items-center justify-center text-6xl font-bold bg-gray-800 relative"
                     style={{
                       background: `linear-gradient(135deg, ${persona.accentColor}22 0%, transparent 100%)`,
                     }}
@@ -250,7 +264,7 @@ export function CharacterSelect() {
                   </div>
 
                   {/* Character Info */}
-                  <div className="p-4 bg-gray-900/80 backdrop-blur">
+                  <div className="p-4 bg-gray-900/80 backdrop-blur flex-1 flex flex-col">
                     <h3 className="text-xl font-bold text-white mb-1 truncate">
                       {persona.name}
                     </h3>

@@ -19,6 +19,7 @@ export const users = pgTable('users', {
   encryptedDisplayName: text('encrypted_display_name'), // Encrypted user-set display name
   imageUrl: text('image_url'), // Not encrypted (public profile picture URL)
   role: text('role').notNull().default('user'), // 'admin' | 'user'
+  isProfilePublic: boolean('is_profile_public').notNull().default(true), // Profile visibility
   createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow(),
 });
@@ -50,6 +51,7 @@ export const battles = pgTable('battles', {
   // Auth and feature flags
   createdBy: text('created_by').references(() => users.id), // null for legacy battles
   isFeatured: boolean('is_featured').notNull().default(false), // true = admin featured, false = user battle
+  isPublic: boolean('is_public').notNull().default(false), // Battle visibility on user profiles
   
   createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow(),

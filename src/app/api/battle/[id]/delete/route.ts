@@ -66,7 +66,7 @@ export async function DELETE(
     // Revalidate pages
     revalidatePath('/');
     revalidatePath('/archive');
-    revalidatePath('/my-battles');
+    revalidatePath('/community');
     revalidatePath('/admin/dashboard');
 
     return new Response(JSON.stringify({ 

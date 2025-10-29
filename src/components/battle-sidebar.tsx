@@ -14,7 +14,7 @@ import Link from "next/link";
 
 interface BattleSidebarProps {
   battle: Battle;
-  onVote: (round: number, personaId: string) => void;
+  onVote: (round: number, personaId: string) => Promise<boolean>;
   onComment: (content: string) => void;
   isArchived?: boolean;
   isVotingPhase?: boolean;
@@ -38,13 +38,9 @@ export function BattleSidebar({
     defaultTab || "comments"
   );
 
-  // Update activeTab when defaultTab changes (for mobile drawer)
-  useEffect(() => {
-    if (defaultTab) {
-      setActiveTab(defaultTab);
-    }
-  }, [defaultTab]);
   const [comment, setComment] = useState("");
+  const [isSubmittingVote, setIsSubmittingVote] = useState(false);
+  const [optimisticVote, setOptimisticVote] = useState<string | null>(null);
   const [userVotes, setUserVotes] = useState<Set<string>>(() => {
     // Load votes from localStorage on mount
     if (typeof window !== "undefined") {
@@ -62,11 +58,15 @@ export function BattleSidebar({
   });
 
   // Automatically switch to voting tab when voting begins
+  // This takes priority over defaultTab when voting is active
   useEffect(() => {
     if (isVotingPhase) {
       setActiveTab("voting");
+    } else if (defaultTab) {
+      // Only respect defaultTab when not in voting phase
+      setActiveTab(defaultTab);
     }
-  }, [isVotingPhase]);
+  }, [isVotingPhase, defaultTab]);
 
   const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,17 +76,35 @@ export function BattleSidebar({
     setComment("");
   };
 
-  const handleVote = (round: number, personaId: string) => {
-    // Check if user has already voted in this round (for either persona)
-    const hasVotedInRound = Array.from(userVotes).some((voteKey) =>
-      voteKey.startsWith(`${round}-`)
-    );
-    if (hasVotedInRound) return;
+  const handleVote = async (round: number, personaId: string) => {
+    if (isSubmittingVote) return; // Prevent double-clicks
 
-    const voteKey = `${round}-${personaId}`;
-    onVote(round, personaId);
+    const voteKey = `${battle.id}-${round}-${personaId}`;
+    const currentVoteInRound = Array.from(userVotes).find((key) =>
+      key.startsWith(`${battle.id}-${round}-`)
+    );
+
+    // Optimistically update UI immediately
+    setIsSubmittingVote(true);
+    setOptimisticVote(voteKey);
+
+    // Determine if this is an undo (clicking same persona again)
+    const isUndo = currentVoteInRound === voteKey;
+
+    // Optimistically update local state
     setUserVotes((prev) => {
-      const newVotes = new Set(prev).add(voteKey);
+      const newVotes = new Set(prev);
+      if (isUndo) {
+        // Remove the vote
+        newVotes.delete(voteKey);
+      } else {
+        // Remove any existing vote in this round and add new one
+        if (currentVoteInRound) {
+          newVotes.delete(currentVoteInRound);
+        }
+        newVotes.add(voteKey);
+      }
+
       // Persist to localStorage
       if (typeof window !== "undefined") {
         const storageKey = `battle-votes-${battle.id}`;
@@ -94,13 +112,55 @@ export function BattleSidebar({
       }
       return newVotes;
     });
+
+    // Submit to server
+    try {
+      const success = await onVote(round, personaId);
+
+      if (!success) {
+        // Revert optimistic update on failure
+        setUserVotes((prev) => {
+          const newVotes = new Set(prev);
+          if (isUndo) {
+            // Restore the vote
+            newVotes.add(voteKey);
+          } else {
+            // Restore previous state
+            newVotes.delete(voteKey);
+            if (currentVoteInRound) {
+              newVotes.add(currentVoteInRound);
+            }
+          }
+
+          if (typeof window !== "undefined") {
+            const storageKey = `battle-votes-${battle.id}`;
+            localStorage.setItem(
+              storageKey,
+              JSON.stringify(Array.from(newVotes))
+            );
+          }
+          return newVotes;
+        });
+      }
+    } finally {
+      setIsSubmittingVote(false);
+      setOptimisticVote(null);
+    }
   };
 
   // Helper function to check if user has already voted in a round
   const hasVotedInRound = (round: number): boolean => {
     return Array.from(userVotes).some((voteKey) =>
-      voteKey.startsWith(`${round}-`)
+      voteKey.startsWith(`${battle.id}-${round}-`)
     );
+  };
+
+  // Helper function to get the current vote in a round (if any)
+  const getCurrentVoteInRound = (round: number): string | null => {
+    const vote = Array.from(userVotes).find((key) =>
+      key.startsWith(`${battle.id}-${round}-`)
+    );
+    return vote || null;
   };
 
   // Helper function to check if voting is allowed for a specific round
@@ -108,16 +168,8 @@ export function BattleSidebar({
     // Archived battles cannot be voted on
     if (isArchived) return false;
 
-    // Can't vote if already voted in this round
-    if (hasVotedInRound(round)) return false;
-
     // Can only vote on the current round during its voting phase
     if (isVotingPhase && battle.currentRound === round) return true;
-
-    // Can vote on completed rounds that haven't been advanced yet
-    // (i.e., after voting phase ends but before advancing to next round)
-    if (votingCompletedRound === round && battle.currentRound === round)
-      return true;
 
     return false;
   };
@@ -316,27 +368,55 @@ export function BattleSidebar({
               .slice()
               .reverse()
               .map((roundScore) => {
+                // During review (reading) phase, don't show the current round's voting pair
+                const isCurrentRound = roundScore.round === battle.currentRound;
+                const hideCurrentRoundDuringReview =
+                  !isArchived &&
+                  isCurrentRound &&
+                  !isVotingPhase &&
+                  votingCompletedRound !== roundScore.round;
+
+                if (hideCurrentRoundDuringReview) {
+                  return null;
+                }
+
                 const leftScore =
                   roundScore.personaScores[battle.personas.left.id];
                 const rightScore =
                   roundScore.personaScores[battle.personas.right.id];
+
+                // Calculate optimistic vote counts by checking both server state and local state
+                const getOptimisticVoteCount = (personaId: string): number => {
+                  const serverVotes =
+                    roundScore.personaScores[personaId]?.userVotes || 0;
+                  // Count local votes for this persona in this round that aren't yet reflected in server state
+                  const localVoteKey = `${battle.id}-${roundScore.round}-${personaId}`;
+                  const hasLocalVote = userVotes.has(localVoteKey);
+
+                  // If we have a local vote that's being optimistically shown, ensure it's counted
+                  // Note: This assumes server votes don't yet include our local vote
+                  return hasLocalVote ? Math.max(serverVotes, 1) : serverVotes;
+                };
 
                 // Create array of personas with their scores and sort by votes (highest first)
                 const sortedPersonas = [
                   {
                     persona: battle.personas.left,
                     score: leftScore,
+                    optimisticVotes: getOptimisticVoteCount(
+                      battle.personas.left.id
+                    ),
                     hoverBorderColor: "hover:border-blue-500",
                   },
                   {
                     persona: battle.personas.right,
                     score: rightScore,
+                    optimisticVotes: getOptimisticVoteCount(
+                      battle.personas.right.id
+                    ),
                     hoverBorderColor: "hover:border-purple-500",
                   },
-                ].sort(
-                  (a, b) =>
-                    (b.score?.userVotes || 0) - (a.score?.userVotes || 0)
-                );
+                ].sort((a, b) => b.optimisticVotes - a.optimisticVotes);
 
                 return (
                   <motion.div
@@ -351,48 +431,70 @@ export function BattleSidebar({
 
                     <div className="space-y-3">
                       {sortedPersonas.map(
-                        ({ persona, score, hoverBorderColor }) => (
-                          <button
-                            key={persona.id}
-                            onClick={() =>
-                              handleVote(roundScore.round, persona.id)
+                        ({
+                          persona,
+                          score,
+                          optimisticVotes,
+                          hoverBorderColor,
+                        }) => {
+                          const voteKey = `${battle.id}-${roundScore.round}-${persona.id}`;
+                          const isVoted = userVotes.has(voteKey);
+                          const canVote = canVoteOnRound(roundScore.round);
+
+                          return (
+                            <button
+                              key={persona.id}
+                              onClick={() =>
+                                handleVote(roundScore.round, persona.id)
+                              }
+                              disabled={!canVote || isSubmittingVote}
+                              className={`
+                            w-full p-3 rounded-lg border-2 transition-all
+                            ${
+                              isVoted
+                                ? "bg-linear-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400 shadow-lg shadow-yellow-400/20 hover:scale-[1.02] hover:border-yellow-500"
+                                : !canVote
+                                ? "bg-gray-700 border-gray-600 cursor-not-allowed"
+                                : `hover:scale-[1.02] hover:shadow-lg border-gray-600 ${hoverBorderColor}`
                             }
-                            disabled={
-                              !canVoteOnRound(roundScore.round) ||
-                              userVotes.has(`${roundScore.round}-${persona.id}`)
-                            }
-                            className={`
-                          w-full p-3 rounded-lg border-2 transition-all
-                          ${
-                            userVotes.has(`${roundScore.round}-${persona.id}`)
-                              ? "bg-gray-700 border-yellow-400 cursor-not-allowed"
-                              : !canVoteOnRound(roundScore.round)
-                              ? "bg-gray-700 border-gray-600 cursor-not-allowed"
-                              : `hover:bg-gray-700 border-gray-600 ${hoverBorderColor}`
-                          }
-                        `}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span
-                                className="font-medium"
-                                style={{ color: persona.accentColor }}
-                              >
-                                {persona.name}
-                              </span>
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm text-gray-400">
-                                  {score?.userVotes || 0} votes
-                                </span>
-                                {roundScore.winner === persona.id && (
-                                  <span>🏆</span>
+                            ${isSubmittingVote ? "opacity-50" : ""}
+                          `}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className="font-medium"
+                                    style={{ color: persona.accentColor }}
+                                  >
+                                    {persona.name}
+                                  </span>
+                                  {isVoted && (
+                                    <span className="text-yellow-400 text-xs">
+                                      ✓ Your vote
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm text-gray-400">
+                                    {optimisticVotes}{" "}
+                                    {optimisticVotes === 1 ? "vote" : "votes"}
+                                  </span>
+                                  {roundScore.winner === persona.id && (
+                                    <span>🏆</span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="text-sm text-gray-400 mt-1">
+                                Score: {score?.totalScore.toFixed(1)}
+                                {isVoted && canVote && (
+                                  <span className="ml-2 text-xs text-yellow-400">
+                                    (click to undo)
+                                  </span>
                                 )}
                               </div>
-                            </div>
-                            <div className="text-sm text-gray-400 mt-1">
-                              Score: {score?.totalScore.toFixed(1)}
-                            </div>
-                          </button>
-                        )
+                            </button>
+                          );
+                        }
                       )}
                     </div>
                   </motion.div>

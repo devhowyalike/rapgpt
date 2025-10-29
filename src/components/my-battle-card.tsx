@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Share2,
@@ -8,6 +8,8 @@ import {
   AlertTriangle,
   MoreVertical,
   Crown,
+  Globe,
+  Lock,
 } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
@@ -24,13 +26,24 @@ interface MyBattleCardProps {
     verses?: any[];
     winner?: string | null;
     scores?: any[];
+    isPublic?: boolean;
   };
   shareUrl: string;
+  showManagement?: boolean;
+  userIsProfilePublic?: boolean;
 }
 
-export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
+export function MyBattleCard({
+  battle,
+  shareUrl,
+  showManagement = false,
+  userIsProfilePublic = true,
+}: MyBattleCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isPublic, setIsPublic] = useState(battle.isPublic || false);
+  const [isTogglingPublic, setIsTogglingPublic] = useState(false);
+  const [toggleError, setToggleError] = useState<string | null>(null);
 
   const personas = {
     left: battle.leftPersona as any,
@@ -39,9 +52,35 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
 
   const battleUrl = `${shareUrl}/battle/${battle.id}`;
 
+  // Sync local state with prop when battle.isPublic changes (e.g., after profile privacy toggle)
+  useEffect(() => {
+    setIsPublic(battle.isPublic || false);
+  }, [battle.isPublic]);
+
   const handleShare = () => {
     navigator.clipboard.writeText(battleUrl);
     alert("Link copied to clipboard!");
+  };
+
+  const handleTogglePublic = async () => {
+    setIsTogglingPublic(true);
+    setToggleError(null);
+    try {
+      const response = await fetch(`/api/battle/${battle.id}/toggle-public`, {
+        method: "PATCH",
+      });
+      const data = await response.json();
+      if (data.success) {
+        setIsPublic(data.isPublic);
+      } else if (data.error) {
+        setToggleError(data.error);
+      }
+    } catch (error) {
+      console.error("Failed to toggle battle public status:", error);
+      setToggleError("Failed to update battle status");
+    } finally {
+      setIsTogglingPublic(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -104,54 +143,105 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
             {battle.title}
           </Link>
         </div>
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger asChild>
-            <button
-              className="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-              title="More options"
-            >
-              <MoreVertical size={18} />
-            </button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Portal>
-            <DropdownMenu.Content
-              className="min-w-[180px] bg-gray-800 border border-gray-700 rounded-lg p-1 shadow-xl z-50"
-              sideOffset={5}
-              align="end"
-            >
-              <DropdownMenu.Item
-                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 rounded cursor-pointer outline-none"
-                onClick={handleShare}
+        {showManagement && (
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <button
+                className={`px-3 py-1.5 rounded flex items-center gap-1.5 text-xs transition-colors ${
+                  isPublic
+                    ? "bg-blue-600/30 text-blue-300 hover:bg-blue-600/40"
+                    : "bg-gray-600/30 text-gray-300 hover:bg-gray-600/40"
+                }`}
+                title="Manage battle"
               >
-                <Share2 size={16} />
-                Share Link
-              </DropdownMenu.Item>
-              <DropdownMenu.Item
-                className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-gray-700 rounded cursor-pointer outline-none"
-                onClick={() => setShowDeleteDialog(true)}
+                {isPublic ? (
+                  <>
+                    <Globe size={12} />
+                    Public
+                  </>
+                ) : (
+                  <>
+                    <Lock size={12} />
+                    Unpublished
+                  </>
+                )}
+                <MoreVertical size={12} className="ml-0.5" />
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                className="min-w-[180px] bg-gray-800 border border-gray-700 rounded-lg p-1 shadow-xl z-50"
+                sideOffset={5}
+                align="end"
               >
-                <Trash2 size={16} />
-                Delete Battle
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Portal>
-        </DropdownMenu.Root>
+                <DropdownMenu.Item
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 rounded cursor-pointer outline-none"
+                  onClick={handleShare}
+                >
+                  <Share2 size={16} />
+                  Share Link
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  className={`flex items-center gap-2 px-3 py-2 text-sm rounded cursor-pointer outline-none ${
+                    !isPublic && (isPaused || !userIsProfilePublic)
+                      ? "text-gray-500 cursor-not-allowed"
+                      : "text-gray-200 hover:bg-gray-700"
+                  }`}
+                  onClick={
+                    !isPublic && (isPaused || !userIsProfilePublic)
+                      ? undefined
+                      : handleTogglePublic
+                  }
+                  disabled={
+                    isTogglingPublic ||
+                    (!isPublic && (isPaused || !userIsProfilePublic))
+                  }
+                >
+                  {isPublic ? (
+                    <>
+                      <Lock size={16} />
+                      Unpublish Battle
+                    </>
+                  ) : (
+                    <>
+                      <Globe size={16} />
+                      {isPaused
+                        ? "Cannot Publish (Paused)"
+                        : !userIsProfilePublic
+                        ? "Cannot Publish (Private Profile)"
+                        : "Publish Battle"}
+                    </>
+                  )}
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-gray-700 rounded cursor-pointer outline-none"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash2 size={16} />
+                  Delete Battle
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
+        )}
       </div>
 
-      <div className="flex items-center gap-2 text-sm mb-4">
-        <span
-          className={`px-3 py-1 rounded ${
-            battle.status === "completed"
-              ? "bg-green-600/30 text-green-300"
-              : battle.status === "ongoing"
-              ? "bg-yellow-600/30 text-yellow-300"
-              : battle.status === "incomplete"
-              ? "bg-orange-600/30 text-orange-300"
-              : "bg-gray-600/30 text-gray-400"
-          }`}
-        >
-          {battle.status === "incomplete" ? "paused" : battle.status}
-        </span>
+      <div className="flex items-center gap-2 text-sm mb-4 flex-wrap">
+        {showManagement && (
+          <span
+            className={`px-3 py-1 rounded ${
+              battle.status === "completed"
+                ? "bg-green-600/30 text-green-300"
+                : battle.status === "ongoing"
+                ? "bg-yellow-600/30 text-yellow-300"
+                : battle.status === "incomplete"
+                ? "bg-orange-600/30 text-orange-300"
+                : "bg-gray-600/30 text-gray-400"
+            }`}
+          >
+            {battle.status === "incomplete" ? "paused" : battle.status}
+          </span>
+        )}
         <span className="text-gray-500">
           Created {new Date(battle.createdAt).toLocaleDateString()}
         </span>
@@ -200,6 +290,13 @@ export function MyBattleCard({ battle, shareUrl }: MyBattleCardProps) {
             </li>
             <li>• {finalStats.totalRounds} rounds completed</li>
           </ul>
+        </div>
+      )}
+
+      {/* Error message for toggle failures */}
+      {toggleError && (
+        <div className="mb-4 p-3 bg-red-900/30 rounded-lg border border-red-500/30">
+          <p className="text-sm text-red-300">{toggleError}</p>
         </div>
       )}
 

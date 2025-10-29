@@ -4,12 +4,36 @@ import {
   UserButton as ClerkUserButton,
   SignInButton,
   useAuth,
+  useUser,
 } from "@clerk/nextjs";
 import Link from "next/link";
-import { User } from "lucide-react";
+import { User, Swords } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function UserButton() {
   const { isSignedIn } = useAuth();
+  const { user } = useUser();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.id) {
+      // Fetch the database user ID from the public metadata
+      const dbUserId = user.publicMetadata?.dbUserId as string | undefined;
+      if (dbUserId) {
+        setUserId(dbUserId);
+      } else {
+        // Fallback: fetch from API
+        fetch("/api/user/me")
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.id) {
+              setUserId(data.id);
+            }
+          })
+          .catch(console.error);
+      }
+    }
+  }, [user]);
 
   if (!isSignedIn) {
     return (
@@ -24,11 +48,22 @@ export function UserButton() {
 
   return (
     <div className="flex items-center gap-4">
+      {userId && (
+        <Link
+          href={`/profile/${userId}`}
+          className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm"
+        >
+          <User size={16} />
+          <span>Profile</span>
+        </Link>
+      )}
+
       <Link
-        href="/my-battles"
-        className="text-gray-300 hover:text-white transition-colors hidden sm:inline"
+        href="/new-battle"
+        className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
       >
-        My e-Beefs
+        <Swords size={16} />
+        <span>Create Battle</span>
       </Link>
 
       <ClerkUserButton
@@ -45,11 +80,6 @@ export function UserButton() {
         }}
       >
         <ClerkUserButton.MenuItems>
-          <ClerkUserButton.Link
-            label="My eBeefs"
-            labelIcon={<User size={16} />}
-            href="/my-battles"
-          />
           <ClerkUserButton.Action label="manageAccount" />
         </ClerkUserButton.MenuItems>
       </ClerkUserButton>

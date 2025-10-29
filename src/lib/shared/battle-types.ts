@@ -85,6 +85,11 @@ export interface Battle {
   winner: string | null;
   createdAt: number;
   updatedAt: number;
+  creator?: {
+    userId: string;
+    displayName: string;
+    imageUrl?: string | null;
+  } | null;
 }
 
 export interface BattleState {

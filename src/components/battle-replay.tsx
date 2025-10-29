@@ -11,7 +11,9 @@ import { VerseDisplay } from "./verse-display";
 import { ScoreDisplay } from "./score-display";
 import { getRoundVerses } from "@/lib/battle-engine";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, User } from "lucide-react";
+import Link from "next/link";
+import { VictoryConfetti } from "./victory-confetti";
 
 interface BattleReplayProps {
   battle: Battle;
@@ -61,21 +63,22 @@ export function BattleReplay({ battle }: BattleReplayProps) {
             {/* Battle Winner at Top */}
             {battle.status === "incomplete" ? (
               <motion.div
-                className="text-center"
+                className="text-center mt-2"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
-                <div className="text-lg font-bold text-orange-400 font-(family-name:--font-bebas-neue)">
+                <div className="text-2xl font-bold text-orange-400 font-(family-name:--font-bebas-neue)">
                   ⏸️ MATCH PAUSED ⏸️
                 </div>
               </motion.div>
             ) : battle.winner ? (
               <motion.div
-                className="text-center"
+                className="text-center mt-2 relative"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
               >
-                <div className="text-xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue)">
+                <VictoryConfetti trigger={true} />
+                <div className="text-3xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue) relative z-10">
                   🏆 WINNER:{" "}
                   {battle.personas.left.id === battle.winner
                     ? battle.personas.left.name
@@ -84,6 +87,19 @@ export function BattleReplay({ battle }: BattleReplayProps) {
                 </div>
               </motion.div>
             ) : null}
+
+            {/* Creator Link */}
+            {battle.creator && (
+              <div className="text-center">
+                <Link
+                  href={`/profile/${battle.creator.userId}`}
+                  className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-blue-400 transition-colors"
+                >
+                  <User className="w-4 h-4" />
+                  <span>Created by {battle.creator.displayName}</span>
+                </Link>
+              </div>
+            )}
 
             {/* Replay Controls - Round Counter */}
             <div className="flex items-center justify-center gap-3">
@@ -111,23 +127,26 @@ export function BattleReplay({ battle }: BattleReplayProps) {
 
           {/* Desktop: Horizontal Layout */}
           <div className="hidden md:flex md:items-center md:justify-between md:gap-8">
-            {/* Left Side: Battle Winner */}
-            <div className="shrink-0">
+            {/* Left Side: Battle Winner and Creator */}
+            <div className="shrink-0 flex flex-col gap-2">
               {battle.status === "incomplete" ? (
                 <motion.div
+                  className="mt-2"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                 >
-                  <div className="text-xl lg:text-2xl font-bold text-orange-400 font-(family-name:--font-bebas-neue) whitespace-nowrap">
+                  <div className="text-2xl lg:text-3xl font-bold text-orange-400 font-(family-name:--font-bebas-neue) whitespace-nowrap">
                     ⏸️ MATCH PAUSED ⏸️
                   </div>
                 </motion.div>
               ) : battle.winner ? (
                 <motion.div
+                  className="mt-2 relative"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                 >
-                  <div className="text-2xl lg:text-3xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue) whitespace-nowrap">
+                  <VictoryConfetti trigger={true} />
+                  <div className="text-4xl lg:text-5xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue) whitespace-nowrap relative z-10">
                     🏆 WINNER:{" "}
                     {battle.personas.left.id === battle.winner
                       ? battle.personas.left.name
@@ -136,6 +155,17 @@ export function BattleReplay({ battle }: BattleReplayProps) {
                   </div>
                 </motion.div>
               ) : null}
+
+              {/* Creator Link */}
+              {battle.creator && (
+                <Link
+                  href={`/profile/${battle.creator.userId}`}
+                  className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-blue-400 transition-colors"
+                >
+                  <User className="w-4 h-4" />
+                  <span>Created by {battle.creator.displayName}</span>
+                </Link>
+              )}
             </div>
 
             {/* Right Side: Round Controls */}

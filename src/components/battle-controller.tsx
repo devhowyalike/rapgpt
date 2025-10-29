@@ -49,6 +49,10 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     setIsVotingPhase,
     votingCompletedRound,
     completeVotingPhase,
+    readingTimeRemaining,
+    setReadingTimeRemaining,
+    isReadingPhase,
+    setIsReadingPhase,
   } = useBattleStore();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
@@ -61,18 +65,26 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   );
   const [isLeaving, setIsLeaving] = useState(false);
 
+  // Automatically switch to voting tab when voting begins (for mobile)
+  useEffect(() => {
+    if (isVotingPhase) {
+      setMobileActiveTab("voting");
+      // Also open the drawer on mobile to make voting more visible
+      setShowMobileDrawer(true);
+    }
+  }, [isVotingPhase]);
+
   // Navigation guard - prevent leaving page during ongoing battle
   const { NavigationDialog } = useNavigationGuard({
     when: battle?.status === "ongoing",
     title: "Pause Battle?",
-    message:
-      "Are you sure you want to leave? The match will be paused and marked as incomplete in the archive.",
+    message: "Leave now? We'll pause your match.",
     onConfirm: async () => {
       if (battle) {
         setIsLeaving(true);
         await cancelBattle();
-        // Redirect immediately to prevent flash of battle page
-        window.location.href = "/my-battles";
+        // Redirect to the battle page itself (it will show as completed/paused)
+        window.location.href = `/battle/${battle.id}`;
       }
     },
   });
@@ -81,33 +93,67 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     setBattle(initialBattle);
   }, [initialBattle, setBattle]);
 
-  // Voting timer effect - starts when round is complete
+  // Reading phase timer effect - starts when round is complete
   useEffect(() => {
     if (!battle) return;
 
     const roundComplete = isRoundComplete(battle, battle.currentRound);
     const nextPerformer = getNextPerformer(battle);
 
-    // Start voting phase when round is complete and we're not already in voting phase
+    // Start reading phase when round is complete and we're not already in reading/voting phase
     if (
       roundComplete &&
       !nextPerformer &&
       battle.status === "ongoing" &&
+      !isReadingPhase &&
       !isVotingPhase &&
       votingCompletedRound !== battle.currentRound
     ) {
-      setIsVotingPhase(true);
-      setVotingTimeRemaining(10); // 10 seconds for voting
+      setIsReadingPhase(true);
+      setReadingTimeRemaining(20); // 20 seconds to read the verse
     }
   }, [
     battle,
+    isReadingPhase,
     isVotingPhase,
-    setIsVotingPhase,
-    setVotingTimeRemaining,
+    setIsReadingPhase,
+    setReadingTimeRemaining,
     votingCompletedRound,
   ]);
 
-  // Countdown timer effect
+  // Reading countdown timer effect
+  useEffect(() => {
+    if (
+      !isReadingPhase ||
+      readingTimeRemaining === null ||
+      readingTimeRemaining <= 0
+    ) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      const next = (readingTimeRemaining ?? 0) - 1;
+      setReadingTimeRemaining(next);
+      if (next <= 0) {
+        // Reading phase complete, start voting phase
+        setIsReadingPhase(false);
+        setReadingTimeRemaining(null);
+        setIsVotingPhase(true);
+        setVotingTimeRemaining(10); // 10 seconds for voting
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [
+    readingTimeRemaining,
+    isReadingPhase,
+    setReadingTimeRemaining,
+    setIsReadingPhase,
+    setIsVotingPhase,
+    setVotingTimeRemaining,
+  ]);
+
+  // Voting countdown timer effect
   useEffect(() => {
     if (
       !isVotingPhase ||
@@ -161,7 +207,9 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let fullVerse = "";
+      let displayedVerse = "";
 
+      // First, buffer all incoming chunks
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
@@ -169,9 +217,27 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
           const chunk = decoder.decode(value);
           fullVerse += chunk;
-          setStreamingVerse(fullVerse, personaId);
         }
       }
+
+      // Now display the verse word by word at a controlled speed
+      const WORD_DELAY = 100; // Delay in milliseconds between words (100ms = 10 words per second)
+
+      // Split text while preserving whitespace and newlines
+      const tokens = fullVerse.split(/(\s+)/);
+
+      for (let i = 0; i < tokens.length; i++) {
+        displayedVerse += tokens[i];
+        setStreamingVerse(displayedVerse, personaId);
+
+        // Only delay on actual words (not whitespace)
+        if (tokens[i].trim()) {
+          await new Promise((resolve) => setTimeout(resolve, WORD_DELAY));
+        }
+      }
+
+      // Ensure the full verse is displayed
+      setStreamingVerse(fullVerse, personaId);
 
       // Add completed verse to battle
       addVerse(personaId, fullVerse);
@@ -187,7 +253,10 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     }
   };
 
-  const handleVote = async (round: number, personaId: string) => {
+  const handleVote = async (
+    round: number,
+    personaId: string
+  ): Promise<boolean> => {
     try {
       const response = await fetch(`/api/battle/${battle.id}/vote`, {
         method: "POST",
@@ -195,21 +264,21 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
         body: JSON.stringify({
           round,
           personaId,
-          userId: `user-${Date.now()}`, // Simple user ID for now
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Vote failed:", errorData.error);
-        // Silently fail - the UI will prevent invalid votes anyway
-        return;
+        return false;
       }
 
       const { battle: updatedBattle } = await response.json();
       setBattle(updatedBattle);
+      return true;
     } catch (error) {
       console.error("Error voting:", error);
+      return false;
     }
   };
 
@@ -239,7 +308,9 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   };
 
   const handleAdvanceRound = async () => {
-    // Reset voting phase when advancing
+    // Reset both reading and voting phases when advancing
+    setIsReadingPhase(false);
+    setReadingTimeRemaining(null);
     setIsVotingPhase(false);
     setVotingTimeRemaining(null);
     advanceRound();
@@ -257,8 +328,8 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     setCancelError(null);
     try {
       await cancelBattle();
-      // Redirect to my battles page after canceling
-      window.location.href = "/my-battles";
+      // Redirect to the battle page itself (it will show as paused)
+      window.location.href = `/battle/${battle.id}`;
     } catch (error) {
       console.error("Error canceling battle:", error);
       setCancelError("Failed to cancel battle. Please try again.");
@@ -288,6 +359,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     roundComplete &&
     !nextPerformer &&
     battle.status === "ongoing" &&
+    !isReadingPhase &&
     !isVotingPhase;
 
   const handleMobileCommentsClick = () => {
@@ -423,29 +495,123 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
             battle={battle}
             streamingPersonaId={streamingPersonaId}
             streamingText={streamingVerse}
+            isReadingPhase={isReadingPhase}
+            isVotingPhase={isVotingPhase}
+            votingCompletedRound={votingCompletedRound}
           />
 
-          {/* Control Bar */}
-          {canGenerate && (
+          {/* Control Bar - Always visible during ongoing battles */}
+          {battle.status === "ongoing" && (
             <div className="p-4 pb-24 md:pb-4 bg-gray-900 border-t border-gray-800">
               <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-3">
+                {/* Primary Action Button - Changes based on state */}
                 <button
-                  onClick={handleGenerateVerse}
-                  disabled={isGenerating}
-                  className="flex-1 px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
+                  onClick={
+                    canAdvance
+                      ? handleAdvanceRound
+                      : canGenerate
+                      ? handleGenerateVerse
+                      : undefined
+                  }
+                  disabled={
+                    isGenerating ||
+                    isReadingPhase ||
+                    isVotingPhase ||
+                    (!canGenerate && !canAdvance)
+                  }
+                  className={`
+                    flex-1 px-6 py-3 rounded-lg text-white font-bold transition-all
+                    ${
+                      isReadingPhase
+                        ? "bg-linear-to-r from-cyan-600 to-blue-600"
+                        : isVotingPhase
+                        ? "bg-linear-to-r from-purple-600 to-pink-600 animate-pulse"
+                        : canAdvance
+                        ? "bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 animate-pulse"
+                        : battle.verses.length === 0
+                        ? "bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                        : "bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"
+                    }
+                    ${
+                      isGenerating ||
+                      isReadingPhase ||
+                      isVotingPhase ||
+                      (!canGenerate && !canAdvance)
+                        ? "cursor-not-allowed"
+                        : ""
+                    }
+                  `}
                 >
                   {isGenerating ? (
-                    <>
+                    <div className="flex items-center justify-center gap-2">
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Generating...
-                    </>
+                      Kicking ballistics...
+                    </div>
+                  ) : isReadingPhase && readingTimeRemaining !== null ? (
+                    <div className="flex items-center justify-between gap-4 w-full">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">📖</span>
+                        <span className="text-lg font-medium">
+                          Read the source...Voting begins in
+                        </span>
+                        <span className="text-2xl font-bebas-neue">
+                          {readingTimeRemaining}s
+                        </span>
+                      </div>
+                      {/* <div className="flex items-center gap-3 flex-1 max-w-md">
+                        <span className="text-sm text-white/80 whitespace-nowrap">
+                          Voting in {readingTimeRemaining}s
+                        </span>
+                        <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden min-w-[100px]">
+                          <div
+                            className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
+                            style={{
+                              width: `${(readingTimeRemaining / 20) * 100}%`,
+                            }}
+                          />
+                        </div>
+                      </div> */}
+                    </div>
+                  ) : isVotingPhase && votingTimeRemaining !== null ? (
+                    <div className="flex items-center justify-between gap-4 w-full">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">⏱️</span>
+                        <span className="text-lg font-medium">Vote Now!</span>
+                        <span className="text-2xl font-bebas-neue">
+                          {votingTimeRemaining}s
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 flex-1 max-w-md">
+                        <span className="text-sm text-white/80 whitespace-nowrap">
+                          Vote in the sidebar →
+                        </span>
+                        <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden min-w-[100px]">
+                          <div
+                            className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
+                            style={{
+                              width: `${(votingTimeRemaining / 10) * 100}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ) : canAdvance ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <ArrowRight className="w-5 h-5" />
+                      {battle.currentRound === 3
+                        ? "Reveal Winner"
+                        : "Next Round"}
+                    </div>
                   ) : (
-                    <>
+                    <div className="flex items-center justify-center gap-2">
                       <Play className="w-5 h-5" />
-                      Next: {battle.personas[nextPerformer].name}
-                    </>
+                      {battle.verses.length === 0 ? "First up:" : "Next:"}{" "}
+                      {nextPerformer && battle.personas[nextPerformer].name}
+                    </div>
                   )}
                 </button>
+
+                {/* Pause Battle Button */}
                 <button
                   onClick={handleCancelBattle}
                   disabled={isCanceling || isGenerating}
@@ -454,69 +620,6 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                   <Pause className="w-5 h-5" />
                   Pause Battle
                 </button>
-              </div>
-            </div>
-          )}
-
-          {/* Voting Timer Display */}
-          {isVotingPhase && votingTimeRemaining !== null && (
-            <div className="p-4 pb-24 md:pb-4 bg-gray-900 border-t border-gray-800">
-              <div className="max-w-4xl mx-auto">
-                <div className="bg-linear-to-r from-purple-600 to-blue-600 rounded-lg p-6 text-center">
-                  <div className="text-white text-lg font-medium mb-2">
-                    ⏱️ Vote Now!
-                  </div>
-                  <div className="text-5xl font-bold text-white mb-2 font-bebas-neue">
-                    {votingTimeRemaining}
-                  </div>
-                  <div className="text-white/80 text-sm">
-                    seconds remaining to cast your vote
-                  </div>
-                  <div className="mt-4 h-2 bg-white/20 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
-                      style={{ width: `${(votingTimeRemaining / 10) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Advance Round Button */}
-          {canAdvance && (
-            <div className="p-4 pb-24 md:pb-4 bg-gray-900 border-t border-gray-800">
-              <div className="max-w-4xl mx-auto space-y-3">
-                {/* Voting Ended Message */}
-                <div className="bg-gray-800 rounded-lg p-4 text-center border-2 border-green-500/30">
-                  <div className="text-green-400 font-medium text-lg mb-1">
-                    ✓ Voting has ended
-                  </div>
-                  <div className="text-gray-400 text-sm">
-                    Round {battle.currentRound} is complete
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <button
-                    onClick={handleAdvanceRound}
-                    className="flex-1 px-6 py-3 bg-linear-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all animate-pulse"
-                  >
-                    <ArrowRight className="w-5 h-5" />
-                    {battle.currentRound === 3
-                      ? "Reveal Winner"
-                      : "Continue to Next Round"}
-                  </button>
-                  <button
-                    onClick={handleCancelBattle}
-                    disabled={isCanceling}
-                    className="px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
-                  >
-                    <Pause className="w-5 h-5" />
-                    Pause Battle
-                  </button>
-                </div>
               </div>
             </div>
           )}
@@ -609,8 +712,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                   Pause Battle?
                 </Dialog.Title>
                 <Dialog.Description className="text-gray-400 mb-4">
-                  Are you sure you want to chill this e-beef? It will be marked
-                  as paused in the archive and can be resumed later.
+                  Pause the battle? You can resume later.
                 </Dialog.Description>
 
                 {cancelError && (

@@ -1,6 +1,11 @@
 import { NextRequest } from 'next/server';
 import { revalidatePath } from 'next/cache';
+import { auth } from '@clerk/nextjs/server';
 import { getBattleById, saveBattle } from '@/lib/battle-storage';
+import { db } from '@/lib/db/client';
+import { battles } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
+import { getOrCreateUser } from '@/lib/auth/sync-user';
 import type { Battle } from '@/lib/shared';
 
 export async function GET(
@@ -36,6 +41,21 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Require authentication
+    const { userId: clerkUserId } = await auth();
+    
+    if (!clerkUserId) {
+      return new Response(JSON.stringify({ 
+        error: 'Unauthorized: You must be signed in to update battles' 
+      }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Get or create user from database
+    const user = await getOrCreateUser(clerkUserId);
+
     const { id } = await params;
     const battle: Battle = await request.json();
 
@@ -46,11 +66,49 @@ export async function PUT(
       });
     }
 
+    // Check if user owns the battle
+    const existingBattle = await db.query.battles.findFirst({
+      where: eq(battles.id, id),
+    });
+
+    if (!existingBattle) {
+      return new Response(JSON.stringify({ error: 'Battle not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Check authorization: user must own the battle OR be an admin
+    const isOwner = existingBattle.createdBy === user.id;
+    const isAdmin = user.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return new Response(JSON.stringify({ 
+        error: 'Forbidden: You do not have permission to update this battle' 
+      }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     await saveBattle(battle);
 
-    // Revalidate the archive page and battle page to show fresh data
+    // If battle is being paused, automatically unpublish it
+    if (battle.status === 'incomplete' && existingBattle.isPublic) {
+      await db
+        .update(battles)
+        .set({
+          isPublic: false,
+          updatedAt: new Date(),
+        })
+        .where(eq(battles.id, id));
+    }
+
+    // Revalidate pages to show fresh data
     revalidatePath('/archive');
+    revalidatePath('/community');
     revalidatePath(`/battle/${id}`);
+    revalidatePath(`/profile/${existingBattle.createdBy}`);
 
     return new Response(JSON.stringify(battle), {
       status: 200,

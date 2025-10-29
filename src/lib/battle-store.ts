@@ -15,6 +15,8 @@ interface BattleStore {
   votingTimeRemaining: number | null;
   isVotingPhase: boolean;
   votingCompletedRound: number | null;
+  readingTimeRemaining: number | null;
+  isReadingPhase: boolean;
   
   setBattle: (battle: Battle) => void;
   setLoading: (loading: boolean) => void;
@@ -24,6 +26,8 @@ interface BattleStore {
   setIsVotingPhase: (isVoting: boolean) => void;
   setVotingCompletedRound: (round: number | null) => void;
   completeVotingPhase: (round: number) => void;
+  setReadingTimeRemaining: (time: number | null) => void;
+  setIsReadingPhase: (isReading: boolean) => void;
   
   addVerse: (personaId: string, verse: string) => void;
   advanceRound: () => void;
@@ -45,6 +49,8 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
   votingTimeRemaining: null,
   isVotingPhase: false,
   votingCompletedRound: null,
+  readingTimeRemaining: null,
+  isReadingPhase: false,
 
   setBattle: (battle) => set({ battle }),
   setLoading: (loading) => set({ isLoading: loading }),
@@ -60,6 +66,8 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
       votingTimeRemaining: null,
       votingCompletedRound: round,
     }),
+  setReadingTimeRemaining: (time) => set({ readingTimeRemaining: time }),
+  setIsReadingPhase: (isReading) => set({ isReadingPhase: isReading }),
 
   addVerse: (personaId, verse) => {
     const { battle } = get();
