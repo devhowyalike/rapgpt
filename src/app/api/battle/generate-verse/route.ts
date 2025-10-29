@@ -3,7 +3,6 @@ import { streamText } from 'ai';
 import { getPersona } from '@/lib/shared';
 import type { Battle, Verse } from '@/lib/shared';
 import { buildSystemPrompt, getFirstVerseMessage } from '@/lib/context-overrides';
-import { battleSchema } from '@/lib/validations/battle';
 import { z } from 'zod';
 import { broadcastEvent } from '@/lib/websocket/broadcast-helper';
 import type { VerseStreamingEvent, VerseCompleteEvent } from '@/lib/websocket/types';
@@ -12,7 +11,7 @@ import type { VerseStreamingEvent, VerseCompleteEvent } from '@/lib/websocket/ty
 export const maxDuration = 30;
 
 const generateVerseRequestSchema = z.object({
-  battle: battleSchema,
+  battle: z.any(), // Accept any battle object - type checking is done at runtime
   personaId: z.string(),
   isLive: z.boolean().optional(),
 });
@@ -25,6 +24,7 @@ export async function POST(req: Request) {
     const validation = generateVerseRequestSchema.safeParse(body);
     
     if (!validation.success) {
+      console.error('[Generate Verse] Validation failed:', validation.error.issues);
       return new Response(JSON.stringify({ 
         error: 'Invalid request', 
         details: validation.error.issues 

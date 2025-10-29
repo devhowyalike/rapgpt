@@ -88,6 +88,22 @@ export const battleSchema = z.object({
   winner: z.string().nullable(),
   createdAt: z.number(),
   updatedAt: z.number(),
+  // Optional creator field
+  creator: z.object({
+    userId: z.string(),
+    displayName: z.string(),
+    imageUrl: z.string().nullable().optional(),
+  }).nullable().optional(),
+  // Live battle fields
+  isLive: z.boolean().optional(),
+  liveStartedAt: z.number().optional(),
+  adminControlMode: z.enum(['manual', 'auto']).optional(),
+  autoPlayConfig: z.object({
+    verseDelay: z.number().optional(),
+    autoAdvance: z.boolean().optional(),
+    readingDuration: z.number().optional(),
+    votingDuration: z.number().optional(),
+  }).optional(),
 });
 
 // API Request/Response schemas

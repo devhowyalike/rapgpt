@@ -4,6 +4,7 @@
  */
 
 import type { WebSocketEvent } from './types';
+import { isWebSocketAvailable, broadcast as directBroadcast } from './server';
 
 const BROADCAST_URL = process.env.BROADCAST_INTERNAL_URL || 'http://localhost:3000/__internal/ws-broadcast';
 
@@ -14,8 +15,6 @@ const BROADCAST_URL = process.env.BROADCAST_INTERNAL_URL || 'http://localhost:30
 export async function broadcastEvent(battleId: string, event: WebSocketEvent): Promise<void> {
   try {
     // Try direct broadcast first (works in production)
-    const { isWebSocketAvailable, broadcast: directBroadcast } = await import('./server');
-    
     if (isWebSocketAvailable()) {
       console.log('[Broadcast Helper] Using direct broadcast for:', event.type);
       directBroadcast(battleId, event);

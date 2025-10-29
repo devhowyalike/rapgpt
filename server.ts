@@ -71,6 +71,21 @@ function broadcast(battleId: string, event: WebSocketEvent, excludeClient?: WebS
   });
 
   console.log(`[WS] Broadcasted ${event.type} to ${sentCount} clients in battle ${battleId}`);
+
+  // Also broadcast to homepage room for live status changes
+  if (battleId !== '__homepage__' && (event.type === 'battle:live_started' || event.type === 'battle:live_ended')) {
+    const homepageRoom = battleRooms.get('__homepage__');
+    if (homepageRoom) {
+      let homepageSentCount = 0;
+      homepageRoom.forEach((client) => {
+        if (client.ws.readyState === WebSocket.OPEN) {
+          client.ws.send(message);
+          homepageSentCount++;
+        }
+      });
+      console.log(`[WS] Broadcasted ${event.type} to ${homepageSentCount} homepage clients`);
+    }
+  }
 }
 
 function getViewerCount(battleId: string): number {

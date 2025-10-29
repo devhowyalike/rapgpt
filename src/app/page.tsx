@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { getLiveBattles } from "@/lib/battle-storage";
 import { SiteHeader } from "@/components/site-header";
+import { LiveBattlesDisplay } from "@/components/live-battles-display";
 import { APP_TITLE, TAGLINE } from "@/lib/constants";
 import { auth } from "@clerk/nextjs/server";
-import { Calendar, Radio, Users, Clock } from "lucide-react";
+import { Calendar } from "lucide-react";
 
 // Revalidate every 10 seconds to show live battles
 export const revalidate = 10;
@@ -88,87 +89,9 @@ export default async function Home() {
           </div>
 
           {/* Live Battles or Coming Soon */}
-          {liveBattles.length > 0 ? (
-            <div className="space-y-6 mt-12">
-              {liveBattles.map((battle) => (
-                <div
-                  key={battle.id}
-                  className="bg-linear-to-br from-red-900/30 via-gray-900/50 to-gray-900/50 border-2 border-red-500/50 rounded-lg p-8 shadow-2xl hover:border-red-400/70 transition-all"
-                >
-                  {/* Live Indicator */}
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-red-600/20 rounded-full">
-                      <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
-                      <span className="text-red-500 font-bold text-lg">
-                        🔴 LIVE NOW
-                      </span>
-                    </div>
-                  </div>
+          <LiveBattlesDisplay initialBattles={liveBattles} />
 
-                  {/* Battle Title */}
-                  <h2 className="text-3xl md:text-4xl font-bold text-center mb-6 text-transparent bg-clip-text bg-linear-to-r from-red-400 via-yellow-400 to-purple-500">
-                    {battle.title}
-                  </h2>
-
-                  {/* Matchup */}
-                  <div className="flex items-center justify-center gap-4 md:gap-8 mb-6 flex-wrap">
-                    <div className="text-center">
-                      <div className="text-5xl mb-2">
-                        {battle.personas.left.avatar || "🎤"}
-                      </div>
-                      <div className="text-lg font-bold text-white">
-                        {battle.personas.left.name}
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        {battle.personas.left.style}
-                      </div>
-                    </div>
-
-                    <div className="text-4xl font-bold text-red-500">VS</div>
-
-                    <div className="text-center">
-                      <div className="text-5xl mb-2">
-                        {battle.personas.right.avatar || "🎤"}
-                      </div>
-                      <div className="text-lg font-bold text-white">
-                        {battle.personas.right.name}
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        {battle.personas.right.style}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Battle Stats */}
-                  <div className="flex items-center justify-center gap-6 mb-6 flex-wrap text-sm text-gray-300">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      <span>Round {battle.currentRound}/3</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4" />
-                      <span>{battle.verses.length} verses</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Radio className="w-4 h-4" />
-                      <span>{battle.comments.length} comments</span>
-                    </div>
-                  </div>
-
-                  {/* Watch Button */}
-                  <div className="flex justify-center">
-                    <Link
-                      href={`/battle/${battle.id}`}
-                      className="inline-flex items-center gap-2 px-8 py-4 bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-lg text-white font-bold text-lg transition-all transform hover:scale-105 shadow-lg"
-                    >
-                      <Radio className="w-5 h-5" />
-                      Watch Live
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
+          {liveBattles.length === 0 && (
             <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-8 mt-12">
               {/* Calendar Display */}
               <div className="flex justify-center mb-6">
