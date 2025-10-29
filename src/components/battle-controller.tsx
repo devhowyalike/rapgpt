@@ -78,8 +78,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   const { NavigationDialog } = useNavigationGuard({
     when: battle?.status === "ongoing",
     title: "Pause Battle?",
-    message:
-      "Are you sure you want to leave? The match will be paused and marked as incomplete in the archive.",
+    message: "Leave now? We'll pause your match.",
     onConfirm: async () => {
       if (battle) {
         setIsLeaving(true);
@@ -550,7 +549,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">📖</span>
                         <span className="text-lg font-medium">
-                          Reviewing lyrics...
+                          Read the source...
                         </span>
                         <span className="text-2xl font-bebas-neue">
                           {readingTimeRemaining}s
@@ -558,7 +557,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                       </div>
                       <div className="flex items-center gap-3 flex-1 max-w-md">
                         <span className="text-sm text-white/80 whitespace-nowrap">
-                          Voting starts in {readingTimeRemaining} seconds
+                          Voting in {readingTimeRemaining}s
                         </span>
                         <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden min-w-[100px]">
                           <div
@@ -581,7 +580,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                       </div>
                       <div className="flex items-center gap-3 flex-1 max-w-md">
                         <span className="text-sm text-white/80 whitespace-nowrap">
-                          Cast your vote in the sidebar →
+                          Vote in the sidebar →
                         </span>
                         <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden min-w-[100px]">
                           <div
@@ -598,7 +597,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                       <ArrowRight className="w-5 h-5" />
                       {battle.currentRound === 3
                         ? "Reveal Winner"
-                        : "Continue to Next Round"}
+                        : "Next Round"}
                     </div>
                   ) : (
                     <div className="flex items-center justify-center gap-2">
@@ -710,8 +709,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                   Pause Battle?
                 </Dialog.Title>
                 <Dialog.Description className="text-gray-400 mb-4">
-                  Are you sure you want to chill this e-beef? It will be marked
-                  as paused in the archive and can be resumed later.
+                  Pause the battle? You can resume later.
                 </Dialog.Description>
 
                 {cancelError && (
