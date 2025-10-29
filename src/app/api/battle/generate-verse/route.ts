@@ -5,6 +5,8 @@ import type { Battle, Verse } from '@/lib/shared';
 import { buildSystemPrompt, getFirstVerseMessage } from '@/lib/context-overrides';
 import { battleSchema } from '@/lib/validations/battle';
 import { z } from 'zod';
+import { broadcast } from '@/lib/websocket/server';
+import type { VerseStreamingEvent, VerseCompleteEvent } from '@/lib/websocket/types';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -12,6 +14,7 @@ export const maxDuration = 30;
 const generateVerseRequestSchema = z.object({
   battle: battleSchema,
   personaId: z.string(),
+  isLive: z.boolean().optional(),
 });
 
 export async function POST(req: Request) {
@@ -31,7 +34,7 @@ export async function POST(req: Request) {
       });
     }
     
-    const { battle, personaId } = validation.data;
+    const { battle, personaId, isLive } = validation.data;
 
     const persona = getPersona(personaId);
     if (!persona) {
@@ -105,6 +108,54 @@ export async function POST(req: Request) {
       ],
       temperature: 0.9,
     });
+
+    // If live, create custom stream that broadcasts to WebSocket
+    if (isLive && battle.isLive) {
+      let fullText = '';
+      
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            for await (const chunk of result.textStream) {
+              fullText += chunk;
+              
+              // Broadcast streaming update
+              broadcast(battle.id, {
+                type: 'verse:streaming',
+                battleId: battle.id,
+                timestamp: Date.now(),
+                personaId,
+                text: fullText,
+                isComplete: false,
+              } as VerseStreamingEvent);
+              
+              // Send to client
+              controller.enqueue(new TextEncoder().encode(chunk));
+            }
+            
+            // Broadcast completion
+            broadcast(battle.id, {
+              type: 'verse:complete',
+              battleId: battle.id,
+              timestamp: Date.now(),
+              personaId,
+              verseText: fullText,
+              round: battle.currentRound,
+            } as VerseCompleteEvent);
+            
+            controller.close();
+          } catch (error) {
+            controller.error(error);
+          }
+        },
+      });
+
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+        },
+      });
+    }
 
     return result.toTextStreamResponse();
   } catch (error) {

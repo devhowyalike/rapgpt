@@ -23,9 +23,12 @@ import {
   MessageSquare,
   ThumbsUp,
   Pause,
+  Settings,
 } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
+import { useAuth } from "@clerk/nextjs";
+import Link from "next/link";
 
 interface BattleControllerProps {
   initialBattle: Battle;
@@ -64,6 +67,10 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     "comments"
   );
   const [isLeaving, setIsLeaving] = useState(false);
+
+  // Check if user is admin
+  const { sessionClaims, isLoaded } = useAuth();
+  const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
 
   // Automatically switch to voting tab when voting begins (for mobile)
   useEffect(() => {
@@ -620,6 +627,17 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                   <Pause className="w-5 h-5" />
                   Pause Battle
                 </button>
+
+                {/* Admin Control Panel Link */}
+                {isAdmin && (
+                  <Link
+                    href={`/admin/battles/${battle.id}/control`}
+                    className="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
+                  >
+                    <Settings className="w-5 h-5" />
+                    <span className="hidden sm:inline">Live Controls</span>
+                  </Link>
+                )}
               </div>
             </div>
           )}

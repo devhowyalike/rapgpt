@@ -10,6 +10,8 @@ import { comments } from '@/lib/db/schema';
 import { nanoid } from 'nanoid';
 import { decrypt } from '@/lib/auth/encryption';
 import { getOrCreateUser } from '@/lib/auth/sync-user';
+import { broadcast } from '@/lib/websocket/server';
+import type { CommentAddedEvent } from '@/lib/websocket/types';
 
 export async function POST(
   request: NextRequest,
@@ -80,11 +82,7 @@ export async function POST(
       round: round || null,
     });
 
-    // Update battle timestamp
-    battle.updatedAt = Date.now();
-    await saveBattle(battle);
-
-    // Return the comment with user info
+    // Create the comment object with user info
     const comment = {
       id: commentId,
       username,
@@ -94,6 +92,24 @@ export async function POST(
       userId: user.id,
       imageUrl: user.imageUrl,
     };
+
+    // Add comment to battle's comments array and save
+    battle.comments.push(comment);
+    battle.updatedAt = Date.now();
+    await saveBattle(battle);
+
+    // Broadcast comment event if battle is live
+    if (battle.isLive) {
+      console.log(`[Comment API] Broadcasting comment to battle ${id}:`, comment.content);
+      broadcast(id, {
+        type: 'comment:added',
+        battleId: id,
+        timestamp: Date.now(),
+        comment,
+      } as CommentAddedEvent);
+    } else {
+      console.log(`[Comment API] Battle ${id} is not live, skipping broadcast`);
+    }
 
     // Revalidate the archive page and battle page to show fresh data
     revalidatePath('/archive');

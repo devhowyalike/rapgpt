@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "tsx server.ts",
     "build": "next build",
     "start": "next start",
     "lint": "biome check",
@@ -26,6 +26,7 @@
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-progress": "^1.1.1",
     "@radix-ui/react-tabs": "^1.1.1",
+    "@types/ws": "^8.18.1",
     "@vercel/postgres": "^0.10.0",
     "ai": "^5.0.68",
     "drizzle-orm": "^0.44.6",
@@ -36,6 +37,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "svix": "^1.78.0",
+    "ws": "^8.18.3",
     "zod": "^4.1.12",
     "zustand": "^5.0.2"
   },

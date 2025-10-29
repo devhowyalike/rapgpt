@@ -10,6 +10,8 @@ import { votes } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { getOrCreateUser } from '@/lib/auth/sync-user';
+import { broadcast } from '@/lib/websocket/server';
+import type { VoteCastEvent } from '@/lib/websocket/types';
 
 export async function POST(
   request: NextRequest,
@@ -151,6 +153,18 @@ export async function POST(
     battle.updatedAt = Date.now();
 
     await saveBattle(battle);
+
+    // Broadcast vote event if battle is live
+    if (battle.isLive) {
+      broadcast(id, {
+        type: 'vote:cast',
+        battleId: id,
+        timestamp: Date.now(),
+        round,
+        personaId,
+        battle,
+      } as VoteCastEvent);
+    }
 
     // Revalidate the archive page and battle page to show fresh data
     revalidatePath('/archive');
