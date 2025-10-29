@@ -14,7 +14,7 @@ import Link from "next/link";
 
 interface BattleSidebarProps {
   battle: Battle;
-  onVote: (round: number, personaId: string) => void;
+  onVote: (round: number, personaId: string) => Promise<boolean>;
   onComment: (content: string) => void;
   isArchived?: boolean;
   isVotingPhase?: boolean;
@@ -39,6 +39,8 @@ export function BattleSidebar({
   );
 
   const [comment, setComment] = useState("");
+  const [isSubmittingVote, setIsSubmittingVote] = useState(false);
+  const [optimisticVote, setOptimisticVote] = useState<string | null>(null);
   const [userVotes, setUserVotes] = useState<Set<string>>(() => {
     // Load votes from localStorage on mount
     if (typeof window !== "undefined") {
@@ -74,18 +76,35 @@ export function BattleSidebar({
     setComment("");
   };
 
-  const handleVote = (round: number, personaId: string) => {
-    // Check if user has already voted in this round (for either persona)
-    const hasVotedInRound = Array.from(userVotes).some((voteKey) =>
-      voteKey.startsWith(`${round}-`)
-    );
-    if (hasVotedInRound) return;
+  const handleVote = async (round: number, personaId: string) => {
+    if (isSubmittingVote) return; // Prevent double-clicks
 
     const voteKey = `${round}-${personaId}`;
+    const currentVoteInRound = Array.from(userVotes).find((key) =>
+      key.startsWith(`${round}-`)
+    );
 
-    // Update local state FIRST for immediate UI feedback
+    // Optimistically update UI immediately
+    setIsSubmittingVote(true);
+    setOptimisticVote(voteKey);
+
+    // Determine if this is an undo (clicking same persona again)
+    const isUndo = currentVoteInRound === voteKey;
+
+    // Optimistically update local state
     setUserVotes((prev) => {
-      const newVotes = new Set(prev).add(voteKey);
+      const newVotes = new Set(prev);
+      if (isUndo) {
+        // Remove the vote
+        newVotes.delete(voteKey);
+      } else {
+        // Remove any existing vote in this round and add new one
+        if (currentVoteInRound) {
+          newVotes.delete(currentVoteInRound);
+        }
+        newVotes.add(voteKey);
+      }
+
       // Persist to localStorage
       if (typeof window !== "undefined") {
         const storageKey = `battle-votes-${battle.id}`;
@@ -94,8 +113,39 @@ export function BattleSidebar({
       return newVotes;
     });
 
-    // Then make the API call
-    onVote(round, personaId);
+    // Submit to server
+    try {
+      const success = await onVote(round, personaId);
+
+      if (!success) {
+        // Revert optimistic update on failure
+        setUserVotes((prev) => {
+          const newVotes = new Set(prev);
+          if (isUndo) {
+            // Restore the vote
+            newVotes.add(voteKey);
+          } else {
+            // Restore previous state
+            newVotes.delete(voteKey);
+            if (currentVoteInRound) {
+              newVotes.add(currentVoteInRound);
+            }
+          }
+
+          if (typeof window !== "undefined") {
+            const storageKey = `battle-votes-${battle.id}`;
+            localStorage.setItem(
+              storageKey,
+              JSON.stringify(Array.from(newVotes))
+            );
+          }
+          return newVotes;
+        });
+      }
+    } finally {
+      setIsSubmittingVote(false);
+      setOptimisticVote(null);
+    }
   };
 
   // Helper function to check if user has already voted in a round
@@ -105,21 +155,21 @@ export function BattleSidebar({
     );
   };
 
+  // Helper function to get the current vote in a round (if any)
+  const getCurrentVoteInRound = (round: number): string | null => {
+    const vote = Array.from(userVotes).find((key) =>
+      key.startsWith(`${round}-`)
+    );
+    return vote || null;
+  };
+
   // Helper function to check if voting is allowed for a specific round
   const canVoteOnRound = (round: number): boolean => {
     // Archived battles cannot be voted on
     if (isArchived) return false;
 
-    // Can't vote if already voted in this round
-    if (hasVotedInRound(round)) return false;
-
     // Can only vote on the current round during its voting phase
     if (isVotingPhase && battle.currentRound === round) return true;
-
-    // Can vote on completed rounds that haven't been advanced yet
-    // (i.e., after voting phase ends but before advancing to next round)
-    if (votingCompletedRound === round && battle.currentRound === round)
-      return true;
 
     return false;
   };
@@ -365,48 +415,64 @@ export function BattleSidebar({
 
                     <div className="space-y-3">
                       {sortedPersonas.map(
-                        ({ persona, score, hoverBorderColor }) => (
-                          <button
-                            key={persona.id}
-                            onClick={() =>
-                              handleVote(roundScore.round, persona.id)
+                        ({ persona, score, hoverBorderColor }) => {
+                          const voteKey = `${roundScore.round}-${persona.id}`;
+                          const isVoted = userVotes.has(voteKey);
+                          const canVote = canVoteOnRound(roundScore.round);
+
+                          return (
+                            <button
+                              key={persona.id}
+                              onClick={() =>
+                                handleVote(roundScore.round, persona.id)
+                              }
+                              disabled={!canVote || isSubmittingVote}
+                              className={`
+                            w-full p-3 rounded-lg border-2 transition-all
+                            ${
+                              isVoted
+                                ? "bg-linear-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400 shadow-lg shadow-yellow-400/20 hover:scale-[1.02] hover:border-yellow-500"
+                                : !canVote
+                                ? "bg-gray-700 border-gray-600 cursor-not-allowed"
+                                : `hover:scale-[1.02] hover:shadow-lg border-gray-600 ${hoverBorderColor}`
                             }
-                            disabled={
-                              !canVoteOnRound(roundScore.round) ||
-                              userVotes.has(`${roundScore.round}-${persona.id}`)
-                            }
-                            className={`
-                          w-full p-3 rounded-lg border-2 transition-all
-                          ${
-                            userVotes.has(`${roundScore.round}-${persona.id}`)
-                              ? "bg-linear-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400 shadow-lg shadow-yellow-400/20 cursor-not-allowed"
-                              : !canVoteOnRound(roundScore.round)
-                              ? "bg-gray-700 border-gray-600 cursor-not-allowed"
-                              : `hover:scale-[1.02] hover:shadow-lg border-gray-600 ${hoverBorderColor}`
-                          }
-                        `}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span
-                                className="font-medium"
-                                style={{ color: persona.accentColor }}
-                              >
-                                {persona.name}
-                              </span>
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm text-gray-400">
-                                  {score?.userVotes || 0} votes
-                                </span>
-                                {roundScore.winner === persona.id && (
-                                  <span>🏆</span>
+                            ${isSubmittingVote ? "opacity-50" : ""}
+                          `}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className="font-medium"
+                                    style={{ color: persona.accentColor }}
+                                  >
+                                    {persona.name}
+                                  </span>
+                                  {isVoted && (
+                                    <span className="text-yellow-400 text-xs">
+                                      ✓ Your vote
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm text-gray-400">
+                                    {score?.userVotes || 0} votes
+                                  </span>
+                                  {roundScore.winner === persona.id && (
+                                    <span>🏆</span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="text-sm text-gray-400 mt-1">
+                                Score: {score?.totalScore.toFixed(1)}
+                                {isVoted && canVote && (
+                                  <span className="ml-2 text-xs text-yellow-400">
+                                    (click to undo)
+                                  </span>
                                 )}
                               </div>
-                            </div>
-                            <div className="text-sm text-gray-400 mt-1">
-                              Score: {score?.totalScore.toFixed(1)}
-                            </div>
-                          </button>
-                        )
+                            </button>
+                          );
+                        }
                       )}
                     </div>
                   </motion.div>

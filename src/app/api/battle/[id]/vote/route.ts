@@ -94,16 +94,6 @@ export async function POST(
       ),
     });
 
-    if (existingVote) {
-      return new Response(JSON.stringify({ 
-        error: 'You have already voted on this round',
-        alreadyVoted: true
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
     // Find the round score
     const roundScoreIndex = battle.scores.findIndex(s => s.round === round);
     
@@ -114,21 +104,50 @@ export async function POST(
       });
     }
 
-    // Insert vote into database
-    await db.insert(votes).values({
-      id: nanoid(),
-      battleId: id,
-      round,
-      personaId,
-      userId: user.id,
-    });
-
-    // Update vote count in battle
     const roundScore = battle.scores[roundScoreIndex];
-    const currentVotes = roundScore.personaScores[personaId]?.userVotes || 0;
-    const updatedScore = updateScoreWithVotes(roundScore, personaId, currentVotes + 1);
 
-    battle.scores[roundScoreIndex] = updatedScore;
+    if (existingVote) {
+      // User is changing their vote
+      if (existingVote.personaId === personaId) {
+        // Clicking the same persona - undo the vote
+        await db.delete(votes).where(eq(votes.id, existingVote.id));
+        
+        // Decrement vote count
+        const currentVotes = roundScore.personaScores[personaId]?.userVotes || 0;
+        const updatedScore = updateScoreWithVotes(roundScore, personaId, Math.max(0, currentVotes - 1));
+        battle.scores[roundScoreIndex] = updatedScore;
+      } else {
+        // Voting for a different persona - update the vote
+        await db.update(votes)
+          .set({ personaId, createdAt: new Date() })
+          .where(eq(votes.id, existingVote.id));
+        
+        // Decrement old persona's votes
+        const oldVotes = roundScore.personaScores[existingVote.personaId]?.userVotes || 0;
+        let updatedScore = updateScoreWithVotes(roundScore, existingVote.personaId, Math.max(0, oldVotes - 1));
+        
+        // Increment new persona's votes
+        const newVotes = updatedScore.personaScores[personaId]?.userVotes || 0;
+        updatedScore = updateScoreWithVotes(updatedScore, personaId, newVotes + 1);
+        
+        battle.scores[roundScoreIndex] = updatedScore;
+      }
+    } else {
+      // New vote - insert into database
+      await db.insert(votes).values({
+        id: nanoid(),
+        battleId: id,
+        round,
+        personaId,
+        userId: user.id,
+      });
+
+      // Increment vote count
+      const currentVotes = roundScore.personaScores[personaId]?.userVotes || 0;
+      const updatedScore = updateScoreWithVotes(roundScore, personaId, currentVotes + 1);
+      battle.scores[roundScoreIndex] = updatedScore;
+    }
+
     battle.updatedAt = Date.now();
 
     await saveBattle(battle);

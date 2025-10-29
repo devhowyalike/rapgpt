@@ -253,7 +253,10 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     }
   };
 
-  const handleVote = async (round: number, personaId: string) => {
+  const handleVote = async (
+    round: number,
+    personaId: string
+  ): Promise<boolean> => {
     try {
       const response = await fetch(`/api/battle/${battle.id}/vote`, {
         method: "POST",
@@ -261,21 +264,21 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
         body: JSON.stringify({
           round,
           personaId,
-          userId: `user-${Date.now()}`, // Simple user ID for now
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Vote failed:", errorData.error);
-        // Silently fail - the UI will prevent invalid votes anyway
-        return;
+        return false;
       }
 
       const { battle: updatedBattle } = await response.json();
       setBattle(updatedBattle);
+      return true;
     } catch (error) {
       console.error("Error voting:", error);
+      return false;
     }
   };
 
