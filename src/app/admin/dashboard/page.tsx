@@ -7,6 +7,7 @@ import { checkRole } from "@/lib/auth/roles";
 import Link from "next/link";
 import { Shield, User, Star, Radio, Settings } from "lucide-react";
 import { DeleteBattleButton } from "@/components/admin/delete-battle-button";
+import { SiteHeader } from "@/components/site-header";
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +34,7 @@ export default async function AdminDashboardPage() {
 
     return (
       <div className="min-h-screen bg-linear-to-br from-gray-900 via-purple-900 to-black">
+        <SiteHeader />
         <div className="max-w-7xl mx-auto px-4 py-24">
           <div className="mb-8 flex items-start justify-between">
             <div>
