@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { getBattleById, saveBattle } from '@/lib/battle-storage';
-import { broadcast } from '@/lib/websocket/server';
+import { broadcastEvent } from '@/lib/websocket/broadcast-helper';
 import type { BattleLiveEndedEvent } from '@/lib/websocket/types';
 import { checkRole } from '@/lib/auth/roles';
 
@@ -45,7 +45,7 @@ export async function POST(
     await saveBattle(battle);
 
     // Broadcast live ended event
-    broadcast(id, {
+    await broadcastEvent(id, {
       type: 'battle:live_ended',
       battleId: id,
       timestamp: Date.now(),

@@ -17,11 +17,13 @@ export async function broadcastEvent(battleId: string, event: WebSocketEvent): P
     const { isWebSocketAvailable, broadcast: directBroadcast } = await import('./server');
     
     if (isWebSocketAvailable()) {
+      console.log('[Broadcast Helper] Using direct broadcast for:', event.type);
       directBroadcast(battleId, event);
       return;
     }
 
     // Fallback to HTTP in dev mode
+    console.log('[Broadcast Helper] Using HTTP broadcast for:', event.type, 'to battle:', battleId);
     const response = await fetch(BROADCAST_URL, {
       method: 'POST',
       headers: {
@@ -33,7 +35,9 @@ export async function broadcastEvent(battleId: string, event: WebSocketEvent): P
     });
 
     if (!response.ok) {
-      console.error('[Broadcast Helper] HTTP broadcast failed:', response.status);
+      console.error('[Broadcast Helper] HTTP broadcast failed:', response.status, await response.text());
+    } else {
+      console.log('[Broadcast Helper] HTTP broadcast successful for:', event.type);
     }
   } catch (error) {
     console.error('[Broadcast Helper] Failed to broadcast:', error);

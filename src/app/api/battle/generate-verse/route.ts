@@ -5,7 +5,7 @@ import type { Battle, Verse } from '@/lib/shared';
 import { buildSystemPrompt, getFirstVerseMessage } from '@/lib/context-overrides';
 import { battleSchema } from '@/lib/validations/battle';
 import { z } from 'zod';
-import { broadcast } from '@/lib/websocket/server';
+import { broadcastEvent } from '@/lib/websocket/broadcast-helper';
 import type { VerseStreamingEvent, VerseCompleteEvent } from '@/lib/websocket/types';
 
 // Allow streaming responses up to 30 seconds
@@ -110,8 +110,14 @@ export async function POST(req: Request) {
     });
 
     // If live, create custom stream that broadcasts to WebSocket
-    if (isLive && battle.isLive) {
+    console.log('[Generate Verse] isLive:', isLive, 'battle.isLive:', battle.isLive);
+    
+    // Trust the isLive parameter from the client (admin might send stale battle object)
+    if (isLive) {
+      console.log('[Generate Verse] Using live broadcast mode');
       let fullText = '';
+      let lastBroadcastTime = 0;
+      const BROADCAST_THROTTLE_MS = 100; // Broadcast every 100ms max
       
       const stream = new ReadableStream({
         async start(controller) {
@@ -119,22 +125,41 @@ export async function POST(req: Request) {
             for await (const chunk of result.textStream) {
               fullText += chunk;
               
-              // Broadcast streaming update
-              broadcast(battle.id, {
-                type: 'verse:streaming',
-                battleId: battle.id,
-                timestamp: Date.now(),
-                personaId,
-                text: fullText,
-                isComplete: false,
-              } as VerseStreamingEvent);
+              const now = Date.now();
+              const shouldBroadcast = now - lastBroadcastTime >= BROADCAST_THROTTLE_MS;
+              
+              // Throttle broadcasts to prevent overwhelming clients
+              if (shouldBroadcast) {
+                lastBroadcastTime = now;
+                await broadcastEvent(battle.id, {
+                  type: 'verse:streaming',
+                  battleId: battle.id,
+                  timestamp: now,
+                  personaId,
+                  text: fullText,
+                  isComplete: false,
+                } as VerseStreamingEvent);
+              }
               
               // Send to client
               controller.enqueue(new TextEncoder().encode(chunk));
             }
             
+            // Broadcast final streaming update with complete text
+            await broadcastEvent(battle.id, {
+              type: 'verse:streaming',
+              battleId: battle.id,
+              timestamp: Date.now(),
+              personaId,
+              text: fullText,
+              isComplete: false,
+            } as VerseStreamingEvent);
+            
+            // Small delay before completion
+            await new Promise(resolve => setTimeout(resolve, 200));
+            
             // Broadcast completion
-            broadcast(battle.id, {
+            await broadcastEvent(battle.id, {
               type: 'verse:complete',
               battleId: battle.id,
               timestamp: Date.now(),
