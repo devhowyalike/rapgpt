@@ -318,6 +318,18 @@ export function BattleSidebar({
               .slice()
               .reverse()
               .map((roundScore) => {
+                // During review (reading) phase, don't show the current round's voting pair
+                const isCurrentRound = roundScore.round === battle.currentRound;
+                const hideCurrentRoundDuringReview =
+                  !isArchived &&
+                  isCurrentRound &&
+                  !isVotingPhase &&
+                  votingCompletedRound !== roundScore.round;
+
+                if (hideCurrentRoundDuringReview) {
+                  return null;
+                }
+
                 const leftScore =
                   roundScore.personaScores[battle.personas.left.id];
                 const rightScore =
