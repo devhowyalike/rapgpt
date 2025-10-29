@@ -16,6 +16,8 @@ const port = parseInt(process.env.PORT || '3000', 10);
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
+const INTERNAL_BROADCAST_SECRET = process.env.INTERNAL_BROADCAST_SECRET || 'dev-secret';
+
 interface ClientConnection {
   ws: WebSocket;
   battleId: string;
@@ -90,9 +92,45 @@ function broadcastViewerCount(battleId: string) {
 }
 
 app.prepare().then(() => {
-  const server = createServer((req, res) => {
+  const server = createServer(async (req, res) => {
+    console.log(`[Server] Request: ${req.method} ${req.url}`);
+    
+    // Internal endpoint for broadcasting WebSocket events from API routes
+    // Must be handled BEFORE Next.js to prevent 404
+    if (req.url?.startsWith('/__internal/ws-broadcast') && req.method === 'POST') {
+      console.log('[Server] Matched internal broadcast endpoint');
+      // Verify internal secret
+      const secret = req.headers['x-internal-secret'];
+      if (secret !== INTERNAL_BROADCAST_SECRET) {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Forbidden' }));
+        return;
+      }
+
+      let body = '';
+      req.on('data', chunk => {
+        body += chunk.toString();
+      });
+      
+      req.on('end', () => {
+        try {
+          const { battleId, event } = JSON.parse(body);
+          console.log(`[Internal Broadcast] Received request for battle ${battleId}, event ${event.type}`);
+          broadcast(battleId, event);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true }));
+        } catch (error) {
+          console.error('[Internal Broadcast] Error:', error);
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Internal error' }));
+        }
+      });
+      return;
+    }
+    
+    // Pass everything else to Next.js
     const parsedUrl = parse(req.url || '', true);
-    handle(req, res, parsedUrl);
+    await handle(req, res, parsedUrl);
   });
 
   // Create WebSocket server

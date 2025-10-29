@@ -114,12 +114,18 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
           break;
 
         case "comment:added":
-          console.log("[Viewer] Received comment:", event.comment.content);
           if (battle) {
-            setBattle({
-              ...battle,
-              comments: [...battle.comments, event.comment],
-            });
+            // Check if comment already exists (to avoid duplicates from optimistic update)
+            const commentExists = battle.comments.some(
+              (c) => c.id === event.comment.id
+            );
+
+            if (!commentExists) {
+              setBattle({
+                ...battle,
+                comments: [...battle.comments, event.comment],
+              });
+            }
           }
           break;
 
@@ -269,11 +275,28 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to submit comment");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit comment");
+      }
 
-      // Don't update local state - wait for WebSocket broadcast
+      const data = await response.json();
+
+      // Optimistically update local state immediately (don't wait for WebSocket)
+      // This ensures the user sees their comment right away
+      if (data.comment) {
+        setBattle({
+          ...battle,
+          comments: [...battle.comments, data.comment],
+        });
+      }
     } catch (error) {
       console.error("Error commenting:", error);
+      alert(
+        `Failed to post comment: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
   };
 

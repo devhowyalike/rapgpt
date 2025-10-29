@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { getCurrentBattle, getLiveBattles } from "@/lib/battle-storage";
-import { BattleController } from "@/components/battle-controller";
+import { getLiveBattles } from "@/lib/battle-storage";
 import { SiteHeader } from "@/components/site-header";
 import { APP_TITLE, TAGLINE } from "@/lib/constants";
 import { auth } from "@clerk/nextjs/server";
@@ -10,15 +9,10 @@ import { Calendar, Radio, Users, Clock } from "lucide-react";
 export const revalidate = 10;
 
 export default async function Home() {
-  const currentBattle = await getCurrentBattle();
   const liveBattles = await getLiveBattles();
   const { sessionClaims } = await auth();
   const isAdmin = sessionClaims?.metadata?.role === "admin";
   const isAuthenticated = !!sessionClaims;
-
-  if (currentBattle) {
-    return <BattleController initialBattle={currentBattle} />;
-  }
 
   return (
     <>

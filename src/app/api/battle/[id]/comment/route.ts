@@ -10,7 +10,7 @@ import { comments } from '@/lib/db/schema';
 import { nanoid } from 'nanoid';
 import { decrypt } from '@/lib/auth/encryption';
 import { getOrCreateUser } from '@/lib/auth/sync-user';
-import { broadcast } from '@/lib/websocket/server';
+import { broadcastEvent } from '@/lib/websocket/broadcast-helper';
 import type { CommentAddedEvent } from '@/lib/websocket/types';
 
 export async function POST(
@@ -100,15 +100,12 @@ export async function POST(
 
     // Broadcast comment event if battle is live
     if (battle.isLive) {
-      console.log(`[Comment API] Broadcasting comment to battle ${id}:`, comment.content);
-      broadcast(id, {
+      await broadcastEvent(id, {
         type: 'comment:added',
         battleId: id,
         timestamp: Date.now(),
         comment,
       } as CommentAddedEvent);
-    } else {
-      console.log(`[Comment API] Battle ${id} is not live, skipping broadcast`);
     }
 
     // Revalidate the archive page and battle page to show fresh data

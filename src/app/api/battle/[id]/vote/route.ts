@@ -10,7 +10,7 @@ import { votes } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { getOrCreateUser } from '@/lib/auth/sync-user';
-import { broadcast } from '@/lib/websocket/server';
+import { broadcastEvent } from '@/lib/websocket/broadcast-helper';
 import type { VoteCastEvent } from '@/lib/websocket/types';
 
 export async function POST(
@@ -156,7 +156,7 @@ export async function POST(
 
     // Broadcast vote event if battle is live
     if (battle.isLive) {
-      broadcast(id, {
+      await broadcastEvent(id, {
         type: 'vote:cast',
         battleId: id,
         timestamp: Date.now(),

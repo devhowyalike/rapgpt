@@ -1,0 +1,42 @@
+/**
+ * Helper to broadcast WebSocket events from API routes
+ * In dev mode, API routes run in a separate process, so we need to use HTTP
+ */
+
+import type { WebSocketEvent } from './types';
+
+const BROADCAST_URL = process.env.BROADCAST_INTERNAL_URL || 'http://localhost:3000/__internal/ws-broadcast';
+
+/**
+ * Broadcast a WebSocket event to all clients in a battle room
+ * This works in both dev and production
+ */
+export async function broadcastEvent(battleId: string, event: WebSocketEvent): Promise<void> {
+  try {
+    // Try direct broadcast first (works in production)
+    const { isWebSocketAvailable, broadcast: directBroadcast } = await import('./server');
+    
+    if (isWebSocketAvailable()) {
+      directBroadcast(battleId, event);
+      return;
+    }
+
+    // Fallback to HTTP in dev mode
+    const response = await fetch(BROADCAST_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Internal secret to prevent external access
+        'X-Internal-Secret': process.env.INTERNAL_BROADCAST_SECRET || 'dev-secret',
+      },
+      body: JSON.stringify({ battleId, event }),
+    });
+
+    if (!response.ok) {
+      console.error('[Broadcast Helper] HTTP broadcast failed:', response.status);
+    }
+  } catch (error) {
+    console.error('[Broadcast Helper] Failed to broadcast:', error);
+  }
+}
+

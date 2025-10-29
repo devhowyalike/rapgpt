@@ -112,7 +112,6 @@ export interface AdminDisconnectedEvent extends BaseWebSocketEvent {
 export interface ConnectionAcknowledgedEvent extends BaseWebSocketEvent {
   type: 'connection:acknowledged';
   clientId: string;
-  battle: Battle;
   viewerCount: number;
 }
 

@@ -13,6 +13,8 @@ const isPublicRoute = createRouteMatcher([
   '/community',
   '/sign-in(.*)',
   '/api/webhooks(.*)', // Webhooks should be public
+  '/api/battle(.*)/comment', // Comment routes handle their own auth
+  '/api/battle(.*)/vote', // Vote routes handle their own auth
 ]);
 
 // Define admin-only routes
