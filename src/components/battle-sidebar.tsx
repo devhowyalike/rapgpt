@@ -79,9 +79,9 @@ export function BattleSidebar({
   const handleVote = async (round: number, personaId: string) => {
     if (isSubmittingVote) return; // Prevent double-clicks
 
-    const voteKey = `${round}-${personaId}`;
+    const voteKey = `${battle.id}-${round}-${personaId}`;
     const currentVoteInRound = Array.from(userVotes).find((key) =>
-      key.startsWith(`${round}-`)
+      key.startsWith(`${battle.id}-${round}-`)
     );
 
     // Optimistically update UI immediately
@@ -151,14 +151,14 @@ export function BattleSidebar({
   // Helper function to check if user has already voted in a round
   const hasVotedInRound = (round: number): boolean => {
     return Array.from(userVotes).some((voteKey) =>
-      voteKey.startsWith(`${round}-`)
+      voteKey.startsWith(`${battle.id}-${round}-`)
     );
   };
 
   // Helper function to get the current vote in a round (if any)
   const getCurrentVoteInRound = (round: number): string | null => {
     const vote = Array.from(userVotes).find((key) =>
-      key.startsWith(`${round}-`)
+      key.startsWith(`${battle.id}-${round}-`)
     );
     return vote || null;
   };
@@ -416,7 +416,7 @@ export function BattleSidebar({
                     <div className="space-y-3">
                       {sortedPersonas.map(
                         ({ persona, score, hoverBorderColor }) => {
-                          const voteKey = `${roundScore.round}-${persona.id}`;
+                          const voteKey = `${battle.id}-${roundScore.round}-${persona.id}`;
                           const isVoted = userVotes.has(voteKey);
                           const canVote = canVoteOnRound(roundScore.round);
 
