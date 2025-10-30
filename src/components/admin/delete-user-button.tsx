@@ -66,11 +66,12 @@ export function DeleteUserButton({
         title="Delete User?"
         description={`Are you sure you want to delete ${userName} (${userEmail})? This will permanently delete:
         
-• The user account
+• The user's Clerk authentication account
+• The user's database record
 • All battles they created
 • All their comments and votes
 
-This action cannot be undone.`}
+The user will not be able to sign back in. This action cannot be undone.`}
         confirmLabel="Delete User"
         onConfirm={handleDelete}
         isLoading={isDeleting}

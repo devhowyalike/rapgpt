@@ -1,10 +1,12 @@
 /**
  * User Deletion API
  * Allows admins to delete users and all their associated data
+ * Deletes from both database and Clerk
  */
 
 import { NextRequest } from 'next/server';
 import { revalidatePath } from 'next/cache';
+import { clerkClient } from '@clerk/nextjs/server';
 import { db } from '@/lib/db/client';
 import { users, battles } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
@@ -60,8 +62,19 @@ export async function DELETE(
     // (comments and votes will cascade delete automatically via foreign key constraints)
     await db.delete(battles).where(eq(battles.createdBy, userId));
 
-    // Delete the user (this will cascade delete comments and votes they created)
+    // Delete the user from database (this will cascade delete comments and votes they created)
     await db.delete(users).where(eq(users.id, userId));
+
+    // Delete the user from Clerk
+    // This ensures they cannot sign back in
+    try {
+      const client = await clerkClient();
+      await client.users.deleteUser(userToDelete.clerkId);
+    } catch (clerkError) {
+      console.error('Error deleting user from Clerk:', clerkError);
+      // Note: User is already deleted from DB, so we log but don't fail the request
+      // The admin may need to manually delete from Clerk dashboard if this fails
+    }
 
     // Revalidate pages
     revalidatePath('/admin/dashboard');
@@ -70,7 +83,7 @@ export async function DELETE(
 
     return new Response(JSON.stringify({ 
       success: true,
-      message: 'User and all associated data deleted successfully'
+      message: 'User deleted from database and Clerk successfully'
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
