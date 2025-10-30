@@ -1,9 +1,11 @@
 import { getAllBattles } from "@/lib/battle-storage";
-import { Shield } from "lucide-react";
+import { Shield, ArrowLeft } from "lucide-react";
 import { checkRole } from "@/lib/auth/roles";
 import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { BattlesTable } from "@/components/admin/battles-table";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 // Revalidate every 5 seconds to show live status
 export const revalidate = 5;
@@ -27,9 +29,15 @@ export default async function BattlesListPage() {
             <Shield className="text-purple-400" size={48} />
             All Battles
           </h1>
-          <p className="text-gray-400 text-lg">
+          <p className="text-gray-400 text-lg mb-4">
             Monitor and manage all battles ({battles.length} total)
           </p>
+          <Button variant="outline" asChild>
+            <Link href="/admin/dashboard" className="text-purple-400 border-purple-400 bg-gray-900/50 hover:bg-purple-400/10">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Admin Dashboard
+            </Link>
+          </Button>
         </div>
 
         <BattlesTable battles={battles} />
