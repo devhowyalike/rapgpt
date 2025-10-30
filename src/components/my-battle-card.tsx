@@ -11,6 +11,7 @@ import {
   Crown,
   Globe,
   Lock,
+  Radio,
 } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
@@ -28,6 +29,9 @@ interface MyBattleCardProps {
     winner?: string | null;
     scores?: any[];
     isPublic?: boolean;
+    isLive?: boolean;
+    liveStartedAt?: Date | null;
+    isFeatured?: boolean;
   };
   shareUrl: string;
   showManagement?: boolean;
@@ -92,7 +96,7 @@ export function MyBattleCard({
       const response = await fetch(`/api/battle/${battle.id}/delete`, {
         method: "DELETE",
       });
-      
+
       if (response.ok) {
         setShowDeleteDialog(false);
         // Use startTransition for smooth UI updates without flashing
@@ -114,6 +118,7 @@ export function MyBattleCard({
   // Calculate battle progress stats for paused battles
   const isPaused = battle.status === "incomplete";
   const isCompleted = battle.status === "completed";
+  const isArchived = !!battle.liveStartedAt && !battle.isLive;
   const currentRound = battle.currentRound || 1;
   const versesCount = battle.verses?.length || 0;
 
@@ -148,9 +153,11 @@ export function MyBattleCard({
   const finalStats = calculateFinalStats();
 
   return (
-    <div className={`h-full flex flex-col bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-all ${
-      isDeleting || isPending ? "opacity-50 pointer-events-none" : ""
-    }`}>
+    <div
+      className={`h-full flex flex-col bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-all ${
+        isDeleting || isPending ? "opacity-50 pointer-events-none" : ""
+      }`}
+    >
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <Link
@@ -167,6 +174,8 @@ export function MyBattleCard({
                 className={`px-3 py-1.5 rounded flex items-center gap-1.5 text-xs transition-colors ${
                   isPublic
                     ? "bg-blue-600/30 text-blue-300 hover:bg-blue-600/40"
+                    : isArchived
+                    ? "bg-purple-600/30 text-purple-300 hover:bg-purple-600/40"
                     : "bg-gray-600/30 text-gray-300 hover:bg-gray-600/40"
                 }`}
                 title="Manage battle"
@@ -175,6 +184,11 @@ export function MyBattleCard({
                   <>
                     <Globe size={12} />
                     Public
+                  </>
+                ) : isArchived ? (
+                  <>
+                    <Radio size={12} />
+                    Live Event
                   </>
                 ) : (
                   <>
@@ -200,18 +214,21 @@ export function MyBattleCard({
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   className={`flex items-center gap-2 px-3 py-2 text-sm rounded cursor-pointer outline-none ${
-                    !isPublic && (isPaused || !userIsProfilePublic)
+                    !isPublic &&
+                    (isPaused || !userIsProfilePublic || isArchived)
                       ? "text-gray-500 cursor-not-allowed"
                       : "text-gray-200 hover:bg-gray-700"
                   }`}
                   onClick={
-                    !isPublic && (isPaused || !userIsProfilePublic)
+                    !isPublic &&
+                    (isPaused || !userIsProfilePublic || isArchived)
                       ? undefined
                       : handleTogglePublic
                   }
                   disabled={
                     isTogglingPublic ||
-                    (!isPublic && (isPaused || !userIsProfilePublic))
+                    (!isPublic &&
+                      (isPaused || !userIsProfilePublic || isArchived))
                   }
                 >
                   {isPublic ? (
@@ -222,7 +239,9 @@ export function MyBattleCard({
                   ) : (
                     <>
                       <Globe size={16} />
-                      {isPaused
+                      {isArchived
+                        ? "Cannot Publish (Archived)"
+                        : isPaused
                         ? "Cannot Publish (Paused)"
                         : !userIsProfilePublic
                         ? "Cannot Publish (Private Profile)"
@@ -244,6 +263,13 @@ export function MyBattleCard({
       </div>
 
       <div className="flex items-center gap-2 text-sm mb-4 flex-wrap">
+        {battle.isLive && (
+          <span className="px-3 py-1 rounded bg-red-600 text-white flex items-center gap-1.5 font-semibold animate-pulse">
+            <Radio size={14} className="fill-white" />
+            LIVE
+          </span>
+        )}
+        {/* Removed secondary archived badge per request */}
         {showManagement && (
           <span
             className={`px-3 py-1 rounded ${
@@ -323,13 +349,24 @@ export function MyBattleCard({
       <div className="flex items-center gap-3">
         <Link
           href={`/battle/${battle.id}`}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-white ${
+            battle.isLive
+              ? "bg-red-600 hover:bg-red-700"
+              : "bg-purple-600 hover:bg-purple-700"
+          }`}
         >
-          {battle.status === "incomplete"
-            ? "Resume Beef"
-            : battle.status === "completed"
-            ? "Replay Battle"
-            : "View Battle"}
+          {battle.isLive ? (
+            <>
+              <Radio size={16} className="fill-white" />
+              Join Live
+            </>
+          ) : battle.status === "incomplete" ? (
+            "Resume Beef"
+          ) : battle.status === "completed" ? (
+            "Replay Battle"
+          ) : (
+            "View Battle"
+          )}
         </Link>
       </div>
 

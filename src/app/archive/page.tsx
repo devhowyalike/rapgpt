@@ -7,8 +7,8 @@ export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
 export default async function ArchivePage() {
-  // Only show featured battles in archive
-  const battles = await getFeaturedBattles();
+  // Only show completed featured battles in archive
+  const battles = (await getFeaturedBattles()).filter((b) => b.status === "completed");
 
   return (
     <>

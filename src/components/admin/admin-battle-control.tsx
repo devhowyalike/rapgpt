@@ -173,22 +173,16 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
 
   const handleAdvanceRound = useCallback(async () => {
     if (!battle) return;
+    // Update local state first so status/winner/currentRound reflect correctly
     advanceRound();
 
     try {
-      const response = await fetch(`/api/battle/${battle.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(battle),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save battle");
-      }
+      // Persist the updated battle from the store (avoids sending stale state)
+      await saveBattle();
     } catch (error) {
       console.error("Error saving battle:", error);
     }
-  }, [battle, advanceRound]);
+  }, [battle, advanceRound, saveBattle]);
 
   // Auto-play mode
   useAutoPlay({
