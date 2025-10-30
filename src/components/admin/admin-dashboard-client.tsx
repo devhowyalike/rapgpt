@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Shield, User, Star, Music } from "lucide-react";
+import { Shield, User, Star, Music, Eye, EyeOff } from "lucide-react";
 import { DeleteBattleButton } from "@/components/admin/delete-battle-button";
 import { DeleteUserButton } from "@/components/admin/delete-user-button";
 import type { UserDB, BattleDB } from "@/lib/db/schema";
@@ -176,18 +176,35 @@ export function AdminDashboardClient({
                           </span>
                         </div>
                       )}
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <Link
                           href={`/battle/${battle.id}`}
                           className="text-white font-semibold hover:text-purple-400 transition-colors"
                         >
                           {battle.title}
                         </Link>
-                        {battle.generatedSong && (
-                          <span title="Has generated song">
-                            <Music className="w-4 h-4 text-purple-400" />
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1">
+                          {battle.generatedSong && (
+                            <span title="Has generated song">
+                              <Music className="w-4 h-4 text-purple-400" />
+                            </span>
+                          )}
+                          {battle.isPublic ? (
+                            <span
+                              title="Public battle"
+                              className="text-green-400"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </span>
+                          ) : (
+                            <span
+                              title="Private battle"
+                              className="text-gray-500"
+                            >
+                              <EyeOff className="w-4 h-4" />
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="text-gray-400 text-sm mt-1">
                         {personas.left.name} vs {personas.right.name}
@@ -201,7 +218,7 @@ export function AdminDashboardClient({
                       />
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm flex-wrap">
                     <span
                       className={`px-2 py-1 rounded text-xs ${
                         battle.isFeatured
@@ -210,6 +227,25 @@ export function AdminDashboardClient({
                       }`}
                     >
                       {battle.isFeatured ? "Featured" : "User Battle"}
+                    </span>
+                    <span
+                      className={`px-2 py-1 rounded text-xs flex items-center gap-1 ${
+                        battle.isPublic
+                          ? "bg-green-600/20 text-green-400"
+                          : "bg-gray-600/30 text-gray-500"
+                      }`}
+                    >
+                      {battle.isPublic ? (
+                        <>
+                          <Eye className="w-3 h-3" />
+                          Public
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff className="w-3 h-3" />
+                          Private
+                        </>
+                      )}
                     </span>
                     <span className="text-gray-500">
                       {new Date(battle.createdAt).toLocaleDateString()}
