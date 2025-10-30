@@ -183,28 +183,6 @@ export function AdminDashboardClient({
                         >
                           {battle.title}
                         </Link>
-                        <div className="flex items-center gap-1">
-                          {battle.generatedSong && (
-                            <span title="Has generated song">
-                              <Music className="w-4 h-4 text-purple-400" />
-                            </span>
-                          )}
-                          {battle.isPublic ? (
-                            <span
-                              title="Public battle"
-                              className="text-green-400"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </span>
-                          ) : (
-                            <span
-                              title="Private battle"
-                              className="text-gray-500"
-                            >
-                              <EyeOff className="w-4 h-4" />
-                            </span>
-                          )}
-                        </div>
                       </div>
                       <div className="text-gray-400 text-sm mt-1">
                         {personas.left.name} vs {personas.right.name}
@@ -247,6 +225,12 @@ export function AdminDashboardClient({
                         </>
                       )}
                     </span>
+                    {battle.generatedSong && (
+                      <span className="px-2 py-1 rounded text-xs flex items-center gap-1 bg-green-600/20 text-green-400 border border-green-500/30">
+                        <Music className="w-3 h-3" />
+                        Music Generated
+                      </span>
+                    )}
                     <span className="text-gray-500">
                       {new Date(battle.createdAt).toLocaleDateString()}
                     </span>
