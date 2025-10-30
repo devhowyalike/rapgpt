@@ -108,11 +108,19 @@ function broadcastViewerCount(battleId: string) {
 
 app.prepare().then(() => {
   const server = createServer(async (req, res) => {
-    console.log(`[Server] Request: ${req.method} ${req.url}`);
+    // Only log non-internal Next.js requests
+    const url = req.url || '';
+    const isInternalNextRequest = url.startsWith('/__nextjs') || 
+                                   url.startsWith('/_next/') ||
+                                   url.includes('hot-update');
+    
+    if (!isInternalNextRequest) {
+      console.log(`[Server] Request: ${req.method} ${url}`);
+    }
     
     // Internal endpoint for broadcasting WebSocket events from API routes
     // Must be handled BEFORE Next.js to prevent 404
-    if (req.url?.startsWith('/__internal/ws-broadcast') && req.method === 'POST') {
+    if (url.startsWith('/__internal/ws-broadcast') && req.method === 'POST') {
       console.log('[Server] Matched internal broadcast endpoint');
       // Verify internal secret
       const secret = req.headers['x-internal-secret'];
