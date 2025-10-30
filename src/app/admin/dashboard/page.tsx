@@ -9,7 +9,7 @@ import { Shield, User, Star } from "lucide-react";
 import { DeleteBattleButton } from "@/components/admin/delete-battle-button";
 import { SiteHeader } from "@/components/site-header";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   try {

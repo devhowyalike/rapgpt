@@ -1,8 +1,9 @@
 import { getAllBattles } from "@/lib/battle-storage";
 import Link from "next/link";
-import { Radio } from "lucide-react";
+import { Radio, Shield } from "lucide-react";
 import { checkRole } from "@/lib/auth/roles";
 import { redirect } from "next/navigation";
+import { SiteHeader } from "@/components/site-header";
 
 // Revalidate every 5 seconds to show live status
 export const revalidate = 5;
@@ -20,106 +21,158 @@ export default async function BattlesListPage() {
   const otherBattles = battles.filter((b) => !b.isLive);
 
   return (
-    <div className="p-8 bg-gray-900 min-h-screen text-white">
-      <h1 className="text-2xl font-bold mb-6">All Battles</h1>
+    <div className="min-h-screen bg-linear-to-br from-gray-900 via-purple-900 to-black">
+      <SiteHeader />
+      <div className="max-w-7xl mx-auto px-4 py-24">
+        <div className="mb-8">
+          <h1 className="font-bebas text-6xl text-white mb-2 flex items-center gap-3">
+            <Shield className="text-purple-400" size={48} />
+            All Battles
+          </h1>
+          <p className="text-gray-400 text-lg">
+            Monitor and manage all battles
+          </p>
+        </div>
 
-      {battles.length === 0 ? (
-        <div className="text-gray-400">No battles found. Create one first!</div>
-      ) : (
-        <div className="space-y-8">
-          {/* Live Battles */}
-          {liveBattles.length > 0 && (
-            <div>
-              <h2 className="text-lg font-bold text-red-400 mb-3 flex items-center gap-2">
-                <Radio className="w-5 h-5" />
-                Live Now ({liveBattles.length})
-              </h2>
-              <div className="space-y-4">
-                {liveBattles.map((battle) => (
-                  <div
-                    key={battle.id}
-                    className="bg-linear-to-br from-red-900/30 to-gray-800 border-2 border-red-500/50 p-4 rounded flex justify-between items-center"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                        <div className="font-bold text-red-400">
-                          🔴 BROADCASTING
+        {battles.length === 0 ? (
+          <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6">
+            <p className="text-gray-400">
+              No battles found. Create one first!
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {/* Live Battles */}
+            {liveBattles.length > 0 && (
+              <div className="bg-gray-800/50 backdrop-blur-sm border border-red-500/30 rounded-lg p-6">
+                <h2 className="font-bebas text-3xl text-white mb-4 flex items-center gap-2">
+                  <Radio className="w-6 h-6 text-red-400" />
+                  <span className="text-red-400">
+                    Live Now ({liveBattles.length})
+                  </span>
+                </h2>
+                <div className="space-y-4">
+                  {liveBattles.map((battle) => (
+                    <div
+                      key={battle.id}
+                      className="bg-red-900/20 border border-red-500/30 p-6 rounded-lg"
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                            <span className="text-red-400 text-xs font-bold uppercase">
+                              Broadcasting
+                            </span>
+                          </div>
+                          <h3 className="font-bebas text-2xl text-white mb-2">
+                            {battle.title}
+                          </h3>
+                          <div className="text-gray-400 mb-2">
+                            {battle.personas.left.name} vs{" "}
+                            {battle.personas.right.name}
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span>Round {battle.currentRound}/3</span>
+                            <span>•</span>
+                            <span>{battle.verses.length} verses</span>
+                            <span>•</span>
+                            <span>{battle.comments.length} comments</span>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-400 mt-2">
+                            <span>
+                              Created by:{" "}
+                              {battle.creator?.displayName || "Unknown"}
+                            </span>
+                            <span>•</span>
+                            <span>
+                              {new Date(battle.createdAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                }
+                              )}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      <div className="font-bold text-lg">{battle.title}</div>
-                      <div className="text-sm text-gray-400">
-                        {battle.personas.left.name} vs{" "}
-                        {battle.personas.right.name}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        Round {battle.currentRound}/3 | {battle.verses.length}{" "}
-                        verses | {battle.comments.length} comments
+                      <div className="flex gap-3">
+                        <Link
+                          href={`/battle/${battle.id}`}
+                          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                        >
+                          View Live
+                        </Link>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/battle/${battle.id}`}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm"
-                      >
-                        View Live
-                      </Link>
-                      <Link
-                        href={`/admin/battles/${battle.id}/control`}
-                        className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-bold"
-                      >
-                        ⚡ Control Panel
-                      </Link>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Other Battles */}
-          {otherBattles.length > 0 && (
-            <div>
-              <h2 className="text-lg font-bold text-gray-400 mb-3">
-                All Battles ({otherBattles.length})
-              </h2>
-              <div className="space-y-4">
-                {otherBattles.map((battle) => (
-                  <div
-                    key={battle.id}
-                    className="bg-gray-800 p-4 rounded flex justify-between items-center"
-                  >
-                    <div>
-                      <div className="font-bold">{battle.title}</div>
-                      <div className="text-sm text-gray-400">
-                        {battle.personas.left.name} vs{" "}
-                        {battle.personas.right.name}
+            {/* Other Battles */}
+            {otherBattles.length > 0 && (
+              <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6">
+                <h2 className="font-bebas text-3xl text-white mb-4">
+                  All Battles ({otherBattles.length})
+                </h2>
+                <div className="space-y-4">
+                  {otherBattles.map((battle) => (
+                    <div
+                      key={battle.id}
+                      className="bg-gray-700/50 p-6 rounded-lg"
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <h3 className="font-bebas text-2xl text-white mb-2">
+                            {battle.title}
+                          </h3>
+                          <div className="text-gray-400 mb-2">
+                            {battle.personas.left.name} vs{" "}
+                            {battle.personas.right.name}
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span>Status: {battle.status}</span>
+                            <span>•</span>
+                            <span>ID: {battle.id}</span>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-400 mt-2">
+                            <span>
+                              Created by:{" "}
+                              {battle.creator?.displayName || "Unknown"}
+                            </span>
+                            <span>•</span>
+                            <span>
+                              {new Date(battle.createdAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                }
+                              )}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-500">
-                        Status: {battle.status} | ID: {battle.id}
+                      <div className="flex gap-3">
+                        <Link
+                          href={`/battle/${battle.id}`}
+                          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                        >
+                          View Battle
+                        </Link>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/battle/${battle.id}`}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm"
-                      >
-                        View Battle
-                      </Link>
-                      <Link
-                        href={`/admin/battles/${battle.id}/control`}
-                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded text-sm"
-                      >
-                        Control Panel
-                      </Link>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
