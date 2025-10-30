@@ -6,7 +6,7 @@
 "use client";
 
 import { useState } from "react";
-import { Music2, Sparkles, Zap } from "lucide-react";
+import { Music2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -142,13 +142,9 @@ export function SongGenerator({
   return (
     <Card className="border-gray-800 bg-gray-900/50 backdrop-blur-sm">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-2xl text-white">
-          <Sparkles className="w-6 h-6 text-yellow-400" />
-          Generate Song
-        </CardTitle>
-        <CardDescription className="text-gray-400">
-          Turn this battle into a full song! Choose your beat style and let AI
-          create the track.
+        <CardDescription className="text-gray-400 text-center">
+          Turn this battle into a full song! Choose your beat style and let{" "}
+          {APP_TITLE} create the track.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -222,7 +218,7 @@ export function SongGenerator({
             ) : (
               <div className="flex items-center gap-2">
                 <Music2 className="w-5 h-5" />
-                <span>Generate Song</span>
+                <span>Generate Track</span>
               </div>
             )}
           </Button>
@@ -255,8 +251,8 @@ export function SongGenerator({
         <div className="text-xs text-gray-500 text-center">
           Song generation typically takes 1-3 minutes.
           <br />
-          {APP_TITLE} will create a unique track combining both personas' styles
-          & lyrics with your selected beat.
+          {APP_TITLE} will create a unique song blending both personas' styles
+          and your chosen beat.
         </div>
       </CardContent>
     </Card>

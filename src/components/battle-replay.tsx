@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, useRef, useLayoutEffect } from "react";
+import { useState, useRef, useLayoutEffect, useEffect } from "react";
 import type { Battle } from "@/lib/shared";
 import { PersonaCard } from "./persona-card";
 import { VerseDisplay } from "./verse-display";
@@ -32,18 +32,29 @@ export function BattleReplay({ battle }: BattleReplayProps) {
 
   const battleReplayHeaderRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
-  
+
   // Check if current user is the battle creator or admin
   // Wait for Clerk to finish loading before checking admin status
-  const isAdmin = isLoaded && sessionClaims?.metadata?.role === 'admin';
+  const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
   const isCreator = userId && battle.creator?.userId === userId;
-  
+
   // Allow song generation for:
-  // 1. Battle creators (verified ownership) 
+  // 1. Battle creators (verified ownership)
   // 2. Admins (can generate for any battle, including legacy ones)
-  const canGenerateSong = (isCreator || isAdmin) && battle.status === 'completed' && !battle.generatedSong?.audioUrl;
+  const canGenerateSong =
+    (isCreator || isAdmin) &&
+    battle.status === "completed" &&
+    !battle.generatedSong?.audioUrl;
   const showSongGenerator = canGenerateSong;
-  const showSongPlayer = battle.status === 'completed' && battle.generatedSong?.audioUrl;
+  const showSongPlayer =
+    battle.status === "completed" && battle.generatedSong?.audioUrl;
+
+  // Default to "song" tab when battle is completed and song tab is available
+  const defaultTab =
+    battle.status === "completed" && (showSongGenerator || showSongPlayer)
+      ? "song"
+      : "scores";
+  const [activeTab, setActiveTab] = useState<"scores" | "song">(defaultTab);
 
   useLayoutEffect(() => {
     const updateHeaderHeight = () => {
@@ -67,6 +78,16 @@ export function BattleReplay({ battle }: BattleReplayProps) {
   const handleNextRound = () => {
     if (canGoNext) setSelectedRound(selectedRound + 1);
   };
+
+  // Auto-switch to song tab when battle is completed and song tab is available
+  useEffect(() => {
+    if (
+      battle.status === "completed" &&
+      (showSongGenerator || showSongPlayer)
+    ) {
+      setActiveTab("song");
+    }
+  }, [battle.status, showSongGenerator, showSongPlayer]);
 
   return (
     <div className="flex flex-col min-h-0 md:h-full bg-linear-to-b from-stage-darker to-stage-dark">
@@ -260,38 +281,124 @@ export function BattleReplay({ battle }: BattleReplayProps) {
         </div>
       </div>
 
-      {/* Score Display */}
-      {roundScore && (
-        <div className="p-4 md:p-6 pb-24 md:pb-6 border-t border-gray-800 bg-gray-900/30">
+      {/* Tabbed Content Section - Scores & Generated Song */}
+      {(roundScore || showSongGenerator || showSongPlayer) && (
+        <div className="border-t border-gray-800 bg-gray-900/30">
           <div className="max-w-4xl mx-auto">
-            <h3 className="text-xl md:text-2xl font-(family-name:--font-bebas-neue) text-center mb-4 text-yellow-400">
-              ROUND {roundScore.round} SCORES
-            </h3>
-            <ScoreDisplay
-              roundScore={roundScore}
-              leftPersona={battle.personas.left}
-              rightPersona={battle.personas.right}
-            />
-          </div>
-        </div>
-      )}
+            {/* Tab Switcher - Prominent Button Style */}
+            <div className="flex items-center justify-center gap-2 md:gap-3 px-3 md:px-4 pt-4">
+              <motion.button
+                onClick={() => setActiveTab("scores")}
+                className={`
+                  relative px-4 md:px-6 py-2.5 md:py-3 font-bold text-sm md:text-base
+                  rounded-lg border-2 transition-all duration-200
+                  ${
+                    activeTab === "scores"
+                      ? "bg-linear-to-r from-yellow-600 to-orange-600 border-yellow-500 text-white shadow-lg shadow-yellow-500/30 scale-105"
+                      : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600 hover:scale-102"
+                  }
+                `}
+                whileHover={{ scale: activeTab === "scores" ? 1.05 : 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <span className="relative z-10 flex items-center gap-1.5">
+                  <span className="text-lg">📊</span>
+                  <span>Scores</span>
+                </span>
+              </motion.button>
 
-      {/* AI Song Generation/Player */}
-      {(showSongGenerator || showSongPlayer) && (
-        <div className="p-4 md:p-6 pb-24 md:pb-6 border-t border-gray-800 bg-gray-900/30">
-          <div className="max-w-2xl mx-auto">
-            {showSongGenerator && (
-              <SongGenerator 
-                battleId={battle.id}
-                onSongGenerated={() => {
-                  // Refresh the page to show the generated song
-                  router.refresh();
-                }}
-              />
-            )}
-            {showSongPlayer && battle.generatedSong && (
-              <SongPlayer song={battle.generatedSong} />
-            )}
+              {(showSongGenerator || showSongPlayer) && (
+                <motion.button
+                  onClick={() => setActiveTab("song")}
+                  className={`
+                    relative px-4 md:px-6 py-2.5 md:py-3 font-bold text-sm md:text-base
+                    rounded-lg border-2 transition-all duration-200
+                    ${
+                      activeTab === "song"
+                        ? "bg-linear-to-r from-green-600 to-emerald-600 border-green-500 text-white shadow-lg shadow-green-500/30 scale-105"
+                        : showSongGenerator
+                        ? "bg-linear-to-r from-green-700/40 to-emerald-700/40 border-green-600 text-green-300 hover:from-green-700/60 hover:to-emerald-700/60 hover:border-green-500 hover:scale-102 animate-pulse"
+                        : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600 hover:scale-102"
+                    }
+                  `}
+                  whileHover={{ scale: activeTab === "song" ? 1.05 : 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span className="relative z-10 flex items-center gap-1.5">
+                    {showSongGenerator ? (
+                      <>
+                        <span
+                          className="text-lg inline-block"
+                          style={{ filter: "invert(1)" }}
+                        >
+                          🎵
+                        </span>
+                        <span>Generate Song</span>
+                      </>
+                    ) : (
+                      <>
+                        <span
+                          className="text-lg inline-block"
+                          style={{ filter: "invert(1)" }}
+                        >
+                          🎵
+                        </span>
+                        <span>Generated Song</span>
+                      </>
+                    )}
+                  </span>
+                </motion.button>
+              )}
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-4 md:p-6 pb-24 md:pb-6">
+              {/* Scores Tab */}
+              {activeTab === "scores" && roundScore && (
+                <motion.div
+                  key="scores-content"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <h3 className="text-xl md:text-2xl font-(family-name:--font-bebas-neue) text-center mb-4 text-yellow-400">
+                    ROUND {roundScore.round} SCORES
+                  </h3>
+                  <ScoreDisplay
+                    roundScore={roundScore}
+                    leftPersona={battle.personas.left}
+                    rightPersona={battle.personas.right}
+                  />
+                </motion.div>
+              )}
+
+              {/* Generated Song Tab */}
+              {activeTab === "song" &&
+                (showSongGenerator || showSongPlayer) && (
+                  <motion.div
+                    key="song-content"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className="max-w-2xl mx-auto"
+                  >
+                    {showSongGenerator && (
+                      <SongGenerator
+                        battleId={battle.id}
+                        onSongGenerated={() => {
+                          // Refresh the page to show the generated song
+                          router.refresh();
+                        }}
+                      />
+                    )}
+                    {showSongPlayer && battle.generatedSong && (
+                      <SongPlayer song={battle.generatedSong} />
+                    )}
+                  </motion.div>
+                )}
+            </div>
           </div>
         </div>
       )}
