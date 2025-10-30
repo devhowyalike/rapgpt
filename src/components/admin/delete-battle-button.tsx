@@ -8,11 +8,13 @@ import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 interface DeleteBattleButtonProps {
   battleId: string;
   battleTitle: string;
+  onDeleteSuccess?: () => void;
 }
 
 export function DeleteBattleButton({
   battleId,
   battleTitle,
+  onDeleteSuccess,
 }: DeleteBattleButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -31,6 +33,8 @@ export function DeleteBattleButton({
 
       if (response.ok) {
         setShowDeleteDialog(false);
+        // Call the callback to update parent component state
+        onDeleteSuccess?.();
         // Use startTransition for smooth UI updates without flashing
         startTransition(() => {
           router.refresh();

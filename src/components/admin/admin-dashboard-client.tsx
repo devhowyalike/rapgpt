@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Shield, User, Star } from "lucide-react";
+import { Shield, User, Star, Music } from "lucide-react";
 import { DeleteBattleButton } from "@/components/admin/delete-battle-button";
 import { DeleteUserButton } from "@/components/admin/delete-user-button";
 import type { UserDB, BattleDB } from "@/lib/db/schema";
@@ -12,7 +12,10 @@ interface AdminDashboardClientProps {
   currentUserId?: string;
 }
 
-export function AdminDashboardClient({ users, currentUserId }: AdminDashboardClientProps) {
+export function AdminDashboardClient({
+  users,
+  currentUserId,
+}: AdminDashboardClientProps) {
   const [selectedUserId, setSelectedUserId] = React.useState<string | null>(
     null
   );
@@ -41,6 +44,10 @@ export function AdminDashboardClient({ users, currentUserId }: AdminDashboardCli
     }
   };
 
+  const handleBattleDeleted = (battleId: string) => {
+    setUserBattles((prev) => prev.filter((battle) => battle.id !== battleId));
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       {/* User Management Section */}
@@ -57,9 +64,7 @@ export function AdminDashboardClient({ users, currentUserId }: AdminDashboardCli
               <div
                 key={user.id}
                 className={`w-full bg-gray-700/50 rounded-lg p-4 transition-all ${
-                  isSelected
-                    ? "ring-2 ring-purple-500 bg-gray-600/50"
-                    : ""
+                  isSelected ? "ring-2 ring-purple-500 bg-gray-600/50" : ""
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -171,12 +176,19 @@ export function AdminDashboardClient({ users, currentUserId }: AdminDashboardCli
                           </span>
                         </div>
                       )}
-                      <Link
-                        href={`/battle/${battle.id}`}
-                        className="text-white font-semibold hover:text-purple-400 transition-colors"
-                      >
-                        {battle.title}
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/battle/${battle.id}`}
+                          className="text-white font-semibold hover:text-purple-400 transition-colors"
+                        >
+                          {battle.title}
+                        </Link>
+                        {battle.generatedSong && (
+                          <span title="Has generated song">
+                            <Music className="w-4 h-4 text-purple-400" />
+                          </span>
+                        )}
+                      </div>
                       <div className="text-gray-400 text-sm mt-1">
                         {personas.left.name} vs {personas.right.name}
                       </div>
@@ -185,6 +197,7 @@ export function AdminDashboardClient({ users, currentUserId }: AdminDashboardCli
                       <DeleteBattleButton
                         battleId={battle.id}
                         battleTitle={battle.title}
+                        onDeleteSuccess={() => handleBattleDeleted(battle.id)}
                       />
                     </div>
                   </div>
@@ -211,4 +224,3 @@ export function AdminDashboardClient({ users, currentUserId }: AdminDashboardCli
     </div>
   );
 }
-
