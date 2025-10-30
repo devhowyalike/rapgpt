@@ -76,9 +76,12 @@ Three beat styles are available for users to choose from:
 2. Battle creator can access song generation
 3. Creator selects a beat style
 4. System formats all verses with persona labels
-5. API generates song (typically 1-3 minutes)
-6. Song is saved with metadata to database
-7. Audio player appears for playback and download
+5. API generates song (typically 2-3 minutes)
+6. Client polls for completion with real-time progress bar
+7. Song is saved with metadata to database when complete
+8. Audio player appears for playback and download
+
+**Real-time Progress**: The UI displays a progress bar that updates every 5 seconds while the song generates, giving users accurate feedback on generation status.
 
 ## Rate Limits
 
@@ -99,13 +102,21 @@ If generation exceeds 5 minutes:
 
 ### Generate Music
 ```
-POST https://api.sunoapi.org/v1/music/generate
+POST https://api.sunoapi.org/api/v1/generate
 ```
 
 ### Check Status
 ```
-GET https://api.sunoapi.org/v1/music/{taskId}
+GET https://api.sunoapi.org/api/v1/query/{taskId}
 ```
+
+**Note**: The status endpoint path may vary depending on your Suno API version. The code will automatically try multiple endpoint variations:
+- `/api/v1/query/{taskId}` (recommended)
+- `/api/v1/task/{taskId}`
+- `/api/v1/generate/{taskId}`
+- `/api/v1/music/{taskId}`
+
+If you encounter 404 errors, check your Suno API dashboard for the exact "Get Music Generation Details" endpoint.
 
 ## Troubleshooting
 

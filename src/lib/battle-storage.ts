@@ -74,6 +74,8 @@ export async function getBattleById(id: string): Promise<Battle | null> {
       liveStartedAt: battle.liveStartedAt?.getTime(),
       adminControlMode: battle.adminControlMode as 'manual' | 'auto' | undefined,
       autoPlayConfig: battle.autoPlayConfig as Battle['autoPlayConfig'],
+      // AI-generated song
+      generatedSong: battle.generatedSong as Battle['generatedSong'],
     };
   } catch (error) {
     console.error('Error getting battle by ID:', error);
@@ -116,6 +118,8 @@ export async function saveBattle(
       liveStartedAt: battle.liveStartedAt ? new Date(battle.liveStartedAt) : null,
       adminControlMode: battle.adminControlMode || 'manual',
       autoPlayConfig: battle.autoPlayConfig || null,
+      // AI-generated song
+      generatedSong: battle.generatedSong || null,
     };
     
     // Add optional fields if provided (only on insert)
@@ -205,6 +209,8 @@ export async function getAllBattles(): Promise<Battle[]> {
         liveStartedAt: battle.liveStartedAt?.getTime(),
         adminControlMode: battle.adminControlMode as 'manual' | 'auto' | undefined,
         autoPlayConfig: battle.autoPlayConfig as Battle['autoPlayConfig'],
+        // AI-generated song
+        generatedSong: battle.generatedSong as Battle['generatedSong'],
       };
     });
   } catch (error) {
@@ -274,6 +280,8 @@ export async function getFeaturedBattles(): Promise<Battle[]> {
         liveStartedAt: battle.liveStartedAt?.getTime(),
         adminControlMode: battle.adminControlMode as 'manual' | 'auto' | undefined,
         autoPlayConfig: battle.autoPlayConfig as Battle['autoPlayConfig'],
+        // AI-generated song
+        generatedSong: battle.generatedSong as Battle['generatedSong'],
       };
     });
   } catch (error) {
@@ -352,6 +360,8 @@ export async function getLiveBattles(): Promise<Battle[]> {
         liveStartedAt: battle.liveStartedAt?.getTime(),
         adminControlMode: battle.adminControlMode as 'manual' | 'auto' | undefined,
         autoPlayConfig: battle.autoPlayConfig as Battle['autoPlayConfig'],
+        // AI-generated song
+        generatedSong: battle.generatedSong as Battle['generatedSong'],
       };
     });
   } catch (error) {

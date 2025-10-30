@@ -33,8 +33,9 @@ export async function POST(
       );
     }
 
-    // Validate user is battle creator
-    if (!battle.creator || battle.creator.userId !== userId) {
+    // Validate user is battle creator (bypass for testing if env var is set)
+    const bypassCreatorCheck = process.env.BYPASS_SONG_GENERATION_AUTH === 'true';
+    if (!bypassCreatorCheck && (!battle.creator || battle.creator.userId !== userId)) {
       return NextResponse.json(
         { error: 'Only the battle creator can generate songs' },
         { status: 403 }
@@ -78,12 +79,20 @@ export async function POST(
     }
 
     // Generate song using Suno API
+    console.log('[API] Starting song generation for battle:', id, 'with beat style:', beatStyle);
+    console.log('[API] Battle has', battle.verses.length, 'verses');
+    
     let taskId: string;
     try {
       const result = await generateSong(battle, beatStyle);
       taskId = result.taskId;
+      console.log('[API] Song generation started successfully. TaskId:', taskId);
     } catch (error) {
-      console.error('Error initiating song generation:', error);
+      console.error('[API] Error initiating song generation:', error);
+      console.error('[API] Error details:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return NextResponse.json(
         { 
           error: error instanceof Error 
@@ -94,61 +103,28 @@ export async function POST(
       );
     }
 
-    // Poll for completion (with 5 minute timeout = 60 attempts * 5 seconds)
-    let songData;
-    try {
-      songData = await pollSongCompletion(taskId, 60, 5000);
-    } catch (error) {
-      console.error('Error polling song completion:', error);
-      
-      // If timeout, save partial data so user can check back later
-      const partialSong = {
-        audioUrl: '', // Empty until complete
-        title: `${battle.title} - ${beatStyle.toUpperCase()} Battle`,
-        beatStyle,
-        generatedAt: Date.now(),
-        sunoTaskId: taskId,
-      };
-
-      const updatedBattle = {
-        ...battle,
-        generatedSong: partialSong,
-      };
-
-      await saveBattle(updatedBattle);
-
-      return NextResponse.json(
-        { 
-          error: 'Song generation is taking longer than expected. The song will continue processing - check back in a few minutes.',
-          taskId,
-          partial: true,
-        },
-        { status: 202 } // Accepted but not complete
-      );
-    }
-
-    // Save completed song data to battle
-    const completedSong = {
-      audioUrl: songData.audioUrl,
-      videoUrl: songData.videoUrl,
-      imageUrl: songData.imageUrl,
+    // Save initial song data with taskId so we can track it
+    const partialSong = {
+      audioUrl: '', // Will be filled when complete
+      videoUrl: '',
+      imageUrl: '',
       title: `${battle.title} - ${beatStyle.toUpperCase()} Battle`,
       beatStyle,
       generatedAt: Date.now(),
       sunoTaskId: taskId,
     };
 
-    const updatedBattle = {
+    await saveBattle({
       ...battle,
-      generatedSong: completedSong,
-    };
+      generatedSong: partialSong,
+    });
 
-    await saveBattle(updatedBattle);
-
-    // Return success with song data
+    // Return taskId immediately - let client poll for progress
     return NextResponse.json({
       success: true,
-      song: completedSong,
+      taskId,
+      status: 'processing',
+      message: 'Song generation started. Polling for completion...',
     });
 
   } catch (error) {

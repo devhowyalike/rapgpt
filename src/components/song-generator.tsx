@@ -62,14 +62,10 @@ export function SongGenerator({
 
     setIsGenerating(true);
     setError(null);
-    setProgress(0);
-
-    // Simulate progress updates
-    const progressInterval = setInterval(() => {
-      setProgress((prev) => Math.min(prev + 2, 90));
-    }, 1000);
+    setProgress(10);
 
     try {
+      // Start generation
       const response = await fetch(`/api/battle/${battleId}/generate-song`, {
         method: "POST",
         headers: {
@@ -80,29 +76,70 @@ export function SongGenerator({
         }),
       });
 
-      clearInterval(progressInterval);
-      setProgress(100);
-
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || "Failed to generate song");
       }
 
       const data = await response.json();
+      const taskId = data.taskId;
 
-      if (data.partial) {
-        // Song is still processing
-        setError(
-          data.error || "Song is processing - check back in a few minutes"
+      if (!taskId) {
+        throw new Error("No task ID received");
+      }
+
+      setProgress(20);
+
+      // Poll for completion
+      const maxAttempts = 60; // 5 minutes (60 * 5 seconds)
+      let attempts = 0;
+
+      const pollStatus = async (): Promise<boolean> => {
+        attempts++;
+        setProgress(Math.min(20 + (attempts / maxAttempts) * 70, 90));
+
+        const statusResponse = await fetch(
+          `/api/battle/${battleId}/song-status?taskId=${taskId}`
         );
-      } else {
+
+        if (!statusResponse.ok) {
+          throw new Error("Failed to check song status");
+        }
+
+        const statusData = await statusResponse.json();
+
+        if (statusData.status === "complete") {
+          setProgress(100);
+          return true;
+        } else if (statusData.status === "error") {
+          throw new Error(statusData.errorMessage || "Song generation failed");
+        } else if (attempts >= maxAttempts) {
+          throw new Error("Song generation timeout - check back later");
+        }
+
+        // Continue polling
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        return pollStatus();
+      };
+
+      try {
+        await pollStatus();
+        
         // Success!
         if (onSongGenerated) {
           onSongGenerated();
         }
+      } catch (pollError) {
+        // If polling fails, song is still generating but we can't check status
+        console.warn('[Song Generator] Polling failed, but song is generating:', pollError);
+        // Keep the progress bar showing and let the manual completion UI appear
+        setProgress(50); // Show partial progress
+        setError(
+          `Song generation started (Task ID: ${taskId}) but status polling is unavailable. ` +
+          `Check the Suno dashboard for completion.`
+        );
       }
     } catch (err) {
-      clearInterval(progressInterval);
       setError(
         err instanceof Error ? err.message : "An unexpected error occurred"
       );

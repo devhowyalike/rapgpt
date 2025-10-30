@@ -35,8 +35,8 @@ export function BattleReplay({ battle }: BattleReplayProps) {
   
   // Check if current user is the battle creator
   const isCreator = userId && battle.creator?.userId === userId;
-  const showSongGenerator = isCreator && battle.status === 'completed' && !battle.generatedSong;
-  const showSongPlayer = battle.status === 'completed' && battle.generatedSong;
+  const showSongGenerator = isCreator && battle.status === 'completed' && !battle.generatedSong?.audioUrl;
+  const showSongPlayer = battle.status === 'completed' && battle.generatedSong?.audioUrl;
 
   useLayoutEffect(() => {
     const updateHeaderHeight = () => {
