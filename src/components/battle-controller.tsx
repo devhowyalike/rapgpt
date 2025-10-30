@@ -24,6 +24,7 @@ import {
   ThumbsUp,
   Pause,
   Settings,
+  CheckCircle,
 } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
@@ -125,47 +126,13 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
       votingCompletedRound !== battle.currentRound
     ) {
       setIsReadingPhase(true);
-      setReadingTimeRemaining(20); // 20 seconds to read the verse
     }
   }, [
     battle,
     isReadingPhase,
     isVotingPhase,
     setIsReadingPhase,
-    setReadingTimeRemaining,
     votingCompletedRound,
-  ]);
-
-  // Reading countdown timer effect
-  useEffect(() => {
-    if (
-      !isReadingPhase ||
-      readingTimeRemaining === null ||
-      readingTimeRemaining <= 0
-    ) {
-      return;
-    }
-
-    const timer = setInterval(() => {
-      const next = (readingTimeRemaining ?? 0) - 1;
-      setReadingTimeRemaining(next);
-      if (next <= 0) {
-        // Reading phase complete, start voting phase
-        setIsReadingPhase(false);
-        setReadingTimeRemaining(null);
-        setIsVotingPhase(true);
-        setVotingTimeRemaining(10); // 10 seconds for voting
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [
-    readingTimeRemaining,
-    isReadingPhase,
-    setReadingTimeRemaining,
-    setIsReadingPhase,
-    setIsVotingPhase,
-    setVotingTimeRemaining,
   ]);
 
   // Voting countdown timer effect
@@ -194,6 +161,14 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     setIsVotingPhase,
     battle,
   ]);
+
+  // Handler to manually start voting phase
+  const handleBeginVoting = () => {
+    setIsReadingPhase(false);
+    setReadingTimeRemaining(null);
+    setIsVotingPhase(true);
+    setVotingTimeRemaining(10); // 10 seconds for voting
+  };
 
   if (!battle || isLeaving) {
     return <BattleLoading />;
@@ -530,7 +505,9 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                 {/* Primary Action Button - Changes based on state */}
                 <button
                   onClick={
-                    canAdvance
+                    isReadingPhase
+                      ? handleBeginVoting
+                      : canAdvance
                       ? handleAdvanceRound
                       : canGenerate
                       ? handleGenerateVerse
@@ -538,15 +515,14 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                   }
                   disabled={
                     isGenerating ||
-                    isReadingPhase ||
                     isVotingPhase ||
-                    (!canGenerate && !canAdvance)
+                    (!canGenerate && !canAdvance && !isReadingPhase)
                   }
                   className={`
                     flex-1 px-6 py-3 rounded-lg text-white font-bold transition-all
                     ${
                       isReadingPhase
-                        ? "bg-linear-to-r from-cyan-600 to-blue-600"
+                        ? "bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
                         : isVotingPhase
                         ? "bg-linear-to-r from-purple-600 to-pink-600 animate-pulse"
                         : canAdvance
@@ -557,9 +533,8 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                     }
                     ${
                       isGenerating ||
-                      isReadingPhase ||
                       isVotingPhase ||
-                      (!canGenerate && !canAdvance)
+                      (!canGenerate && !canAdvance && !isReadingPhase)
                         ? "cursor-not-allowed"
                         : ""
                     }
@@ -570,30 +545,10 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Kicking ballistics...
                     </div>
-                  ) : isReadingPhase && readingTimeRemaining !== null ? (
-                    <div className="flex items-center justify-between gap-4 w-full">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">📖</span>
-                        <span className="text-lg font-medium">
-                          Read the source...Voting begins in
-                        </span>
-                        <span className="text-2xl font-bebas-neue">
-                          {readingTimeRemaining}s
-                        </span>
-                      </div>
-                      {/* <div className="flex items-center gap-3 flex-1 max-w-md">
-                        <span className="text-sm text-white/80 whitespace-nowrap">
-                          Voting in {readingTimeRemaining}s
-                        </span>
-                        <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden min-w-[100px]">
-                          <div
-                            className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
-                            style={{
-                              width: `${(readingTimeRemaining / 20) * 100}%`,
-                            }}
-                          />
-                        </div>
-                      </div> */}
+                  ) : isReadingPhase ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <CheckCircle className="w-5 h-5" />
+                      <span className="text-lg font-medium">Begin Voting</span>
                     </div>
                   ) : isVotingPhase && votingTimeRemaining !== null ? (
                     <div className="flex items-center justify-between gap-4 w-full">
