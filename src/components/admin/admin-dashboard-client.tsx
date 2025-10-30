@@ -4,13 +4,15 @@ import * as React from "react";
 import Link from "next/link";
 import { Shield, User, Star } from "lucide-react";
 import { DeleteBattleButton } from "@/components/admin/delete-battle-button";
+import { DeleteUserButton } from "@/components/admin/delete-user-button";
 import type { UserDB, BattleDB } from "@/lib/db/schema";
 
 interface AdminDashboardClientProps {
   users: Array<UserDB & { displayName: string; email: string }>;
+  currentUserId?: string;
 }
 
-export function AdminDashboardClient({ users }: AdminDashboardClientProps) {
+export function AdminDashboardClient({ users, currentUserId }: AdminDashboardClientProps) {
   const [selectedUserId, setSelectedUserId] = React.useState<string | null>(
     null
   );
@@ -52,43 +54,55 @@ export function AdminDashboardClient({ users }: AdminDashboardClientProps) {
           {users.map((user) => {
             const isSelected = selectedUserId === user.id;
             return (
-              <button
+              <div
                 key={user.id}
-                onClick={() => handleUserClick(user.id)}
-                className={`w-full bg-gray-700/50 rounded-lg p-4 flex items-center justify-between transition-all hover:bg-gray-600/50 ${
+                className={`w-full bg-gray-700/50 rounded-lg p-4 transition-all ${
                   isSelected
                     ? "ring-2 ring-purple-500 bg-gray-600/50"
                     : ""
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  {user.imageUrl && (
-                    <img
-                      src={user.imageUrl}
-                      alt={user.displayName}
-                      className="w-10 h-10 rounded-full"
-                    />
-                  )}
-                  <div className="text-left">
-                    <div className="text-white font-semibold">
-                      {user.displayName}
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    onClick={() => handleUserClick(user.id)}
+                    className="flex items-center gap-3 flex-1 hover:opacity-80 transition-opacity"
+                  >
+                    {user.imageUrl && (
+                      <img
+                        src={user.imageUrl}
+                        alt={user.displayName}
+                        className="w-10 h-10 rounded-full"
+                      />
+                    )}
+                    <div className="text-left">
+                      <div className="text-white font-semibold">
+                        {user.displayName}
+                      </div>
+                      <div className="text-gray-400 text-sm">{user.email}</div>
                     </div>
-                    <div className="text-gray-400 text-sm">{user.email}</div>
+                  </button>
+                  <div className="flex items-center gap-2">
+                    {user.role === "admin" ? (
+                      <span className="px-3 py-1 bg-purple-600 text-white text-sm rounded-full flex items-center gap-1">
+                        <Shield size={14} />
+                        Admin
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 bg-gray-600 text-gray-300 text-sm rounded-full">
+                        User
+                      </span>
+                    )}
+                    {/* Only show delete button if not the current user and not an admin */}
+                    {user.id !== currentUserId && user.role !== "admin" && (
+                      <DeleteUserButton
+                        userId={user.id}
+                        userName={user.displayName}
+                        userEmail={user.email}
+                      />
+                    )}
                   </div>
                 </div>
-                <div>
-                  {user.role === "admin" ? (
-                    <span className="px-3 py-1 bg-purple-600 text-white text-sm rounded-full flex items-center gap-1">
-                      <Shield size={14} />
-                      Admin
-                    </span>
-                  ) : (
-                    <span className="px-3 py-1 bg-gray-600 text-gray-300 text-sm rounded-full">
-                      User
-                    </span>
-                  )}
-                </div>
-              </button>
+              </div>
             );
           })}
         </div>
