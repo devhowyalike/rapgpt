@@ -233,6 +233,12 @@ POSTGRES_USER=your_user
 POSTGRES_HOST=your_host
 POSTGRES_PASSWORD=your_password
 POSTGRES_DATABASE=your_database
+
+# Feature Flags for User Battles
+# These control voting and commenting on USER-CREATED battles only
+# Live/featured battles (admin-created) ALWAYS have voting and commenting enabled
+NEXT_PUBLIC_USER_BATTLE_VOTING=false        # Enable voting on user battles (default: false)
+NEXT_PUBLIC_USER_BATTLE_COMMENTING=false    # Enable commenting on user battles (default: false)
 ```
 
 ## Tech Stack

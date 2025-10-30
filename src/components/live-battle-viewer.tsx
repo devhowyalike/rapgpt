@@ -13,10 +13,10 @@ import { LiveIndicator } from "./live-indicator";
 import { useWebSocket } from "@/lib/websocket/client";
 import type { WebSocketEvent } from "@/lib/websocket/types";
 import { useBattleStore } from "@/lib/battle-store";
-import * as Dialog from "@radix-ui/react-dialog";
-import { X, MessageSquare, ThumbsUp, Settings } from "lucide-react";
+import { MessageSquare, ThumbsUp, Settings } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
+import { MobileDrawer } from "@/components/ui/mobile-drawer";
 
 interface LiveBattleViewerProps {
   initialBattle: Battle;
@@ -51,6 +51,11 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
   // Check if user is admin
   const { sessionClaims, isLoaded } = useAuth();
   const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
+  
+  // Determine if voting and commenting should be shown
+  // Live battles are always featured, so these should always be true, but we check for safety
+  const showVoting = battle?.isFeatured || process.env.NEXT_PUBLIC_USER_BATTLE_VOTING === 'true';
+  const showCommenting = battle?.isFeatured || process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING === 'true';
 
   // Initialize battle state
   useEffect(() => {
@@ -355,7 +360,69 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
         </div>
 
         {/* Desktop Sidebar */}
-        <div className="hidden md:block w-96">
+        {(showCommenting || showVoting) && (
+          <div className="hidden md:block w-96">
+            <BattleSidebar
+              battle={battle}
+              onVote={handleVote}
+              onComment={handleComment}
+              isVotingPhase={isVotingPhase}
+              votingTimeRemaining={votingTimeRemaining}
+              votingCompletedRound={votingCompletedRound}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Mobile Floating Action Buttons */}
+      {(showCommenting || showVoting) && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40">
+          {showCommenting && (
+            <button
+              onClick={() => {
+                setMobileActiveTab("comments");
+                setShowMobileDrawer(true);
+              }}
+              className={`
+                w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+                ${
+                  showMobileDrawer && mobileActiveTab === "comments"
+                    ? "bg-blue-600/90 text-white border-blue-400/50 scale-110"
+                    : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-blue-600/90 hover:text-white hover:border-blue-500/50 hover:scale-105"
+                }
+              `}
+            >
+              <MessageSquare className="w-6 h-6" strokeWidth={2.5} />
+            </button>
+          )}
+          {showVoting && (
+            <button
+              onClick={() => {
+                setMobileActiveTab("voting");
+                setShowMobileDrawer(true);
+              }}
+              className={`
+                w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+                ${
+                  showMobileDrawer && mobileActiveTab === "voting"
+                    ? "bg-purple-600/90 text-white border-purple-400/50 scale-110"
+                    : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-purple-600/90 hover:text-white hover:border-purple-500/50 hover:scale-105"
+                }
+              `}
+            >
+              <ThumbsUp className="w-6 h-6" strokeWidth={2.5} />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Mobile Drawer */}
+      <MobileDrawer
+        open={showMobileDrawer}
+        onOpenChange={setShowMobileDrawer}
+        title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
+      >
+        <div className="flex-1 overflow-y-auto min-h-0">
           <BattleSidebar
             battle={battle}
             onVote={handleVote}
@@ -363,75 +430,10 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
             isVotingPhase={isVotingPhase}
             votingTimeRemaining={votingTimeRemaining}
             votingCompletedRound={votingCompletedRound}
+            defaultTab={mobileActiveTab}
           />
         </div>
-      </div>
-
-      {/* Mobile Floating Action Buttons */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40">
-        <button
-          onClick={() => {
-            setMobileActiveTab("comments");
-            setShowMobileDrawer(true);
-          }}
-          className={`
-            w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
-            ${
-              showMobileDrawer && mobileActiveTab === "comments"
-                ? "bg-blue-600/90 text-white border-blue-400/50 scale-110"
-                : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-blue-600/90 hover:text-white hover:border-blue-500/50 hover:scale-105"
-            }
-          `}
-        >
-          <MessageSquare className="w-6 h-6" strokeWidth={2.5} />
-        </button>
-        <button
-          onClick={() => {
-            setMobileActiveTab("voting");
-            setShowMobileDrawer(true);
-          }}
-          className={`
-            w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
-            ${
-              showMobileDrawer && mobileActiveTab === "voting"
-                ? "bg-purple-600/90 text-white border-purple-400/50 scale-110"
-                : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-purple-600/90 hover:text-white hover:border-purple-500/50 hover:scale-105"
-            }
-          `}
-        >
-          <ThumbsUp className="w-6 h-6" strokeWidth={2.5} />
-        </button>
-      </div>
-
-      {/* Mobile Drawer */}
-      <Dialog.Root open={showMobileDrawer} onOpenChange={setShowMobileDrawer}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in" />
-          <Dialog.Content className="fixed inset-x-0 bottom-0 z-50 md:hidden bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-gray-800 shrink-0">
-              <Dialog.Title className="text-lg font-bold text-white">
-                {mobileActiveTab === "comments" ? "Comments" : "Voting"}
-              </Dialog.Title>
-              <Dialog.Close asChild>
-                <button className="p-2 text-gray-400 hover:text-white transition-colors">
-                  <X className="w-5 h-5" />
-                </button>
-              </Dialog.Close>
-            </div>
-            <div className="flex-1 overflow-y-auto min-h-0">
-              <BattleSidebar
-                battle={battle}
-                onVote={handleVote}
-                onComment={handleComment}
-                isVotingPhase={isVotingPhase}
-                votingTimeRemaining={votingTimeRemaining}
-                votingCompletedRound={votingCompletedRound}
-                defaultTab={mobileActiveTab}
-              />
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      </MobileDrawer>
     </>
   );
 }

@@ -65,7 +65,7 @@ export default async function ProfilePage({
       .select()
       .from(battles)
       .where(
-        and(eq(battles.createdBy, profileUserId), eq(battles.isFeatured, false))
+        eq(battles.createdBy, profileUserId)
       )
       .orderBy(desc(battles.createdAt));
   } else if (

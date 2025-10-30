@@ -34,9 +34,21 @@ export function BattleSidebar({
   defaultTab,
 }: BattleSidebarProps) {
   const { user, isLoaded } = useUser();
-  const [activeTab, setActiveTab] = useState<"comments" | "voting">(
-    defaultTab || "comments"
-  );
+  
+  // Determine if voting and commenting should be shown
+  // Live/featured battles always show these features, user battles check env flags
+  const showVoting = battle.isFeatured || process.env.NEXT_PUBLIC_USER_BATTLE_VOTING === 'true';
+  const showCommenting = battle.isFeatured || process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING === 'true';
+  
+  // Default to whichever is available if neither is specified
+  const getInitialTab = (): "comments" | "voting" => {
+    if (defaultTab) return defaultTab;
+    if (showCommenting) return "comments";
+    if (showVoting) return "voting";
+    return "comments"; // fallback
+  };
+  
+  const [activeTab, setActiveTab] = useState<"comments" | "voting">(getInitialTab());
 
   const [comment, setComment] = useState("");
   const [isSubmittingVote, setIsSubmittingVote] = useState(false);
@@ -60,13 +72,13 @@ export function BattleSidebar({
   // Automatically switch to voting tab when voting begins
   // This takes priority over defaultTab when voting is active
   useEffect(() => {
-    if (isVotingPhase) {
+    if (isVotingPhase && showVoting) {
       setActiveTab("voting");
     } else if (defaultTab) {
       // Only respect defaultTab when not in voting phase
       setActiveTab(defaultTab);
     }
-  }, [isVotingPhase, defaultTab]);
+  }, [isVotingPhase, defaultTab, showVoting]);
 
   const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -174,51 +186,58 @@ export function BattleSidebar({
     return false;
   };
 
+  // If neither feature is enabled, don't render anything
+  if (!showCommenting && !showVoting) {
+    return null;
+  }
+
   return (
     <div
       className={`flex flex-col bg-gray-900 md:border-l border-gray-800 ${
         defaultTab ? "" : "h-full"
       }`}
     >
-      {/* Tabs - Hidden on mobile when in drawer mode */}
-      <div
-        className={`flex border-b border-gray-800 ${
-          defaultTab ? "hidden" : ""
-        }`}
-      >
-        <button
-          onClick={() => setActiveTab("comments")}
-          className={`
-            flex-1 px-4 py-3 font-medium transition-colors
-            ${
-              activeTab === "comments"
-                ? "bg-gray-800 text-white border-b-2 border-blue-500"
-                : "text-gray-400 hover:text-white hover:bg-gray-800/50"
-            }
-          `}
+      {/* Tabs - Hidden on mobile when in drawer mode OR when only one feature is available */}
+      {showCommenting && showVoting && (
+        <div
+          className={`flex border-b border-gray-800 ${
+            defaultTab ? "hidden" : ""
+          }`}
         >
-          <MessageSquare className="inline-block w-4 h-4 mr-2" />
-          Comments
-        </button>
-        <button
-          onClick={() => setActiveTab("voting")}
-          className={`
-            flex-1 px-4 py-3 font-medium transition-colors
-            ${
-              activeTab === "voting"
-                ? "bg-gray-800 text-white border-b-2 border-purple-500"
-                : "text-gray-400 hover:text-white hover:bg-gray-800/50"
-            }
-          `}
-        >
-          <ThumbsUp className="inline-block w-4 h-4 mr-2" />
-          Vote
-        </button>
-      </div>
+          <button
+            onClick={() => setActiveTab("comments")}
+            className={`
+              flex-1 px-4 py-3 font-medium transition-colors
+              ${
+                activeTab === "comments"
+                  ? "bg-gray-800 text-white border-b-2 border-blue-500"
+                  : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+              }
+            `}
+          >
+            <MessageSquare className="inline-block w-4 h-4 mr-2" />
+            Comments
+          </button>
+          <button
+            onClick={() => setActiveTab("voting")}
+            className={`
+              flex-1 px-4 py-3 font-medium transition-colors
+              ${
+                activeTab === "voting"
+                  ? "bg-gray-800 text-white border-b-2 border-purple-500"
+                  : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+              }
+            `}
+          >
+            <ThumbsUp className="inline-block w-4 h-4 mr-2" />
+            Vote
+          </button>
+        </div>
+      )}
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
-        {activeTab === "comments" && (
+        {showCommenting && activeTab === "comments" && (
           <div className="flex flex-col h-full">
             {/* Archived Message - Always visible at top */}
             {isArchived && (
@@ -316,7 +335,7 @@ export function BattleSidebar({
           </div>
         )}
 
-        {activeTab === "voting" && (
+        {showVoting && activeTab === "voting" && (
           <div className="p-4 space-y-6">
             {isArchived && battle.scores.length > 0 && (
               <div className="bg-gray-800 rounded-lg p-3 mb-4">

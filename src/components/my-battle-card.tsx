@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Share2,
@@ -10,9 +11,10 @@ import {
   Crown,
   Globe,
   Lock,
+  Radio,
 } from "lucide-react";
-import * as Dialog from "@radix-ui/react-dialog";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 interface MyBattleCardProps {
   battle: {
@@ -27,6 +29,9 @@ interface MyBattleCardProps {
     winner?: string | null;
     scores?: any[];
     isPublic?: boolean;
+    isLive?: boolean;
+    liveStartedAt?: Date | null;
+    isFeatured?: boolean;
   };
   shareUrl: string;
   showManagement?: boolean;
@@ -39,6 +44,8 @@ export function MyBattleCard({
   showManagement = false,
   userIsProfilePublic = true,
 }: MyBattleCardProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPublic, setIsPublic] = useState(battle.isPublic || false);
@@ -86,12 +93,24 @@ export function MyBattleCard({
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      await fetch(`/api/battle/${battle.id}/delete`, {
+      const response = await fetch(`/api/battle/${battle.id}/delete`, {
         method: "DELETE",
       });
-      window.location.reload();
+
+      if (response.ok) {
+        setShowDeleteDialog(false);
+        // Use startTransition for smooth UI updates without flashing
+        startTransition(() => {
+          router.refresh();
+        });
+      } else {
+        const data = await response.json();
+        alert(data.error || "Failed to delete battle");
+        setIsDeleting(false);
+      }
     } catch (error) {
       console.error("Failed to delete battle:", error);
+      alert("Failed to delete battle");
       setIsDeleting(false);
     }
   };
@@ -99,6 +118,7 @@ export function MyBattleCard({
   // Calculate battle progress stats for paused battles
   const isPaused = battle.status === "incomplete";
   const isCompleted = battle.status === "completed";
+  const isArchived = !!battle.liveStartedAt && !battle.isLive;
   const currentRound = battle.currentRound || 1;
   const versesCount = battle.verses?.length || 0;
 
@@ -133,7 +153,11 @@ export function MyBattleCard({
   const finalStats = calculateFinalStats();
 
   return (
-    <div className="h-full flex flex-col bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-colors">
+    <div
+      className={`h-full flex flex-col bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-all ${
+        isDeleting || isPending ? "opacity-50 pointer-events-none" : ""
+      }`}
+    >
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <Link
@@ -150,6 +174,8 @@ export function MyBattleCard({
                 className={`px-3 py-1.5 rounded flex items-center gap-1.5 text-xs transition-colors ${
                   isPublic
                     ? "bg-blue-600/30 text-blue-300 hover:bg-blue-600/40"
+                    : isArchived
+                    ? "bg-purple-600/30 text-purple-300 hover:bg-purple-600/40"
                     : "bg-gray-600/30 text-gray-300 hover:bg-gray-600/40"
                 }`}
                 title="Manage battle"
@@ -158,6 +184,11 @@ export function MyBattleCard({
                   <>
                     <Globe size={12} />
                     Public
+                  </>
+                ) : isArchived ? (
+                  <>
+                    <Radio size={12} />
+                    Live Event
                   </>
                 ) : (
                   <>
@@ -183,18 +214,21 @@ export function MyBattleCard({
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   className={`flex items-center gap-2 px-3 py-2 text-sm rounded cursor-pointer outline-none ${
-                    !isPublic && (isPaused || !userIsProfilePublic)
+                    !isPublic &&
+                    (isPaused || !userIsProfilePublic || isArchived)
                       ? "text-gray-500 cursor-not-allowed"
                       : "text-gray-200 hover:bg-gray-700"
                   }`}
                   onClick={
-                    !isPublic && (isPaused || !userIsProfilePublic)
+                    !isPublic &&
+                    (isPaused || !userIsProfilePublic || isArchived)
                       ? undefined
                       : handleTogglePublic
                   }
                   disabled={
                     isTogglingPublic ||
-                    (!isPublic && (isPaused || !userIsProfilePublic))
+                    (!isPublic &&
+                      (isPaused || !userIsProfilePublic || isArchived))
                   }
                 >
                   {isPublic ? (
@@ -205,7 +239,9 @@ export function MyBattleCard({
                   ) : (
                     <>
                       <Globe size={16} />
-                      {isPaused
+                      {isArchived
+                        ? "Cannot Publish (Archived)"
+                        : isPaused
                         ? "Cannot Publish (Paused)"
                         : !userIsProfilePublic
                         ? "Cannot Publish (Private Profile)"
@@ -227,6 +263,13 @@ export function MyBattleCard({
       </div>
 
       <div className="flex items-center gap-2 text-sm mb-4 flex-wrap">
+        {battle.isLive && (
+          <span className="px-3 py-1 rounded bg-red-600 text-white flex items-center gap-1.5 font-semibold animate-pulse">
+            <Radio size={14} className="fill-white" />
+            LIVE
+          </span>
+        )}
+        {/* Removed secondary archived badge per request */}
         {showManagement && (
           <span
             className={`px-3 py-1 rounded ${
@@ -306,55 +349,39 @@ export function MyBattleCard({
       <div className="flex items-center gap-3">
         <Link
           href={`/battle/${battle.id}`}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-white ${
+            battle.isLive
+              ? "bg-red-600 hover:bg-red-700"
+              : "bg-purple-600 hover:bg-purple-700"
+          }`}
         >
-          {battle.status === "incomplete"
-            ? "Resume Beef"
-            : battle.status === "completed"
-            ? "Replay Battle"
-            : "View Battle"}
+          {battle.isLive ? (
+            <>
+              <Radio size={16} className="fill-white" />
+              Join Live
+            </>
+          ) : battle.status === "incomplete" ? (
+            "Resume Beef"
+          ) : battle.status === "completed" ? (
+            "Replay Battle"
+          ) : (
+            "View Battle"
+          )}
         </Link>
       </div>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog.Root open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-gray-900 border border-gray-800 rounded-lg shadow-2xl p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-start gap-4">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-red-500" />
-              </div>
-              <div className="flex-1">
-                <Dialog.Title className="text-xl font-bold text-white mb-2">
-                  Delete Battle?
-                </Dialog.Title>
-                <Dialog.Description className="text-gray-400 mb-4">
-                  Are you sure you want to delete this beef? This will also
-                  delete all votes and comments. This action cannot be undone.
-                </Dialog.Description>
-
-                <div className="flex gap-3 justify-end">
-                  <button
-                    onClick={() => setShowDeleteDialog(false)}
-                    disabled={isDeleting}
-                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    {isDeleting ? "Deleting..." : "Delete Battle"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      <ConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete Battle?"
+        description="Are you sure you want to delete this beef? This will also delete all votes and comments. This action cannot be undone."
+        confirmLabel="Delete Battle"
+        onConfirm={handleDelete}
+        isLoading={isDeleting}
+        variant="danger"
+        icon={AlertTriangle}
+      />
     </div>
   );
 }

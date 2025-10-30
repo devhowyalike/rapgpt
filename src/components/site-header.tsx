@@ -7,15 +7,32 @@ import { useAuth } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import type { Battle } from "@/lib/shared";
 
+// Cache admin status in memory to prevent flickering
+let cachedAdminStatus: boolean | null = null;
+let cachedUserId: string | null = null;
+
 export function SiteHeader() {
   const { userId, isLoaded } = useAuth();
   const [liveBattles, setLiveBattles] = useState<Battle[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
+  // Start with cached value if available
+  const [isAdmin, setIsAdmin] = useState(cachedAdminStatus ?? false);
 
   // Check admin status from database
   useEffect(() => {
-    if (!userId || !isLoaded) {
+    if (!isLoaded) {
+      return;
+    }
+
+    if (!userId) {
       setIsAdmin(false);
+      cachedAdminStatus = false;
+      cachedUserId = null;
+      return;
+    }
+
+    // If userId hasn't changed and we have cached status, use it
+    if (cachedUserId === userId && cachedAdminStatus !== null) {
+      setIsAdmin(cachedAdminStatus);
       return;
     }
 
@@ -24,7 +41,11 @@ export function SiteHeader() {
         const response = await fetch("/api/user/me");
         if (response.ok) {
           const data = await response.json();
-          setIsAdmin(data.user?.role === "admin");
+          const adminStatus = data.user?.role === "admin";
+          setIsAdmin(adminStatus);
+          // Cache the result
+          cachedAdminStatus = adminStatus;
+          cachedUserId = userId;
         }
       } catch (error) {
         console.error("[SiteHeader] Failed to check admin status:", error);

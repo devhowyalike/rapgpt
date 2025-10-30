@@ -67,6 +67,8 @@ export async function getBattleById(id: string): Promise<Battle | null> {
       createdAt: battle.createdAt.getTime(),
       updatedAt: battle.updatedAt.getTime(),
       creator: creatorInfo,
+      // Battle type flags
+      isFeatured: battle.isFeatured,
       // Live battle fields
       isLive: battle.isLive,
       liveStartedAt: battle.liveStartedAt?.getTime(),
@@ -128,8 +130,14 @@ export async function saveBattle(
       // Insert new battle
       await db.insert(battles).values(battleData);
     } else {
-      // Update existing battle (don't update createdBy or isFeatured)
-      await db.update(battles).set(battleData).where(eq(battles.id, battle.id));
+      // Update existing battle (don't update createdBy). Allow updating isFeatured for admin workflows
+      await db
+        .update(battles)
+        .set({
+          ...battleData,
+          isFeatured: battle.isFeatured ?? undefined,
+        })
+        .where(eq(battles.id, battle.id));
     }
   } catch (error) {
     console.error('Error saving battle:', error);
@@ -190,6 +198,8 @@ export async function getAllBattles(): Promise<Battle[]> {
         createdAt: battle.createdAt.getTime(),
         updatedAt: battle.updatedAt.getTime(),
         creator: creatorInfo,
+        // Battle type flags
+        isFeatured: battle.isFeatured,
         // Live battle fields
         isLive: battle.isLive,
         liveStartedAt: battle.liveStartedAt?.getTime(),
@@ -257,6 +267,8 @@ export async function getFeaturedBattles(): Promise<Battle[]> {
         createdAt: battle.createdAt.getTime(),
         updatedAt: battle.updatedAt.getTime(),
         creator: creatorInfo,
+        // Battle type flags
+        isFeatured: battle.isFeatured,
         // Live battle fields
         isLive: battle.isLive,
         liveStartedAt: battle.liveStartedAt?.getTime(),
@@ -333,6 +345,8 @@ export async function getLiveBattles(): Promise<Battle[]> {
         createdAt: battle.createdAt.getTime(),
         updatedAt: battle.updatedAt.getTime(),
         creator: creatorInfo,
+        // Battle type flags
+        isFeatured: battle.isFeatured,
         // Live battle fields
         isLive: battle.isLive,
         liveStartedAt: battle.liveStartedAt?.getTime(),

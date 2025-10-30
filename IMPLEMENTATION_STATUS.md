@@ -48,7 +48,7 @@ This document tracks the implementation of Clerk authentication with role-based 
 - ✅ Created admin dashboard (`src/app/admin/dashboard/page.tsx`)
 - ✅ User management interface
 - ✅ Battle management with delete functionality
-- ✅ Admin battle creation page (`src/app/admin/battles/new/page.tsx`)
+- ✅ Admin "Go Live" toggle on new-battle page
 - ✅ Creates featured battles (isFeatured: true)
 
 ### Phase 7: User Features
@@ -158,7 +158,7 @@ battles (deleted) → votes (deleted)
 ### Admin (Authenticated)
 
 - All user features
-- Create featured battles at `/admin/battles/new`
+- Create featured battles at `/new-battle` (using "Go Live" toggle)
 - Access admin dashboard at `/admin/dashboard`
 - View all users
 - Delete any battle
@@ -277,9 +277,7 @@ ANTHROPIC_API_KEY=
 
 - `src/app/sign-in/[[...sign-in]]/page.tsx`
 - `src/app/admin/dashboard/page.tsx`
-  - `src/app/admin/battles/new/page.tsx`
-  - `src/app/my-battles/page.tsx`
-- `src/app/my-battles/new/page.tsx`
+- `src/app/new-battle/page.tsx` (with admin "Go Live" toggle)
 
 ### API Routes
 

@@ -308,7 +308,7 @@ The admin dashboard has a user management interface prepared. You can extend it 
 ### Admin (Authenticated)
 
 - ✅ All user features
-- ✅ Create featured battles at `/admin/battles/new`
+- ✅ Create featured battles at `/new-battle` (using "Go Live" toggle)
 - ✅ Access admin dashboard at `/admin/dashboard`
 - ✅ View all users and their roles
 - ✅ View and delete any battle

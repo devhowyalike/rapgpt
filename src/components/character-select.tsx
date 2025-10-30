@@ -1,16 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getAllPersonas } from "@/lib/shared/personas";
 import type { Persona } from "@/lib/shared/battle-types";
 import { useRouter } from "next/navigation";
 import { SiteHeader } from "./site-header";
+import { useAuth } from "@clerk/nextjs";
+import { Switch } from "./ui/switch";
+import { Radio } from "lucide-react";
 
 export function CharacterSelect() {
   const [player1, setPlayer1] = useState<Persona | null>(null);
   const [player2, setPlayer2] = useState<Persona | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [createAsLive, setCreateAsLive] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
+
+  // Check if user is admin
+  const { userId, isLoaded } = useAuth();
+
+  // Check admin status from database
+  useEffect(() => {
+    if (!userId || !isLoaded) {
+      setIsAdmin(false);
+      return;
+    }
+
+    const checkAdminStatus = async () => {
+      try {
+        const response = await fetch("/api/user/me");
+        if (response.ok) {
+          const data = await response.json();
+          setIsAdmin(data.user?.role === "admin");
+        }
+      } catch (error) {
+        console.error("Failed to check admin status:", error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [userId, isLoaded]);
 
   const personas = getAllPersonas();
 
@@ -54,6 +85,7 @@ export function CharacterSelect() {
         body: JSON.stringify({
           leftPersonaId: player1.id,
           rightPersonaId: player2.id,
+          isFeatured: createAsLive, // Only true if admin and toggle enabled
         }),
         signal: controller.signal,
       });
@@ -67,8 +99,13 @@ export function CharacterSelect() {
 
       const { battleId } = await response.json();
 
-      // Navigate to battle page
-      router.push(`/battle/${battleId}`);
+      // If creating as live battle (admin), redirect to control panel
+      // Otherwise, redirect to battle page
+      if (createAsLive) {
+        router.push(`/admin/battles/${battleId}/control`);
+      } else {
+        router.push(`/battle/${battleId}`);
+      }
 
       // Don't reset isCreating here - let the navigation happen
       // If navigation fails, the finally block won't execute
@@ -286,6 +323,27 @@ export function CharacterSelect() {
           </div>
         </div>
 
+        {/* Admin Toggle for Live Battle */}
+        {isAdmin && (
+          <div className="w-full max-w-7xl mx-auto mb-6 flex justify-center">
+            <div className="flex items-center gap-4 bg-purple-900/30 border-2 border-purple-500/50 rounded-lg px-6 py-4 shadow-lg">
+              <div className="flex items-center gap-2 text-purple-400">
+                <Radio size={20} />
+              </div>
+              <div className="flex-1">
+                <div className="text-white font-bold text-lg">Go Live</div>
+                <div className="text-purple-300 text-sm">
+                  Create as featured battle on homepage
+                </div>
+              </div>
+              <Switch
+                checked={createAsLive}
+                onCheckedChange={setCreateAsLive}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Start Battle Button */}
         <div className="w-full max-w-7xl mx-auto text-center">
           <button
@@ -304,7 +362,9 @@ export function CharacterSelect() {
             {isCreating
               ? "CREATING BATTLE..."
               : player1 && player2
-              ? "START BATTLE"
+              ? createAsLive
+                ? "START LIVE BATTLE"
+                : "START BATTLE"
               : "SELECT YOUR FIGHTERS"}
           </button>
         </div>

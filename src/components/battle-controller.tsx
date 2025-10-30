@@ -24,11 +24,13 @@ import {
   ThumbsUp,
   Pause,
   Settings,
+  CheckCircle,
 } from "lucide-react";
-import * as Dialog from "@radix-ui/react-dialog";
 import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { MobileDrawer } from "@/components/ui/mobile-drawer";
 
 interface BattleControllerProps {
   initialBattle: Battle;
@@ -71,6 +73,14 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   // Check if user is admin
   const { sessionClaims, isLoaded } = useAuth();
   const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
+
+  // Determine if voting and commenting should be shown
+  // Live/featured battles always show these features, user battles check env flags
+  const showVoting =
+    battle?.isFeatured || process.env.NEXT_PUBLIC_USER_BATTLE_VOTING === "true";
+  const showCommenting =
+    battle?.isFeatured ||
+    process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING === "true";
 
   // Automatically switch to voting tab when voting begins (for mobile)
   useEffect(() => {
@@ -117,47 +127,13 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
       votingCompletedRound !== battle.currentRound
     ) {
       setIsReadingPhase(true);
-      setReadingTimeRemaining(20); // 20 seconds to read the verse
     }
   }, [
     battle,
     isReadingPhase,
     isVotingPhase,
     setIsReadingPhase,
-    setReadingTimeRemaining,
     votingCompletedRound,
-  ]);
-
-  // Reading countdown timer effect
-  useEffect(() => {
-    if (
-      !isReadingPhase ||
-      readingTimeRemaining === null ||
-      readingTimeRemaining <= 0
-    ) {
-      return;
-    }
-
-    const timer = setInterval(() => {
-      const next = (readingTimeRemaining ?? 0) - 1;
-      setReadingTimeRemaining(next);
-      if (next <= 0) {
-        // Reading phase complete, start voting phase
-        setIsReadingPhase(false);
-        setReadingTimeRemaining(null);
-        setIsVotingPhase(true);
-        setVotingTimeRemaining(10); // 10 seconds for voting
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [
-    readingTimeRemaining,
-    isReadingPhase,
-    setReadingTimeRemaining,
-    setIsReadingPhase,
-    setIsVotingPhase,
-    setVotingTimeRemaining,
   ]);
 
   // Voting countdown timer effect
@@ -186,6 +162,14 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     setIsVotingPhase,
     battle,
   ]);
+
+  // Handler to manually start voting phase
+  const handleBeginVoting = () => {
+    setIsReadingPhase(false);
+    setReadingTimeRemaining(null);
+    setIsVotingPhase(true);
+    setVotingTimeRemaining(10); // 10 seconds for voting
+  };
 
   if (!battle || isLeaving) {
     return <BattleLoading />;
@@ -417,75 +401,72 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
           </div>
 
           {/* Desktop Sidebar */}
-          <div className="hidden md:block w-96">
+          {(showCommenting || showVoting) && (
+            <div className="hidden md:block w-96">
+              <BattleSidebar
+                battle={battle}
+                onVote={handleVote}
+                onComment={handleComment}
+                isArchived={true}
+                votingCompletedRound={votingCompletedRound}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Floating Action Buttons */}
+        {(showCommenting || showVoting) && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40">
+            {showCommenting && (
+              <button
+                onClick={handleMobileCommentsClick}
+                className={`
+                  w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+                  ${
+                    showMobileDrawer && mobileActiveTab === "comments"
+                      ? "bg-blue-600/90 text-white border-blue-400/50 scale-110"
+                      : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-blue-600/90 hover:text-white hover:border-blue-500/50 hover:scale-105"
+                  }
+                `}
+              >
+                <MessageSquare className="w-6 h-6" strokeWidth={2.5} />
+              </button>
+            )}
+            {showVoting && (
+              <button
+                onClick={handleMobileVotingClick}
+                className={`
+                  w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+                  ${
+                    showMobileDrawer && mobileActiveTab === "voting"
+                      ? "bg-purple-600/90 text-white border-purple-400/50 scale-110"
+                      : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-purple-600/90 hover:text-white hover:border-purple-500/50 hover:scale-105"
+                  }
+                `}
+              >
+                <ThumbsUp className="w-6 h-6" strokeWidth={2.5} />
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Mobile Drawer */}
+        <MobileDrawer
+          open={showMobileDrawer}
+          onOpenChange={setShowMobileDrawer}
+          title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
+        >
+          <div className="flex-1 overflow-y-auto min-h-0">
             <BattleSidebar
               battle={battle}
               onVote={handleVote}
               onComment={handleComment}
               isArchived={true}
               votingCompletedRound={votingCompletedRound}
+              defaultTab={mobileActiveTab}
             />
           </div>
-        </div>
-
-        {/* Mobile Floating Action Buttons */}
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40">
-          <button
-            onClick={handleMobileCommentsClick}
-            className={`
-              w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
-              ${
-                showMobileDrawer && mobileActiveTab === "comments"
-                  ? "bg-blue-600/90 text-white border-blue-400/50 scale-110"
-                  : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-blue-600/90 hover:text-white hover:border-blue-500/50 hover:scale-105"
-              }
-            `}
-          >
-            <MessageSquare className="w-6 h-6" strokeWidth={2.5} />
-          </button>
-          <button
-            onClick={handleMobileVotingClick}
-            className={`
-              w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
-              ${
-                showMobileDrawer && mobileActiveTab === "voting"
-                  ? "bg-purple-600/90 text-white border-purple-400/50 scale-110"
-                  : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-purple-600/90 hover:text-white hover:border-purple-500/50 hover:scale-105"
-              }
-            `}
-          >
-            <ThumbsUp className="w-6 h-6" strokeWidth={2.5} />
-          </button>
-        </div>
-
-        {/* Mobile Drawer */}
-        <Dialog.Root open={showMobileDrawer} onOpenChange={setShowMobileDrawer}>
-          <Dialog.Portal>
-            <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in" />
-            <Dialog.Content className="fixed inset-x-0 bottom-0 z-50 md:hidden bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom h-[85vh] flex flex-col">
-              <div className="flex items-center justify-between p-4 border-b border-gray-800 shrink-0">
-                <Dialog.Title className="text-lg font-bold text-white">
-                  {mobileActiveTab === "comments" ? "Comments" : "Voting"}
-                </Dialog.Title>
-                <Dialog.Close asChild>
-                  <button className="p-2 text-gray-400 hover:text-white transition-colors">
-                    <X className="w-5 h-5" />
-                  </button>
-                </Dialog.Close>
-              </div>
-              <div className="flex-1 overflow-y-auto min-h-0">
-                <BattleSidebar
-                  battle={battle}
-                  onVote={handleVote}
-                  onComment={handleComment}
-                  isArchived={true}
-                  votingCompletedRound={votingCompletedRound}
-                  defaultTab={mobileActiveTab}
-                />
-              </div>
-            </Dialog.Content>
-          </Dialog.Portal>
-        </Dialog.Root>
+        </MobileDrawer>
       </>
     );
   }
@@ -514,7 +495,9 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                 {/* Primary Action Button - Changes based on state */}
                 <button
                   onClick={
-                    canAdvance
+                    isReadingPhase
+                      ? handleBeginVoting
+                      : canAdvance
                       ? handleAdvanceRound
                       : canGenerate
                       ? handleGenerateVerse
@@ -522,15 +505,14 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                   }
                   disabled={
                     isGenerating ||
-                    isReadingPhase ||
                     isVotingPhase ||
-                    (!canGenerate && !canAdvance)
+                    (!canGenerate && !canAdvance && !isReadingPhase)
                   }
                   className={`
                     flex-1 px-6 py-3 rounded-lg text-white font-bold transition-all
                     ${
                       isReadingPhase
-                        ? "bg-linear-to-r from-cyan-600 to-blue-600"
+                        ? "bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
                         : isVotingPhase
                         ? "bg-linear-to-r from-purple-600 to-pink-600 animate-pulse"
                         : canAdvance
@@ -541,9 +523,8 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                     }
                     ${
                       isGenerating ||
-                      isReadingPhase ||
                       isVotingPhase ||
-                      (!canGenerate && !canAdvance)
+                      (!canGenerate && !canAdvance && !isReadingPhase)
                         ? "cursor-not-allowed"
                         : ""
                     }
@@ -554,30 +535,10 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Kicking ballistics...
                     </div>
-                  ) : isReadingPhase && readingTimeRemaining !== null ? (
-                    <div className="flex items-center justify-between gap-4 w-full">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">📖</span>
-                        <span className="text-lg font-medium">
-                          Read the source...Voting begins in
-                        </span>
-                        <span className="text-2xl font-bebas-neue">
-                          {readingTimeRemaining}s
-                        </span>
-                      </div>
-                      {/* <div className="flex items-center gap-3 flex-1 max-w-md">
-                        <span className="text-sm text-white/80 whitespace-nowrap">
-                          Voting in {readingTimeRemaining}s
-                        </span>
-                        <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden min-w-[100px]">
-                          <div
-                            className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
-                            style={{
-                              width: `${(readingTimeRemaining / 20) * 100}%`,
-                            }}
-                          />
-                        </div>
-                      </div> */}
+                  ) : isReadingPhase ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <CheckCircle className="w-5 h-5" />
+                      <span className="text-lg font-medium">Begin Voting</span>
                     </div>
                   ) : isVotingPhase && votingTimeRemaining !== null ? (
                     <div className="flex items-center justify-between gap-4 w-full">
@@ -644,7 +605,63 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
         </div>
 
         {/* Desktop Sidebar */}
-        <div className="hidden md:block w-96">
+        {(showCommenting || showVoting) && (
+          <div className="hidden md:block w-96">
+            <BattleSidebar
+              battle={battle}
+              onVote={handleVote}
+              onComment={handleComment}
+              isVotingPhase={isVotingPhase}
+              votingTimeRemaining={votingTimeRemaining}
+              votingCompletedRound={votingCompletedRound}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Mobile Floating Action Buttons */}
+      {(showCommenting || showVoting) && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40">
+          {showCommenting && (
+            <button
+              onClick={handleMobileCommentsClick}
+              className={`
+                w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+                ${
+                  showMobileDrawer && mobileActiveTab === "comments"
+                    ? "bg-blue-600/90 text-white border-blue-400/50 scale-110"
+                    : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-blue-600/90 hover:text-white hover:border-blue-500/50 hover:scale-105"
+                }
+              `}
+            >
+              <MessageSquare className="w-6 h-6" strokeWidth={2.5} />
+            </button>
+          )}
+          {showVoting && (
+            <button
+              onClick={handleMobileVotingClick}
+              className={`
+                w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+                ${
+                  showMobileDrawer && mobileActiveTab === "voting"
+                    ? "bg-purple-600/90 text-white border-purple-400/50 scale-110"
+                    : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-purple-600/90 hover:text-white hover:border-purple-500/50 hover:scale-105"
+                }
+              `}
+            >
+              <ThumbsUp className="w-6 h-6" strokeWidth={2.5} />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Mobile Drawer */}
+      <MobileDrawer
+        open={showMobileDrawer}
+        onOpenChange={setShowMobileDrawer}
+        title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
+      >
+        <div className="flex-1 overflow-y-auto min-h-0">
           <BattleSidebar
             battle={battle}
             onVote={handleVote}
@@ -652,124 +669,25 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
             isVotingPhase={isVotingPhase}
             votingTimeRemaining={votingTimeRemaining}
             votingCompletedRound={votingCompletedRound}
+            defaultTab={mobileActiveTab}
           />
         </div>
-      </div>
-
-      {/* Mobile Floating Action Buttons */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40">
-        <button
-          onClick={handleMobileCommentsClick}
-          className={`
-            w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
-            ${
-              showMobileDrawer && mobileActiveTab === "comments"
-                ? "bg-blue-600/90 text-white border-blue-400/50 scale-110"
-                : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-blue-600/90 hover:text-white hover:border-blue-500/50 hover:scale-105"
-            }
-          `}
-        >
-          <MessageSquare className="w-6 h-6" strokeWidth={2.5} />
-        </button>
-        <button
-          onClick={handleMobileVotingClick}
-          className={`
-            w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
-            ${
-              showMobileDrawer && mobileActiveTab === "voting"
-                ? "bg-purple-600/90 text-white border-purple-400/50 scale-110"
-                : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-purple-600/90 hover:text-white hover:border-purple-500/50 hover:scale-105"
-            }
-          `}
-        >
-          <ThumbsUp className="w-6 h-6" strokeWidth={2.5} />
-        </button>
-      </div>
-
-      {/* Mobile Drawer */}
-      <Dialog.Root open={showMobileDrawer} onOpenChange={setShowMobileDrawer}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in" />
-          <Dialog.Content className="fixed inset-x-0 bottom-0 z-50 md:hidden bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-gray-800 shrink-0">
-              <Dialog.Title className="text-lg font-bold text-white">
-                {mobileActiveTab === "comments" ? "Comments" : "Voting"}
-              </Dialog.Title>
-              <Dialog.Close asChild>
-                <button className="p-2 text-gray-400 hover:text-white transition-colors">
-                  <X className="w-5 h-5" />
-                </button>
-              </Dialog.Close>
-            </div>
-            <div className="flex-1 overflow-y-auto min-h-0">
-              <BattleSidebar
-                battle={battle}
-                onVote={handleVote}
-                onComment={handleComment}
-                isVotingPhase={isVotingPhase}
-                votingTimeRemaining={votingTimeRemaining}
-                votingCompletedRound={votingCompletedRound}
-                defaultTab={mobileActiveTab}
-              />
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      </MobileDrawer>
 
       {/* Pause Battle Dialog */}
-      <Dialog.Root open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-gray-900 border border-gray-800 rounded-lg shadow-2xl p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-start gap-4">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-orange-500" />
-              </div>
-              <div className="flex-1">
-                <Dialog.Title className="text-xl font-bold text-white mb-2">
-                  Pause Battle?
-                </Dialog.Title>
-                <Dialog.Description className="text-gray-400 mb-4">
-                  Pause the battle? You can resume later.
-                </Dialog.Description>
-
-                {cancelError && (
-                  <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
-                    {cancelError}
-                  </div>
-                )}
-
-                <div className="flex gap-3 justify-end">
-                  <Dialog.Close asChild>
-                    <button
-                      type="button"
-                      disabled={isCanceling}
-                      className="px-4 py-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-medium transition-colors"
-                    >
-                      Keep Playing
-                    </button>
-                  </Dialog.Close>
-                  <button
-                    type="button"
-                    onClick={confirmCancelBattle}
-                    disabled={isCanceling}
-                    className="px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-800 disabled:cursor-not-allowed rounded-lg text-white font-medium flex items-center gap-2 transition-colors"
-                  >
-                    {isCanceling ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Pausing...
-                      </>
-                    ) : (
-                      "Pause Battle"
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      <ConfirmationDialog
+        open={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+        title="Pause Battle?"
+        description="Pause the battle? You can resume later."
+        confirmLabel="Pause Battle"
+        cancelLabel="Keep Playing"
+        onConfirm={confirmCancelBattle}
+        isLoading={isCanceling}
+        variant="warning"
+        icon={AlertTriangle}
+        errorMessage={cancelError || undefined}
+      />
 
       {/* Navigation Guard Dialog */}
       <NavigationDialog />
