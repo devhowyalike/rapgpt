@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Share2,
@@ -39,6 +40,8 @@ export function MyBattleCard({
   showManagement = false,
   userIsProfilePublic = true,
 }: MyBattleCardProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPublic, setIsPublic] = useState(battle.isPublic || false);
@@ -86,12 +89,24 @@ export function MyBattleCard({
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      await fetch(`/api/battle/${battle.id}/delete`, {
+      const response = await fetch(`/api/battle/${battle.id}/delete`, {
         method: "DELETE",
       });
-      window.location.reload();
+      
+      if (response.ok) {
+        setShowDeleteDialog(false);
+        // Use startTransition for smooth UI updates without flashing
+        startTransition(() => {
+          router.refresh();
+        });
+      } else {
+        const data = await response.json();
+        alert(data.error || "Failed to delete battle");
+        setIsDeleting(false);
+      }
     } catch (error) {
       console.error("Failed to delete battle:", error);
+      alert("Failed to delete battle");
       setIsDeleting(false);
     }
   };
@@ -133,7 +148,9 @@ export function MyBattleCard({
   const finalStats = calculateFinalStats();
 
   return (
-    <div className="h-full flex flex-col bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-colors">
+    <div className={`h-full flex flex-col bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-all ${
+      isDeleting || isPending ? "opacity-50 pointer-events-none" : ""
+    }`}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <Link

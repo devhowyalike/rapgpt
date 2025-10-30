@@ -68,6 +68,7 @@ export async function DELETE(
     revalidatePath('/archive');
     revalidatePath('/community');
     revalidatePath('/admin/dashboard');
+    revalidatePath(`/profile/${battle.createdBy}`, 'page');
 
     return new Response(JSON.stringify({ 
       success: true,
