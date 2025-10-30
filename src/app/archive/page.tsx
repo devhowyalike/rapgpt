@@ -7,8 +7,8 @@ export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
 export default async function ArchivePage() {
-  // Only show completed featured battles in archive
-  const battles = (await getFeaturedBattles()).filter((b) => b.status === "completed");
+  // Only show completed live battles in archive (battles that have a liveStartedAt timestamp)
+  const battles = (await getFeaturedBattles()).filter((b) => b.status === "completed" && b.liveStartedAt);
 
   return (
     <>
