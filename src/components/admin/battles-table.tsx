@@ -27,6 +27,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 
@@ -56,6 +57,10 @@ export function BattlesTable({ battles }: BattlesTableProps) {
   );
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [selectedBattles, setSelectedBattles] = React.useState<Set<string>>(
+    new Set()
+  );
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = React.useState(false);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -96,6 +101,55 @@ export function BattlesTable({ battles }: BattlesTableProps) {
       setErrorMessage("Failed to delete battle");
       setIsDeleting(false);
     }
+  };
+
+  const handleBulkDelete = async () => {
+    setIsDeleting(true);
+    setErrorMessage(null);
+    try {
+      const deletePromises = Array.from(selectedBattles).map((battleId) =>
+        fetch(`/api/battle/${battleId}/delete`, {
+          method: "DELETE",
+        })
+      );
+
+      const responses = await Promise.all(deletePromises);
+      const failedDeletes = responses.filter((res) => !res.ok);
+
+      if (failedDeletes.length > 0) {
+        setErrorMessage(
+          `Failed to delete ${failedDeletes.length} of ${selectedBattles.size} battles`
+        );
+        setIsDeleting(false);
+      } else {
+        setIsDeleting(false);
+        setShowBulkDeleteDialog(false);
+        setSelectedBattles(new Set());
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Error deleting battles:", error);
+      setErrorMessage("Failed to delete battles");
+      setIsDeleting(false);
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedBattles(new Set(sortedBattles.map((b) => b.id)));
+    } else {
+      setSelectedBattles(new Set());
+    }
+  };
+
+  const handleSelectBattle = (battleId: string, checked: boolean) => {
+    const newSelected = new Set(selectedBattles);
+    if (checked) {
+      newSelected.add(battleId);
+    } else {
+      newSelected.delete(battleId);
+    }
+    setSelectedBattles(newSelected);
   };
 
   const sortedBattles = React.useMemo(() => {
@@ -167,9 +221,36 @@ export function BattlesTable({ battles }: BattlesTableProps) {
 
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg overflow-hidden">
+      {selectedBattles.size > 0 && (
+        <div className="px-4 py-3 bg-purple-900/20 border-b border-purple-500/20 flex items-center justify-between">
+          <span className="text-sm text-gray-300">
+            {selectedBattles.size} battle{selectedBattles.size !== 1 ? "s" : ""}{" "}
+            selected
+          </span>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => setShowBulkDeleteDialog(true)}
+            className="gap-2"
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete Selected
+          </Button>
+        </div>
+      )}
       <Table>
         <TableHeader>
           <TableRow className="border-purple-500/20 hover:bg-gray-700/50">
+            <TableHead className="w-12">
+              <Checkbox
+                checked={
+                  sortedBattles.length > 0 &&
+                  selectedBattles.size === sortedBattles.length
+                }
+                onCheckedChange={handleSelectAll}
+                aria-label="Select all battles"
+              />
+            </TableHead>
             <TableHead className="text-gray-300">
               <SortButton field="title">Title</SortButton>
             </TableHead>
@@ -201,8 +282,21 @@ export function BattlesTable({ battles }: BattlesTableProps) {
           {sortedBattles.map((battle) => (
             <TableRow
               key={battle.id}
-              className="border-purple-500/20 hover:bg-gray-700/50 transition-colors"
+              className={`border-purple-500/20 transition-colors ${
+                selectedBattles.has(battle.id)
+                  ? "bg-gray-700/50 hover:bg-gray-700/70"
+                  : "hover:bg-gray-700/50"
+              }`}
             >
+              <TableCell>
+                <Checkbox
+                  checked={selectedBattles.has(battle.id)}
+                  onCheckedChange={(checked) =>
+                    handleSelectBattle(battle.id, checked as boolean)
+                  }
+                  aria-label={`Select ${battle.title}`}
+                />
+              </TableCell>
               <TableCell className="font-medium text-white">
                 <div className="flex items-center gap-2">
                   {battle.isLive && (
@@ -345,6 +439,57 @@ export function BattlesTable({ battles }: BattlesTableProps) {
                     className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50"
                   >
                     {isDeleting ? "Deleting..." : "Delete Battle"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+
+      <Dialog.Root
+        open={showBulkDeleteDialog}
+        onOpenChange={setShowBulkDeleteDialog}
+      >
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-gray-900 border border-gray-800 rounded-lg shadow-2xl p-6 animate-in fade-in zoom-in-95">
+            <div className="flex items-start gap-4">
+              <div className="shrink-0 w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-red-500" />
+              </div>
+              <div className="flex-1">
+                <Dialog.Title className="text-xl font-bold text-white mb-2">
+                  Delete {selectedBattles.size} Battle
+                  {selectedBattles.size !== 1 ? "s" : ""}?
+                </Dialog.Title>
+                <Dialog.Description className="text-gray-400 mb-4">
+                  Are you sure you want to delete {selectedBattles.size}{" "}
+                  selected battle{selectedBattles.size !== 1 ? "s" : ""}? This
+                  will also delete all associated votes and comments. This
+                  action cannot be undone.
+                </Dialog.Description>
+
+                {errorMessage && (
+                  <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+                    {errorMessage}
+                  </div>
+                )}
+
+                <div className="flex gap-3 justify-end">
+                  <button
+                    onClick={() => setShowBulkDeleteDialog(false)}
+                    disabled={isDeleting}
+                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleBulkDelete}
+                    disabled={isDeleting}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    {isDeleting ? "Deleting..." : "Delete Battles"}
                   </button>
                 </div>
               </div>
