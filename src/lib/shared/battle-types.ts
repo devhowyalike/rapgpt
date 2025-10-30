@@ -4,6 +4,7 @@
 
 export type BattleStatus = 'upcoming' | 'ongoing' | 'completed' | 'incomplete';
 export type PersonaPosition = 'left' | 'right';
+export type SongGenerationBeatStyle = 'g-funk' | 'boom-bap' | 'trap';
 
 export interface Persona {
   id: string;
@@ -101,6 +102,16 @@ export interface Battle {
     autoAdvance?: boolean;
     readingDuration?: number;
     votingDuration?: number;
+  };
+  // AI-generated song from battle verses
+  generatedSong?: {
+    audioUrl: string;
+    videoUrl?: string;
+    imageUrl?: string;
+    title: string;
+    beatStyle: SongGenerationBeatStyle;
+    generatedAt: number;
+    sunoTaskId: string;
   };
 }
 

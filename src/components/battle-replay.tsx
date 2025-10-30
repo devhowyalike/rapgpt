@@ -9,11 +9,15 @@ import type { Battle } from "@/lib/shared";
 import { PersonaCard } from "./persona-card";
 import { VerseDisplay } from "./verse-display";
 import { ScoreDisplay } from "./score-display";
+import { SongGenerator } from "./song-generator";
+import { SongPlayer } from "./song-player";
 import { getRoundVerses } from "@/lib/battle-engine";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, User } from "lucide-react";
 import Link from "next/link";
 import { VictoryConfetti } from "./victory-confetti";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 interface BattleReplayProps {
   battle: Battle;
@@ -23,9 +27,16 @@ export function BattleReplay({ battle }: BattleReplayProps) {
   const [selectedRound, setSelectedRound] = useState(1);
   const roundVerses = getRoundVerses(battle, selectedRound);
   const roundScore = battle.scores.find((s) => s.round === selectedRound);
+  const { userId } = useAuth();
+  const router = useRouter();
 
   const battleReplayHeaderRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
+  
+  // Check if current user is the battle creator
+  const isCreator = userId && battle.creator?.userId === userId;
+  const showSongGenerator = isCreator && battle.status === 'completed' && !battle.generatedSong;
+  const showSongPlayer = battle.status === 'completed' && battle.generatedSong;
 
   useLayoutEffect(() => {
     const updateHeaderHeight = () => {
@@ -254,6 +265,26 @@ export function BattleReplay({ battle }: BattleReplayProps) {
               leftPersona={battle.personas.left}
               rightPersona={battle.personas.right}
             />
+          </div>
+        </div>
+      )}
+
+      {/* AI Song Generation/Player */}
+      {(showSongGenerator || showSongPlayer) && (
+        <div className="p-4 md:p-6 pb-24 md:pb-6 border-t border-gray-800 bg-gray-900/30">
+          <div className="max-w-2xl mx-auto">
+            {showSongGenerator && (
+              <SongGenerator 
+                battleId={battle.id}
+                onSongGenerated={() => {
+                  // Refresh the page to show the generated song
+                  router.refresh();
+                }}
+              />
+            )}
+            {showSongPlayer && battle.generatedSong && (
+              <SongPlayer song={battle.generatedSong} />
+            )}
           </div>
         </div>
       )}

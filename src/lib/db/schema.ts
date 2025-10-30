@@ -64,6 +64,17 @@ export const battles = pgTable('battles', {
     votingDuration?: number;
   }>(), // Auto-play timing settings
   
+  // AI-generated song from battle verses
+  generatedSong: jsonb('generated_song').$type<{
+    audioUrl: string;
+    videoUrl?: string;
+    imageUrl?: string;
+    title: string;
+    beatStyle: 'g-funk' | 'boom-bap' | 'trap';
+    generatedAt: number;
+    sunoTaskId: string;
+  }>(),
+  
   createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow(),
 });
