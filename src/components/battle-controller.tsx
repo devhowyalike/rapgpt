@@ -16,10 +16,8 @@ import { getNextPerformer, isRoundComplete } from "@/lib/battle-engine";
 import {
   Play,
   ArrowRight,
-  XCircle,
   RotateCcw,
   AlertTriangle,
-  X,
   MessageSquare,
   ThumbsUp,
   Pause,

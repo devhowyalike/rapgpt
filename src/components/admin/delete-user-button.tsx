@@ -5,17 +5,17 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
-interface DeleteBattleButtonProps {
-  battleId: string;
-  battleTitle: string;
-  onDeleteSuccess?: () => void;
+interface DeleteUserButtonProps {
+  userId: string;
+  userName: string;
+  userEmail: string;
 }
 
-export function DeleteBattleButton({
-  battleId,
-  battleTitle,
-  onDeleteSuccess,
-}: DeleteBattleButtonProps) {
+export function DeleteUserButton({
+  userId,
+  userName,
+  userEmail,
+}: DeleteUserButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -27,26 +27,24 @@ export function DeleteBattleButton({
     setErrorMessage(null);
     
     try {
-      const response = await fetch(`/api/battle/${battleId}/delete`, {
+      const response = await fetch(`/api/user/${userId}/delete`, {
         method: "DELETE",
       });
 
       if (response.ok) {
         setShowDeleteDialog(false);
-        // Call the callback to update parent component state
-        onDeleteSuccess?.();
         // Use startTransition for smooth UI updates without flashing
         startTransition(() => {
           router.refresh();
         });
       } else {
         const data = await response.json();
-        setErrorMessage(data.error || "Failed to delete battle");
+        setErrorMessage(data.error || "Failed to delete user");
         setIsDeleting(false);
       }
     } catch (error) {
-      console.error("Error deleting battle:", error);
-      setErrorMessage("Failed to delete battle");
+      console.error("Error deleting user:", error);
+      setErrorMessage("Failed to delete user");
       setIsDeleting(false);
     }
   };
@@ -57,7 +55,7 @@ export function DeleteBattleButton({
         onClick={() => setShowDeleteDialog(true)}
         disabled={isDeleting || isPending}
         className="p-2 hover:bg-red-600 text-red-400 hover:text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        title="Delete battle"
+        title="Delete user"
       >
         <Trash2 size={18} />
       </button>
@@ -65,9 +63,16 @@ export function DeleteBattleButton({
       <ConfirmationDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
-        title="Delete Battle?"
-        description={`Are you sure you want to delete "${battleTitle}"? This will also delete all votes and comments. This action cannot be undone.`}
-        confirmLabel="Delete Battle"
+        title="Delete User?"
+        description={`Are you sure you want to delete ${userName} (${userEmail})? This will permanently delete:
+        
+• The user's Clerk authentication account
+• The user's database record
+• All battles they created
+• All their comments and votes
+
+The user will not be able to sign back in. This action cannot be undone.`}
+        confirmLabel="Delete User"
         onConfirm={handleDelete}
         isLoading={isDeleting}
         variant="danger"
@@ -77,3 +82,4 @@ export function DeleteBattleButton({
     </>
   );
 }
+

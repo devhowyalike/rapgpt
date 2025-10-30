@@ -2,15 +2,20 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Shield, User, Star } from "lucide-react";
+import { Shield, User, Star, Music, Eye, EyeOff } from "lucide-react";
 import { DeleteBattleButton } from "@/components/admin/delete-battle-button";
+import { DeleteUserButton } from "@/components/admin/delete-user-button";
 import type { UserDB, BattleDB } from "@/lib/db/schema";
 
 interface AdminDashboardClientProps {
   users: Array<UserDB & { displayName: string; email: string }>;
+  currentUserId?: string;
 }
 
-export function AdminDashboardClient({ users }: AdminDashboardClientProps) {
+export function AdminDashboardClient({
+  users,
+  currentUserId,
+}: AdminDashboardClientProps) {
   const [selectedUserId, setSelectedUserId] = React.useState<string | null>(
     null
   );
@@ -39,6 +44,10 @@ export function AdminDashboardClient({ users }: AdminDashboardClientProps) {
     }
   };
 
+  const handleBattleDeleted = (battleId: string) => {
+    setUserBattles((prev) => prev.filter((battle) => battle.id !== battleId));
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       {/* User Management Section */}
@@ -48,47 +57,59 @@ export function AdminDashboardClient({ users }: AdminDashboardClientProps) {
           Users ({users.length})
         </h2>
 
-        <div className="space-y-3 max-h-[600px] overflow-y-auto">
+        <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1 py-1">
           {users.map((user) => {
             const isSelected = selectedUserId === user.id;
             return (
-              <button
+              <div
                 key={user.id}
-                onClick={() => handleUserClick(user.id)}
-                className={`w-full bg-gray-700/50 rounded-lg p-4 flex items-center justify-between transition-all hover:bg-gray-600/50 ${
+                className={`w-full bg-gray-700/50 rounded-lg p-4 transition-all ${
                   isSelected
-                    ? "ring-2 ring-purple-500 bg-gray-600/50"
-                    : ""
+                    ? "border-2 border-purple-500 bg-gray-600/50"
+                    : "border-2 border-transparent"
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  {user.imageUrl && (
-                    <img
-                      src={user.imageUrl}
-                      alt={user.displayName}
-                      className="w-10 h-10 rounded-full"
-                    />
-                  )}
-                  <div className="text-left">
-                    <div className="text-white font-semibold">
-                      {user.displayName}
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    onClick={() => handleUserClick(user.id)}
+                    className="flex items-center gap-3 flex-1 hover:opacity-80 transition-opacity"
+                  >
+                    {user.imageUrl && (
+                      <img
+                        src={user.imageUrl}
+                        alt={user.displayName}
+                        className="w-10 h-10 rounded-full"
+                      />
+                    )}
+                    <div className="text-left">
+                      <div className="text-white font-semibold">
+                        {user.displayName}
+                      </div>
+                      <div className="text-gray-400 text-sm">{user.email}</div>
                     </div>
-                    <div className="text-gray-400 text-sm">{user.email}</div>
+                  </button>
+                  <div className="flex items-center gap-2">
+                    {user.role === "admin" ? (
+                      <span className="px-3 py-1 bg-purple-600 text-white text-sm rounded-full flex items-center gap-1">
+                        <Shield size={14} />
+                        Admin
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 bg-gray-600 text-gray-300 text-sm rounded-full">
+                        User
+                      </span>
+                    )}
+                    {/* Only show delete button if not the current user and not an admin */}
+                    {user.id !== currentUserId && user.role !== "admin" && (
+                      <DeleteUserButton
+                        userId={user.id}
+                        userName={user.displayName}
+                        userEmail={user.email}
+                      />
+                    )}
                   </div>
                 </div>
-                <div>
-                  {user.role === "admin" ? (
-                    <span className="px-3 py-1 bg-purple-600 text-white text-sm rounded-full flex items-center gap-1">
-                      <Shield size={14} />
-                      Admin
-                    </span>
-                  ) : (
-                    <span className="px-3 py-1 bg-gray-600 text-gray-300 text-sm rounded-full">
-                      User
-                    </span>
-                  )}
-                </div>
-              </button>
+              </div>
             );
           })}
         </div>
@@ -157,12 +178,14 @@ export function AdminDashboardClient({ users }: AdminDashboardClientProps) {
                           </span>
                         </div>
                       )}
-                      <Link
-                        href={`/battle/${battle.id}`}
-                        className="text-white font-semibold hover:text-purple-400 transition-colors"
-                      >
-                        {battle.title}
-                      </Link>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Link
+                          href={`/battle/${battle.id}`}
+                          className="text-white font-semibold hover:text-purple-400 transition-colors"
+                        >
+                          {battle.title}
+                        </Link>
+                      </div>
                       <div className="text-gray-400 text-sm mt-1">
                         {personas.left.name} vs {personas.right.name}
                       </div>
@@ -171,10 +194,11 @@ export function AdminDashboardClient({ users }: AdminDashboardClientProps) {
                       <DeleteBattleButton
                         battleId={battle.id}
                         battleTitle={battle.title}
+                        onDeleteSuccess={() => handleBattleDeleted(battle.id)}
                       />
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm flex-wrap">
                     <span
                       className={`px-2 py-1 rounded text-xs ${
                         battle.isFeatured
@@ -184,6 +208,31 @@ export function AdminDashboardClient({ users }: AdminDashboardClientProps) {
                     >
                       {battle.isFeatured ? "Featured" : "User Battle"}
                     </span>
+                    <span
+                      className={`px-2 py-1 rounded text-xs flex items-center gap-1 ${
+                        battle.isPublic
+                          ? "bg-green-600/20 text-green-400"
+                          : "bg-gray-600/30 text-gray-500"
+                      }`}
+                    >
+                      {battle.isPublic ? (
+                        <>
+                          <Eye className="w-3 h-3" />
+                          Public
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff className="w-3 h-3" />
+                          Private
+                        </>
+                      )}
+                    </span>
+                    {battle.generatedSong && (
+                      <span className="px-2 py-1 rounded text-xs flex items-center gap-1 bg-green-600/20 text-green-400 border border-green-500/30">
+                        <Music className="w-3 h-3" />
+                        Music Generated
+                      </span>
+                    )}
                     <span className="text-gray-500">
                       {new Date(battle.createdAt).toLocaleDateString()}
                     </span>
@@ -197,4 +246,3 @@ export function AdminDashboardClient({ users }: AdminDashboardClientProps) {
     </div>
   );
 }
-

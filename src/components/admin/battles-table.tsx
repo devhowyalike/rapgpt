@@ -9,6 +9,9 @@ import {
   Eye,
   Trash2,
   AlertTriangle,
+  Music,
+  Check,
+  X,
 } from "lucide-react";
 import type { Battle } from "@/lib/shared";
 import {
@@ -39,7 +42,8 @@ type SortField =
   | "comments"
   | "matchup"
   | "creator"
-  | "round";
+  | "round"
+  | "musicGenerated";
 type SortDirection = "asc" | "desc";
 
 interface BattlesTableProps {
@@ -192,6 +196,10 @@ export function BattlesTable({ battles }: BattlesTableProps) {
           aValue = a.currentRound;
           bValue = b.currentRound;
           break;
+        case "musicGenerated":
+          aValue = a.generatedSong?.audioUrl ? 1 : 0;
+          bValue = b.generatedSong?.audioUrl ? 1 : 0;
+          break;
         default:
           return 0;
       }
@@ -274,6 +282,9 @@ export function BattlesTable({ battles }: BattlesTableProps) {
             </TableHead>
             <TableHead className="text-gray-300">
               <SortButton field="round">Round</SortButton>
+            </TableHead>
+            <TableHead className="text-gray-300 text-center">
+              <SortButton field="musicGenerated">Music Generated</SortButton>
             </TableHead>
             <TableHead className="text-gray-300">Actions</TableHead>
           </TableRow>
@@ -358,6 +369,16 @@ export function BattlesTable({ battles }: BattlesTableProps) {
               </TableCell>
               <TableCell className="text-gray-400 text-sm">
                 {battle.currentRound}/3
+              </TableCell>
+              <TableCell className="text-center">
+                {battle.generatedSong?.audioUrl ? (
+                  <div className="flex items-center justify-center gap-1">
+                    <Music className="w-4 h-4 text-green-400" />
+                    <Check className="w-4 h-4 text-green-400" />
+                  </div>
+                ) : (
+                  <X className="w-4 h-4 text-gray-500 mx-auto" />
+                )}
               </TableCell>
               <TableCell>
                 <DropdownMenu>

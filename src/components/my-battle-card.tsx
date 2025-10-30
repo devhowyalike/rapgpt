@@ -12,6 +12,7 @@ import {
   Globe,
   Lock,
   Radio,
+  Music2,
 } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -32,6 +33,15 @@ interface MyBattleCardProps {
     isLive?: boolean;
     liveStartedAt?: Date | null;
     isFeatured?: boolean;
+    generatedSong?: {
+      audioUrl: string;
+      videoUrl?: string;
+      imageUrl?: string;
+      title?: string;
+      beatStyle?: string;
+      generatedAt?: number;
+      sunoTaskId?: string;
+    } | null;
   };
   shareUrl: string;
   showManagement?: boolean;
@@ -271,23 +281,33 @@ export function MyBattleCard({
         )}
         {/* Removed secondary archived badge per request */}
         {showManagement && (
-          <span
-            className={`px-3 py-1 rounded ${
-              battle.status === "completed"
-                ? "bg-green-600/30 text-green-300"
-                : battle.status === "ongoing"
-                ? "bg-yellow-600/30 text-yellow-300"
-                : battle.status === "incomplete"
-                ? "bg-orange-600/30 text-orange-300"
-                : "bg-gray-600/30 text-gray-400"
-            }`}
-          >
-            {battle.status === "incomplete" ? "paused" : battle.status}
-          </span>
+          <>
+            <span
+              className={`px-3 py-1 rounded ${
+                battle.status === "completed"
+                  ? "bg-green-600/30 text-green-300"
+                  : battle.status === "ongoing"
+                  ? "bg-yellow-600/30 text-yellow-300"
+                  : battle.status === "incomplete"
+                  ? "bg-orange-600/30 text-orange-300"
+                  : "bg-gray-600/30 text-gray-400"
+              }`}
+            >
+              {battle.status === "incomplete" ? "paused" : battle.status}
+            </span>
+          </>
         )}
         <span className="text-gray-500">
           Created {new Date(battle.createdAt).toLocaleDateString()}
         </span>
+        {battle.generatedSong?.audioUrl ? (
+          <span
+            className="ml-auto inline-flex items-center justify-center rounded-full bg-green-500/15 text-green-400 px-2 py-0.5 border border-green-500/30"
+            title="Song generated"
+          >
+            <Music2 className="w-4 h-4" />
+          </span>
+        ) : null}
       </div>
 
       {isPaused && (

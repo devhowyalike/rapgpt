@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db/client";
 import { users } from "@/lib/db/schema";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { decrypt } from "@/lib/auth/encryption";
 import { checkRole } from "@/lib/auth/roles";
 import Link from "next/link";
@@ -20,11 +21,19 @@ export default async function AdminDashboardPage() {
       redirect("/");
     }
 
+    // Get current user's Clerk ID
+    const { userId: clerkUserId } = await auth();
+
     // Fetch all users
     const allUsers = await db
       .select()
       .from(users)
       .orderBy(desc(users.createdAt));
+
+    // Get current user from database to pass their ID
+    const currentDbUser = await db.query.users.findFirst({
+      where: eq(users.clerkId, clerkUserId!),
+    });
 
     // Decrypt user data for display
     const decryptedUsers = allUsers.map((user) => {
@@ -71,7 +80,10 @@ export default async function AdminDashboardPage() {
             </Link>
           </div>
 
-          <AdminDashboardClient users={decryptedUsers} />
+          <AdminDashboardClient 
+            users={decryptedUsers} 
+            currentUserId={currentDbUser?.id}
+          />
         </div>
       </div>
     );

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { UserButton } from "./auth/user-button";
 import { useAuth } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
-import type { Battle } from "@/lib/shared";
+import { useLiveBattles } from "@/lib/hooks/use-live-battles";
 
 // Cache admin status in memory to prevent flickering
 let cachedAdminStatus: boolean | null = null;
@@ -13,7 +13,6 @@ let cachedUserId: string | null = null;
 
 export function SiteHeader() {
   const { userId, isLoaded } = useAuth();
-  const [liveBattles, setLiveBattles] = useState<Battle[]>([]);
   // Start with cached value if available
   const [isAdmin, setIsAdmin] = useState(cachedAdminStatus ?? false);
 
@@ -56,33 +55,8 @@ export function SiteHeader() {
     checkAdminStatus();
   }, [userId, isLoaded]);
 
-  // Fetch live battles for admins
-  useEffect(() => {
-    console.log("[SiteHeader] isAdmin:", isAdmin, "isLoaded:", isLoaded);
-    if (!isAdmin) return;
-
-    const fetchLiveBattles = async () => {
-      try {
-        console.log("[SiteHeader] Fetching live battles...");
-        const response = await fetch("/api/battle/live");
-        if (response.ok) {
-          const data = await response.json();
-          console.log("[SiteHeader] Live battles:", data.battles?.length || 0);
-          setLiveBattles(data.battles || []);
-        } else {
-          console.error("[SiteHeader] Failed to fetch:", response.status);
-        }
-      } catch (error) {
-        console.error("[SiteHeader] Failed to fetch live battles:", error);
-      }
-    };
-
-    fetchLiveBattles();
-
-    // Poll every 10 seconds
-    const interval = setInterval(fetchLiveBattles, 10000);
-    return () => clearInterval(interval);
-  }, [isAdmin, isLoaded]);
+  // Use custom hook to manage live battles (only enabled for admins)
+  const { liveBattles } = useLiveBattles({ enabled: isAdmin });
 
   return (
     <div className="fixed top-0 left-0 right-0 z-30 p-3 bg-gray-900/95 border-b border-gray-800 backdrop-blur-sm">
