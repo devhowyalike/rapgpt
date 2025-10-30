@@ -80,35 +80,6 @@ export default async function ArchivePage() {
                           )}
                         </p>
                       </div>
-                      <div
-                        className={`
-                        px-3 py-1 rounded-full text-xs font-medium
-                        ${
-                          battle.status === "completed"
-                            ? "bg-green-900 text-green-300"
-                            : ""
-                        }
-                        ${
-                          battle.status === "ongoing"
-                            ? "bg-blue-900 text-blue-300"
-                            : ""
-                        }
-                        ${
-                          battle.status === "upcoming"
-                            ? "bg-yellow-900 text-yellow-300"
-                            : ""
-                        }
-                        ${
-                          battle.status === "incomplete"
-                            ? "bg-orange-900 text-orange-300"
-                            : ""
-                        }
-                      `}
-                      >
-                        {battle.status === "incomplete"
-                          ? "PAUSED"
-                          : battle.status.toUpperCase()}
-                      </div>
                     </div>
 
                     {/* Personas */}
