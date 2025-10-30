@@ -67,6 +67,8 @@ export async function getBattleById(id: string): Promise<Battle | null> {
       createdAt: battle.createdAt.getTime(),
       updatedAt: battle.updatedAt.getTime(),
       creator: creatorInfo,
+      // Battle type flags
+      isFeatured: battle.isFeatured,
       // Live battle fields
       isLive: battle.isLive,
       liveStartedAt: battle.liveStartedAt?.getTime(),
@@ -190,6 +192,8 @@ export async function getAllBattles(): Promise<Battle[]> {
         createdAt: battle.createdAt.getTime(),
         updatedAt: battle.updatedAt.getTime(),
         creator: creatorInfo,
+        // Battle type flags
+        isFeatured: battle.isFeatured,
         // Live battle fields
         isLive: battle.isLive,
         liveStartedAt: battle.liveStartedAt?.getTime(),
@@ -257,6 +261,8 @@ export async function getFeaturedBattles(): Promise<Battle[]> {
         createdAt: battle.createdAt.getTime(),
         updatedAt: battle.updatedAt.getTime(),
         creator: creatorInfo,
+        // Battle type flags
+        isFeatured: battle.isFeatured,
         // Live battle fields
         isLive: battle.isLive,
         liveStartedAt: battle.liveStartedAt?.getTime(),
@@ -333,6 +339,8 @@ export async function getLiveBattles(): Promise<Battle[]> {
         createdAt: battle.createdAt.getTime(),
         updatedAt: battle.updatedAt.getTime(),
         creator: creatorInfo,
+        // Battle type flags
+        isFeatured: battle.isFeatured,
         // Live battle fields
         isLive: battle.isLive,
         liveStartedAt: battle.liveStartedAt?.getTime(),

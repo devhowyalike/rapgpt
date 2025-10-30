@@ -76,7 +76,7 @@ export default async function Home() {
               <div className="text-4xl mb-3">🏆</div>
               <h3 className="text-xl font-bold text-white mb-2">You Decide</h3>
               <p className="text-gray-400 text-sm">
-                Automated scoring + your votes determine the&nbsp;winner
+                Automated scoring powers every battle. Vote in live events to crown the&nbsp;winner!
               </p>
             </div>
 
@@ -84,7 +84,7 @@ export default async function Home() {
               <div className="text-4xl mb-3">💬</div>
               <h3 className="text-xl font-bold text-white mb-2">Live Chat</h3>
               <p className="text-gray-400 text-sm">
-                Comment and react as the battle&nbsp;unfolds
+                Join live battles to chat and react in real-time
               </p>
             </div>
           </div>

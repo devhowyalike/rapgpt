@@ -5,12 +5,18 @@ import { getAllPersonas } from "@/lib/shared/personas";
 import type { Persona } from "@/lib/shared/battle-types";
 import { useRouter } from "next/navigation";
 import { SiteHeader } from "./site-header";
+import { useAuth } from "@clerk/nextjs";
 
 export function CharacterSelect() {
   const [player1, setPlayer1] = useState<Persona | null>(null);
   const [player2, setPlayer2] = useState<Persona | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [createAsLive, setCreateAsLive] = useState(false);
   const router = useRouter();
+  
+  // Check if user is admin
+  const { sessionClaims, isLoaded } = useAuth();
+  const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
 
   const personas = getAllPersonas();
 
@@ -54,6 +60,7 @@ export function CharacterSelect() {
         body: JSON.stringify({
           leftPersonaId: player1.id,
           rightPersonaId: player2.id,
+          isFeatured: createAsLive, // Only true if admin and toggle enabled
         }),
         signal: controller.signal,
       });
@@ -286,6 +293,26 @@ export function CharacterSelect() {
           </div>
         </div>
 
+        {/* Admin Toggle for Live Battle */}
+        {isAdmin && (
+          <div className="w-full max-w-7xl mx-auto mb-6 flex justify-center">
+            <label className="flex items-center gap-3 bg-purple-900/30 border-2 border-purple-500/50 rounded-lg px-6 py-3 cursor-pointer hover:bg-purple-900/50 transition-colors">
+              <input
+                type="checkbox"
+                checked={createAsLive}
+                onChange={(e) => setCreateAsLive(e.target.checked)}
+                className="w-5 h-5 rounded accent-purple-500"
+              />
+              <span className="text-white font-semibold text-lg">
+                Create as Live Battle (Featured)
+              </span>
+              <span className="text-purple-300 text-sm">
+                🎭 Admin Only
+              </span>
+            </label>
+          </div>
+        )}
+
         {/* Start Battle Button */}
         <div className="w-full max-w-7xl mx-auto text-center">
           <button
@@ -304,7 +331,9 @@ export function CharacterSelect() {
             {isCreating
               ? "CREATING BATTLE..."
               : player1 && player2
-              ? "START BATTLE"
+              ? createAsLive
+                ? "START LIVE BATTLE"
+                : "START BATTLE"
               : "SELECT YOUR FIGHTERS"}
           </button>
         </div>

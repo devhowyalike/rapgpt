@@ -90,6 +90,8 @@ export interface Battle {
     displayName: string;
     imageUrl?: string | null;
   } | null;
+  // Battle type flags
+  isFeatured?: boolean; // true = admin featured battle, false = user battle
   // Live battle fields
   isLive?: boolean;
   liveStartedAt?: number;
