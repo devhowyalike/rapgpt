@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import type { SongGenerationBeatStyle } from "@/lib/shared/battle-types";
+import { APP_TITLE } from "@/lib/constants";
 
 interface SongGeneratorProps {
   battleId: string;
@@ -252,8 +253,10 @@ export function SongGenerator({
 
         {/* Info Text */}
         <div className="text-xs text-gray-500 text-center">
-          Song generation typically takes 1-3 minutes. The AI will create a
-          unique track combining both personas' styles with your selected beat.
+          Song generation typically takes 1-3 minutes.
+          <br />
+          {APP_TITLE} will create a unique track combining both personas' styles
+          & lyrics with your selected beat.
         </div>
       </CardContent>
     </Card>
