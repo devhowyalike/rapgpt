@@ -15,6 +15,7 @@ import type { WebSocketEvent } from "@/lib/websocket/types";
 import { useBattleStore } from "@/lib/battle-store";
 import { getNextPerformer } from "@/lib/battle-engine";
 import { useAutoPlay } from "@/lib/hooks/use-auto-play";
+import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
 
 interface AdminBattleControlProps {
   initialBattle: Battle;
@@ -196,6 +197,20 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
     onGenerateVerse: handleGenerateVerse,
     onAdvanceRound: handleAdvanceRound,
     isGenerating,
+  });
+
+  // Navigation guard - warn admin before leaving live battle
+  const { NavigationDialog } = useNavigationGuard({
+    when: battle?.isLive ?? false,
+    title: "End Live Battle?",
+    message:
+      "This battle is currently live with viewers watching. Navigating away will completely terminate the live session and end the broadcast for all viewers. This is equivalent to clicking 'End Live'.",
+    onConfirm: async () => {
+      // Automatically stop the live battle when navigating away
+      if (battle?.isLive) {
+        await handleStopLive();
+      }
+    },
   });
 
   const handleStartLive = async () => {
@@ -429,6 +444,9 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
           />
         </div>
       </div>
+
+      {/* Navigation guard dialog */}
+      <NavigationDialog />
     </>
   );
 }
