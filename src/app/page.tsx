@@ -112,14 +112,6 @@ export default async function Home() {
               </p>
 
               <div className="flex gap-4 justify-center flex-wrap">
-                {isAdmin && (
-                  <Link
-                    href="/new-battle"
-                    className="inline-block px-6 py-3 bg-linear-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 rounded-lg text-white font-bold transition-all"
-                  >
-                    Create Featured Battle
-                  </Link>
-                )}
                 <Link
                   href="/archive"
                   className="inline-block px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg text-white font-bold transition-all"

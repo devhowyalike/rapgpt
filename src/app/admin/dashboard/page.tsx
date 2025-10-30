@@ -123,12 +123,6 @@ export default async function AdminDashboardPage() {
                   <Star size={24} />
                   Battles ({allBattles.length})
                 </h2>
-                <Link
-                  href="/new-battle"
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
-                >
-                  Create Featured Battle
-                </Link>
               </div>
 
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
