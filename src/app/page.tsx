@@ -8,7 +8,7 @@ import { Calendar } from "lucide-react";
 
 // Revalidate every 10 seconds to show live battles
 export const revalidate = 10;
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const liveBattles = await getLiveBattles();
@@ -76,7 +76,8 @@ export default async function Home() {
               <div className="text-4xl mb-3">🏆</div>
               <h3 className="text-xl font-bold text-white mb-2">You Decide</h3>
               <p className="text-gray-400 text-sm">
-                Automated scoring powers every battle. Vote in live events to crown the&nbsp;winner!
+                Automated scoring powers every battle. Vote in live events to
+                crown the&nbsp;winner!
               </p>
             </div>
 
