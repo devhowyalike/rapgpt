@@ -222,6 +222,9 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
 
       const { battle: updatedBattle } = await response.json();
       setBattle(updatedBattle);
+      
+      // Notify header to refresh live battles
+      window.dispatchEvent(new CustomEvent("battle:status-changed"));
     } catch (error) {
       console.error("Error starting live mode:", error);
       alert("Failed to start live mode");
@@ -243,6 +246,9 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
 
       const { battle: updatedBattle } = await response.json();
       setBattle(updatedBattle);
+      
+      // Notify header to refresh live battles
+      window.dispatchEvent(new CustomEvent("battle:status-changed"));
     } catch (error) {
       console.error("Error stopping live mode:", error);
       alert("Failed to stop live mode");
