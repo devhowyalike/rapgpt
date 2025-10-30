@@ -124,7 +124,7 @@ export default async function AdminDashboardPage() {
                   Battles ({allBattles.length})
                 </h2>
                 <Link
-                  href="/admin/battles/new"
+                  href="/new-battle"
                   className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
                 >
                   Create Featured Battle
