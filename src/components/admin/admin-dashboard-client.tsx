@@ -1,0 +1,200 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { Shield, User, Star } from "lucide-react";
+import { DeleteBattleButton } from "@/components/admin/delete-battle-button";
+import type { UserDB, BattleDB } from "@/lib/db/schema";
+
+interface AdminDashboardClientProps {
+  users: Array<UserDB & { displayName: string; email: string }>;
+}
+
+export function AdminDashboardClient({ users }: AdminDashboardClientProps) {
+  const [selectedUserId, setSelectedUserId] = React.useState<string | null>(
+    null
+  );
+  const [userBattles, setUserBattles] = React.useState<BattleDB[]>([]);
+  const [isLoadingBattles, setIsLoadingBattles] = React.useState(false);
+
+  const selectedUser = users.find((u) => u.id === selectedUserId);
+
+  const handleUserClick = async (userId: string) => {
+    setSelectedUserId(userId);
+    setIsLoadingBattles(true);
+    try {
+      const response = await fetch(`/api/user/${userId}/battles`);
+      if (response.ok) {
+        const data = await response.json();
+        setUserBattles(data.battles);
+      } else {
+        console.error("Failed to fetch user battles");
+        setUserBattles([]);
+      }
+    } catch (error) {
+      console.error("Error fetching user battles:", error);
+      setUserBattles([]);
+    } finally {
+      setIsLoadingBattles(false);
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* User Management Section */}
+      <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6">
+        <h2 className="font-bebas text-3xl text-white mb-4 flex items-center gap-2">
+          <User size={24} />
+          Users ({users.length})
+        </h2>
+
+        <div className="space-y-3 max-h-[600px] overflow-y-auto">
+          {users.map((user) => {
+            const isSelected = selectedUserId === user.id;
+            return (
+              <button
+                key={user.id}
+                onClick={() => handleUserClick(user.id)}
+                className={`w-full bg-gray-700/50 rounded-lg p-4 flex items-center justify-between transition-all hover:bg-gray-600/50 ${
+                  isSelected
+                    ? "ring-2 ring-purple-500 bg-gray-600/50"
+                    : ""
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  {user.imageUrl && (
+                    <img
+                      src={user.imageUrl}
+                      alt={user.displayName}
+                      className="w-10 h-10 rounded-full"
+                    />
+                  )}
+                  <div className="text-left">
+                    <div className="text-white font-semibold">
+                      {user.displayName}
+                    </div>
+                    <div className="text-gray-400 text-sm">{user.email}</div>
+                  </div>
+                </div>
+                <div>
+                  {user.role === "admin" ? (
+                    <span className="px-3 py-1 bg-purple-600 text-white text-sm rounded-full flex items-center gap-1">
+                      <Shield size={14} />
+                      Admin
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1 bg-gray-600 text-gray-300 text-sm rounded-full">
+                      User
+                    </span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Battle Management Section */}
+      <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-bebas text-3xl text-white flex items-center gap-2">
+            <Star size={24} />
+            {selectedUser ? (
+              <>
+                {selectedUser.displayName}'s Battles ({userBattles.length})
+              </>
+            ) : (
+              <>Select a User</>
+            )}
+          </h2>
+        </div>
+
+        {!selectedUser ? (
+          <div className="flex items-center justify-center h-[400px] text-gray-400">
+            <div className="text-center">
+              <User size={48} className="mx-auto mb-4 opacity-50" />
+              <p>Select a user to view their battles</p>
+            </div>
+          </div>
+        ) : isLoadingBattles ? (
+          <div className="flex items-center justify-center h-[400px] text-gray-400">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4" />
+              <p>Loading battles...</p>
+            </div>
+          </div>
+        ) : userBattles.length === 0 ? (
+          <div className="flex items-center justify-center h-[400px] text-gray-400">
+            <div className="text-center">
+              <Star size={48} className="mx-auto mb-4 opacity-50" />
+              <p>This user has no battles yet</p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3 max-h-[600px] overflow-y-auto">
+            {userBattles.map((battle) => {
+              const personas = {
+                left: battle.leftPersona as any,
+                right: battle.rightPersona as any,
+              };
+
+              return (
+                <div
+                  key={battle.id}
+                  className={`rounded-lg p-4 ${
+                    battle.isLive
+                      ? "bg-red-900/20 border border-red-500/30"
+                      : "bg-gray-700/50"
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      {battle.isLive && (
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                          <span className="text-red-400 text-xs font-bold uppercase">
+                            Live Now
+                          </span>
+                        </div>
+                      )}
+                      <Link
+                        href={`/battle/${battle.id}`}
+                        className="text-white font-semibold hover:text-purple-400 transition-colors"
+                      >
+                        {battle.title}
+                      </Link>
+                      <div className="text-gray-400 text-sm mt-1">
+                        {personas.left.name} vs {personas.right.name}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <DeleteBattleButton
+                        battleId={battle.id}
+                        battleTitle={battle.title}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${
+                        battle.isFeatured
+                          ? "bg-purple-600/30 text-purple-300"
+                          : "bg-gray-600/30 text-gray-400"
+                      }`}
+                    >
+                      {battle.isFeatured ? "Featured" : "User Battle"}
+                    </span>
+                    <span className="text-gray-500">
+                      {new Date(battle.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
