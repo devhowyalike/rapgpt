@@ -26,44 +26,6 @@ interface SunoGenerateResponse {
   };
 }
 
-interface SunoStatusResponse {
-  code: number;
-  msg: string;
-  data: Array<{
-    id: string;
-    audio_url: string;
-    video_url: string;
-    image_url: string;
-    image_large_url: string;
-    title: string;
-    status: 'streaming' | 'complete' | 'error';
-    error_message?: string;
-  }>;
-}
-
-// Alternative response format for MusicAPI/producer endpoints
-interface MusicAPIProducerResponse {
-  code: number;
-  data: Array<{
-    clip_id: string;
-    audio_url: string;
-    video_url?: string | null;
-    image_url: string;
-    state: 'pending' | 'running' | 'succeeded';
-    title?: string;
-  }>;
-  message: string;
-}
-
-// Alternative response format for MusicAPI/nuro endpoints  
-interface MusicAPINuroResponse {
-  task_id: string;
-  status: 'pending' | 'running' | 'succeeded';
-  progress: number;
-  audio_url: string;
-  lyrics?: string;
-  duration?: number;
-}
 
 // Suno record-info response format from /api/v1/generate/record-info
 interface SunoRecordInfoResponse {
@@ -241,13 +203,8 @@ export async function generateSong(
 }
 
 /**
- * Check the status of a song generation task
- * 
- * Note: The exact endpoint path may vary. Try these if the current one fails:
- * - /api/v1/query/{taskId}
- * - /api/v1/task/{taskId}
- * - /api/v1/generate/{taskId}
- * Check your Suno API dashboard for the correct "Get Music Generation Details" endpoint
+ * Check the status of a song generation task using the official endpoint
+ * Documentation: https://docs.sunoapi.org/suno-api/get-music-generation-details
  */
 export async function checkSongStatus(taskId: string): Promise<{
   status: 'streaming' | 'complete' | 'error';
@@ -260,208 +217,70 @@ export async function checkSongStatus(taskId: string): Promise<{
     throw new Error('SUNO_API_KEY is not configured');
   }
   
-  // Try the status endpoint - the correct one from docs is first
-  const endpoints = [
-    `/api/v1/generate/record-info?taskId=${taskId}`,
-  ];
+  const url = `${SUNO_API_BASE_URL}/api/v1/generate/record-info?taskId=${taskId}`;
+  console.log('[Suno] Checking status:', url);
   
-  let lastError: Error | null = null;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${SUNO_API_KEY}`,
+    },
+  });
   
-  // Try each endpoint until one works
-  for (const endpoint of endpoints) {
-    try {
-      const url = `${SUNO_API_BASE_URL}${endpoint}`;
-      console.log('[Suno] Trying status endpoint:', url);
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${SUNO_API_KEY}`,
-        },
-      });
-      
-      console.log('[Suno] Status endpoint response:', {
-        endpoint,
-        status: response.status,
-        statusText: response.statusText,
-      });
-      
-      if (response.status === 404) {
-        console.log('[Suno] 404 - trying next endpoint');
-        // Try next endpoint
-        continue;
-      }
-      
-      if (!response.ok) {
-        const error = await response.text();
-        console.error('[Suno] Error response from', endpoint, ':', error);
-        throw new Error(`Suno API error: ${response.status} - ${error}`);
-      }
-      
-      const data = await response.json();
-      console.log('[Suno] Status data received:', data);
-      
-      // Try to parse response in different formats
-      
-      // Format 1: Suno record-info format (status field)
-      if ('code' in data && 'data' in data && 'status' in data.data) {
-        const recordInfo = data as SunoRecordInfoResponse;
-        console.log('[Suno] Using record-info format, status:', recordInfo.data.status);
-        
-        if (recordInfo.code !== 200) {
-          throw new Error(`Suno API error: ${recordInfo.msg}`);
-        }
-        
-        // Check status field
-        if (recordInfo.data.status === 'SUCCESS' && recordInfo.data.response?.sunoData && recordInfo.data.response.sunoData.length > 0) {
-          // Use first song
-          const song = recordInfo.data.response.sunoData[0];
-          console.log('[Suno] Generation complete, audioUrl:', song.audioUrl);
-          
-          return {
-            status: 'complete',
-            audioUrl: song.audioUrl,
-            videoUrl: '',
-            imageUrl: song.imageUrl || '',
-            errorMessage: undefined,
-          };
-        } else if (recordInfo.data.status === 'CREATE_TASK_FAILED' || recordInfo.data.status === 'GENERATE_AUDIO_FAILED' || recordInfo.data.status === 'CALLBACK_EXCEPTION' || recordInfo.data.status === 'SENSITIVE_WORD_ERROR') {
-          return {
-            status: 'error',
-            audioUrl: '',
-            videoUrl: '',
-            imageUrl: '',
-            errorMessage: recordInfo.data.errorMessage || `Generation failed: ${recordInfo.data.status}`,
-          };
-        } else {
-          // Still in progress (PENDING, TEXT_SUCCESS, FIRST_SUCCESS)
-          console.log('[Suno] Generation in progress');
-          return {
-            status: 'streaming',
-            audioUrl: '',
-            videoUrl: '',
-            imageUrl: '',
-            errorMessage: undefined,
-          };
-        }
-      }
-      
-      // Format 2: MusicAPI Nuro format (flat object with task_id)
-      if ('task_id' in data && 'status' in data) {
-        const nuroData = data as MusicAPINuroResponse;
-        console.log('[Suno] Using Nuro format, status:', nuroData.status);
-        
-        const status = nuroData.status === 'succeeded' ? 'complete' : 
-                      nuroData.status === 'pending' ? 'streaming' :
-                      nuroData.status === 'running' ? 'streaming' : 'error';
-        
-        return {
-          status,
-          audioUrl: nuroData.audio_url,
-          videoUrl: '',
-          imageUrl: '',
-          errorMessage: undefined,
-        };
-      }
-      
-      // Format 3: MusicAPI Producer format (code + data array with clip_id)
-      if ('code' in data && 'data' in data && Array.isArray(data.data) && data.data.length > 0 && 'clip_id' in data.data[0]) {
-        const producerData = data as MusicAPIProducerResponse;
-        console.log('[Suno] Using Producer format');
-        
-        if (producerData.code !== 200) {
-          console.error('[Suno] API returned error code:', producerData.code, producerData.message);
-          throw new Error(`Suno API error: ${producerData.message}`);
-        }
-        
-        const clip = producerData.data[0];
-        console.log('[Suno] Song state:', clip.state);
-        
-        const status = clip.state === 'succeeded' ? 'complete' :
-                      clip.state === 'pending' ? 'streaming' :
-                      clip.state === 'running' ? 'streaming' : 'error';
-        
-        return {
-          status,
-          audioUrl: clip.audio_url,
-          videoUrl: clip.video_url || '',
-          imageUrl: clip.image_url,
-          errorMessage: undefined,
-        };
-      }
-      
-      // Format 4: Original Suno format (code + data array with id)
-      if ('code' in data && 'data' in data && Array.isArray(data.data) && data.data.length > 0) {
-        const sunoData = data as SunoStatusResponse;
-        
-        if (sunoData.code !== 200) {
-          console.error('[Suno] API returned error code:', sunoData.code, sunoData.msg);
-          throw new Error(`Suno API error: ${sunoData.msg}`);
-        }
-        
-        const song = sunoData.data[0];
-        console.log('[Suno] Song status:', song.status);
-        
-        return {
-          status: song.status,
-          audioUrl: song.audio_url,
-          videoUrl: song.video_url,
-          imageUrl: song.image_large_url || song.image_url,
-          errorMessage: song.error_message,
-        };
-      }
-      
-      // Unknown format
-      throw new Error(`Unknown response format: ${JSON.stringify(data).substring(0, 200)}`);
-    } catch (error) {
-      console.error('[Suno] Error checking endpoint', endpoint, ':', error);
-      lastError = error instanceof Error ? error : new Error(String(error));
-      // Continue to next endpoint
-    }
+  console.log('[Suno] Status response:', {
+    status: response.status,
+    statusText: response.statusText,
+  });
+  
+  if (!response.ok) {
+    const error = await response.text();
+    console.error('[Suno] Error response:', error);
+    throw new Error(`Suno API error: ${response.status} - ${error}`);
   }
   
-  // All endpoints failed
-  throw new Error(
-    `Failed to check song status. Tried ${endpoints.length} endpoints. ` +
-    `Last error: ${lastError?.message || 'Unknown error'}. ` +
-    `Please check your Suno API documentation for the correct endpoint.`
-  );
-}
-
-/**
- * Poll for song completion with timeout
- * @param taskId - Suno task ID
- * @param maxAttempts - Maximum number of polling attempts (default: 60)
- * @param intervalMs - Polling interval in milliseconds (default: 5000)
- */
-export async function pollSongCompletion(
-  taskId: string,
-  maxAttempts = 60,
-  intervalMs = 5000
-): Promise<{
-  audioUrl: string;
-  videoUrl: string;
-  imageUrl: string;
-}> {
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const status = await checkSongStatus(taskId);
-    
-    if (status.status === 'complete' && status.audioUrl) {
-      return {
-        audioUrl: status.audioUrl,
-        videoUrl: status.videoUrl || '',
-        imageUrl: status.imageUrl || '',
-      };
-    }
-    
-    if (status.status === 'error') {
-      throw new Error(status.errorMessage || 'Song generation failed');
-    }
-    
-    // Wait before next attempt
-    await new Promise(resolve => setTimeout(resolve, intervalMs));
+  const data = await response.json() as SunoRecordInfoResponse;
+  console.log('[Suno] Status data:', {
+    status: data.data.status,
+    taskId: data.data.taskId,
+  });
+  
+  if (data.code !== 200) {
+    throw new Error(`Suno API error: ${data.msg}`);
   }
   
-  throw new Error('Song generation timeout - please check back later');
+  // Check status field
+  if (data.data.status === 'SUCCESS' && data.data.response?.sunoData && data.data.response.sunoData.length > 0) {
+    // Use first song
+    const song = data.data.response.sunoData[0];
+    console.log('[Suno] Generation complete, audioUrl:', song.audioUrl);
+    
+    return {
+      status: 'complete',
+      audioUrl: song.audioUrl,
+      videoUrl: '',
+      imageUrl: song.imageUrl || '',
+      errorMessage: undefined,
+    };
+  } 
+  
+  if (data.data.status === 'CREATE_TASK_FAILED' || data.data.status === 'GENERATE_AUDIO_FAILED' || 
+      data.data.status === 'CALLBACK_EXCEPTION' || data.data.status === 'SENSITIVE_WORD_ERROR') {
+    return {
+      status: 'error',
+      audioUrl: '',
+      videoUrl: '',
+      imageUrl: '',
+      errorMessage: data.data.errorMessage || `Generation failed: ${data.data.status}`,
+    };
+  }
+  
+  // Still in progress (PENDING, TEXT_SUCCESS, FIRST_SUCCESS)
+  console.log('[Suno] Generation in progress');
+  return {
+    status: 'streaming',
+    audioUrl: '',
+    videoUrl: '',
+    imageUrl: '',
+    errorMessage: undefined,
+  };
 }
-

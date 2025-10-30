@@ -124,9 +124,9 @@ export function SongPlayer({ song }: SongPlayerProps) {
   return (
     <Card className="border-gray-800 bg-gray-900/50 backdrop-blur-sm">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl">
+        <CardTitle className="flex items-center gap-2 text-xl text-white">
           <Music2 className="w-5 h-5 text-green-400" />
-          AI-Generated Song
+          Generated Song
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

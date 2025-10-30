@@ -122,22 +122,11 @@ export function SongGenerator({
         return pollStatus();
       };
 
-      try {
-        await pollStatus();
-        
-        // Success!
-        if (onSongGenerated) {
-          onSongGenerated();
-        }
-      } catch (pollError) {
-        // If polling fails, song is still generating but we can't check status
-        console.warn('[Song Generator] Polling failed, but song is generating:', pollError);
-        // Keep the progress bar showing and let the manual completion UI appear
-        setProgress(50); // Show partial progress
-        setError(
-          `Song generation started (Task ID: ${taskId}) but status polling is unavailable. ` +
-          `Check the Suno dashboard for completion.`
-        );
+      await pollStatus();
+
+      // Success!
+      if (onSongGenerated) {
+        onSongGenerated();
       }
     } catch (err) {
       setError(
@@ -152,9 +141,9 @@ export function SongGenerator({
   return (
     <Card className="border-gray-800 bg-gray-900/50 backdrop-blur-sm">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-2xl">
+        <CardTitle className="flex items-center gap-2 text-2xl text-white">
           <Sparkles className="w-6 h-6 text-yellow-400" />
-          Generate AI Song
+          Generate Song
         </CardTitle>
         <CardDescription className="text-gray-400">
           Turn this battle into a full song! Choose your beat style and let AI

@@ -27,15 +27,22 @@ export function BattleReplay({ battle }: BattleReplayProps) {
   const [selectedRound, setSelectedRound] = useState(1);
   const roundVerses = getRoundVerses(battle, selectedRound);
   const roundScore = battle.scores.find((s) => s.round === selectedRound);
-  const { userId } = useAuth();
+  const { userId, sessionClaims, isLoaded } = useAuth();
   const router = useRouter();
 
   const battleReplayHeaderRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
   
-  // Check if current user is the battle creator
+  // Check if current user is the battle creator or admin
+  // Wait for Clerk to finish loading before checking admin status
+  const isAdmin = isLoaded && sessionClaims?.metadata?.role === 'admin';
   const isCreator = userId && battle.creator?.userId === userId;
-  const showSongGenerator = isCreator && battle.status === 'completed' && !battle.generatedSong?.audioUrl;
+  
+  // Allow song generation for:
+  // 1. Battle creators (verified ownership) 
+  // 2. Admins (can generate for any battle, including legacy ones)
+  const canGenerateSong = (isCreator || isAdmin) && battle.status === 'completed' && !battle.generatedSong?.audioUrl;
+  const showSongGenerator = canGenerateSong;
   const showSongPlayer = battle.status === 'completed' && battle.generatedSong?.audioUrl;
 
   useLayoutEffect(() => {

@@ -38,7 +38,7 @@ export async function getBattleById(id: string): Promise<Battle | null> {
           : (creator.encryptedName ? decrypt(creator.encryptedName) : 'Anonymous');
         
         creatorInfo = {
-          userId: creator.id,
+          userId: creator.clerkId, // Use Clerk ID for frontend comparison
           displayName,
           imageUrl: creator.imageUrl,
         };
@@ -174,7 +174,7 @@ export async function getAllBattles(): Promise<Battle[]> {
             : (creator.encryptedName ? decrypt(creator.encryptedName) : 'Anonymous');
           
           creatorInfo = {
-            userId: creator.id,
+            userId: creator.clerkId, // Use Clerk ID for frontend comparison
             displayName,
             imageUrl: creator.imageUrl,
           };
@@ -245,7 +245,7 @@ export async function getFeaturedBattles(): Promise<Battle[]> {
             : (creator.encryptedName ? decrypt(creator.encryptedName) : 'Anonymous');
           
           creatorInfo = {
-            userId: creator.id,
+            userId: creator.clerkId, // Use Clerk ID for frontend comparison
             displayName,
             imageUrl: creator.imageUrl,
           };
@@ -325,7 +325,7 @@ export async function getLiveBattles(): Promise<Battle[]> {
             : (creator.encryptedName ? decrypt(creator.encryptedName) : 'Anonymous');
           
           creatorInfo = {
-            userId: creator.id,
+            userId: creator.clerkId, // Use Clerk ID for frontend comparison
             displayName,
             imageUrl: creator.imageUrl,
           };

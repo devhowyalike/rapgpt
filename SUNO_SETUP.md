@@ -105,18 +105,14 @@ If generation exceeds 5 minutes:
 POST https://api.sunoapi.org/api/v1/generate
 ```
 
+**Documentation**: [Generate Suno AI Music](https://docs.sunoapi.org/suno-api/generate-music)
+
 ### Check Status
 ```
-GET https://api.sunoapi.org/api/v1/query/{taskId}
+GET https://api.sunoapi.org/api/v1/generate/record-info?taskId={taskId}
 ```
 
-**Note**: The status endpoint path may vary depending on your Suno API version. The code will automatically try multiple endpoint variations:
-- `/api/v1/query/{taskId}` (recommended)
-- `/api/v1/task/{taskId}`
-- `/api/v1/generate/{taskId}`
-- `/api/v1/music/{taskId}`
-
-If you encounter 404 errors, check your Suno API dashboard for the exact "Get Music Generation Details" endpoint.
+**Documentation**: [Get Music Generation Details](https://docs.sunoapi.org/suno-api/get-music-generation-details)
 
 ## Troubleshooting
 
