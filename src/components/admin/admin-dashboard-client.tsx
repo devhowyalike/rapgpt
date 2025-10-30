@@ -57,14 +57,16 @@ export function AdminDashboardClient({
           Users ({users.length})
         </h2>
 
-        <div className="space-y-3 max-h-[600px] overflow-y-auto">
+        <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1 py-1">
           {users.map((user) => {
             const isSelected = selectedUserId === user.id;
             return (
               <div
                 key={user.id}
                 className={`w-full bg-gray-700/50 rounded-lg p-4 transition-all ${
-                  isSelected ? "ring-2 ring-purple-500 bg-gray-600/50" : ""
+                  isSelected
+                    ? "border-2 border-purple-500 bg-gray-600/50"
+                    : "border-2 border-transparent"
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
