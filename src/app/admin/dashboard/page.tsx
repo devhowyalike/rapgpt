@@ -5,7 +5,7 @@ import { desc } from "drizzle-orm";
 import { decrypt } from "@/lib/auth/encryption";
 import { checkRole } from "@/lib/auth/roles";
 import Link from "next/link";
-import { Shield, User, Star, Radio, Settings } from "lucide-react";
+import { Shield, User, Star } from "lucide-react";
 import { DeleteBattleButton } from "@/components/admin/delete-battle-button";
 import { SiteHeader } from "@/components/site-header";
 
@@ -162,21 +162,6 @@ export default async function AdminDashboardPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Link
-                            href={`/admin/battles/${battle.id}/control`}
-                            className={`p-2 rounded transition-colors ${
-                              battle.isLive
-                                ? "bg-red-600 hover:bg-red-700 text-white"
-                                : "bg-purple-600 hover:bg-purple-700 text-white"
-                            }`}
-                            title="Control Panel"
-                          >
-                            {battle.isLive ? (
-                              <Radio size={18} />
-                            ) : (
-                              <Settings size={18} />
-                            )}
-                          </Link>
                           <DeleteBattleButton
                             battleId={battle.id}
                             battleTitle={battle.title}
