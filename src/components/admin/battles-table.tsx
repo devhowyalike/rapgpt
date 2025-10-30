@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
-import * as Dialog from "@radix-ui/react-dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 type SortField =
   | "title"
@@ -401,102 +401,39 @@ export function BattlesTable({ battles }: BattlesTableProps) {
         </div>
       )}
 
-      <Dialog.Root open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-gray-900 border border-gray-800 rounded-lg shadow-2xl p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-start gap-4">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-red-500" />
-              </div>
-              <div className="flex-1">
-                <Dialog.Title className="text-xl font-bold text-white mb-2">
-                  Delete Battle?
-                </Dialog.Title>
-                <Dialog.Description className="text-gray-400 mb-4">
-                  Are you sure you want to delete "
-                  {battleToDelete?.title || "this battle"}"? This will also
-                  delete all votes and comments. This action cannot be undone.
-                </Dialog.Description>
+      <ConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete Battle?"
+        description={`Are you sure you want to delete "${
+          battleToDelete?.title || "this battle"
+        }"? This will also delete all votes and comments. This action cannot be undone.`}
+        confirmLabel="Delete Battle"
+        onConfirm={handleDelete}
+        isLoading={isDeleting}
+        variant="danger"
+        icon={AlertTriangle}
+        errorMessage={errorMessage || undefined}
+      />
 
-                {errorMessage && (
-                  <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
-                    {errorMessage}
-                  </div>
-                )}
-
-                <div className="flex gap-3 justify-end">
-                  <button
-                    onClick={() => setShowDeleteDialog(false)}
-                    disabled={isDeleting}
-                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    {isDeleting ? "Deleting..." : "Delete Battle"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
-
-      <Dialog.Root
+      <ConfirmationDialog
         open={showBulkDeleteDialog}
         onOpenChange={setShowBulkDeleteDialog}
-      >
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-gray-900 border border-gray-800 rounded-lg shadow-2xl p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-start gap-4">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-red-500" />
-              </div>
-              <div className="flex-1">
-                <Dialog.Title className="text-xl font-bold text-white mb-2">
-                  Delete {selectedBattles.size} Battle
-                  {selectedBattles.size !== 1 ? "s" : ""}?
-                </Dialog.Title>
-                <Dialog.Description className="text-gray-400 mb-4">
-                  Are you sure you want to delete {selectedBattles.size}{" "}
-                  selected battle{selectedBattles.size !== 1 ? "s" : ""}? This
-                  will also delete all associated votes and comments. This
-                  action cannot be undone.
-                </Dialog.Description>
-
-                {errorMessage && (
-                  <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
-                    {errorMessage}
-                  </div>
-                )}
-
-                <div className="flex gap-3 justify-end">
-                  <button
-                    onClick={() => setShowBulkDeleteDialog(false)}
-                    disabled={isDeleting}
-                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleBulkDelete}
-                    disabled={isDeleting}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    {isDeleting ? "Deleting..." : "Delete Battles"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+        title={`Delete ${selectedBattles.size} Battle${
+          selectedBattles.size !== 1 ? "s" : ""
+        }?`}
+        description={`Are you sure you want to delete ${
+          selectedBattles.size
+        } selected battle${
+          selectedBattles.size !== 1 ? "s" : ""
+        }? This will also delete all associated votes and comments. This action cannot be undone.`}
+        confirmLabel="Delete Battles"
+        onConfirm={handleBulkDelete}
+        isLoading={isDeleting}
+        variant="danger"
+        icon={AlertTriangle}
+        errorMessage={errorMessage || undefined}
+      />
     </div>
   );
 }

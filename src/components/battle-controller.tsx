@@ -26,10 +26,11 @@ import {
   Settings,
   CheckCircle,
 } from "lucide-react";
-import * as Dialog from "@radix-ui/react-dialog";
 import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { MobileDrawer } from "@/components/ui/mobile-drawer";
 
 interface BattleControllerProps {
   initialBattle: Battle;
@@ -450,33 +451,22 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
         )}
 
         {/* Mobile Drawer */}
-        <Dialog.Root open={showMobileDrawer} onOpenChange={setShowMobileDrawer}>
-          <Dialog.Portal>
-            <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in" />
-            <Dialog.Content className="fixed inset-x-0 bottom-0 z-50 md:hidden bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom h-[85vh] flex flex-col">
-              <div className="flex items-center justify-between p-4 border-b border-gray-800 shrink-0">
-                <Dialog.Title className="text-lg font-bold text-white">
-                  {mobileActiveTab === "comments" ? "Comments" : "Voting"}
-                </Dialog.Title>
-                <Dialog.Close asChild>
-                  <button className="p-2 text-gray-400 hover:text-white transition-colors">
-                    <X className="w-5 h-5" />
-                  </button>
-                </Dialog.Close>
-              </div>
-              <div className="flex-1 overflow-y-auto min-h-0">
-                <BattleSidebar
-                  battle={battle}
-                  onVote={handleVote}
-                  onComment={handleComment}
-                  isArchived={true}
-                  votingCompletedRound={votingCompletedRound}
-                  defaultTab={mobileActiveTab}
-                />
-              </div>
-            </Dialog.Content>
-          </Dialog.Portal>
-        </Dialog.Root>
+        <MobileDrawer
+          open={showMobileDrawer}
+          onOpenChange={setShowMobileDrawer}
+          title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
+        >
+          <div className="flex-1 overflow-y-auto min-h-0">
+            <BattleSidebar
+              battle={battle}
+              onVote={handleVote}
+              onComment={handleComment}
+              isArchived={true}
+              votingCompletedRound={votingCompletedRound}
+              defaultTab={mobileActiveTab}
+            />
+          </div>
+        </MobileDrawer>
       </>
     );
   }
@@ -666,89 +656,38 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
       )}
 
       {/* Mobile Drawer */}
-      <Dialog.Root open={showMobileDrawer} onOpenChange={setShowMobileDrawer}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in" />
-          <Dialog.Content className="fixed inset-x-0 bottom-0 z-50 md:hidden bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-gray-800 shrink-0">
-              <Dialog.Title className="text-lg font-bold text-white">
-                {mobileActiveTab === "comments" ? "Comments" : "Voting"}
-              </Dialog.Title>
-              <Dialog.Close asChild>
-                <button className="p-2 text-gray-400 hover:text-white transition-colors">
-                  <X className="w-5 h-5" />
-                </button>
-              </Dialog.Close>
-            </div>
-            <div className="flex-1 overflow-y-auto min-h-0">
-              <BattleSidebar
-                battle={battle}
-                onVote={handleVote}
-                onComment={handleComment}
-                isVotingPhase={isVotingPhase}
-                votingTimeRemaining={votingTimeRemaining}
-                votingCompletedRound={votingCompletedRound}
-                defaultTab={mobileActiveTab}
-              />
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      <MobileDrawer
+        open={showMobileDrawer}
+        onOpenChange={setShowMobileDrawer}
+        title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
+      >
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <BattleSidebar
+            battle={battle}
+            onVote={handleVote}
+            onComment={handleComment}
+            isVotingPhase={isVotingPhase}
+            votingTimeRemaining={votingTimeRemaining}
+            votingCompletedRound={votingCompletedRound}
+            defaultTab={mobileActiveTab}
+          />
+        </div>
+      </MobileDrawer>
 
       {/* Pause Battle Dialog */}
-      <Dialog.Root open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-gray-900 border border-gray-800 rounded-lg shadow-2xl p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-start gap-4">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-orange-500" />
-              </div>
-              <div className="flex-1">
-                <Dialog.Title className="text-xl font-bold text-white mb-2">
-                  Pause Battle?
-                </Dialog.Title>
-                <Dialog.Description className="text-gray-400 mb-4">
-                  Pause the battle? You can resume later.
-                </Dialog.Description>
-
-                {cancelError && (
-                  <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
-                    {cancelError}
-                  </div>
-                )}
-
-                <div className="flex gap-3 justify-end">
-                  <Dialog.Close asChild>
-                    <button
-                      type="button"
-                      disabled={isCanceling}
-                      className="px-4 py-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-medium transition-colors"
-                    >
-                      Keep Playing
-                    </button>
-                  </Dialog.Close>
-                  <button
-                    type="button"
-                    onClick={confirmCancelBattle}
-                    disabled={isCanceling}
-                    className="px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-800 disabled:cursor-not-allowed rounded-lg text-white font-medium flex items-center gap-2 transition-colors"
-                  >
-                    {isCanceling ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Pausing...
-                      </>
-                    ) : (
-                      "Pause Battle"
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      <ConfirmationDialog
+        open={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+        title="Pause Battle?"
+        description="Pause the battle? You can resume later."
+        confirmLabel="Pause Battle"
+        cancelLabel="Keep Playing"
+        onConfirm={confirmCancelBattle}
+        isLoading={isCanceling}
+        variant="warning"
+        icon={AlertTriangle}
+        errorMessage={cancelError || undefined}
+      />
 
       {/* Navigation Guard Dialog */}
       <NavigationDialog />
