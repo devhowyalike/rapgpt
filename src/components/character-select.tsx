@@ -170,7 +170,7 @@ export function CharacterSelect() {
           {/* Top Section - Character Display */}
           <div className="flex items-center justify-between px-2 md:px-8 lg:px-16 pb-0">
             {/* Player 1 - Left Side */}
-            <div className="flex-1 flex flex-col items-center justify-start min-h-[240px] md:min-h-[280px] lg:min-h-[320px]">
+            <div className="flex-1 flex flex-col items-center justify-start min-h-[180px] md:min-h-[280px] lg:min-h-[320px]">
               {(() => {
                 // Show player1 if selected, otherwise show hoveredPersona as preview if no player1 selected
                 const displayPersona = player1 || (!player1 && hoveredPersona);
@@ -197,11 +197,11 @@ export function CharacterSelect() {
                       </div>
                     </div>
                     {/* Character Name */}
-                    <div className="text-center text-lg md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-wider drop-shadow-[0_0_20px_rgba(59,130,246,0.8)] text-balance">
+                    <div className="text-center min-h-[48px] md:min-h-0 text-sm md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-tight md:tracking-wider drop-shadow-[0_0_20px_rgba(59,130,246,0.8)] text-balance">
                       {displayPersona.name.toUpperCase()}
                     </div>
                     {/* Character Bio */}
-                    <div className="text-center max-w-xs mb-1 flex flex-col min-h-[40px] md:min-h-[60px]">
+                    <div className="text-center max-w-xs mb-1 flex flex-col md:min-h-[60px]">
                       <p className="text-gray-300 text-xs md:text-sm lg:text-base hidden md:block">
                         {displayPersona.bio}
                       </p>
@@ -218,11 +218,11 @@ export function CharacterSelect() {
                         ?
                       </div>
                     </div>
-                    <div className="text-center text-base md:text-xl lg:text-2xl font-black text-gray-700 tracking-wider mb-1 opacity-40">
+                    <div className="text-center min-h-[48px] md:min-h-0 text-sm md:text-xl lg:text-2xl font-black text-gray-700 tracking-tight md:tracking-wider mb-1 opacity-40">
                       PLAYER 1
                     </div>
                     {/* Spacer to match bio height */}
-                    <div className="text-center max-w-xs mb-1 min-h-[40px] md:min-h-[60px]" />
+                    <div className="text-center max-w-xs mb-1 md:min-h-[60px]" />
                   </>
                 );
               })()}
@@ -251,7 +251,7 @@ export function CharacterSelect() {
             </div>
 
             {/* Player 2 - Right Side */}
-            <div className="flex-1 flex flex-col items-center justify-start min-h-[240px] md:min-h-[280px] lg:min-h-[320px]">
+            <div className="flex-1 flex flex-col items-center justify-start min-h-[180px] md:min-h-[280px] lg:min-h-[320px]">
               {(() => {
                 // Show player2 if selected, otherwise show hoveredPersona as preview if player1 is selected but not player2
                 const displayPersona =
@@ -279,11 +279,11 @@ export function CharacterSelect() {
                       </div>
                     </div>
                     {/* Character Name */}
-                    <div className="text-center text-lg md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-wider drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] text-balance">
+                    <div className="text-center min-h-[48px] md:min-h-0 text-sm md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-tight md:tracking-wider drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] text-balance">
                       {displayPersona.name.toUpperCase()}
                     </div>
                     {/* Character Bio */}
-                    <div className="text-center max-w-xs mb-1 flex flex-col min-h-[40px] md:min-h-[60px]">
+                    <div className="text-center max-w-xs mb-1 flex flex-col md:min-h-[60px]">
                       <p className="text-gray-300 text-xs md:text-sm lg:text-base hidden md:block">
                         {displayPersona.bio}
                       </p>
@@ -300,11 +300,11 @@ export function CharacterSelect() {
                         ?
                       </div>
                     </div>
-                    <div className="text-center text-base md:text-xl lg:text-2xl font-black text-gray-700 tracking-wider mb-1 opacity-40">
+                    <div className="text-center min-h-[48px] md:min-h-0 text-sm md:text-xl lg:text-2xl font-black text-gray-700 tracking-tight md:tracking-wider mb-1 opacity-40">
                       PLAYER 2
                     </div>
                     {/* Spacer to match bio height */}
-                    <div className="text-center max-w-xs mb-1 min-h-[40px] md:min-h-[60px]" />
+                    <div className="text-center max-w-xs mb-1 md:min-h-[60px]" />
                   </>
                 );
               })()}
