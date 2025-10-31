@@ -97,7 +97,7 @@ export function SongGenerator({
 
       const pollStatus = async (): Promise<boolean> => {
         attempts++;
-        setProgress(Math.min(20 + (attempts / maxAttempts) * 70, 90));
+        setProgress(Math.round(Math.min(20 + (attempts / maxAttempts) * 70, 90)));
 
         const statusResponse = await fetch(
           `/api/battle/${battleId}/song-status?taskId=${taskId}`

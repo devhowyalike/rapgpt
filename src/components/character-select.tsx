@@ -17,6 +17,7 @@ export function CharacterSelect() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [votingEnabled, setVotingEnabled] = useState(true);
   const [commentsEnabled, setCommentsEnabled] = useState(true);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const router = useRouter();
 
   // Check if features are globally enabled via env flags
@@ -27,6 +28,11 @@ export function CharacterSelect() {
 
   // Check if user is admin
   const { userId, isLoaded } = useAuth();
+
+  // Detect touch device
+  useEffect(() => {
+    setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
+  }, []);
 
   // Check admin status from database
   useEffect(() => {
@@ -54,6 +60,11 @@ export function CharacterSelect() {
   const personas = getAllPersonas();
 
   const handlePersonaClick = (persona: Persona) => {
+    // Clear hover preview on touch devices after click
+    if (isTouchDevice) {
+      setHoveredPersona(null);
+    }
+
     // Check if clicking a selected character (deselect)
     if (player1?.id === persona.id) {
       setPlayer1(null);
@@ -159,13 +170,17 @@ export function CharacterSelect() {
           {/* Top Section - Character Display */}
           <div className="flex items-center justify-between px-2 md:px-8 lg:px-16 pb-0">
             {/* Player 1 - Left Side */}
-            <div className="flex-1 flex flex-col items-center justify-start min-h-[240px] md:min-h-[280px] lg:min-h-[320px]">
+            <div className="flex-1 flex flex-col items-center justify-start min-h-[180px] md:min-h-[280px] lg:min-h-[320px]">
               {(() => {
                 // Show player1 if selected, otherwise show hoveredPersona as preview if no player1 selected
                 const displayPersona = player1 || (!player1 && hoveredPersona);
 
                 return displayPersona ? (
                   <>
+                    {/* Character Style */}
+                    <p className="text-blue-400 text-xs md:text-sm lg:text-base font-semibold mb-2">
+                      Style: {displayPersona.style}
+                    </p>
                     {/* Large Character Portrait */}
                     <div className="relative mb-2 group">
                       <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full animate-pulse" />
@@ -182,28 +197,33 @@ export function CharacterSelect() {
                       </div>
                     </div>
                     {/* Character Name */}
-                    <div className="text-center text-lg md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-wider drop-shadow-[0_0_20px_rgba(59,130,246,0.8)] text-balance">
-                      {displayPersona.name.toUpperCase()}
+                    <div className="text-center min-h-[48px] md:min-h-0 text-sm md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-tight md:tracking-wider drop-shadow-[0_0_20px_rgba(59,130,246,0.8)] text-balance uppercase">
+                      {displayPersona.name}
                     </div>
-                    {/* Character Info */}
-                    <div className="text-center max-w-xs mb-1 flex flex-col min-h-[60px] md:min-h-[80px]">
-                      <p className="text-gray-300 text-xs md:text-sm lg:text-base hidden md:block mb-1">
+                    {/* Character Bio */}
+                    <div className="text-center max-w-xs mb-1 flex flex-col md:min-h-[60px]">
+                      <p className="text-gray-300 text-xs md:text-sm lg:text-base hidden md:block">
                         {displayPersona.bio}
-                      </p>
-                      <p className="text-blue-400 text-xs md:text-sm lg:text-base font-semibold mt-auto">
-                        Style: {displayPersona.style}
                       </p>
                     </div>
                   </>
                 ) : (
-                  <div className="text-center opacity-40">
-                    <div className="w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 border-gray-700 border-dashed flex items-center justify-center text-3xl md:text-4xl lg:text-5xl text-gray-700 mb-2">
-                      ?
+                  <>
+                    {/* Spacer to match style text height */}
+                    <p className="text-xs md:text-sm lg:text-base font-semibold mb-2 opacity-0">
+                      Style: Placeholder
+                    </p>
+                    <div className="opacity-40 mb-2">
+                      <div className="w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 border-gray-700 border-dashed flex items-center justify-center text-3xl md:text-4xl lg:text-5xl text-gray-700">
+                        ?
+                      </div>
                     </div>
-                    <div className="text-base md:text-xl lg:text-2xl font-black text-gray-700 tracking-wider">
+                    <div className="text-center min-h-[48px] md:min-h-0 text-sm md:text-xl lg:text-2xl font-black text-gray-700 tracking-tight md:tracking-wider mb-1 opacity-40">
                       PLAYER 1
                     </div>
-                  </div>
+                    {/* Spacer to match bio height */}
+                    <div className="text-center max-w-xs mb-1 md:min-h-[60px]" />
+                  </>
                 );
               })()}
             </div>
@@ -211,10 +231,10 @@ export function CharacterSelect() {
             {/* Center - VS Text */}
             <div className="flex flex-col items-center justify-center px-1 md:px-4 lg:px-8">
               <div className="text-center mb-1">
-                <div className="text-xl md:text-3xl lg:text-5xl font-black text-transparent bg-clip-text bg-linear-to-b from-yellow-400 via-orange-500 to-red-600 tracking-wider drop-shadow-[0_0_30px_rgba(251,191,36,0.8)] mb-0.5">
+                <div className="text-base md:text-3xl lg:text-5xl font-black text-transparent bg-clip-text bg-linear-to-b from-yellow-400 via-orange-500 to-red-600 tracking-wider drop-shadow-[0_0_30px_rgba(251,191,36,0.8)] mb-0.5">
                   CHARACTER
                 </div>
-                <div className="text-base md:text-xl lg:text-3xl font-black text-white tracking-[0.3em] md:tracking-[0.5em] drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]">
+                <div className="text-xs md:text-xl lg:text-3xl font-black text-white tracking-[0.3em] md:tracking-[0.5em] drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]">
                   SELECT
                 </div>
               </div>
@@ -231,7 +251,7 @@ export function CharacterSelect() {
             </div>
 
             {/* Player 2 - Right Side */}
-            <div className="flex-1 flex flex-col items-center justify-start min-h-[240px] md:min-h-[280px] lg:min-h-[320px]">
+            <div className="flex-1 flex flex-col items-center justify-start min-h-[180px] md:min-h-[280px] lg:min-h-[320px]">
               {(() => {
                 // Show player2 if selected, otherwise show hoveredPersona as preview if player1 is selected but not player2
                 const displayPersona =
@@ -239,6 +259,10 @@ export function CharacterSelect() {
 
                 return displayPersona ? (
                   <>
+                    {/* Character Style */}
+                    <p className="text-red-400 text-xs md:text-sm lg:text-base font-semibold mb-2">
+                      Style: {displayPersona.style}
+                    </p>
                     {/* Large Character Portrait */}
                     <div className="relative mb-2 group">
                       <div className="absolute inset-0 bg-red-500/20 blur-2xl rounded-full animate-pulse" />
@@ -255,28 +279,33 @@ export function CharacterSelect() {
                       </div>
                     </div>
                     {/* Character Name */}
-                    <div className="text-center text-lg md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-wider drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] text-balance">
-                      {displayPersona.name.toUpperCase()}
+                    <div className="text-center min-h-[48px] md:min-h-0 text-sm md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-tight md:tracking-wider drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] text-balance uppercase">
+                      {displayPersona.name}
                     </div>
-                    {/* Character Info */}
-                    <div className="text-center max-w-xs mb-1 flex flex-col min-h-[60px] md:min-h-[80px]">
-                      <p className="text-gray-300 text-xs md:text-sm lg:text-base hidden md:block mb-1">
+                    {/* Character Bio */}
+                    <div className="text-center max-w-xs mb-1 flex flex-col md:min-h-[60px]">
+                      <p className="text-gray-300 text-xs md:text-sm lg:text-base hidden md:block">
                         {displayPersona.bio}
-                      </p>
-                      <p className="text-red-400 text-xs md:text-sm lg:text-base font-semibold mt-auto">
-                        Style: {displayPersona.style}
                       </p>
                     </div>
                   </>
                 ) : (
-                  <div className="text-center opacity-40">
-                    <div className="w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 border-gray-700 border-dashed flex items-center justify-center text-3xl md:text-4xl lg:text-5xl text-gray-700 mb-2">
-                      ?
+                  <>
+                    {/* Spacer to match style text height */}
+                    <p className="text-xs md:text-sm lg:text-base font-semibold mb-2 opacity-0">
+                      Style: Placeholder
+                    </p>
+                    <div className="opacity-40 mb-2">
+                      <div className="w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 border-gray-700 border-dashed flex items-center justify-center text-3xl md:text-4xl lg:text-5xl text-gray-700">
+                        ?
+                      </div>
                     </div>
-                    <div className="text-base md:text-xl lg:text-2xl font-black text-gray-700 tracking-wider">
+                    <div className="text-center min-h-[48px] md:min-h-0 text-sm md:text-xl lg:text-2xl font-black text-gray-700 tracking-tight md:tracking-wider mb-1 opacity-40">
                       PLAYER 2
                     </div>
-                  </div>
+                    {/* Spacer to match bio height */}
+                    <div className="text-center max-w-xs mb-1 md:min-h-[60px]" />
+                  </>
                 );
               })()}
             </div>
@@ -295,8 +324,15 @@ export function CharacterSelect() {
                     <button
                       key={persona.id}
                       onClick={() => handlePersonaClick(persona)}
-                      onMouseEnter={() => setHoveredPersona(persona)}
-                      onMouseLeave={() => setHoveredPersona(null)}
+                      onMouseEnter={() =>
+                        !isTouchDevice && setHoveredPersona(persona)
+                      }
+                      onMouseLeave={() =>
+                        !isTouchDevice && setHoveredPersona(null)
+                      }
+                      onTouchStart={() =>
+                        isTouchDevice && setHoveredPersona(null)
+                      }
                       className={`
                         relative group
                         transition-all duration-300 transform
