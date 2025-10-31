@@ -11,6 +11,7 @@ import { BattleOptions } from "./battle-options";
 export function CharacterSelect() {
   const [player1, setPlayer1] = useState<Persona | null>(null);
   const [player2, setPlayer2] = useState<Persona | null>(null);
+  const [hoveredPersona, setHoveredPersona] = useState<Persona | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [createAsLive, setCreateAsLive] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -154,68 +155,73 @@ export function CharacterSelect() {
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(0,0,0,0.8)_100%)]" />
 
         {/* Main Container */}
-        <div className="relative z-10 flex flex-col h-[calc(100vh-52px)] justify-center">
+        <div className="relative z-10 flex flex-col h-[calc(100vh-52px)] justify-start pt-16 md:pt-20 lg:pt-24">
           {/* Top Section - Character Display */}
-          <div className="flex items-center justify-between px-2 md:px-8 lg:px-16 pt-4 pb-0">
+          <div className="flex items-center justify-between px-2 md:px-8 lg:px-16 pb-0">
             {/* Player 1 - Left Side */}
-            <div className="flex-1 flex flex-col items-center justify-center min-h-[280px] md:min-h-[350px] lg:min-h-[400px]">
-              {player1 ? (
-                <>
-                  {/* Large Character Portrait */}
-                  <div className="relative mb-3 group">
-                    <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full animate-pulse" />
-                    <div
-                      className="relative w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full border-4 md:border-6 border-blue-500 flex items-center justify-center text-3xl md:text-5xl lg:text-6xl text-white bg-linear-to-br from-gray-800 to-gray-900 shadow-2xl transform transition-transform hover:scale-105"
-                      style={{
-                        boxShadow: `0 0 40px rgba(59, 130, 246, 0.6)`,
-                      }}
-                    >
-                      {player1.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
+            <div className="flex-1 flex flex-col items-center justify-start min-h-[240px] md:min-h-[280px] lg:min-h-[320px]">
+              {(() => {
+                // Show player1 if selected, otherwise show hoveredPersona as preview if no player1 selected
+                const displayPersona = player1 || (!player1 && hoveredPersona);
+
+                return displayPersona ? (
+                  <>
+                    {/* Large Character Portrait */}
+                    <div className="relative mb-2 group">
+                      <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full animate-pulse" />
+                      <div
+                        className="relative w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 border-blue-500 flex items-center justify-center text-2xl md:text-4xl lg:text-5xl text-white bg-linear-to-br from-gray-800 to-gray-900 shadow-2xl transform transition-transform hover:scale-105"
+                        style={{
+                          boxShadow: `0 0 40px rgba(59, 130, 246, 0.6)`,
+                        }}
+                      >
+                        {displayPersona.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </div>
+                    </div>
+                    {/* Character Name */}
+                    <div className="text-center text-lg md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-wider drop-shadow-[0_0_20px_rgba(59,130,246,0.8)] text-balance">
+                      {displayPersona.name.toUpperCase()}
+                    </div>
+                    {/* Character Info */}
+                    <div className="text-center max-w-xs mb-1 flex flex-col min-h-[60px] md:min-h-[80px]">
+                      <p className="text-gray-300 text-xs md:text-sm lg:text-base hidden md:block mb-1">
+                        {displayPersona.bio}
+                      </p>
+                      <p className="text-blue-400 text-xs md:text-sm lg:text-base font-semibold mt-auto">
+                        Style: {displayPersona.style}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center opacity-40">
+                    <div className="w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 border-gray-700 border-dashed flex items-center justify-center text-3xl md:text-4xl lg:text-5xl text-gray-700 mb-2">
+                      ?
+                    </div>
+                    <div className="text-base md:text-xl lg:text-2xl font-black text-gray-700 tracking-wider">
+                      PLAYER 1
                     </div>
                   </div>
-                  {/* Character Name */}
-                  <div className="text-center text-xl md:text-3xl lg:text-4xl font-black text-white mb-1 tracking-wider drop-shadow-[0_0_20px_rgba(59,130,246,0.8)] text-balance">
-                    {player1.name.toUpperCase()}
-                  </div>
-                  {/* Character Info */}
-                  <div className="text-center max-w-xs mb-2 space-y-2">
-                    <p className="text-gray-300 text-xs md:text-sm lg:text-base hidden md:block">
-                      {player1.bio}
-                    </p>
-                    <p className="text-blue-400 text-xs md:text-sm lg:text-base font-semibold">
-                      Style: {player1.style}
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <div className="text-center opacity-40">
-                  <div className="w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full border-4 md:border-6 border-gray-700 border-dashed flex items-center justify-center text-4xl md:text-5xl lg:text-6xl text-gray-700 mb-3">
-                    ?
-                  </div>
-                  <div className="text-lg md:text-2xl lg:text-3xl font-black text-gray-700 tracking-wider">
-                    PLAYER 1
-                  </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
 
             {/* Center - VS Text */}
             <div className="flex flex-col items-center justify-center px-1 md:px-4 lg:px-8">
-              <div className="text-center mb-2">
-                <div className="text-2xl md:text-4xl lg:text-6xl font-black text-transparent bg-clip-text bg-linear-to-b from-yellow-400 via-orange-500 to-red-600 tracking-wider drop-shadow-[0_0_30px_rgba(251,191,36,0.8)] mb-1">
+              <div className="text-center mb-1">
+                <div className="text-xl md:text-3xl lg:text-5xl font-black text-transparent bg-clip-text bg-linear-to-b from-yellow-400 via-orange-500 to-red-600 tracking-wider drop-shadow-[0_0_30px_rgba(251,191,36,0.8)] mb-0.5">
                   CHARACTER
                 </div>
-                <div className="text-lg md:text-2xl lg:text-4xl font-black text-white tracking-[0.3em] md:tracking-[0.5em] drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]">
+                <div className="text-base md:text-xl lg:text-3xl font-black text-white tracking-[0.3em] md:tracking-[0.5em] drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]">
                   SELECT
                 </div>
               </div>
               {/* VS text with fixed height to prevent layout shift */}
-              <div className="h-7 md:h-9 lg:h-12 flex items-center justify-center">
+              <div className="h-6 md:h-8 lg:h-10 flex items-center justify-center">
                 <div
-                  className={`text-xl md:text-2xl lg:text-3xl font-black text-red-500 animate-pulse drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] transition-opacity duration-300 ${
+                  className={`text-lg md:text-xl lg:text-2xl font-black text-red-500 animate-pulse drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] transition-opacity duration-300 ${
                     player1 && player2 ? "opacity-100" : "opacity-0"
                   }`}
                 >
@@ -225,55 +231,61 @@ export function CharacterSelect() {
             </div>
 
             {/* Player 2 - Right Side */}
-            <div className="flex-1 flex flex-col items-center justify-center min-h-[280px] md:min-h-[350px] lg:min-h-[400px]">
-              {player2 ? (
-                <>
-                  {/* Large Character Portrait */}
-                  <div className="relative mb-3 group">
-                    <div className="absolute inset-0 bg-red-500/20 blur-2xl rounded-full animate-pulse" />
-                    <div
-                      className="relative w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full border-4 md:border-6 border-red-500 flex items-center justify-center text-3xl md:text-5xl lg:text-6xl text-white bg-linear-to-br from-gray-800 to-gray-900 shadow-2xl transform transition-transform hover:scale-105"
-                      style={{
-                        boxShadow: `0 0 40px rgba(239, 68, 68, 0.6)`,
-                      }}
-                    >
-                      {player2.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
+            <div className="flex-1 flex flex-col items-center justify-start min-h-[240px] md:min-h-[280px] lg:min-h-[320px]">
+              {(() => {
+                // Show player2 if selected, otherwise show hoveredPersona as preview if player1 is selected but not player2
+                const displayPersona =
+                  player2 || (player1 && !player2 && hoveredPersona);
+
+                return displayPersona ? (
+                  <>
+                    {/* Large Character Portrait */}
+                    <div className="relative mb-2 group">
+                      <div className="absolute inset-0 bg-red-500/20 blur-2xl rounded-full animate-pulse" />
+                      <div
+                        className="relative w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 border-red-500 flex items-center justify-center text-2xl md:text-4xl lg:text-5xl text-white bg-linear-to-br from-gray-800 to-gray-900 shadow-2xl transform transition-transform hover:scale-105"
+                        style={{
+                          boxShadow: `0 0 40px rgba(239, 68, 68, 0.6)`,
+                        }}
+                      >
+                        {displayPersona.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </div>
+                    </div>
+                    {/* Character Name */}
+                    <div className="text-center text-lg md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-wider drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] text-balance">
+                      {displayPersona.name.toUpperCase()}
+                    </div>
+                    {/* Character Info */}
+                    <div className="text-center max-w-xs mb-1 flex flex-col min-h-[60px] md:min-h-[80px]">
+                      <p className="text-gray-300 text-xs md:text-sm lg:text-base hidden md:block mb-1">
+                        {displayPersona.bio}
+                      </p>
+                      <p className="text-red-400 text-xs md:text-sm lg:text-base font-semibold mt-auto">
+                        Style: {displayPersona.style}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center opacity-40">
+                    <div className="w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 border-gray-700 border-dashed flex items-center justify-center text-3xl md:text-4xl lg:text-5xl text-gray-700 mb-2">
+                      ?
+                    </div>
+                    <div className="text-base md:text-xl lg:text-2xl font-black text-gray-700 tracking-wider">
+                      PLAYER 2
                     </div>
                   </div>
-                  {/* Character Name */}
-                  <div className="text-center text-xl md:text-3xl lg:text-4xl font-black text-white mb-1 tracking-wider drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] text-balance">
-                    {player2.name.toUpperCase()}
-                  </div>
-                  {/* Character Info */}
-                  <div className="text-center max-w-xs mb-2 space-y-2">
-                    <p className="text-gray-300 text-xs md:text-sm lg:text-base hidden md:block">
-                      {player2.bio}
-                    </p>
-                    <p className="text-red-400 text-xs md:text-sm lg:text-base font-semibold">
-                      Style: {player2.style}
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <div className="text-center opacity-40">
-                  <div className="w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full border-4 md:border-6 border-gray-700 border-dashed flex items-center justify-center text-4xl md:text-5xl lg:text-6xl text-gray-700 mb-3">
-                    ?
-                  </div>
-                  <div className="text-lg md:text-2xl lg:text-3xl font-black text-gray-700 tracking-wider">
-                    PLAYER 2
-                  </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           </div>
 
           {/* Bottom Section - Character Grid */}
-          <div className="bg-linear-to-t from-black/90 via-black/70 to-transparent pt-4 pb-4">
+          <div className="bg-linear-to-t from-black/90 via-black/70 to-transparent pt-2 pb-4">
             {/* Character Selection Grid */}
-            <div className="max-w-5xl mx-auto px-2 md:px-4 lg:px-8 mb-4 md:mb-6">
+            <div className="max-w-5xl mx-auto px-2 md:px-4 lg:px-8 mb-3 md:mb-4">
               <div className="flex justify-center items-center gap-3 md:gap-4">
                 {personas.map((persona) => {
                   const selected = isSelected(persona);
@@ -283,6 +295,8 @@ export function CharacterSelect() {
                     <button
                       key={persona.id}
                       onClick={() => handlePersonaClick(persona)}
+                      onMouseEnter={() => setHoveredPersona(persona)}
+                      onMouseLeave={() => setHoveredPersona(null)}
                       className={`
                         relative group
                         transition-all duration-300 transform
