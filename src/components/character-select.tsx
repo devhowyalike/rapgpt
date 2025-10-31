@@ -53,15 +53,24 @@ export function CharacterSelect() {
   const personas = getAllPersonas();
 
   const handlePersonaClick = (persona: Persona) => {
+    // Check if clicking a selected character (deselect)
+    if (player1?.id === persona.id) {
+      setPlayer1(null);
+      return;
+    }
+
+    if (player2?.id === persona.id) {
+      setPlayer2(null);
+      return;
+    }
+
+    // Select logic - assign to first empty slot
     if (!player1) {
       setPlayer1(persona);
-    } else if (!player2 && persona.id !== player1.id) {
+    } else if (!player2) {
       setPlayer2(persona);
-    } else if (player1.id === persona.id) {
-      setPlayer1(null);
-    } else if (player2?.id === persona.id) {
-      setPlayer2(null);
     }
+    // If both slots full and clicking an unselected character, do nothing
   };
 
   const isSelected = (persona: Persona) => {
@@ -139,245 +148,273 @@ export function CharacterSelect() {
     <>
       <SiteHeader />
       <div style={{ height: "52px" }} />
-      <div className="min-h-[calc(100vh-3.5rem)] bg-linear-to-b from-gray-950 via-gray-900 to-black flex flex-col items-center p-6 py-12">
-        {/* Header */}
-        <div className="w-full max-w-7xl mx-auto mb-8">
-          <h1 className="text-5xl md:text-7xl font-bold text-center mb-4">
-            <span className="bg-linear-to-r from-yellow-400 via-red-500 to-purple-600 text-transparent bg-clip-text">
-              SELECT YOUR FIGHTERS
-            </span>
-          </h1>
-          <p className="text-center text-gray-400 text-lg">
-            Choose two personas to battle. Click to select Player 1, then Player
-            2. Click again to deselect.
-          </p>
-        </div>
+      <div className="min-h-screen bg-linear-to-b from-gray-950 via-gray-900 to-black relative overflow-hidden">
+        {/* Dramatic Background Effect */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(0,0,0,0.8)_100%)]" />
 
-        {/* Selection Display */}
-        <div className="w-full max-w-7xl mx-auto mb-8 grid grid-cols-2 gap-8">
-          {/* Player 1 */}
-          <div className="bg-linear-to-br from-blue-900/30 to-blue-950/30 border-2 border-blue-500 rounded-lg p-6 relative">
-            <div className="text-blue-400 font-bold text-xl mb-4 text-center">
-              PLAYER 1
-            </div>
-            <div className="text-center h-[220px] flex flex-col items-center justify-center py-4">
+        {/* Main Container */}
+        <div className="relative z-10 flex flex-col h-[calc(100vh-52px)] justify-center">
+          {/* Top Section - Character Display */}
+          <div className="flex items-center justify-between px-2 md:px-8 lg:px-16 pt-4 pb-0">
+            {/* Player 1 - Left Side */}
+            <div className="flex-1 flex flex-col items-center justify-center min-h-[280px] md:min-h-[350px] lg:min-h-[400px]">
               {player1 ? (
                 <>
-                  <div className="w-24 h-24 shrink-0 mb-4 rounded-full border-4 border-blue-500 overflow-hidden bg-gray-800 flex items-center justify-center text-4xl text-white">
-                    {player1.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </div>
-                  <div className="text-white font-bold text-2xl mb-2">
-                    {player1.name}
-                  </div>
-                  <div className="text-gray-400 text-sm">{player1.style}</div>
-                </>
-              ) : (
-                <>
-                  <div className="w-24 h-24 shrink-0 mb-4 rounded-full border-4 border-gray-700 overflow-hidden bg-gray-800 flex items-center justify-center text-6xl text-gray-600">
-                    ?
-                  </div>
-                  <div className="text-gray-600 font-bold text-2xl mb-2">
-                    No Selection
-                  </div>
-                  <div className="text-gray-600 text-sm animate-pulse">
-                    Waiting for selection...
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Player 2 */}
-          <div className="bg-linear-to-br from-red-900/30 to-red-950/30 border-2 border-red-500 rounded-lg p-6 relative">
-            <div className="text-red-400 font-bold text-xl mb-4 text-center">
-              PLAYER 2
-            </div>
-            <div className="text-center h-[220px] flex flex-col items-center justify-center py-4">
-              {player2 ? (
-                <>
-                  <div className="w-24 h-24 shrink-0 mb-4 rounded-full border-4 border-red-500 overflow-hidden bg-gray-800 flex items-center justify-center text-4xl text-white">
-                    {player2.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </div>
-                  <div className="text-white font-bold text-2xl mb-2">
-                    {player2.name}
-                  </div>
-                  <div className="text-gray-400 text-sm">{player2.style}</div>
-                </>
-              ) : (
-                <>
-                  <div className="w-24 h-24 shrink-0 mb-4 rounded-full border-4 border-gray-700 overflow-hidden bg-gray-800 flex items-center justify-center text-6xl text-gray-600">
-                    ?
-                  </div>
-                  <div className="text-gray-600 font-bold text-2xl mb-2">
-                    No Selection
-                  </div>
-                  <div className="text-gray-600 text-sm animate-pulse">
-                    Waiting for selection...
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Character Grid */}
-        <div className="w-full max-w-7xl mx-auto mb-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {personas.map((persona) => {
-              const selected = isSelected(persona);
-              const label = getSelectionLabel(persona);
-
-              return (
-                <button
-                  key={persona.id}
-                  onClick={() => handlePersonaClick(persona)}
-                  className={`
-                    relative group flex flex-col h-full
-                    bg-linear-to-b from-gray-800 to-gray-900
-                    border-4 rounded-xl overflow-hidden
-                    transition-all duration-300 transform
-                    hover:scale-105 hover:shadow-2xl
-                    ${
-                      selected
-                        ? label === "P1"
-                          ? "border-blue-500 shadow-blue-500/50 shadow-lg"
-                          : "border-red-500 shadow-red-500/50 shadow-lg"
-                        : "border-gray-700 hover:border-yellow-500"
-                    }
-                  `}
-                  style={{
-                    borderColor: selected
-                      ? label === "P1"
-                        ? "#3b82f6"
-                        : "#ef4444"
-                      : undefined,
-                  }}
-                >
-                  {/* Selection Badge */}
-                  {selected && (
+                  {/* Large Character Portrait */}
+                  <div className="relative mb-3 group">
+                    <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full animate-pulse" />
                     <div
-                      className={`
-                        absolute top-2 right-2 z-10
-                        px-3 py-1 rounded-full
-                        font-bold text-sm
-                        ${
-                          label === "P1"
-                            ? "bg-blue-500 text-white"
-                            : "bg-red-500 text-white"
-                        }
-                      `}
+                      className="relative w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full border-4 md:border-6 border-blue-500 flex items-center justify-center text-3xl md:text-5xl lg:text-6xl text-white bg-linear-to-br from-gray-800 to-gray-900 shadow-2xl transform transition-transform hover:scale-105"
+                      style={{
+                        boxShadow: `0 0 40px rgba(59, 130, 246, 0.6)`,
+                      }}
                     >
-                      {label}
-                    </div>
-                  )}
-
-                  {/* Deselect Indicator - appears on hover of selected character */}
-                  {selected && (
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 group-hover:backdrop-blur-md transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100 z-20">
-                      <div className="text-center">
-                        <div className="text-white font-bold text-3xl mb-2">
-                          ✕
-                        </div>
-                        <div className="text-white font-semibold text-base">
-                          Click to Deselect
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Character Avatar */}
-                  <div
-                    className="h-40 flex items-center justify-center text-6xl font-bold bg-gray-800 relative"
-                    style={{
-                      background: `linear-gradient(135deg, ${persona.accentColor}22 0%, transparent 100%)`,
-                    }}
-                  >
-                    <div
-                      className="w-24 h-24 rounded-full border-4 flex items-center justify-center text-4xl text-white bg-gray-900"
-                      style={{ borderColor: persona.accentColor }}
-                    >
-                      {persona.name
+                      {player1.name
                         .split(" ")
                         .map((n) => n[0])
                         .join("")}
                     </div>
                   </div>
-
+                  {/* Character Name */}
+                  <div className="text-center text-xl md:text-3xl lg:text-4xl font-black text-white mb-1 tracking-wider drop-shadow-[0_0_20px_rgba(59,130,246,0.8)] text-balance">
+                    {player1.name.toUpperCase()}
+                  </div>
                   {/* Character Info */}
-                  <div className="p-4 bg-gray-900/80 backdrop-blur flex-1 flex flex-col">
-                    <h3 className="text-xl font-bold text-white mb-1 truncate">
-                      {persona.name}
-                    </h3>
-                    <p className="text-sm text-gray-400 mb-2">
-                      {persona.style}
+                  <div className="text-center max-w-xs mb-2 space-y-2">
+                    <p className="text-gray-300 text-xs md:text-sm lg:text-base hidden md:block">
+                      {player1.bio}
                     </p>
-                    <p className="text-xs text-gray-500 line-clamp-3">
-                      {persona.bio}
+                    <p className="text-blue-400 text-xs md:text-sm lg:text-base font-semibold">
+                      Style: {player1.style}
                     </p>
                   </div>
+                </>
+              ) : (
+                <div className="text-center opacity-40">
+                  <div className="w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full border-4 md:border-6 border-gray-700 border-dashed flex items-center justify-center text-4xl md:text-5xl lg:text-6xl text-gray-700 mb-3">
+                    ?
+                  </div>
+                  <div className="text-lg md:text-2xl lg:text-3xl font-black text-gray-700 tracking-wider">
+                    PLAYER 1
+                  </div>
+                </div>
+              )}
+            </div>
 
-                  {/* Hover Overlay */}
-                  {!selected && (
-                    <div className="absolute inset-0 bg-yellow-500/0 group-hover:bg-yellow-500/10 transition-colors duration-300 pointer-events-none" />
-                  )}
-                </button>
-              );
-            })}
+            {/* Center - VS Text */}
+            <div className="flex flex-col items-center justify-center px-1 md:px-4 lg:px-8">
+              <div className="text-center mb-2">
+                <div className="text-2xl md:text-4xl lg:text-6xl font-black text-transparent bg-clip-text bg-linear-to-b from-yellow-400 via-orange-500 to-red-600 tracking-wider drop-shadow-[0_0_30px_rgba(251,191,36,0.8)] mb-1">
+                  CHARACTER
+                </div>
+                <div className="text-lg md:text-2xl lg:text-4xl font-black text-white tracking-[0.3em] md:tracking-[0.5em] drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]">
+                  SELECT
+                </div>
+              </div>
+              {/* VS text with fixed height to prevent layout shift */}
+              <div className="h-7 md:h-9 lg:h-12 flex items-center justify-center">
+                <div
+                  className={`text-xl md:text-2xl lg:text-3xl font-black text-red-500 animate-pulse drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] transition-opacity duration-300 ${
+                    player1 && player2 ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  VS
+                </div>
+              </div>
+            </div>
+
+            {/* Player 2 - Right Side */}
+            <div className="flex-1 flex flex-col items-center justify-center min-h-[280px] md:min-h-[350px] lg:min-h-[400px]">
+              {player2 ? (
+                <>
+                  {/* Large Character Portrait */}
+                  <div className="relative mb-3 group">
+                    <div className="absolute inset-0 bg-red-500/20 blur-2xl rounded-full animate-pulse" />
+                    <div
+                      className="relative w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full border-4 md:border-6 border-red-500 flex items-center justify-center text-3xl md:text-5xl lg:text-6xl text-white bg-linear-to-br from-gray-800 to-gray-900 shadow-2xl transform transition-transform hover:scale-105"
+                      style={{
+                        boxShadow: `0 0 40px rgba(239, 68, 68, 0.6)`,
+                      }}
+                    >
+                      {player2.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </div>
+                  </div>
+                  {/* Character Name */}
+                  <div className="text-center text-xl md:text-3xl lg:text-4xl font-black text-white mb-1 tracking-wider drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] text-balance">
+                    {player2.name.toUpperCase()}
+                  </div>
+                  {/* Character Info */}
+                  <div className="text-center max-w-xs mb-2 space-y-2">
+                    <p className="text-gray-300 text-xs md:text-sm lg:text-base hidden md:block">
+                      {player2.bio}
+                    </p>
+                    <p className="text-red-400 text-xs md:text-sm lg:text-base font-semibold">
+                      Style: {player2.style}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center opacity-40">
+                  <div className="w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full border-4 md:border-6 border-gray-700 border-dashed flex items-center justify-center text-4xl md:text-5xl lg:text-6xl text-gray-700 mb-3">
+                    ?
+                  </div>
+                  <div className="text-lg md:text-2xl lg:text-3xl font-black text-gray-700 tracking-wider">
+                    PLAYER 2
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Battle Options */}
-        <BattleOptions
-          votingEnabled={votingEnabled}
-          onVotingEnabledChange={setVotingEnabled}
-          commentsEnabled={commentsEnabled}
-          onCommentsEnabledChange={setCommentsEnabled}
-          createAsLive={createAsLive}
-          onCreateAsLiveChange={setCreateAsLive}
-          isAdmin={isAdmin}
-          isVotingGloballyEnabled={isVotingGloballyEnabled}
-          isCommentsGloballyEnabled={isCommentsGloballyEnabled}
-        />
+          {/* Bottom Section - Character Grid */}
+          <div className="bg-linear-to-t from-black/90 via-black/70 to-transparent pt-4 pb-4">
+            {/* Character Selection Grid */}
+            <div className="max-w-5xl mx-auto px-2 md:px-4 lg:px-8 mb-4 md:mb-6">
+              <div className="flex justify-center items-center gap-3 md:gap-4">
+                {personas.map((persona) => {
+                  const selected = isSelected(persona);
+                  const label = getSelectionLabel(persona);
 
-        {/* Start Battle Button */}
-        <div className="w-full max-w-7xl mx-auto text-center">
-          <button
-            onClick={handleStartBattle}
-            disabled={!player1 || !player2 || isCreating}
-            className={`
-              px-12 py-4 rounded-lg font-bold text-xl
-              transition-all duration-300 transform
-              ${
-                player1 && player2 && !isCreating
-                  ? "bg-linear-to-r from-yellow-400 via-red-500 to-purple-600 hover:scale-105 hover:shadow-2xl text-white"
-                  : "bg-gray-800 text-gray-600 cursor-not-allowed"
-              }
-            `}
-          >
-            {isCreating
-              ? "CREATING BATTLE..."
-              : player1 && player2
-              ? createAsLive
-                ? "START LIVE BATTLE"
-                : "START BATTLE"
-              : "SELECT YOUR FIGHTERS"}
-          </button>
-        </div>
+                  return (
+                    <button
+                      key={persona.id}
+                      onClick={() => handlePersonaClick(persona)}
+                      className={`
+                        relative group
+                        transition-all duration-300 transform
+                        hover:scale-110 hover:z-20
+                        ${selected ? "scale-110 z-10" : ""}
+                      `}
+                    >
+                      {/* Selection Indicator */}
+                      {selected && (
+                        <div
+                          className={`
+                            absolute -top-2 -right-2 z-20
+                            w-8 h-8 rounded-full
+                            flex items-center justify-center
+                            font-bold text-xs
+                            ${
+                              label === "P1"
+                                ? "bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.8)]"
+                                : "bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.8)]"
+                            }
+                          `}
+                        >
+                          {label}
+                        </div>
+                      )}
 
-        {/* Back Link */}
-        <div className="mt-8">
-          <a
-            href="/"
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            ← Back to Home
-          </a>
+                      {/* Deselect Overlay - shows on hover of selected character */}
+                      {selected && (
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/70 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100 z-10 rounded-lg">
+                          <div className="text-center">
+                            <div className="text-white font-bold text-2xl md:text-3xl mb-1">
+                              ✕
+                            </div>
+                            <div className="text-white font-semibold text-xs">
+                              DESELECT
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Character Portrait */}
+                      <div
+                        className={`
+                          w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28
+                          rounded-lg
+                          border-4
+                          flex items-center justify-center
+                          text-2xl md:text-3xl font-bold text-white
+                          bg-linear-to-br from-gray-800 to-gray-900
+                          transition-all duration-300
+                          ${
+                            selected
+                              ? label === "P1"
+                                ? "border-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.8)]"
+                                : "border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.8)]"
+                              : "border-gray-700 hover:border-yellow-400 hover:shadow-[0_0_20px_rgba(250,204,21,0.5)]"
+                          }
+                        `}
+                        style={{
+                          background: selected
+                            ? `linear-gradient(135deg, ${persona.accentColor}44 0%, #1f2937 100%)`
+                            : `linear-gradient(135deg, ${persona.accentColor}22 0%, #1f2937 100%)`,
+                        }}
+                      >
+                        {persona.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </div>
+
+                      {/* Character Name on Hover - only show for unselected characters */}
+                      {!selected && (
+                        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none">
+                          <div className="bg-black/90 px-3 py-1 rounded text-white text-xs font-bold border border-gray-700">
+                            {persona.name}
+                          </div>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Battle Options & Start Button */}
+            <div className="max-w-4xl mx-auto px-2 md:px-4 lg:px-8 space-y-3 md:space-y-4">
+              <BattleOptions
+                votingEnabled={votingEnabled}
+                onVotingEnabledChange={setVotingEnabled}
+                commentsEnabled={commentsEnabled}
+                onCommentsEnabledChange={setCommentsEnabled}
+                createAsLive={createAsLive}
+                onCreateAsLiveChange={setCreateAsLive}
+                isAdmin={isAdmin}
+                isVotingGloballyEnabled={isVotingGloballyEnabled}
+                isCommentsGloballyEnabled={isCommentsGloballyEnabled}
+              />
+
+              {/* Start Battle Button */}
+              <div className="text-center pb-2 md:pb-4">
+                <button
+                  onClick={handleStartBattle}
+                  disabled={!player1 || !player2 || isCreating}
+                  className={`
+                    px-8 md:px-12 lg:px-16 py-3 md:py-4 rounded-lg font-black text-lg md:text-xl lg:text-2xl tracking-wider
+                    transition-all duration-300 transform
+                    ${
+                      player1 && player2 && !isCreating
+                        ? "bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.8)] text-white"
+                        : "bg-gray-800 text-gray-600 cursor-not-allowed"
+                    }
+                  `}
+                >
+                  {isCreating
+                    ? "CREATING BATTLE..."
+                    : player1 && player2
+                    ? "FIGHT!"
+                    : "SELECT FIGHTERS"}
+                </button>
+
+                {/* Back Link */}
+                <div className="mt-4">
+                  <a
+                    href="/"
+                    className="text-gray-500 hover:text-gray-300 transition-colors text-sm font-semibold tracking-wide"
+                  >
+                    ← BACK TO HOME
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>
