@@ -34,12 +34,17 @@ export function BattleSidebar({
   defaultTab,
 }: BattleSidebarProps) {
   const { user, isLoaded } = useUser();
-  
+
   // Determine if voting and commenting should be shown
-  // Live/featured battles always show these features, user battles check env flags
-  const showVoting = battle.isFeatured || process.env.NEXT_PUBLIC_USER_BATTLE_VOTING === 'true';
-  const showCommenting = battle.isFeatured || process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING === 'true';
-  
+  // Check both env flags (master switch) AND battle settings
+  const isVotingGloballyEnabled =
+    process.env.NEXT_PUBLIC_USER_BATTLE_VOTING !== "false";
+  const isCommentsGloballyEnabled =
+    process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING !== "false";
+  const showVoting = isVotingGloballyEnabled && (battle.votingEnabled ?? true);
+  const showCommenting =
+    isCommentsGloballyEnabled && (battle.commentsEnabled ?? true);
+
   // Default to whichever is available if neither is specified
   const getInitialTab = (): "comments" | "voting" => {
     if (defaultTab) return defaultTab;
@@ -47,8 +52,10 @@ export function BattleSidebar({
     if (showVoting) return "voting";
     return "comments"; // fallback
   };
-  
-  const [activeTab, setActiveTab] = useState<"comments" | "voting">(getInitialTab());
+
+  const [activeTab, setActiveTab] = useState<"comments" | "voting">(
+    getInitialTab()
+  );
 
   const [comment, setComment] = useState("");
   const [isSubmittingVote, setIsSubmittingVote] = useState(false);
@@ -197,8 +204,9 @@ export function BattleSidebar({
         defaultTab ? "" : "h-full"
       }`}
     >
-      {/* Tabs - Hidden on mobile when in drawer mode OR when only one feature is available */}
-      {showCommenting && showVoting && (
+      {/* Tabs or Header */}
+      {showCommenting && showVoting ? (
+        // Show tabs when both features are enabled (hidden in drawer mode)
         <div
           className={`flex border-b border-gray-800 ${
             defaultTab ? "hidden" : ""
@@ -233,6 +241,25 @@ export function BattleSidebar({
             Vote
           </button>
         </div>
+      ) : (
+        // Show simple header when only one feature is enabled (hidden in drawer mode)
+        !defaultTab && (
+          <div className="shrink-0 flex items-center justify-center px-4 py-3 border-b border-gray-800 bg-gray-800 mt-3">
+            <div className="text-white font-medium flex items-center gap-2">
+              {showCommenting ? (
+                <>
+                  <MessageSquare className="w-4 h-4" />
+                  Comments
+                </>
+              ) : (
+                <>
+                  <ThumbsUp className="w-4 h-4" />
+                  Vote
+                </>
+              )}
+            </div>
+          </div>
+        )
       )}
 
       {/* Content */}

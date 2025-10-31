@@ -6,8 +6,7 @@ import type { Persona } from "@/lib/shared/battle-types";
 import { useRouter } from "next/navigation";
 import { SiteHeader } from "./site-header";
 import { useAuth } from "@clerk/nextjs";
-import { Switch } from "./ui/switch";
-import { Radio } from "lucide-react";
+import { BattleOptions } from "./battle-options";
 
 export function CharacterSelect() {
   const [player1, setPlayer1] = useState<Persona | null>(null);
@@ -15,7 +14,15 @@ export function CharacterSelect() {
   const [isCreating, setIsCreating] = useState(false);
   const [createAsLive, setCreateAsLive] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [votingEnabled, setVotingEnabled] = useState(true);
+  const [commentsEnabled, setCommentsEnabled] = useState(true);
   const router = useRouter();
+
+  // Check if features are globally enabled via env flags
+  const isVotingGloballyEnabled =
+    process.env.NEXT_PUBLIC_USER_BATTLE_VOTING !== "false";
+  const isCommentsGloballyEnabled =
+    process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING !== "false";
 
   // Check if user is admin
   const { userId, isLoaded } = useAuth();
@@ -86,6 +93,8 @@ export function CharacterSelect() {
           leftPersonaId: player1.id,
           rightPersonaId: player2.id,
           isFeatured: createAsLive, // Only true if admin and toggle enabled
+          votingEnabled,
+          commentsEnabled,
         }),
         signal: controller.signal,
       });
@@ -323,26 +332,18 @@ export function CharacterSelect() {
           </div>
         </div>
 
-        {/* Admin Toggle for Live Battle */}
-        {isAdmin && (
-          <div className="w-full max-w-7xl mx-auto mb-6 flex justify-center">
-            <div className="flex items-center gap-4 bg-purple-900/30 border-2 border-purple-500/50 rounded-lg px-6 py-4 shadow-lg">
-              <div className="flex items-center gap-2 text-purple-400">
-                <Radio size={20} />
-              </div>
-              <div className="flex-1">
-                <div className="text-white font-bold text-lg">Go Live</div>
-                <div className="text-purple-300 text-sm">
-                  Create as featured battle on homepage
-                </div>
-              </div>
-              <Switch
-                checked={createAsLive}
-                onCheckedChange={setCreateAsLive}
-              />
-            </div>
-          </div>
-        )}
+        {/* Battle Options */}
+        <BattleOptions
+          votingEnabled={votingEnabled}
+          onVotingEnabledChange={setVotingEnabled}
+          commentsEnabled={commentsEnabled}
+          onCommentsEnabledChange={setCommentsEnabled}
+          createAsLive={createAsLive}
+          onCreateAsLiveChange={setCreateAsLive}
+          isAdmin={isAdmin}
+          isVotingGloballyEnabled={isVotingGloballyEnabled}
+          isCommentsGloballyEnabled={isCommentsGloballyEnabled}
+        />
 
         {/* Start Battle Button */}
         <div className="w-full max-w-7xl mx-auto text-center">

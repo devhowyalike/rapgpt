@@ -93,6 +93,8 @@ export interface Battle {
   } | null;
   // Battle type flags
   isFeatured?: boolean; // true = admin featured battle, false = user battle
+  votingEnabled?: boolean; // Enable/disable voting (default: true)
+  commentsEnabled?: boolean; // Enable/disable comments (default: true)
   // Live battle fields
   isLive?: boolean;
   liveStartedAt?: number;

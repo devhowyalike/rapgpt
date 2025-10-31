@@ -73,12 +73,14 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
 
   // Determine if voting and commenting should be shown
-  // Live/featured battles always show these features, user battles check env flags
-  const showVoting =
-    battle?.isFeatured || process.env.NEXT_PUBLIC_USER_BATTLE_VOTING === "true";
+  // Check both env flags (master switch) AND battle settings
+  const isVotingGloballyEnabled =
+    process.env.NEXT_PUBLIC_USER_BATTLE_VOTING !== "false";
+  const isCommentsGloballyEnabled =
+    process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING !== "false";
+  const showVoting = isVotingGloballyEnabled && (battle?.votingEnabled ?? true);
   const showCommenting =
-    battle?.isFeatured ||
-    process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING === "true";
+    isCommentsGloballyEnabled && (battle?.commentsEnabled ?? true);
 
   // Automatically switch to voting tab when voting begins (for mobile)
   useEffect(() => {
@@ -116,13 +118,15 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     const nextPerformer = getNextPerformer(battle);
 
     // Start reading phase when round is complete and we're not already in reading/voting phase
+    // Only start reading phase if voting is enabled
     if (
       roundComplete &&
       !nextPerformer &&
       battle.status === "ongoing" &&
       !isReadingPhase &&
       !isVotingPhase &&
-      votingCompletedRound !== battle.currentRound
+      votingCompletedRound !== battle.currentRound &&
+      showVoting
     ) {
       setIsReadingPhase(true);
     }
@@ -132,6 +136,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     isVotingPhase,
     setIsReadingPhase,
     votingCompletedRound,
+    showVoting,
   ]);
 
   // Voting countdown timer effect
@@ -163,6 +168,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
   // Handler to manually start voting phase
   const handleBeginVoting = () => {
+    if (!showVoting) return; // Don't start voting if it's disabled
     setIsReadingPhase(false);
     setReadingTimeRemaining(null);
     setIsVotingPhase(true);
@@ -493,7 +499,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                 {/* Primary Action Button - Changes based on state */}
                 <button
                   onClick={
-                    isReadingPhase
+                    isReadingPhase && showVoting
                       ? handleBeginVoting
                       : canAdvance
                       ? handleAdvanceRound
@@ -504,7 +510,9 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                   disabled={
                     isGenerating ||
                     isVotingPhase ||
-                    (!canGenerate && !canAdvance && !isReadingPhase)
+                    (!canGenerate &&
+                      !canAdvance &&
+                      !(isReadingPhase && showVoting))
                   }
                   className={`
                     flex-1 px-6 py-3 rounded-lg text-white font-bold transition-all
@@ -533,12 +541,14 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Kicking ballistics...
                     </div>
-                  ) : isReadingPhase ? (
+                  ) : isReadingPhase && showVoting ? (
                     <div className="flex items-center justify-center gap-2">
                       <CheckCircle className="w-5 h-5" />
                       <span className="text-lg font-medium">Begin Voting</span>
                     </div>
-                  ) : isVotingPhase && votingTimeRemaining !== null ? (
+                  ) : isVotingPhase &&
+                    votingTimeRemaining !== null &&
+                    showVoting ? (
                     <div className="flex items-center justify-between gap-4 w-full">
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">⏱️</span>

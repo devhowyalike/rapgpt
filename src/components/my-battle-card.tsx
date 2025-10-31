@@ -13,6 +13,8 @@ import {
   Lock,
   Radio,
   Music2,
+  ThumbsUp,
+  MessageSquare,
 } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -33,6 +35,8 @@ interface MyBattleCardProps {
     isLive?: boolean;
     liveStartedAt?: Date | null;
     isFeatured?: boolean;
+    votingEnabled?: boolean;
+    commentsEnabled?: boolean;
     generatedSong?: {
       audioUrl: string;
       videoUrl?: string;
@@ -300,6 +304,24 @@ export function MyBattleCard({
         <span className="text-gray-500">
           Created {new Date(battle.createdAt).toLocaleDateString()}
         </span>
+        {battle.votingEnabled !== false && (
+          <span
+            className="px-2 py-1 rounded bg-blue-600/20 text-blue-400 flex items-center gap-1.5 text-xs border border-blue-500/30"
+            title="Voting enabled"
+          >
+            <ThumbsUp size={12} />
+            <span>Voting</span>
+          </span>
+        )}
+        {battle.commentsEnabled !== false && (
+          <span
+            className="px-2 py-1 rounded bg-purple-600/20 text-purple-400 flex items-center gap-1.5 text-xs border border-purple-500/30"
+            title="Comments enabled"
+          >
+            <MessageSquare size={12} />
+            <span>Comments</span>
+          </span>
+        )}
         {battle.generatedSong?.audioUrl ? (
           <span
             className="ml-auto inline-flex items-center justify-center rounded-full bg-green-500/15 text-green-400 px-2 py-0.5 border border-green-500/30"
