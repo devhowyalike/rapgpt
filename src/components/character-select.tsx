@@ -6,9 +6,7 @@ import type { Persona } from "@/lib/shared/battle-types";
 import { useRouter } from "next/navigation";
 import { SiteHeader } from "./site-header";
 import { useAuth } from "@clerk/nextjs";
-import { Switch } from "./ui/switch";
-import { Radio, ThumbsUp, MessageSquare, ChevronDown, ChevronUp } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
+import { BattleOptions } from "./battle-options";
 
 export function CharacterSelect() {
   const [player1, setPlayer1] = useState<Persona | null>(null);
@@ -18,12 +16,13 @@ export function CharacterSelect() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [votingEnabled, setVotingEnabled] = useState(true);
   const [commentsEnabled, setCommentsEnabled] = useState(true);
-  const [battleOptionsOpen, setBattleOptionsOpen] = useState(false);
   const router = useRouter();
 
   // Check if features are globally enabled via env flags
-  const isVotingGloballyEnabled = process.env.NEXT_PUBLIC_USER_BATTLE_VOTING !== 'false';
-  const isCommentsGloballyEnabled = process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING !== 'false';
+  const isVotingGloballyEnabled =
+    process.env.NEXT_PUBLIC_USER_BATTLE_VOTING !== "false";
+  const isCommentsGloballyEnabled =
+    process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING !== "false";
 
   // Check if user is admin
   const { userId, isLoaded } = useAuth();
@@ -333,93 +332,18 @@ export function CharacterSelect() {
           </div>
         </div>
 
-        {/* Battle Options - Only show if at least one feature is globally enabled or user is admin */}
-        {(isVotingGloballyEnabled || isCommentsGloballyEnabled || isAdmin) && (
-          <div className="w-full max-w-7xl mx-auto mb-6 flex justify-center">
-            <Collapsible 
-              open={battleOptionsOpen} 
-              onOpenChange={setBattleOptionsOpen}
-              className="w-full max-w-2xl"
-            >
-              <div className="bg-gray-800/50 border-2 border-gray-700 rounded-lg shadow-lg overflow-hidden">
-                <CollapsibleTrigger className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-800/70 transition-colors">
-                  <h3 className="text-white font-bold text-xl">Battle Options</h3>
-                  {battleOptionsOpen ? (
-                    <ChevronUp className="w-5 h-5 text-gray-400" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-400" />
-                  )}
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="px-6 pb-6 pt-2 space-y-4">
-                    {/* Voting Toggle - Only show if globally enabled */}
-                    {isVotingGloballyEnabled && (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-900/50 border border-blue-500/50">
-                            <ThumbsUp size={20} className="text-blue-400" />
-                          </div>
-                          <div>
-                            <div className="text-white font-semibold">Enable Voting</div>
-                            <div className="text-gray-400 text-sm">
-                              Allow viewers to vote for their favorite verses
-                            </div>
-                          </div>
-                        </div>
-                        <Switch
-                          checked={votingEnabled}
-                          onCheckedChange={setVotingEnabled}
-                        />
-                      </div>
-                    )}
-
-                    {/* Comments Toggle - Only show if globally enabled */}
-                    {isCommentsGloballyEnabled && (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-900/50 border border-green-500/50">
-                            <MessageSquare size={20} className="text-green-400" />
-                          </div>
-                          <div>
-                            <div className="text-white font-semibold">Enable Comments</div>
-                            <div className="text-gray-400 text-sm">
-                              Allow viewers to leave comments on the battle
-                            </div>
-                          </div>
-                        </div>
-                        <Switch
-                          checked={commentsEnabled}
-                          onCheckedChange={setCommentsEnabled}
-                        />
-                      </div>
-                    )}
-
-                    {/* Go Live Toggle - Only show for admins */}
-                    {isAdmin && (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-900/50 border border-purple-500/50">
-                            <Radio size={20} className="text-purple-400" />
-                          </div>
-                          <div>
-                            <div className="text-white font-semibold">Go Live</div>
-                            <div className="text-gray-400 text-sm">
-                              Create as featured battle on homepage
-                            </div>
-                          </div>
-                        </div>
-                        <Switch
-                          checked={createAsLive}
-                          onCheckedChange={setCreateAsLive}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </CollapsibleContent>
-              </div>
-            </Collapsible>
-          </div>
-        )}
+        {/* Battle Options */}
+        <BattleOptions
+          votingEnabled={votingEnabled}
+          onVotingEnabledChange={setVotingEnabled}
+          commentsEnabled={commentsEnabled}
+          onCommentsEnabledChange={setCommentsEnabled}
+          createAsLive={createAsLive}
+          onCreateAsLiveChange={setCreateAsLive}
+          isAdmin={isAdmin}
+          isVotingGloballyEnabled={isVotingGloballyEnabled}
+          isCommentsGloballyEnabled={isCommentsGloballyEnabled}
+        />
 
         {/* Start Battle Button */}
         <div className="w-full max-w-7xl mx-auto text-center">

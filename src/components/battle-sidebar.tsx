@@ -244,7 +244,7 @@ export function BattleSidebar({
       ) : (
         // Show simple header when only one feature is enabled (hidden in drawer mode)
         !defaultTab && (
-          <div className="flex-shrink-0 flex items-center justify-center px-4 py-3 border-b border-gray-800 bg-gray-800 mt-3">
+          <div className="shrink-0 flex items-center justify-center px-4 py-3 border-b border-gray-800 bg-gray-800 mt-3">
             <div className="text-white font-medium flex items-center gap-2">
               {showCommenting ? (
                 <>
