@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { SiteHeader } from "./site-header";
 import { useAuth } from "@clerk/nextjs";
 import { Switch } from "./ui/switch";
-import { Radio } from "lucide-react";
+import { Radio, ThumbsUp, MessageSquare } from "lucide-react";
 
 export function CharacterSelect() {
   const [player1, setPlayer1] = useState<Persona | null>(null);
@@ -15,7 +15,13 @@ export function CharacterSelect() {
   const [isCreating, setIsCreating] = useState(false);
   const [createAsLive, setCreateAsLive] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [votingEnabled, setVotingEnabled] = useState(true);
+  const [commentsEnabled, setCommentsEnabled] = useState(true);
   const router = useRouter();
+
+  // Check if features are globally enabled via env flags
+  const isVotingGloballyEnabled = process.env.NEXT_PUBLIC_USER_BATTLE_VOTING !== 'false';
+  const isCommentsGloballyEnabled = process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING !== 'false';
 
   // Check if user is admin
   const { userId, isLoaded } = useAuth();
@@ -86,6 +92,8 @@ export function CharacterSelect() {
           leftPersonaId: player1.id,
           rightPersonaId: player2.id,
           isFeatured: createAsLive, // Only true if admin and toggle enabled
+          votingEnabled,
+          commentsEnabled,
         }),
         signal: controller.signal,
       });
@@ -322,6 +330,58 @@ export function CharacterSelect() {
             })}
           </div>
         </div>
+
+        {/* Battle Options - Only show if at least one feature is globally enabled */}
+        {(isVotingGloballyEnabled || isCommentsGloballyEnabled) && (
+          <div className="w-full max-w-7xl mx-auto mb-6">
+            <div className="bg-gray-800/50 border-2 border-gray-700 rounded-lg p-6 shadow-lg">
+              <h3 className="text-white font-bold text-xl mb-4">Battle Options</h3>
+              <div className="space-y-4">
+                {/* Voting Toggle - Only show if globally enabled */}
+                {isVotingGloballyEnabled && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-900/50 border border-blue-500/50">
+                        <ThumbsUp size={20} className="text-blue-400" />
+                      </div>
+                      <div>
+                        <div className="text-white font-semibold">Enable Voting</div>
+                        <div className="text-gray-400 text-sm">
+                          Allow viewers to vote for their favorite verses
+                        </div>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={votingEnabled}
+                      onCheckedChange={setVotingEnabled}
+                    />
+                  </div>
+                )}
+
+                {/* Comments Toggle - Only show if globally enabled */}
+                {isCommentsGloballyEnabled && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-900/50 border border-green-500/50">
+                        <MessageSquare size={20} className="text-green-400" />
+                      </div>
+                      <div>
+                        <div className="text-white font-semibold">Enable Comments</div>
+                        <div className="text-gray-400 text-sm">
+                          Allow viewers to leave comments on the battle
+                        </div>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={commentsEnabled}
+                      onCheckedChange={setCommentsEnabled}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Admin Toggle for Live Battle */}
         {isAdmin && (

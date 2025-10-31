@@ -7,11 +7,13 @@ import { createBattleRequestSchema } from '@/lib/validations/battle';
 import { getOrCreateUser } from '@/lib/auth/sync-user';
 import { z } from 'zod';
 
-// Extended schema to include isFeatured
+// Extended schema to include isFeatured, votingEnabled, and commentsEnabled
 // Use .merge() instead of .extend() because createBattleRequestSchema contains refinements
 const extendedBattleRequestSchema = createBattleRequestSchema.merge(
   z.object({
     isFeatured: z.boolean().optional().default(false),
+    votingEnabled: z.boolean().optional().default(true),
+    commentsEnabled: z.boolean().optional().default(true),
   })
 );
 
@@ -42,7 +44,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const { leftPersonaId, rightPersonaId, isFeatured } = validation.data;
+    const { leftPersonaId, rightPersonaId, isFeatured, votingEnabled, commentsEnabled } = validation.data;
 
     // If creating a featured battle, verify user is admin
     if (isFeatured && user.role !== 'admin') {
@@ -90,10 +92,12 @@ export async function POST(request: NextRequest) {
       updatedAt: now,
     };
 
-    // Save battle with createdBy and isFeatured
+    // Save battle with createdBy, isFeatured, votingEnabled, and commentsEnabled
     await saveBattle(battle, {
       createdBy: user.id,
       isFeatured,
+      votingEnabled,
+      commentsEnabled,
     });
 
     return NextResponse.json({ battleId: battle.id }, { status: 201 });

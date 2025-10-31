@@ -54,12 +54,11 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
   const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
 
   // Determine if voting and commenting should be shown
-  // Live battles are always featured, so these should always be true, but we check for safety
-  const showVoting =
-    battle?.isFeatured || process.env.NEXT_PUBLIC_USER_BATTLE_VOTING === "true";
-  const showCommenting =
-    battle?.isFeatured ||
-    process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING === "true";
+  // Check both env flags (master switch) AND battle settings
+  const isVotingGloballyEnabled = process.env.NEXT_PUBLIC_USER_BATTLE_VOTING !== 'false';
+  const isCommentsGloballyEnabled = process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING !== 'false';
+  const showVoting = isVotingGloballyEnabled && (battle?.votingEnabled ?? true);
+  const showCommenting = isCommentsGloballyEnabled && (battle?.commentsEnabled ?? true);
 
   // Initialize battle state
   useEffect(() => {

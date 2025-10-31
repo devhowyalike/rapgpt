@@ -69,6 +69,8 @@ export async function getBattleById(id: string): Promise<Battle | null> {
       creator: creatorInfo,
       // Battle type flags
       isFeatured: battle.isFeatured,
+      votingEnabled: battle.votingEnabled ?? true,
+      commentsEnabled: battle.commentsEnabled ?? true,
       // Live battle fields
       isLive: battle.isLive,
       liveStartedAt: battle.liveStartedAt?.getTime(),
@@ -91,6 +93,8 @@ export async function saveBattle(
   options?: {
     createdBy?: string | null;
     isFeatured?: boolean;
+    votingEnabled?: boolean;
+    commentsEnabled?: boolean;
   }
 ): Promise<void> {
   try {
@@ -129,6 +133,12 @@ export async function saveBattle(
       }
       if (options?.isFeatured !== undefined) {
         battleData.isFeatured = options.isFeatured;
+      }
+      if (options?.votingEnabled !== undefined) {
+        battleData.votingEnabled = options.votingEnabled;
+      }
+      if (options?.commentsEnabled !== undefined) {
+        battleData.commentsEnabled = options.commentsEnabled;
       }
       
       // Insert new battle
@@ -204,6 +214,8 @@ export async function getAllBattles(): Promise<Battle[]> {
         creator: creatorInfo,
         // Battle type flags
         isFeatured: battle.isFeatured,
+        votingEnabled: battle.votingEnabled ?? true,
+        commentsEnabled: battle.commentsEnabled ?? true,
         // Live battle fields
         isLive: battle.isLive,
         liveStartedAt: battle.liveStartedAt?.getTime(),
@@ -275,6 +287,8 @@ export async function getFeaturedBattles(): Promise<Battle[]> {
         creator: creatorInfo,
         // Battle type flags
         isFeatured: battle.isFeatured,
+        votingEnabled: battle.votingEnabled ?? true,
+        commentsEnabled: battle.commentsEnabled ?? true,
         // Live battle fields
         isLive: battle.isLive,
         liveStartedAt: battle.liveStartedAt?.getTime(),
@@ -355,6 +369,8 @@ export async function getLiveBattles(): Promise<Battle[]> {
         creator: creatorInfo,
         // Battle type flags
         isFeatured: battle.isFeatured,
+        votingEnabled: battle.votingEnabled ?? true,
+        commentsEnabled: battle.commentsEnabled ?? true,
         // Live battle fields
         isLive: battle.isLive,
         liveStartedAt: battle.liveStartedAt?.getTime(),
