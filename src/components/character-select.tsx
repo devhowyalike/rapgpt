@@ -333,8 +333,8 @@ export function CharacterSelect() {
           </div>
         </div>
 
-        {/* Battle Options - Only show if at least one feature is globally enabled */}
-        {(isVotingGloballyEnabled || isCommentsGloballyEnabled) && (
+        {/* Battle Options - Only show if at least one feature is globally enabled or user is admin */}
+        {(isVotingGloballyEnabled || isCommentsGloballyEnabled || isAdmin) && (
           <div className="w-full max-w-7xl mx-auto mb-6 flex justify-center">
             <Collapsible 
               open={battleOptionsOpen} 
@@ -393,31 +393,31 @@ export function CharacterSelect() {
                         />
                       </div>
                     )}
+
+                    {/* Go Live Toggle - Only show for admins */}
+                    {isAdmin && (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-900/50 border border-purple-500/50">
+                            <Radio size={20} className="text-purple-400" />
+                          </div>
+                          <div>
+                            <div className="text-white font-semibold">Go Live</div>
+                            <div className="text-gray-400 text-sm">
+                              Create as featured battle on homepage
+                            </div>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={createAsLive}
+                          onCheckedChange={setCreateAsLive}
+                        />
+                      </div>
+                    )}
                   </div>
                 </CollapsibleContent>
               </div>
             </Collapsible>
-          </div>
-        )}
-
-        {/* Admin Toggle for Live Battle */}
-        {isAdmin && (
-          <div className="w-full max-w-7xl mx-auto mb-6 flex justify-center">
-            <div className="flex items-center gap-4 bg-purple-900/30 border-2 border-purple-500/50 rounded-lg px-6 py-4 shadow-lg">
-              <div className="flex items-center gap-2 text-purple-400">
-                <Radio size={20} />
-              </div>
-              <div className="flex-1">
-                <div className="text-white font-bold text-lg">Go Live</div>
-                <div className="text-purple-300 text-sm">
-                  Create as featured battle on homepage
-                </div>
-              </div>
-              <Switch
-                checked={createAsLive}
-                onCheckedChange={setCreateAsLive}
-              />
-            </div>
           </div>
         )}
 
