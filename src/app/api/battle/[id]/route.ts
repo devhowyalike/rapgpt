@@ -94,18 +94,6 @@ export async function PUT(
     // Persist main battle fields
     await saveBattle(battle);
 
-    // If an admin just completed this battle, feature it for the archive
-    const becameCompleted = battle.status === 'completed' && existingBattle.status !== 'completed';
-    if (becameCompleted && isAdmin && !existingBattle.isFeatured) {
-      await db
-        .update(battles)
-        .set({
-          isFeatured: true,
-          updatedAt: new Date(),
-        })
-        .where(eq(battles.id, id));
-    }
-
     // If battle is being paused, automatically unpublish it
     if (battle.status === 'incomplete' && existingBattle.isPublic) {
       await db

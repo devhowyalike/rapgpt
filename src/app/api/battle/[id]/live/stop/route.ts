@@ -40,10 +40,10 @@ export async function POST(
 
     // Update battle to end live mode
     battle.isLive = false;
-    // If the live battle has been completed (winner assigned or status already completed), feature it for archive
+    // If the live battle has been completed (winner assigned or status already completed), mark as completed
     if (battle.status === 'completed' || !!battle.winner) {
       battle.status = 'completed';
-      battle.isFeatured = true;
+      // Note: isFeatured status remains as originally set when battle was created
     }
     battle.updatedAt = Date.now();
 
