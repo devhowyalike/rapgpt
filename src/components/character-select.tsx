@@ -1,17 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getAllPersonas } from "@/lib/shared/personas";
-import type { Persona } from "@/lib/shared/battle-types";
+import {
+  getAllClientPersonas,
+  type ClientPersona,
+} from "@/lib/shared/personas/client";
 import { useRouter } from "next/navigation";
 import { SiteHeader } from "./site-header";
 import { useAuth } from "@clerk/nextjs";
 import { BattleOptions } from "./battle-options";
 
 export function CharacterSelect() {
-  const [player1, setPlayer1] = useState<Persona | null>(null);
-  const [player2, setPlayer2] = useState<Persona | null>(null);
-  const [hoveredPersona, setHoveredPersona] = useState<Persona | null>(null);
+  const [player1, setPlayer1] = useState<ClientPersona | null>(null);
+  const [player2, setPlayer2] = useState<ClientPersona | null>(null);
+  const [hoveredPersona, setHoveredPersona] = useState<ClientPersona | null>(
+    null
+  );
   const [isCreating, setIsCreating] = useState(false);
   const [createAsLive, setCreateAsLive] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -57,9 +61,9 @@ export function CharacterSelect() {
     checkAdminStatus();
   }, [userId, isLoaded]);
 
-  const personas = getAllPersonas();
+  const personas = getAllClientPersonas();
 
-  const handlePersonaClick = (persona: Persona) => {
+  const handlePersonaClick = (persona: ClientPersona) => {
     // Clear hover preview on touch devices after click
     if (isTouchDevice) {
       setHoveredPersona(null);
@@ -85,11 +89,11 @@ export function CharacterSelect() {
     // If both slots full and clicking an unselected character, do nothing
   };
 
-  const isSelected = (persona: Persona) => {
+  const isSelected = (persona: ClientPersona) => {
     return player1?.id === persona.id || player2?.id === persona.id;
   };
 
-  const getSelectionLabel = (persona: Persona) => {
+  const getSelectionLabel = (persona: ClientPersona) => {
     if (player1?.id === persona.id) return "P1";
     if (player2?.id === persona.id) return "P2";
     return null;

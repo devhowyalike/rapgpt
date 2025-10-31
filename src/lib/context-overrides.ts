@@ -3,6 +3,8 @@
  * This allows special behaviors when certain personas battle each other
  */
 
+import { BATTLE_CONTEXT, BATTLE_RULES, BATTLE_RESPONSE_FORMAT } from './shared/personas/battleRules';
+
 export interface MatchupOverride {
   /** ID of the persona who gets the override */
   personaId: string;
@@ -43,6 +45,7 @@ export function getMatchupOverride(
 
 /**
  * Build enhanced system prompt with opponent context and any overrides
+ * Automatically appends shared battle rules at runtime
  */
 export function buildSystemPrompt(
   baseSystemPrompt: string,
@@ -50,7 +53,12 @@ export function buildSystemPrompt(
   opponentId: string,
   opponentName: string
 ): string {
+  // Start with persona-specific prompt
   let systemPrompt = baseSystemPrompt;
+  
+  // Add shared battle context and rules (compiled at runtime, not duplicated in each persona)
+  systemPrompt += `\n\n${BATTLE_CONTEXT}`;
+  systemPrompt += `\n\n${BATTLE_RULES}`;
   
   // Always add opponent context
   systemPrompt += `\n\nCURRENT OPPONENT: ${opponentName}`;
@@ -60,6 +68,9 @@ export function buildSystemPrompt(
   if (override?.systemPromptOverride) {
     systemPrompt += `\n\n${override.systemPromptOverride}`;
   }
+  
+  // Add response format instructions at the end
+  systemPrompt += `\n\n${BATTLE_RESPONSE_FORMAT}`;
   
   return systemPrompt;
 }
