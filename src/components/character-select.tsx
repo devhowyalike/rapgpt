@@ -17,6 +17,7 @@ export function CharacterSelect() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [votingEnabled, setVotingEnabled] = useState(true);
   const [commentsEnabled, setCommentsEnabled] = useState(true);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const router = useRouter();
 
   // Check if features are globally enabled via env flags
@@ -27,6 +28,11 @@ export function CharacterSelect() {
 
   // Check if user is admin
   const { userId, isLoaded } = useAuth();
+
+  // Detect touch device
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
 
   // Check admin status from database
   useEffect(() => {
@@ -54,6 +60,11 @@ export function CharacterSelect() {
   const personas = getAllPersonas();
 
   const handlePersonaClick = (persona: Persona) => {
+    // Clear hover preview on touch devices after click
+    if (isTouchDevice) {
+      setHoveredPersona(null);
+    }
+
     // Check if clicking a selected character (deselect)
     if (player1?.id === persona.id) {
       setPlayer1(null);
@@ -295,8 +306,9 @@ export function CharacterSelect() {
                     <button
                       key={persona.id}
                       onClick={() => handlePersonaClick(persona)}
-                      onMouseEnter={() => setHoveredPersona(persona)}
-                      onMouseLeave={() => setHoveredPersona(null)}
+                      onMouseEnter={() => !isTouchDevice && setHoveredPersona(persona)}
+                      onMouseLeave={() => !isTouchDevice && setHoveredPersona(null)}
+                      onTouchStart={() => isTouchDevice && setHoveredPersona(null)}
                       className={`
                         relative group
                         transition-all duration-300 transform
