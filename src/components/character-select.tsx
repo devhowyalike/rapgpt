@@ -197,8 +197,8 @@ export function CharacterSelect() {
                       </div>
                     </div>
                     {/* Character Name */}
-                    <div className="text-center min-h-[48px] md:min-h-0 text-sm md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-tight md:tracking-wider drop-shadow-[0_0_20px_rgba(59,130,246,0.8)] text-balance">
-                      {displayPersona.name.toUpperCase()}
+                    <div className="text-center min-h-[48px] md:min-h-0 text-sm md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-tight md:tracking-wider drop-shadow-[0_0_20px_rgba(59,130,246,0.8)] text-balance uppercase">
+                      {displayPersona.name}
                     </div>
                     {/* Character Bio */}
                     <div className="text-center max-w-xs mb-1 flex flex-col md:min-h-[60px]">
@@ -279,8 +279,8 @@ export function CharacterSelect() {
                       </div>
                     </div>
                     {/* Character Name */}
-                    <div className="text-center min-h-[48px] md:min-h-0 text-sm md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-tight md:tracking-wider drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] text-balance">
-                      {displayPersona.name.toUpperCase()}
+                    <div className="text-center min-h-[48px] md:min-h-0 text-sm md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-tight md:tracking-wider drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] text-balance uppercase">
+                      {displayPersona.name}
                     </div>
                     {/* Character Bio */}
                     <div className="text-center max-w-xs mb-1 flex flex-col md:min-h-[60px]">
