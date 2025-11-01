@@ -121,7 +121,7 @@ export function BattleStage({
               mobileActiveSide && mobileActiveSide !== "left"
                 ? "hidden md:flex"
                 : "flex"
-            } flex-col min-h-[400px] md:min-h-0`}
+            } flex-col md:min-h-0`}
           >
             <div className="p-3 md:p-4 border-b border-gray-800">
               <PersonaCard
@@ -155,7 +155,7 @@ export function BattleStage({
               mobileActiveSide && mobileActiveSide !== "right"
                 ? "hidden md:flex"
                 : "flex"
-            } flex-col min-h-[400px] md:min-h-0`}
+            } flex-col md:min-h-0`}
           >
             <div className="p-3 md:p-4 border-b border-gray-800">
               <PersonaCard
