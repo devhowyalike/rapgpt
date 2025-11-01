@@ -188,7 +188,7 @@ export function BattleStage({
       {/* Score Display (when round is complete and voting is done) */}
       {shouldShowScores && currentRoundScore && (
         <motion.div
-          className="p-4 md:p-6 pb-24 md:pb-6 border-t border-gray-800 bg-gray-900/30"
+          className="p-4 md:p-6 border-t border-gray-800 bg-gray-900/30"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
