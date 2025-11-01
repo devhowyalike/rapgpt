@@ -499,7 +499,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                 showCommenting || showVoting ? "pb-24 md:pb-4" : "pb-4"
               } bg-gray-900 border-t border-gray-800`}
             >
-              <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-3">
+              <div className="max-w-4xl mx-auto flex flex-row gap-3">
                 {/* Primary Action Button - Changes based on state */}
                 <button
                   onClick={
@@ -595,10 +595,10 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                 <button
                   onClick={handleCancelBattle}
                   disabled={isCanceling || isGenerating}
-                  className="px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
+                  className="px-3 sm:px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
                 >
                   <Pause className="w-5 h-5" />
-                  Pause Battle
+                  <span className="hidden sm:inline">Pause Battle</span>
                 </button>
 
                 {/* Admin Control Panel Link */}
