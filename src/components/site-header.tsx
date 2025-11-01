@@ -6,6 +6,7 @@ import { UserButton } from "./auth/user-button";
 import { useAuth } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { useLiveBattles } from "@/lib/hooks/use-live-battles";
+import { useHasArchivedBattles } from "@/lib/hooks/use-has-archived-battles";
 
 // Cache admin status in memory to prevent flickering
 let cachedAdminStatus: boolean | null = null;
@@ -58,6 +59,9 @@ export function SiteHeader() {
   // Use custom hook to manage live battles (only enabled for admins)
   const { liveBattles } = useLiveBattles({ enabled: isAdmin });
 
+  // Check if there are any archived battles
+  const { hasArchived } = useHasArchivedBattles();
+
   return (
     <div className="fixed top-0 left-0 right-0 z-30 p-3 bg-gray-900/95 border-b border-gray-800 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -70,14 +74,16 @@ export function SiteHeader() {
             <Home className="w-4 h-4" />
             <span className="hidden sm:inline">Home</span>
           </Link>
-          <Link
-            href="/archive"
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-gray-800"
-            prefetch={false}
-          >
-            <Archive className="w-4 h-4" />
-            <span className="hidden sm:inline">Archive</span>
-          </Link>
+          {hasArchived && (
+            <Link
+              href="/archive"
+              className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-gray-800"
+              prefetch={false}
+            >
+              <Archive className="w-4 h-4" />
+              <span className="hidden sm:inline">Archive</span>
+            </Link>
+          )}
           <Link
             href="/community"
             className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-gray-800"
