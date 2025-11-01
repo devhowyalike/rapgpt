@@ -11,7 +11,7 @@ import { RoundTracker } from "./round-tracker";
 import { ScoreDisplay } from "./score-display";
 import { getRoundVerses, getBattleProgress } from "@/lib/battle-engine";
 import { motion } from "framer-motion";
-import { APP_TITLE } from "@/lib/constants";
+import { APP_TITLE, LAYOUT } from "@/lib/constants";
 import { BattleBell } from "./battle-bell";
 import { VictoryConfetti } from "./victory-confetti";
 
@@ -48,10 +48,19 @@ export function BattleStage({
     votingCompletedRound !== null &&
     votingCompletedRound >= battle.currentRound;
 
+  // Calculate mobile header spacer height dynamically
+  const mobileHeaderHeight =
+    LAYOUT.SITE_HEADER_HEIGHT + LAYOUT.BATTLE_STAGE_HEADER_HEIGHT_MOBILE;
+  const mobileHeaderHeightWithWinner =
+    mobileHeaderHeight + LAYOUT.WINNER_SECTION_HEIGHT_MOBILE;
+
   return (
     <div className="flex flex-col min-h-0 md:h-full bg-linear-to-b from-stage-darker to-stage-dark">
       {/* Header with Round Tracker */}
-      <div className="fixed md:relative top-[52px] md:top-0 left-0 right-0 z-20 px-4 py-3 md:px-6 md:py-5 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none">
+      <div
+        className="fixed md:relative md:top-0 left-0 right-0 z-20 px-4 py-3 md:px-6 md:py-5 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none"
+        style={{ top: `${LAYOUT.SITE_HEADER_HEIGHT}px` }}
+      >
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-row md:flex-row items-center justify-between md:justify-start gap-2 md:gap-6">
             <motion.h1
@@ -102,7 +111,9 @@ export function BattleStage({
         className="md:hidden"
         style={{
           height:
-            battle.status === "completed" && battle.winner ? "220px" : "180px",
+            battle.status === "completed" && battle.winner
+              ? `${mobileHeaderHeightWithWinner}px`
+              : `${mobileHeaderHeight}px`,
         }}
       />
 
