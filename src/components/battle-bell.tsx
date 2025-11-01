@@ -46,7 +46,7 @@ export function BattleBell({ currentRound, completedRounds }: BattleBellProps) {
     <div className="relative">
       <motion.button
         onClick={handleClick}
-        className="hidden md:flex items-center justify-center text-yellow-400 hover:text-yellow-300 transition-colors cursor-pointer relative z-10"
+        className="flex items-center justify-center text-yellow-400 hover:text-yellow-300 transition-colors cursor-pointer relative z-10"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{
           opacity: 1,
@@ -61,7 +61,7 @@ export function BattleBell({ currentRound, completedRounds }: BattleBellProps) {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
       >
-        <Bell className="w-12 h-12" />
+        <Bell className="w-8 h-8 md:w-12 md:h-12" />
       </motion.button>
 
       {/* Confetti particles */}
