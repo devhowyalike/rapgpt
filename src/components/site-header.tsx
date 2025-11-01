@@ -2,6 +2,7 @@
 
 import { Home, Archive, Shield, Users, Radio } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { UserButton } from "./auth/user-button";
 import { useAuth } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
@@ -14,8 +15,17 @@ let cachedUserId: string | null = null;
 
 export function SiteHeader() {
   const { userId, isLoaded } = useAuth();
+  const pathname = usePathname();
   // Start with cached value if available
   const [isAdmin, setIsAdmin] = useState(cachedAdminStatus ?? false);
+
+  // Helper to check if a link is active
+  const isActiveLink = (href: string) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+    return pathname?.startsWith(href);
+  };
 
   // Check admin status from database
   useEffect(() => {
@@ -68,7 +78,11 @@ export function SiteHeader() {
         <div className="flex items-center gap-4">
           <Link
             href="/"
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-gray-800"
+            className={`flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg ${
+              isActiveLink("/")
+                ? "text-white bg-gray-800 font-medium"
+                : "text-gray-400 hover:text-white hover:bg-gray-800"
+            }`}
             prefetch={false}
           >
             <Home className="w-4 h-4" />
@@ -77,7 +91,11 @@ export function SiteHeader() {
           {hasArchived && (
             <Link
               href="/archive"
-              className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-gray-800"
+              className={`flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg ${
+                isActiveLink("/archive")
+                  ? "text-white bg-gray-800 font-medium"
+                  : "text-gray-400 hover:text-white hover:bg-gray-800"
+              }`}
               prefetch={false}
             >
               <Archive className="w-4 h-4" />
@@ -86,7 +104,11 @@ export function SiteHeader() {
           )}
           <Link
             href="/community"
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-gray-800"
+            className={`flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg ${
+              isActiveLink("/community")
+                ? "text-white bg-gray-800 font-medium"
+                : "text-gray-400 hover:text-white hover:bg-gray-800"
+            }`}
             prefetch={false}
           >
             <Users className="w-4 h-4" />
@@ -96,7 +118,11 @@ export function SiteHeader() {
             <>
               <Link
                 href="/admin/dashboard"
-                className="flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors px-3 py-2 rounded-lg hover:bg-gray-800"
+                className={`flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg ${
+                  isActiveLink("/admin")
+                    ? "text-purple-300 bg-purple-900/30 font-medium"
+                    : "text-purple-400 hover:text-purple-300 hover:bg-gray-800"
+                }`}
                 prefetch={false}
               >
                 <Shield className="w-4 h-4" />
