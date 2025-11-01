@@ -51,11 +51,11 @@ export function BattleStage({
   return (
     <div className="flex flex-col min-h-0 md:h-full bg-linear-to-b from-stage-darker to-stage-dark">
       {/* Header with Round Tracker */}
-      <div className="fixed md:relative top-[52px] md:top-0 left-0 right-0 z-20 px-4 py-5 md:px-6 md:py-5 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none">
+      <div className="fixed md:relative top-[52px] md:top-0 left-0 right-0 z-20 px-4 py-3 md:px-6 md:py-5 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+          <div className="flex flex-row md:flex-row items-center justify-between md:justify-start gap-2 md:gap-6">
             <motion.h1
-              className="text-3xl md:text-4xl lg:text-6xl font-bold text-center md:text-left tracking-wider leading-none md:flex-1"
+              className="text-2xl md:text-4xl lg:text-6xl font-bold tracking-wider leading-none md:flex-1"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
             >
