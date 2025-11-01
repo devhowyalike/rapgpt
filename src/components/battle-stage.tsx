@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import { APP_TITLE } from "@/lib/constants";
 import { BattleBell } from "./battle-bell";
 import { VictoryConfetti } from "./victory-confetti";
+import { useEffect, useRef } from "react";
 
 interface BattleStageProps {
   battle: Battle;
@@ -62,6 +63,24 @@ export function BattleStage({
     // New round just started; show the current turn on mobile immediately
     mobileActiveSide = battle.currentTurn ?? null;
   }
+
+  // When scores become visible on mobile, scroll them into view
+  const scoreSectionRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!shouldShowScores) return;
+    if (typeof window === "undefined") return;
+    // Tailwind md breakpoint ~ 768px; treat below as mobile
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (!isMobile) return;
+    // Allow initial animation frame before scrolling for smoother UX
+    const id = window.requestAnimationFrame(() => {
+      scoreSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [shouldShowScores]);
 
   return (
     <div className="flex flex-col h-full overflow-y-auto bg-linear-to-b from-stage-darker to-stage-dark">
@@ -188,6 +207,7 @@ export function BattleStage({
       {/* Score Display (when round is complete and voting is done) */}
       {shouldShowScores && currentRoundScore && (
         <motion.div
+          ref={scoreSectionRef}
           className="p-4 md:p-6 border-t border-gray-800 bg-gray-900/30"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
