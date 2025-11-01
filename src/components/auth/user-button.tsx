@@ -7,7 +7,7 @@ import {
   useUser,
 } from "@clerk/nextjs";
 import Link from "next/link";
-import { User, Swords } from "lucide-react";
+import { User, Mic2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 // Cache user ID in memory to prevent flickering
@@ -78,23 +78,23 @@ export function UserButton() {
   }
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-2 sm:gap-4">
       {userId && (
         <Link
           href={`/profile/${userId}`}
-          className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm"
+          className="flex items-center gap-2 px-2 sm:px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm"
         >
           <User size={16} />
-          <span>Profile</span>
+          <span className="hidden sm:inline">Profile</span>
         </Link>
       )}
 
       <Link
         href="/new-battle"
-        className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
+        className="flex items-center gap-2 px-2 sm:px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
       >
-        <Swords size={16} />
-        <span>Create Battle</span>
+        <Mic2 size={16} />
+        <span className="hidden sm:inline">Create Battle</span>
       </Link>
 
       <ClerkUserButton
