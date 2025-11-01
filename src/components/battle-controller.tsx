@@ -494,7 +494,11 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
           {/* Control Bar - Always visible during ongoing battles */}
           {battle.status === "ongoing" && (
-            <div className={`p-4 ${(showCommenting || showVoting) ? 'pb-24 md:pb-4' : 'pb-4'} bg-gray-900 border-t border-gray-800`}>
+            <div
+              className={`p-4 ${
+                showCommenting || showVoting ? "pb-24 md:pb-4" : "pb-4"
+              } bg-gray-900 border-t border-gray-800`}
+            >
               <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-3">
                 {/* Primary Action Button - Changes based on state */}
                 <button
