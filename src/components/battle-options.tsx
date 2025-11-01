@@ -74,16 +74,16 @@ export function BattleOptions({
             <div className="px-6 pb-6 pt-2 space-y-4">
               {/* Voting Toggle - Only show if globally enabled */}
               {isVotingGloballyEnabled && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-900/50 border border-blue-500/50">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-blue-900/50 border border-blue-500/50">
                       <ThumbsUp size={20} className="text-blue-400" />
                     </div>
-                    <div>
-                      <div className="text-white font-semibold">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-white font-semibold truncate">
                         Enable Voting
                       </div>
-                      <div className="text-gray-400 text-sm">
+                      <div className="text-gray-400 text-sm line-clamp-2 text-pretty">
                         Allow viewers to vote for their favorite verses
                       </div>
                     </div>
@@ -91,22 +91,23 @@ export function BattleOptions({
                   <Switch
                     checked={votingEnabled}
                     onCheckedChange={onVotingEnabledChange}
+                    className="shrink-0"
                   />
                 </div>
               )}
 
               {/* Comments Toggle - Only show if globally enabled */}
               {isCommentsGloballyEnabled && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-900/50 border border-green-500/50">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-green-900/50 border border-green-500/50">
                       <MessageSquare size={20} className="text-green-400" />
                     </div>
-                    <div>
-                      <div className="text-white font-semibold">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-white font-semibold truncate">
                         Enable Comments
                       </div>
-                      <div className="text-gray-400 text-sm">
+                      <div className="text-gray-400 text-sm line-clamp-2 text-pretty">
                         Allow viewers to leave comments on the battle
                       </div>
                     </div>
@@ -114,20 +115,23 @@ export function BattleOptions({
                   <Switch
                     checked={commentsEnabled}
                     onCheckedChange={onCommentsEnabledChange}
+                    className="shrink-0"
                   />
                 </div>
               )}
 
               {/* Go Live Toggle - Only show for admins */}
               {isAdmin && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-900/50 border border-purple-500/50">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-purple-900/50 border border-purple-500/50">
                       <Radio size={20} className="text-purple-400" />
                     </div>
-                    <div>
-                      <div className="text-white font-semibold">Go Live</div>
-                      <div className="text-gray-400 text-sm">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-white font-semibold truncate">
+                        Go Live
+                      </div>
+                      <div className="text-gray-400 text-sm line-clamp-2 text-pretty">
                         Create as featured battle on homepage
                       </div>
                     </div>
@@ -135,6 +139,7 @@ export function BattleOptions({
                   <Switch
                     checked={createAsLive}
                     onCheckedChange={onCreateAsLiveChange}
+                    className="shrink-0"
                   />
                 </div>
               )}
