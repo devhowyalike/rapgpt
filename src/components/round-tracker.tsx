@@ -22,44 +22,9 @@ export function RoundTracker({
 
   return (
     <>
-      {/* Mobile: Show only current round */}
-      <div className={`md:hidden flex flex-col items-center ${className}`}>
-        <motion.div
-          className={`
-            w-12 h-12 rounded-full
-            flex items-center justify-center
-            font-[family-name:var(--font-bebas-neue)]
-            text-xl
-            transition-colors duration-300
-            ${
-              isCompleted
-                ? "bg-gradient-to-br from-yellow-400 to-yellow-600 text-black"
-                : "bg-gradient-to-br from-blue-500 to-purple-600 text-white"
-            }
-          `}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={
-            isCompleted
-              ? { opacity: 1, scale: 1 }
-              : {
-                  opacity: 1,
-                  scale: [1, 1.1, 1],
-                  boxShadow: [
-                    "0 0 0px rgba(59, 130, 246, 0.5)",
-                    "0 0 20px rgba(59, 130, 246, 0.8)",
-                    "0 0 0px rgba(59, 130, 246, 0.5)",
-                  ],
-                }
-          }
-          transition={{
-            opacity: { duration: 0.3 },
-            scale: { duration: 2, repeat: isCompleted ? 0 : Number.POSITIVE_INFINITY, ease: "easeInOut" },
-            boxShadow: { duration: 2, repeat: isCompleted ? 0 : Number.POSITIVE_INFINITY, ease: "easeInOut" },
-          }}
-        >
-          {isCompleted ? "✓" : currentRound}
-        </motion.div>
-        <span className="text-xs text-gray-400 font-medium mt-1">
+      {/* Mobile: Show only current round text */}
+      <div className={`md:hidden flex items-center justify-center ${className}`}>
+        <span className="text-sm text-gray-400 font-medium">
           Round {currentRound} of {ROUNDS_PER_BATTLE}
         </span>
       </div>
