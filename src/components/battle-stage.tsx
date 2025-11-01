@@ -48,6 +48,21 @@ export function BattleStage({
     votingCompletedRound !== null &&
     votingCompletedRound >= battle.currentRound;
 
+  // Determine which persona to show on mobile (keep last performer up until next starts)
+  let mobileActiveSide: "left" | "right" | null = null;
+  if (streamingPersonaId === battle.personas.left.id) {
+    mobileActiveSide = "left";
+  } else if (streamingPersonaId === battle.personas.right.id) {
+    mobileActiveSide = "right";
+  } else if (currentRoundVerses.left && !currentRoundVerses.right) {
+    mobileActiveSide = "left";
+  } else if (currentRoundVerses.right && !currentRoundVerses.left) {
+    mobileActiveSide = "right";
+  } else if (!currentRoundVerses.left && !currentRoundVerses.right) {
+    // New round just started; show the current turn on mobile immediately
+    mobileActiveSide = battle.currentTurn ?? null;
+  }
+
   return (
     <div className="flex flex-col h-full overflow-y-auto bg-linear-to-b from-stage-darker to-stage-dark">
       {/* Header with Round Tracker */}
@@ -101,7 +116,13 @@ export function BattleStage({
       <div className="flex-1">
         <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:h-full">
           {/* Left Persona */}
-          <div className="flex flex-col min-h-[400px] md:min-h-0">
+          <div
+            className={`${
+              mobileActiveSide && mobileActiveSide !== "left"
+                ? "hidden md:flex"
+                : "flex"
+            } flex-col min-h-[400px] md:min-h-0`}
+          >
             <div className="p-3 md:p-4 border-b border-gray-800">
               <PersonaCard
                 persona={battle.personas.left}
@@ -129,7 +150,13 @@ export function BattleStage({
           </div>
 
           {/* Right Persona */}
-          <div className="flex flex-col min-h-[400px] md:min-h-0">
+          <div
+            className={`${
+              mobileActiveSide && mobileActiveSide !== "right"
+                ? "hidden md:flex"
+                : "flex"
+            } flex-col min-h-[400px] md:min-h-0`}
+          >
             <div className="p-3 md:p-4 border-b border-gray-800">
               <PersonaCard
                 persona={battle.personas.right}
