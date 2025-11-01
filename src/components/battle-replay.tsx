@@ -57,15 +57,28 @@ export function BattleReplay({ battle }: BattleReplayProps) {
   const [activeTab, setActiveTab] = useState<"scores" | "song">(defaultTab);
 
   useLayoutEffect(() => {
+    const headerEl = battleReplayHeaderRef.current;
+    if (!headerEl) return;
+
     const updateHeaderHeight = () => {
-      if (battleReplayHeaderRef.current) {
-        setHeaderHeight(battleReplayHeaderRef.current.offsetHeight);
-      }
+      setHeaderHeight(headerEl.offsetHeight);
     };
 
+    // Initial measurement
     updateHeaderHeight();
-    window.addEventListener("resize", updateHeaderHeight);
-    return () => window.removeEventListener("resize", updateHeaderHeight);
+
+    // Listen for window resizes
+    const onWindowResize = () => updateHeaderHeight();
+    window.addEventListener("resize", onWindowResize);
+
+    // Observe element size changes (content changes like winner banner)
+    const resizeObserver = new ResizeObserver(() => updateHeaderHeight());
+    resizeObserver.observe(headerEl);
+
+    return () => {
+      window.removeEventListener("resize", onWindowResize);
+      resizeObserver.disconnect();
+    };
   }, []);
 
   const canGoPrev = selectedRound > 1;
@@ -127,8 +140,8 @@ export function BattleReplay({ battle }: BattleReplayProps) {
               </motion.div>
             ) : null}
 
-            {/* Creator Link */}
-            {battle.creator && (
+            {/* Creator Link (hidden on mobile when winner is shown) */}
+            {battle.creator && !battle.winner && (
               <div className="text-center">
                 <Link
                   href={`/profile/${battle.creator.userId}`}
