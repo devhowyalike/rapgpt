@@ -49,9 +49,9 @@ export function BattleStage({
     votingCompletedRound >= battle.currentRound;
 
   return (
-    <div className="flex flex-col min-h-0 md:h-full bg-linear-to-b from-stage-darker to-stage-dark">
+    <div className="flex flex-col h-full overflow-y-auto bg-linear-to-b from-stage-darker to-stage-dark">
       {/* Header with Round Tracker */}
-      <div className="sticky top-[52px] md:top-0 left-0 right-0 z-20 px-4 py-3 md:px-6 md:py-5 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none">
+      <div className="sticky top-0 left-0 right-0 z-20 px-4 py-3 md:px-6 md:py-5 border-b border-gray-800 bg-stage-darker/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-row md:flex-row items-center justify-between md:justify-start gap-2 md:gap-6">
             <motion.h1
@@ -98,7 +98,7 @@ export function BattleStage({
       </div>
 
       {/* Split Screen Stage */}
-      <div className="flex-1 md:overflow-y-auto">
+      <div className="flex-1">
         <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:h-full">
           {/* Left Persona */}
           <div className="flex flex-col min-h-[400px] md:min-h-0">
