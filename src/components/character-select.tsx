@@ -164,13 +164,13 @@ export function CharacterSelect() {
     <>
       <SiteHeader />
       <div style={{ height: "52px" }} />
-      <div className="min-h-screen bg-linear-to-b from-gray-950 via-gray-900 to-black relative overflow-hidden">
+      <div className="bg-linear-to-b from-gray-950 via-gray-900 to-black relative">
         {/* Dramatic Background Effect */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(0,0,0,0.8)_100%)]" />
+        <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_50%)] pointer-events-none" />
+        <div className="fixed inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(0,0,0,0.8)_100%)] pointer-events-none" />
 
         {/* Main Container */}
-        <div className="relative z-10 flex flex-col h-[calc(100vh-52px)] justify-start pt-16 md:pt-20 lg:pt-24">
+        <div className="relative z-10 flex flex-col min-h-[calc(100vh-52px)] justify-start pt-8 md:pt-16 lg:pt-20 pb-4 md:pb-8">
           {/* Top Section - Character Display */}
           <div className="flex items-center justify-between px-2 md:px-8 lg:px-16 pb-0">
             {/* Player 1 - Left Side */}
