@@ -13,7 +13,7 @@ interface ConfirmationDialogProps {
   onConfirm: () => void | Promise<void>;
   onCancel?: () => void;
   isLoading?: boolean;
-  variant?: "danger" | "warning" | "info";
+  variant?: "danger" | "warning" | "info" | "success";
   icon?: LucideIcon;
   errorMessage?: string;
 }
@@ -58,6 +58,11 @@ export function ConfirmationDialog({
       iconColor: "text-blue-500",
       buttonBg: "bg-blue-600 hover:bg-blue-700",
     },
+    success: {
+      iconBg: "bg-green-500/20",
+      iconColor: "text-green-500",
+      buttonBg: "bg-green-600 hover:bg-green-700",
+    },
   };
 
   const styles = variantStyles[variant];
@@ -89,13 +94,15 @@ export function ConfirmationDialog({
               )}
 
               <div className="flex gap-3 justify-end">
-                <button
-                  onClick={handleCancel}
-                  disabled={isLoading}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50"
-                >
-                  {cancelLabel}
-                </button>
+                {cancelLabel && (
+                  <button
+                    onClick={handleCancel}
+                    disabled={isLoading}
+                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    {cancelLabel}
+                  </button>
+                )}
                 <button
                   onClick={handleConfirm}
                   disabled={isLoading}

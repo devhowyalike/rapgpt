@@ -31,9 +31,22 @@ export function VerseDisplay({
   const previousStreamingRef = useRef(false);
   const justFinishedStreaming = previousStreamingRef.current && !isStreaming;
 
+  // Ref for streaming container to enable auto-scrolling
+  const streamingContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     previousStreamingRef.current = isStreaming || false;
   }, [isStreaming]);
+
+  // Auto-scroll to bottom when streaming text updates
+  useEffect(() => {
+    if (isStreaming && streamingContainerRef.current) {
+      streamingContainerRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }, [streamingText, isStreaming]);
 
   return (
     <div className="flex-1 p-6 md:p-8">
@@ -82,6 +95,7 @@ export function VerseDisplay({
         {isStreaming && (
           <motion.div
             key="streaming"
+            ref={streamingContainerRef}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 1 }}

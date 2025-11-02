@@ -21,7 +21,7 @@ export default async function BattlesListPage() {
   const battles = await getAllBattles();
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-900 via-purple-900 to-black">
+    <div className="min-h-[100dvh] bg-linear-to-br from-gray-900 via-purple-900 to-black">
       <SiteHeader />
       <div className="max-w-[1400px] mx-auto px-4 py-24">
         <div className="mb-8">

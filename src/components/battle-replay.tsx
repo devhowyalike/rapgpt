@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, useRef, useLayoutEffect, useEffect } from "react";
+import { useState, useEffect } from "react";
 import type { Battle } from "@/lib/shared";
 import { PersonaCard } from "./persona-card";
 import { VerseDisplay } from "./verse-display";
@@ -13,34 +13,68 @@ import { SongGenerator } from "./song-generator";
 import { SongPlayer } from "./song-player";
 import { getRoundVerses } from "@/lib/battle-engine";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, User } from "lucide-react";
-import Link from "next/link";
-import { VictoryConfetti } from "./victory-confetti";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { AnimatedEq } from "./animated-eq";
+import { WinnerBanner } from "./winner-banner";
+import { CreatorAttribution } from "./creator-attribution";
+import { RoundControls } from "./round-controls";
+import { BattleDrawer } from "./ui/battle-drawer";
+import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
 
 interface BattleReplayProps {
   battle: Battle;
+  /**
+   * Extra bottom padding for mobile to clear floating UI
+   */
+  mobileBottomPadding?: string;
 }
 
-export function BattleReplay({ battle }: BattleReplayProps) {
+export function BattleReplay({
+  battle,
+  mobileBottomPadding,
+}: BattleReplayProps) {
   const [selectedRound, setSelectedRound] = useState(1);
   const roundVerses = getRoundVerses(battle, selectedRound);
   const roundScore = battle.scores.find((s) => s.round === selectedRound);
-  const { userId, sessionClaims, isLoaded } = useAuth();
+  const { sessionClaims, isLoaded } = useAuth();
+  const { user } = useUser();
   const router = useRouter();
+  const [dbUserId, setDbUserId] = useState<string | null>(null);
 
-  const battleReplayHeaderRef = useRef<HTMLDivElement>(null);
-  const [headerHeight, setHeaderHeight] = useState(0);
+  // Fetch internal database user ID
+  useEffect(() => {
+    if (!user?.id) {
+      setDbUserId(null);
+      return;
+    }
+
+    // Try to get from public metadata first
+    const cachedDbUserId = user.publicMetadata?.dbUserId as string | undefined;
+    if (cachedDbUserId) {
+      setDbUserId(cachedDbUserId);
+    } else {
+      // Fallback: fetch from API
+      fetch("/api/user/me")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.user?.id) {
+            setDbUserId(data.user.id);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [user]);
 
   // Check if current user is the battle creator or admin
   // Wait for Clerk to finish loading before checking admin status
   const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
-  const isCreator = userId && battle.creator?.userId === userId;
+  const isCreator = dbUserId && battle.creator?.userId === dbUserId;
 
   // Allow song generation for:
   // 1. Battle creators (verified ownership)
   // 2. Admins (can generate for any battle, including legacy ones)
+  // Also show generator if song generation was incomplete (has taskId but no audioUrl)
   const canGenerateSong =
     (isCreator || isAdmin) &&
     battle.status === "completed" &&
@@ -54,19 +88,14 @@ export function BattleReplay({ battle }: BattleReplayProps) {
     battle.status === "completed" && (showSongGenerator || showSongPlayer)
       ? "song"
       : "scores";
-  const [activeTab, setActiveTab] = useState<"scores" | "song">(defaultTab);
+  const [activeTab, setActiveTab] = useState<"scores" | "song" | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isSongPlaying, setIsSongPlaying] = useState(false);
 
-  useLayoutEffect(() => {
-    const updateHeaderHeight = () => {
-      if (battleReplayHeaderRef.current) {
-        setHeaderHeight(battleReplayHeaderRef.current.offsetHeight);
-      }
-    };
+  // Ensure only one drawer is open at a time across the page
+  useExclusiveDrawer("replay-scores-song", isDrawerOpen, setIsDrawerOpen);
 
-    updateHeaderHeight();
-    window.addEventListener("resize", updateHeaderHeight);
-    return () => window.removeEventListener("resize", updateHeaderHeight);
-  }, []);
+  // No JS offset needed when header is sticky
 
   const canGoPrev = selectedRound > 1;
   const canGoNext = selectedRound < 3;
@@ -79,166 +108,80 @@ export function BattleReplay({ battle }: BattleReplayProps) {
     if (canGoNext) setSelectedRound(selectedRound + 1);
   };
 
-  // Auto-switch to song tab when battle is completed and song tab is available
-  useEffect(() => {
-    if (
-      battle.status === "completed" &&
-      (showSongGenerator || showSongPlayer)
-    ) {
-      setActiveTab("song");
+  const handleTabClick = (tab: "scores" | "song") => {
+    // If clicking the same tab while open, close it
+    if (activeTab === tab && isDrawerOpen) {
+      setIsDrawerOpen(false);
+      setActiveTab(null);
+      return;
     }
-  }, [battle.status, showSongGenerator, showSongPlayer]);
+
+    // If switching tabs while the drawer is open, animate close then open
+    if (activeTab !== tab && isDrawerOpen) {
+      setIsDrawerOpen(false);
+      // Match BattleDrawer close animation duration (~300ms) with slight buffer
+      window.setTimeout(() => {
+        setActiveTab(tab);
+        setIsDrawerOpen(true);
+      }, 320);
+      return;
+    }
+
+    // Drawer is closed: open with the requested tab
+    setActiveTab(tab);
+    setIsDrawerOpen(true);
+  };
+
+  const handleSongButtonClick = () => {
+    // If drawer is closed but song is playing, open it instead of pausing
+    if (isSongPlaying && !isDrawerOpen) {
+      handleTabClick("song");
+    }
+    // If drawer is open with song tab AND song is playing, pause it
+    else if (isSongPlaying && isDrawerOpen && activeTab === "song") {
+      setIsSongPlaying(false);
+    }
+    // If drawer is open with different tab OR song is not playing, toggle/switch to song tab
+    else {
+      handleTabClick("song");
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-0 md:h-full bg-linear-to-b from-stage-darker to-stage-dark">
-      {/* Header with Replay Controls */}
-      <div
-        ref={battleReplayHeaderRef}
-        className="fixed md:relative top-[52px] md:top-0 left-0 right-0 z-20 p-4 md:p-6 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none"
-      >
+      {/* Header with Replay Controls - Unified responsive layout */}
+      <div className="sticky md:relative left-0 right-0 z-20 p-4 md:p-6 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none top-(--header-height) md:top-auto">
         <div className="max-w-7xl mx-auto">
-          {/* Mobile: Stacked Layout */}
-          <div className="md:hidden flex flex-col gap-3">
-            {/* Battle Winner at Top */}
-            {battle.status === "incomplete" ? (
-              <motion.div
-                className="text-center mt-2"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-              >
-                <div className="text-2xl font-bold text-orange-400 font-(family-name:--font-bebas-neue)">
-                  ⏸️ MATCH PAUSED ⏸️
-                </div>
-              </motion.div>
-            ) : battle.winner ? (
-              <motion.div
-                className="text-center mt-2 relative"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-              >
-                <VictoryConfetti trigger={true} />
-                <div className="text-3xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue) relative z-10">
-                  🏆 WINNER:{" "}
-                  {battle.personas.left.id === battle.winner
-                    ? battle.personas.left.name
-                    : battle.personas.right.name}{" "}
-                  🏆
-                </div>
-              </motion.div>
-            ) : null}
-
-            {/* Creator Link */}
-            {battle.creator && (
-              <div className="text-center">
-                <Link
-                  href={`/profile/${battle.creator.userId}`}
-                  className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-blue-400 transition-colors"
-                >
-                  <User className="w-4 h-4" />
-                  <span>Created by {battle.creator.displayName}</span>
-                </Link>
-              </div>
-            )}
-
-            {/* Replay Controls - Round Counter */}
-            <div className="flex items-center justify-center gap-3">
-              <button
-                onClick={handlePrevRound}
-                disabled={!canGoPrev}
-                className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                title="Previous Round"
-              >
-                <ChevronLeft className="w-4 h-4 text-white" />
-              </button>
-              <div className="px-4 py-1.5 rounded-lg bg-linear-to-r from-blue-600 to-purple-600 text-white font-bold font-(family-name:--font-bebas-neue) text-lg">
-                Round {selectedRound} of 3
-              </div>
-              <button
-                onClick={handleNextRound}
-                disabled={!canGoNext}
-                className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                title="Next Round"
-              >
-                <ChevronRight className="w-4 h-4 text-white" />
-              </button>
-            </div>
-          </div>
-
-          {/* Desktop: Horizontal Layout */}
-          <div className="hidden md:flex md:items-center md:justify-between md:gap-8">
-            {/* Left Side: Battle Winner and Creator */}
-            <div className="shrink-0 flex flex-col gap-2">
-              {battle.status === "incomplete" ? (
-                <motion.div
-                  className="mt-2"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                >
-                  <div className="text-2xl lg:text-3xl font-bold text-orange-400 font-(family-name:--font-bebas-neue) whitespace-nowrap">
-                    ⏸️ MATCH PAUSED ⏸️
-                  </div>
-                </motion.div>
-              ) : battle.winner ? (
-                <motion.div
-                  className="mt-2 relative"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                >
-                  <VictoryConfetti trigger={true} />
-                  <div className="text-4xl lg:text-5xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue) whitespace-nowrap relative z-10">
-                    🏆 WINNER:{" "}
-                    {battle.personas.left.id === battle.winner
-                      ? battle.personas.left.name
-                      : battle.personas.right.name}{" "}
-                    🏆
-                  </div>
-                </motion.div>
-              ) : null}
-
-              {/* Creator Link */}
-              {battle.creator && (
-                <Link
-                  href={`/profile/${battle.creator.userId}`}
-                  className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-blue-400 transition-colors"
-                >
-                  <User className="w-4 h-4" />
-                  <span>Created by {battle.creator.displayName}</span>
-                </Link>
-              )}
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-8">
+            {/* Left Side: Winner/Paused and Creator */}
+            <div className="shrink-0 flex flex-col gap-2 items-center md:items-start">
+              <WinnerBanner battle={battle} />
+              <CreatorAttribution
+                battle={battle}
+                hideOnMobileWhenWinnerVisible
+              />
             </div>
 
             {/* Right Side: Round Controls */}
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handlePrevRound}
-                disabled={!canGoPrev}
-                className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                title="Previous Round"
-              >
-                <ChevronLeft className="w-5 h-5 text-white" />
-              </button>
-              <div className="px-6 py-2 rounded-lg bg-linear-to-r from-blue-600 to-purple-600 text-white font-bold font-(family-name:--font-bebas-neue) text-xl whitespace-nowrap">
-                Round {selectedRound} of 3
-              </div>
-              <button
-                onClick={handleNextRound}
-                disabled={!canGoNext}
-                className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                title="Next Round"
-              >
-                <ChevronRight className="w-5 h-5 text-white" />
-              </button>
-            </div>
+            <RoundControls
+              selectedRound={selectedRound}
+              canGoPrev={canGoPrev}
+              canGoNext={canGoNext}
+              onPrev={handlePrevRound}
+              onNext={handleNextRound}
+            />
           </div>
         </div>
       </div>
 
-      {/* Spacer for mobile fixed header */}
-      <div className="md:hidden" style={{ height: headerHeight }} />
-
       {/* Split Screen Stage */}
-      <div className="flex-1 md:overflow-y-auto">
-        <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:h-full">
+      <div
+        className="flex-1 md:overflow-y-auto pb-[var(--mobile-bottom-padding,5rem)] md:pb-(--bottom-controls-height)"
+        style={{
+          ["--mobile-bottom-padding" as any]: mobileBottomPadding ?? "5rem",
+        }}
+      >
+        <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:min-h-full">
           {/* Left Persona */}
           <div className="flex flex-col min-h-[400px] md:min-h-0">
             <div className="p-6 border-b border-gray-800">
@@ -281,127 +224,157 @@ export function BattleReplay({ battle }: BattleReplayProps) {
         </div>
       </div>
 
-      {/* Tabbed Content Section - Scores & Generated Song */}
-      {(roundScore || showSongGenerator || showSongPlayer) && (
-        <div className="border-t border-gray-800 bg-gray-900/30">
-          <div className="max-w-4xl mx-auto">
-            {/* Tab Switcher - Prominent Button Style */}
-            <div className="flex items-center justify-center gap-2 md:gap-3 px-3 md:px-4 pt-4">
-              <motion.button
-                onClick={() => setActiveTab("scores")}
-                className={`
-                  relative px-4 md:px-6 py-2.5 md:py-3 font-bold text-sm md:text-base
-                  rounded-lg border-2 transition-all duration-200
-                  ${
-                    activeTab === "scores"
-                      ? "bg-linear-to-r from-yellow-600 to-orange-600 border-yellow-500 text-white shadow-lg shadow-yellow-500/30 scale-105"
-                      : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600 hover:scale-102"
-                  }
-                `}
-                whileHover={{ scale: activeTab === "scores" ? 1.05 : 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span className="relative z-10 flex items-center gap-1.5">
-                  <span className="text-lg">📊</span>
-                  <span>Scores</span>
-                </span>
-              </motion.button>
+      {/* Unified Drawer - Only show for completed battles */}
+      {battle.status === "completed" &&
+        (roundScore || showSongGenerator || showSongPlayer) && (
+          <>
+            <BattleDrawer
+              open={isDrawerOpen}
+              onOpenChange={setIsDrawerOpen}
+              title={
+                activeTab === "scores"
+                  ? "Round Scores"
+                  : showSongGenerator
+                  ? "Generate Song"
+                  : "Generated Song"
+              }
+              excludeBottomControls={true}
+              mobileOnly={false}
+            >
+              <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
+                <div className="p-4 md:p-6">
+                  <div className={activeTab === "scores" ? "" : "hidden"}>
+                    {roundScore && (
+                      <div>
+                        {/* Round Navigation Controls */}
+                        <div className="flex justify-center mb-6">
+                          <RoundControls
+                            selectedRound={selectedRound}
+                            canGoPrev={canGoPrev}
+                            canGoNext={canGoNext}
+                            onPrev={handlePrevRound}
+                            onNext={handleNextRound}
+                          />
+                        </div>
 
-              {(showSongGenerator || showSongPlayer) && (
-                <motion.button
-                  onClick={() => setActiveTab("song")}
-                  className={`
-                    relative px-4 md:px-6 py-2.5 md:py-3 font-bold text-sm md:text-base
-                    rounded-lg border-2 transition-all duration-200
-                    ${
-                      activeTab === "song"
-                        ? "bg-linear-to-r from-green-600 to-emerald-600 border-green-500 text-white shadow-lg shadow-green-500/30 scale-105"
-                        : showSongGenerator
-                        ? "bg-linear-to-r from-green-700/40 to-emerald-700/40 border-green-600 text-green-300 hover:from-green-700/60 hover:to-emerald-700/60 hover:border-green-500 hover:scale-102 animate-pulse"
-                        : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600 hover:scale-102"
-                    }
-                  `}
-                  whileHover={{ scale: activeTab === "song" ? 1.05 : 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <span className="relative z-10 flex items-center gap-1.5">
-                    {showSongGenerator ? (
-                      <>
-                        <span
-                          className="text-lg inline-block"
-                          style={{ filter: "invert(1)" }}
-                        >
-                          🎵
-                        </span>
-                        <span>Generate Song</span>
-                      </>
-                    ) : (
-                      <>
-                        <span
-                          className="text-lg inline-block"
-                          style={{ filter: "invert(1)" }}
-                        >
-                          🎵
-                        </span>
-                        <span>Generated Song</span>
-                      </>
+                        <ScoreDisplay
+                          roundScore={roundScore}
+                          leftPersona={battle.personas.left}
+                          rightPersona={battle.personas.right}
+                        />
+                      </div>
                     )}
-                  </span>
-                </motion.button>
-              )}
-            </div>
-
-            {/* Tab Content */}
-            <div className="p-4 md:p-6 pb-24 md:pb-6">
-              {/* Scores Tab */}
-              {activeTab === "scores" && roundScore && (
-                <motion.div
-                  key="scores-content"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <h3 className="text-xl md:text-2xl font-(family-name:--font-bebas-neue) text-center mb-4 text-yellow-400">
-                    ROUND {roundScore.round} SCORES
-                  </h3>
-                  <ScoreDisplay
-                    roundScore={roundScore}
-                    leftPersona={battle.personas.left}
-                    rightPersona={battle.personas.right}
-                  />
-                </motion.div>
-              )}
-
-              {/* Generated Song Tab */}
-              {activeTab === "song" &&
-                (showSongGenerator || showSongPlayer) && (
-                  <motion.div
-                    key="song-content"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="max-w-2xl mx-auto"
+                  </div>
+                  <div
+                    className={`max-w-2xl mx-auto ${
+                      activeTab === "song" ? "" : "hidden"
+                    }`}
                   >
                     {showSongGenerator && (
                       <SongGenerator
                         battleId={battle.id}
-                        onSongGenerated={() => {
-                          // Refresh the page to show the generated song
-                          router.refresh();
-                        }}
+                        battle={battle}
+                        onSongGenerated={() => router.refresh()}
                       />
                     )}
                     {showSongPlayer && battle.generatedSong && (
-                      <SongPlayer song={battle.generatedSong} />
+                      <SongPlayer
+                        song={battle.generatedSong}
+                        externalIsPlaying={isSongPlaying}
+                        onPlayStateChange={(playing) =>
+                          setIsSongPlaying(playing)
+                        }
+                        onTogglePlay={() => setIsSongPlaying(!isSongPlaying)}
+                      />
                     )}
-                  </motion.div>
+                  </div>
+                </div>
+              </div>
+            </BattleDrawer>
+
+            {/* Fixed Bottom Buttons */}
+            <div
+              className="fixed bottom-0 left-0 right-0 z-60 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800"
+              style={{ height: "var(--bottom-controls-height)" }}
+            >
+              <div className="max-w-4xl mx-auto h-full px-2 md:px-4 flex items-center justify-center gap-2 md:gap-3">
+                <motion.button
+                  onClick={() => handleTabClick("scores")}
+                  className={`
+                  flex-1 md:flex-none px-4 py-2.5 md:px-6 md:py-3 font-bold text-sm md:text-base
+                  rounded-lg border-2 transition-all duration-200
+                  ${
+                    activeTab === "scores" && isDrawerOpen
+                      ? "bg-linear-to-r from-yellow-600 to-orange-600 border-yellow-500 text-white shadow-lg shadow-yellow-500/30"
+                      : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
+                  }
+                `}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="text-lg">📊</span>
+                    <span>Scores</span>
+                  </span>
+                </motion.button>
+
+                {(showSongGenerator || showSongPlayer) && (
+                  <motion.button
+                    onClick={
+                      showSongPlayer
+                        ? handleSongButtonClick
+                        : () => handleTabClick("song")
+                    }
+                    className={`
+                    flex-1 md:flex-none px-4 py-2.5 md:px-6 md:py-3 font-bold text-sm md:text-base
+                    rounded-lg border-2 transition-all duration-200
+                    ${
+                      isSongPlaying
+                        ? "bg-linear-to-r from-green-600 to-emerald-600 border-green-500 text-white shadow-lg shadow-green-500/30"
+                        : activeTab === "song" && isDrawerOpen
+                        ? "bg-linear-to-r from-green-600 to-emerald-600 border-green-500 text-white shadow-lg shadow-green-500/30"
+                        : showSongGenerator
+                        ? "bg-linear-to-r from-green-700/40 to-emerald-700/40 border-green-600 text-green-300 hover:from-green-700/60 hover:to-emerald-700/60 hover:border-green-500 animate-pulse"
+                        : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
+                    }
+                  `}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <span className="flex items-center justify-center gap-2">
+                      {showSongGenerator ? (
+                        <>
+                          <span
+                            className="text-lg inline-block"
+                            style={{ filter: "invert(1)" }}
+                          >
+                            🎵
+                          </span>
+                          <span>Make it an MP3</span>
+                        </>
+                      ) : isSongPlaying ? (
+                        <>
+                          <AnimatedEq className="text-white" />
+                          <span>Pause Song</span>
+                        </>
+                      ) : (
+                        <>
+                          <span
+                            className="text-lg inline-block"
+                            style={{ filter: "invert(1)" }}
+                          >
+                            🎵
+                          </span>
+                          <span>Song</span>
+                        </>
+                      )}
+                    </span>
+                  </motion.button>
                 )}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
     </div>
   );
 }

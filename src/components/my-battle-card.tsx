@@ -15,6 +15,7 @@ import {
   Music2,
   ThumbsUp,
   MessageSquare,
+  CheckCircle,
 } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -65,6 +66,7 @@ export function MyBattleCard({
   const [isPublic, setIsPublic] = useState(battle.isPublic || false);
   const [isTogglingPublic, setIsTogglingPublic] = useState(false);
   const [toggleError, setToggleError] = useState<string | null>(null);
+  const [showCopiedDialog, setShowCopiedDialog] = useState(false);
 
   const personas = {
     left: battle.leftPersona as any,
@@ -80,7 +82,7 @@ export function MyBattleCard({
 
   const handleShare = () => {
     navigator.clipboard.writeText(battleUrl);
-    alert("Link copied to clipboard!");
+    setShowCopiedDialog(true);
   };
 
   const handleTogglePublic = async () => {
@@ -423,6 +425,18 @@ export function MyBattleCard({
         isLoading={isDeleting}
         variant="danger"
         icon={AlertTriangle}
+      />
+
+      {/* Link Copied Success Dialog */}
+      <ConfirmationDialog
+        open={showCopiedDialog}
+        onOpenChange={setShowCopiedDialog}
+        title="Link Copied!"
+        description="The battle link has been copied to your clipboard."
+        confirmLabel="OK"
+        onConfirm={() => setShowCopiedDialog(false)}
+        variant="success"
+        icon={CheckCircle}
       />
     </div>
   );

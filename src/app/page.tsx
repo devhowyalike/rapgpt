@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getLiveBattles } from "@/lib/battle-storage";
+import { getLiveBattles, getFeaturedBattles } from "@/lib/battle-storage";
 import { SiteHeader } from "@/components/site-header";
 import { LiveBattlesDisplay } from "@/components/live-battles-display";
 import { APP_TITLE, TAGLINE } from "@/lib/constants";
@@ -15,12 +15,18 @@ export default async function Home() {
   const { sessionClaims } = await auth();
   const isAdmin = sessionClaims?.metadata?.role === "admin";
   const isAuthenticated = !!sessionClaims;
+  
+  // Check if there are any archived battles (completed battles with liveStartedAt)
+  const featuredBattles = await getFeaturedBattles();
+  const hasArchivedBattles = featuredBattles.some(
+    (b) => b.status === "completed" && b.liveStartedAt
+  );
 
   return (
     <>
       <SiteHeader />
-      <div style={{ height: "52px" }} />
-      <div className="min-h-[calc(100vh-3.5rem)] bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center justify-center p-6">
+      <div style={{ height: "var(--header-height)" }} />
+      <div className="min-h-[calc(100dvh-var(--header-height))] bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center justify-center p-6">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           {/* Logo */}
           <h1 className="text-6xl md:text-8xl font-bold tracking-wider">
@@ -112,14 +118,16 @@ export default async function Home() {
                 and new roster additions.
               </p>
 
-              <div className="flex gap-4 justify-center flex-wrap">
-                <Link
-                  href="/archive"
-                  className="inline-block px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg text-white font-bold transition-all"
-                >
-                  View Archive
-                </Link>
-              </div>
+              {hasArchivedBattles && (
+                <div className="flex gap-4 justify-center flex-wrap">
+                  <Link
+                    href="/archive"
+                    className="inline-block px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg text-white font-bold transition-all"
+                  >
+                    View Archive
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 

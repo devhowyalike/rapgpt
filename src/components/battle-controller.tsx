@@ -28,7 +28,8 @@ import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { MobileDrawer } from "@/components/ui/mobile-drawer";
+import { BattleDrawer } from "@/components/ui/battle-drawer";
+import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
 
 interface BattleControllerProps {
   initialBattle: Battle;
@@ -68,6 +69,13 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   );
   const [isLeaving, setIsLeaving] = useState(false);
 
+  // Ensure only one drawer is open at a time across the page
+  useExclusiveDrawer(
+    "mobile-comments-voting",
+    showMobileDrawer,
+    setShowMobileDrawer
+  );
+
   // Check if user is admin
   const { sessionClaims, isLoaded } = useAuth();
   const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
@@ -86,7 +94,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   useEffect(() => {
     if (isVotingPhase) {
       setMobileActiveTab("voting");
-      // Also open the drawer on mobile to make voting more visible
+      // Open drawer - CSS (md:hidden) ensures it only shows on mobile
       setShowMobileDrawer(true);
     }
   }, [isVotingPhase]);
@@ -154,6 +162,11 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
       setVotingTimeRemaining(next);
       if (next <= 0 && battle) {
         completeVotingPhase(battle.currentRound);
+        
+        // On mobile, close the drawer and scroll to scores when voting ends
+        if (typeof window !== "undefined" && window.innerWidth < 768) {
+          setShowMobileDrawer(false);
+        }
       }
     }, 1000);
 
@@ -369,18 +382,27 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
   // If battle is completed or incomplete, use full replay mode
   if (battle.status === "completed" || battle.status === "incomplete") {
+    const mobileBottomPadding =
+      showCommenting || showVoting
+        ? battle.status === "completed"
+          ? "calc(var(--bottom-controls-height) + var(--fab-size) + var(--fab-gutter))"
+          : "calc(var(--fab-size) + var(--fab-gutter))"
+        : undefined;
     return (
       <>
         <SiteHeader />
-        <div style={{ height: "52px" }} />
-        <div className="flex flex-col md:h-[calc(100vh-3.5rem)] md:flex-row">
+        <div style={{ height: "var(--header-height)" }} />
+        <div className="flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row">
           {/* Main Stage */}
           <div className="flex-1 flex flex-col min-h-0">
-            <BattleReplay battle={battle} />
+            <BattleReplay
+              battle={battle}
+              mobileBottomPadding={mobileBottomPadding}
+            />
 
             {/* Resume Button for Incomplete Battles */}
             {battle.status === "incomplete" && (
-              <div className="p-4 pb-24 md:pb-4 bg-gray-900 border-t border-gray-800">
+              <div className="fixed md:relative bottom-0 left-0 right-0 z-50 p-4 bg-gray-900/95 md:bg-gray-900 backdrop-blur-sm md:backdrop-blur-none border-t border-gray-800">
                 <div className="max-w-4xl mx-auto">
                   <button
                     onClick={handleResumeBattle}
@@ -420,7 +442,17 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
         {/* Mobile Floating Action Buttons */}
         {(showCommenting || showVoting) && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40">
+          <div
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40"
+            style={
+              battle.status === "completed"
+                ? {
+                    bottom:
+                      "calc(var(--bottom-controls-height) + var(--fab-gutter))",
+                  }
+                : undefined
+            }
+          >
             {showCommenting && (
               <button
                 onClick={handleMobileCommentsClick}
@@ -455,10 +487,11 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
         )}
 
         {/* Mobile Drawer */}
-        <MobileDrawer
+        <BattleDrawer
           open={showMobileDrawer}
           onOpenChange={setShowMobileDrawer}
           title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
+          excludeBottomControls={battle.status === "completed"}
         >
           <div className="flex-1 overflow-y-auto min-h-0">
             <BattleSidebar
@@ -470,7 +503,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
               defaultTab={mobileActiveTab}
             />
           </div>
-        </MobileDrawer>
+        </BattleDrawer>
       </>
     );
   }
@@ -479,8 +512,8 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   return (
     <>
       <SiteHeader />
-      <div style={{ height: "52px" }} />
-      <div className="flex flex-col md:h-[calc(100vh-3.5rem)] md:flex-row">
+      <div style={{ height: "var(--header-height)" }} />
+      <div className="flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row">
         {/* Main Stage */}
         <div className="flex-1 flex flex-col min-h-0">
           <BattleStage
@@ -494,8 +527,12 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
           {/* Control Bar - Always visible during ongoing battles */}
           {battle.status === "ongoing" && (
-            <div className="p-4 pb-24 md:pb-4 bg-gray-900 border-t border-gray-800">
-              <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-3">
+            <div
+              className={`p-4 ${
+                showCommenting || showVoting ? "pb-24 md:pb-4" : "pb-4"
+              } bg-gray-900 border-t border-gray-800`}
+            >
+              <div className="max-w-4xl mx-auto flex flex-row gap-3">
                 {/* Primary Action Button - Changes based on state */}
                 <button
                   onClick={
@@ -515,7 +552,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                       !(isReadingPhase && showVoting))
                   }
                   className={`
-                    flex-1 px-6 py-3 rounded-lg text-white font-bold transition-all
+                    flex-1 px-2 py-2 rounded-lg text-white font-bold transition-all
                     ${
                       isReadingPhase
                         ? "bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
@@ -550,7 +587,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                     votingTimeRemaining !== null &&
                     showVoting ? (
                     <div className="flex items-center justify-between gap-4 w-full">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 whitespace-nowrap">
                         <span className="text-2xl">⏱️</span>
                         <span className="text-lg font-medium">Vote Now!</span>
                         <span className="text-2xl font-bebas-neue">
@@ -558,7 +595,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                         </span>
                       </div>
                       <div className="flex items-center gap-3 flex-1 max-w-md">
-                        <span className="text-sm text-white/80 whitespace-nowrap">
+                        <span className="hidden md:inline text-sm text-white/80 whitespace-nowrap">
                           Vote in the sidebar →
                         </span>
                         <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden min-w-[100px]">
@@ -591,10 +628,10 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                 <button
                   onClick={handleCancelBattle}
                   disabled={isCanceling || isGenerating}
-                  className="px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
+                  className="px-3 sm:px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
                 >
                   <Pause className="w-5 h-5" />
-                  Pause Battle
+                  <span className="hidden sm:inline">Pause Battle</span>
                 </button>
 
                 {/* Admin Control Panel Link */}
@@ -664,7 +701,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
       )}
 
       {/* Mobile Drawer */}
-      <MobileDrawer
+      <BattleDrawer
         open={showMobileDrawer}
         onOpenChange={setShowMobileDrawer}
         title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
@@ -680,7 +717,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
             defaultTab={mobileActiveTab}
           />
         </div>
-      </MobileDrawer>
+      </BattleDrawer>
 
       {/* Pause Battle Dialog */}
       <ConfirmationDialog

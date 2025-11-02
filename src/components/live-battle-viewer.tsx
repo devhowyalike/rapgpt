@@ -16,7 +16,8 @@ import { useBattleStore } from "@/lib/battle-store";
 import { MessageSquare, ThumbsUp, Settings } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
-import { MobileDrawer } from "@/components/ui/mobile-drawer";
+import { BattleDrawer } from "@/components/ui/battle-drawer";
+import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
 
 interface LiveBattleViewerProps {
   initialBattle: Battle;
@@ -48,6 +49,9 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
     "comments"
   );
   const [hasInitiallyConnected, setHasInitiallyConnected] = useState(false);
+
+  // Ensure only one drawer is open at a time across the page
+  useExclusiveDrawer("viewer-comments-voting", showMobileDrawer, setShowMobileDrawer);
 
   // Check if user is admin
   const { sessionClaims, isLoaded } = useAuth();
@@ -233,6 +237,11 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
       setVotingTimeRemaining(next);
       if (next <= 0 && battle) {
         completeVotingPhase(battle.currentRound);
+        
+        // On mobile, close the drawer and scroll to scores when voting ends
+        if (typeof window !== "undefined" && window.innerWidth < 768) {
+          setShowMobileDrawer(false);
+        }
       }
     }, 1000);
 
@@ -317,10 +326,13 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
   return (
     <>
       <SiteHeader />
-      <div style={{ height: "52px" }} />
+      <div style={{ height: "var(--header-height)" }} />
 
       {/* Live Indicator Banner */}
-      <div className="bg-gray-900 border-b border-gray-800 p-3">
+      <div 
+        className="bg-gray-900 border-b border-gray-800 p-3"
+        style={{ height: 'var(--live-banner-height)' }}
+      >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <LiveIndicator
             isLive={battle.isLive}
@@ -351,7 +363,7 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
         </div>
       </div>
 
-      <div className="flex flex-col md:h-[calc(100vh-7.5rem)] md:flex-row">
+      <div className="flex flex-col md:h-[calc(100dvh-var(--header-height)-var(--live-banner-height))] md:flex-row">
         {/* Battle Stage */}
         <div className="flex-1 flex flex-col min-h-0">
           <BattleStage
@@ -422,7 +434,7 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
       )}
 
       {/* Mobile Drawer */}
-      <MobileDrawer
+      <BattleDrawer
         open={showMobileDrawer}
         onOpenChange={setShowMobileDrawer}
         title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
@@ -438,7 +450,7 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
             defaultTab={mobileActiveTab}
           />
         </div>
-      </MobileDrawer>
+      </BattleDrawer>
     </>
   );
 }

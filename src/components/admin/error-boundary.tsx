@@ -28,7 +28,7 @@ export class AdminErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-gray-900 flex items-center justify-center p-8">
+        <div className="min-h-[100dvh] bg-gray-900 flex items-center justify-center p-8">
           <div className="max-w-2xl w-full bg-red-900/20 border border-red-500 rounded-lg p-6">
             <h1 className="text-2xl font-bold text-red-500 mb-4">
               Admin Panel Error

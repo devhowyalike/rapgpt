@@ -7,7 +7,7 @@ export default async function DebugAuthPage() {
   const user = await currentUser();
 
   return (
-    <div className="p-8 bg-gray-900 min-h-screen text-white">
+    <div className="p-8 bg-gray-900 min-h-[100dvh] text-white">
       <h1 className="text-2xl font-bold mb-4">Debug Auth Info</h1>
 
       <div className="space-y-4">

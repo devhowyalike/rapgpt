@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import { APP_TITLE } from "@/lib/constants";
 import { BattleBell } from "./battle-bell";
 import { VictoryConfetti } from "./victory-confetti";
+import { useEffect, useRef, useLayoutEffect, useState } from "react";
 
 interface BattleStageProps {
   battle: Battle;
@@ -48,14 +49,102 @@ export function BattleStage({
     votingCompletedRound !== null &&
     votingCompletedRound >= battle.currentRound;
 
+  // Mobile-only offset so the first persona does not render under the sticky trophy/header
+  const [isMobile, setIsMobile] = useState(false);
+  const trophyRef = useRef<HTMLDivElement | null>(null);
+  const [personaTopMargin, setPersonaTopMargin] = useState(0);
+
+  // Track viewport size for mobile logic
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Compute combined offset: site header height (CSS var) + trophy banner height
+  useLayoutEffect(() => {
+    if (!isMobile) {
+      setPersonaTopMargin(0);
+      return;
+    }
+
+    const recalc = () => {
+      const rootStyle = getComputedStyle(document.documentElement);
+      const headerVar = rootStyle.getPropertyValue("--header-height").trim();
+      const headerPx = parseFloat(headerVar || "0") || 0;
+
+      const trophyEl = trophyRef.current;
+      if (!trophyEl) {
+        setPersonaTopMargin(0);
+        return;
+      }
+
+      const rect = trophyEl.getBoundingClientRect();
+      const trophyStyle = getComputedStyle(trophyEl);
+      const mt = parseFloat(trophyStyle.marginTop || "0") || 0;
+      const mb = parseFloat(trophyStyle.marginBottom || "0") || 0;
+      const trophyTotal = rect.height + mt + mb;
+      // Include the distance from the top of the sticky header down to the trophy block
+      const distanceToTrophy = trophyEl.offsetTop || 0;
+
+      setPersonaTopMargin(headerPx + distanceToTrophy + trophyTotal);
+    };
+
+    recalc();
+    window.addEventListener("resize", recalc);
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined" && trophyRef.current) {
+      ro = new ResizeObserver(() => recalc());
+      ro.observe(trophyRef.current);
+    }
+    return () => {
+      window.removeEventListener("resize", recalc);
+      ro?.disconnect();
+    };
+  }, [isMobile, battle.status, battle.winner]);
+
+  // Determine which persona to show on mobile (keep last performer up until next starts)
+  let mobileActiveSide: "left" | "right" | null = null;
+  if (streamingPersonaId === battle.personas.left.id) {
+    mobileActiveSide = "left";
+  } else if (streamingPersonaId === battle.personas.right.id) {
+    mobileActiveSide = "right";
+  } else if (currentRoundVerses.left && !currentRoundVerses.right) {
+    mobileActiveSide = "left";
+  } else if (currentRoundVerses.right && !currentRoundVerses.left) {
+    mobileActiveSide = "right";
+  } else if (!currentRoundVerses.left && !currentRoundVerses.right) {
+    // New round just started; show the current turn on mobile immediately
+    mobileActiveSide = battle.currentTurn ?? null;
+  }
+
+  // When scores become visible on mobile, scroll them into view
+  const scoreSectionRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!shouldShowScores) return;
+    if (typeof window === "undefined") return;
+    // Tailwind md breakpoint ~ 768px; treat below as mobile
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (!isMobile) return;
+    // Allow initial animation frame before scrolling for smoother UX
+    const id = window.requestAnimationFrame(() => {
+      scoreSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [shouldShowScores]);
+
   return (
-    <div className="flex flex-col min-h-0 md:h-full bg-linear-to-b from-stage-darker to-stage-dark">
+    <div className="flex flex-col h-full overflow-y-auto bg-linear-to-b from-stage-darker to-stage-dark overflow-x-hidden">
       {/* Header with Round Tracker */}
-      <div className="fixed md:relative top-[52px] md:top-0 left-0 right-0 z-20 px-4 py-5 md:px-6 md:py-5 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none">
+      <div className="sticky left-0 right-0 z-20 px-4 py-2 md:px-6 md:py-4 border-b border-gray-800 bg-stage-darker/95 backdrop-blur-sm top-0">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+          <div className="flex flex-row md:flex-row items-center justify-between md:justify-start gap-2 md:gap-6">
             <motion.h1
-              className="text-3xl md:text-4xl lg:text-6xl font-bold text-center md:text-left tracking-wider leading-none md:flex-1"
+              className="text-2xl md:text-4xl lg:text-6xl font-bold tracking-wider leading-none md:flex-1"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
             >
@@ -79,6 +168,7 @@ export function BattleStage({
 
           {battle.status === "completed" && battle.winner && (
             <motion.div
+              ref={trophyRef}
               className="mt-4 md:mt-6 text-center relative"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -97,21 +187,21 @@ export function BattleStage({
         </div>
       </div>
 
-      {/* Spacer for mobile fixed header */}
-      <div
-        className="md:hidden"
-        style={{
-          height:
-            battle.status === "completed" && battle.winner ? "220px" : "180px",
-        }}
-      />
-
       {/* Split Screen Stage */}
-      <div className="flex-1 md:overflow-y-auto">
-        <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:h-full">
+      <div className="flex-1">
+        <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:min-h-full">
           {/* Left Persona */}
-          <div className="flex flex-col min-h-[400px] md:min-h-0">
-            <div className="p-3 md:p-4 border-b border-gray-800">
+          <div
+            className={`${
+              mobileActiveSide && mobileActiveSide !== "left"
+                ? "hidden md:flex"
+                : "flex"
+            } flex-col md:min-h-0`}
+          >
+            <div
+              className="p-3 md:p-4 border-b border-gray-800"
+              style={isMobile ? { marginTop: personaTopMargin } : undefined}
+            >
               <PersonaCard
                 persona={battle.personas.left}
                 position="left"
@@ -138,8 +228,17 @@ export function BattleStage({
           </div>
 
           {/* Right Persona */}
-          <div className="flex flex-col min-h-[400px] md:min-h-0">
-            <div className="p-3 md:p-4 border-b border-gray-800">
+          <div
+            className={`${
+              mobileActiveSide && mobileActiveSide !== "right"
+                ? "hidden md:flex"
+                : "flex"
+            } flex-col md:min-h-0`}
+          >
+            <div
+              className="p-3 md:p-4 border-b border-gray-800"
+              style={isMobile ? { marginTop: personaTopMargin } : undefined}
+            >
               <PersonaCard
                 persona={battle.personas.right}
                 position="right"
@@ -170,7 +269,8 @@ export function BattleStage({
       {/* Score Display (when round is complete and voting is done) */}
       {shouldShowScores && currentRoundScore && (
         <motion.div
-          className="p-4 md:p-6 pb-24 md:pb-6 border-t border-gray-800 bg-gray-900/30"
+          ref={scoreSectionRef}
+          className="p-4 md:p-6 border-t border-gray-800 bg-gray-900/30"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}

@@ -1,6 +1,6 @@
 export function BattleLoading() {
   return (
-    <div className="min-h-screen bg-linear-to-b from-stage-darker to-stage-dark flex items-center justify-center">
+    <div className="min-h-[100dvh] bg-linear-to-b from-stage-darker to-stage-dark flex items-center justify-center">
       <div className="text-center px-4">
         <div className="text-3xl md:text-5xl lg:text-6xl font-bold flex items-end justify-center gap-2 md:gap-3">
           <span className="bg-linear-to-r from-yellow-400 via-red-500 to-purple-600 text-transparent bg-clip-text animate-pulse inline-block pb-1">
