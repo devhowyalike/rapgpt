@@ -387,7 +387,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
   if (!battle) {
     console.log("[AdminBattleControl] Battle is null, showing loading state");
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-[100dvh] bg-gray-900 flex items-center justify-center">
         <div className="text-white text-xl">Loading battle...</div>
       </div>
     );
@@ -403,7 +403,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
       <SiteHeader />
       <div style={{ height: "var(--header-height)" }} />
 
-      <div className="flex h-[calc(100vh-var(--header-height))]">
+      <div className="flex h-[calc(100dvh-var(--header-height))]">
         {/* Battle View - 60% width */}
         <div className="flex-1 flex flex-col min-w-0">
           <BattleStage

@@ -170,7 +170,7 @@ export function CharacterSelect() {
         <div className="fixed inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(0,0,0,0.8)_100%)] pointer-events-none" />
 
         {/* Main Container */}
-        <div className="relative z-10 flex flex-col min-h-[calc(100vh-var(--header-height))] justify-start pt-8 md:pt-16 lg:pt-20 pb-4 md:pb-8">
+        <div className="relative z-10 flex flex-col min-h-[calc(100dvh-var(--header-height))] justify-start pt-8 md:pt-16 lg:pt-20 pb-4 md:pb-8">
           {/* Page Hero - Create Battle */}
           <div className="px-2 md:px-8 lg:px-16 mb-3 md:mb-6 lg:mb-8">
             <div className="text-center">

@@ -16,7 +16,7 @@ export default async function TestBattlePage({
   }
 
   return (
-    <div className="p-8 bg-gray-900 min-h-screen text-white">
+    <div className="p-8 bg-gray-900 min-h-[100dvh] text-white">
       <h1 className="text-2xl font-bold mb-4">Battle Data</h1>
       <pre className="text-xs bg-gray-800 p-4 rounded overflow-auto">
         {JSON.stringify(battle, null, 2)}

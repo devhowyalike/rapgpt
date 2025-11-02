@@ -358,7 +358,7 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
         </div>
       </div>
 
-      <div className="flex flex-col md:h-[calc(100vh-var(--header-height)-var(--live-banner-height))] md:flex-row">
+      <div className="flex flex-col md:h-[calc(100dvh-var(--header-height)-var(--live-banner-height))] md:flex-row">
         {/* Battle Stage */}
         <div className="flex-1 flex flex-col min-h-0">
           <BattleStage

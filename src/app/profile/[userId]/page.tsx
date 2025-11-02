@@ -95,7 +95,7 @@ export default async function ProfilePage({
       : process.env.NEXT_PUBLIC_APP_URL || "";
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-900 via-purple-900 to-black">
+    <div className="min-h-[100dvh] bg-linear-to-br from-gray-900 via-purple-900 to-black">
       <SiteHeader />
       <div className="max-w-6xl mx-auto px-4 py-24">
         {/* User Profile Header */}
