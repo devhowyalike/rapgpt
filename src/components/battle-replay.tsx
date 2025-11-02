@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { Battle } from "@/lib/shared";
 import { PersonaCard } from "./persona-card";
 import { VerseDisplay } from "./verse-display";
@@ -31,8 +31,6 @@ export function BattleReplay({ battle }: BattleReplayProps) {
   const { userId, sessionClaims, isLoaded } = useAuth();
   const router = useRouter();
 
-  const [isMobile, setIsMobile] = useState(false);
-
   // Check if current user is the battle creator or admin
   // Wait for Clerk to finish loading before checking admin status
   const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
@@ -57,17 +55,6 @@ export function BattleReplay({ battle }: BattleReplayProps) {
   const [activeTab, setActiveTab] = useState<"scores" | "song" | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSongPlaying, setIsSongPlaying] = useState(false);
-
-  // Check if mobile viewport
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   // No JS offset needed when header is sticky
 
@@ -292,15 +279,15 @@ export function BattleReplay({ battle }: BattleReplayProps) {
         </div>
       </div>
 
-      {/* Mobile Backdrop - Synchronized with drawer */}
+      {/* Drawer Backdrop - Synchronized with drawer (all breakpoints) */}
       <AnimatePresence>
-        {isDrawerOpen && activeTab && isMobile && (
+        {isDrawerOpen && activeTab && (
           <motion.div
             className="fixed inset-0 bg-black/50 z-20"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            transition={{ type: "tween", ease: "easeOut", duration: 0.2 }}
             onClick={() => setIsDrawerOpen(false)}
           />
         )}
@@ -310,27 +297,25 @@ export function BattleReplay({ battle }: BattleReplayProps) {
       {(roundScore || showSongGenerator || showSongPlayer) && (
         <>
           <motion.div
-            className={`fixed left-0 right-0 z-30 md:relative md:z-0 bg-gray-900 md:bg-gray-900/30 shadow-2xl md:shadow-none md:border-t md:border-gray-800 pointer-events-none ${
-              !isMobile && !(isDrawerOpen && activeTab) ? "md:hidden" : ""
-            }`}
-            style={{ bottom: isMobile ? "var(--header-height)" : undefined }}
-            animate={
-              isMobile
-                ? isDrawerOpen && activeTab
-                  ? { y: 0, opacity: 1 }
-                  : { y: "100%", opacity: 0 }
-                : {}
+            className={
+              "fixed left-0 right-0 z-30 bg-gray-900 shadow-2xl border-t border-gray-800 pointer-events-none"
             }
-            initial={isMobile ? { y: "100%", opacity: 0 } : {}}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            style={{ bottom: "var(--bottom-controls-height)" }}
+            animate={
+              isDrawerOpen && activeTab
+                ? { y: 0, opacity: 1 }
+                : { y: "100%", opacity: 0 }
+            }
+            initial={{ y: "100%", opacity: 0 }}
+            transition={{ type: "tween", ease: "easeOut", duration: 0.28 }}
           >
             <div
               className={`max-w-4xl mx-auto ${
                 isDrawerOpen && activeTab ? "pointer-events-auto" : ""
               }`}
             >
-              {/* Close button - mobile only */}
-              <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-gray-800">
+              {/* Close button */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
                 <h3 className="text-lg font-bold text-white">
                   {activeTab === "scores"
                     ? "Round Scores"
@@ -347,7 +332,7 @@ export function BattleReplay({ battle }: BattleReplayProps) {
               </div>
 
               {/* Scrollable Content */}
-              <div className="overflow-y-auto max-h-[60vh] md:max-h-none">
+              <div className="overflow-y-auto max-h-[60vh]">
                 <div className="p-4 md:p-6 pb-8">
                   <div className={activeTab === "scores" ? "" : "hidden"}>
                     {roundScore && (
@@ -391,8 +376,11 @@ export function BattleReplay({ battle }: BattleReplayProps) {
           </motion.div>
 
           {/* Fixed Bottom Buttons */}
-          <div className="fixed md:relative bottom-0 left-0 right-0 z-40 md:z-0 bg-gray-900/95 md:bg-gray-900/30 backdrop-blur-sm md:backdrop-blur-none border-t border-gray-800">
-            <div className="max-w-4xl mx-auto px-2 py-2 md:px-4 md:py-4 flex items-center justify-center gap-2 md:gap-3">
+          <div
+            className="fixed bottom-0 left-0 right-0 z-40 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800"
+            style={{ height: "var(--bottom-controls-height)" }}
+          >
+            <div className="max-w-4xl mx-auto h-full px-2 md:px-4 flex items-center justify-center gap-2 md:gap-3">
               <motion.button
                 onClick={() => handleTabClick("scores")}
                 className={`

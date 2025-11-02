@@ -25,12 +25,14 @@
   /* Layout heights - centralized for scalability */
   --header-height: 52px;
   --live-banner-height: 60px;
+  --bottom-controls-height: 72px; /* drawer offset for bottom buttons */
 }
 
 /* Desktop header heights - applied at md breakpoint (768px+) */
 @media (min-width: 768px) {
   :root {
     --header-height: 3.5rem; /* 56px on desktop */
+    --bottom-controls-height: 80px; /* slightly taller controls on desktop */
   }
 }
 
