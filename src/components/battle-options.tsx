@@ -132,7 +132,8 @@ export function BattleOptions({
                         Go Live
                       </div>
                       <div className="text-gray-400 text-sm line-clamp-2 text-pretty">
-                        Create as featured battle on homepage
+                        Stream your battle & engage with your audience in
+                        real-time
                       </div>
                     </div>
                   </div>
