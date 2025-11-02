@@ -1,14 +1,23 @@
 "use client";
 
 import {
-  UserButton as ClerkUserButton,
   SignInButton,
+  SignOutButton,
   useAuth,
   useUser,
+  useClerk,
 } from "@clerk/nextjs";
-import Link from "next/link";
-import { User, Mic2 } from "lucide-react";
+import { User, ChevronDown, LogOut, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Cache user ID in memory to prevent flickering
 let cachedDbUserId: string | null = null;
@@ -17,6 +26,7 @@ let cachedClerkUserId: string | null = null;
 export function UserButton() {
   const { isSignedIn, isLoaded } = useAuth();
   const { user } = useUser();
+  const clerk = useClerk();
   // Start with cached value if available
   const [userId, setUserId] = useState<string | null>(cachedDbUserId);
 
@@ -58,10 +68,9 @@ export function UserButton() {
   // Show loading skeleton while auth is loading on first mount
   if (!isLoaded) {
     return (
-      <div className="flex items-center gap-4">
-        <div className="hidden sm:block w-20 h-9 bg-gray-700/50 rounded-lg animate-pulse" />
-        <div className="hidden sm:block w-28 h-9 bg-purple-600/50 rounded-lg animate-pulse" />
-        <div className="w-10 h-10 bg-gray-700/50 rounded-full animate-pulse" />
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 bg-gray-700/50 rounded-full animate-pulse" />
+        <div className="hidden sm:block w-24 h-4 bg-gray-700/50 rounded animate-pulse" />
       </div>
     );
   }
@@ -77,40 +86,59 @@ export function UserButton() {
     );
   }
 
-  return (
-    <div className="flex items-center gap-3 sm:gap-4">
-      <Link
-        href="/new-battle"
-        className="flex items-center gap-2 px-3 sm:px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
-      >
-        <Mic2 size={16} />
-        <span className="hidden sm:inline">Create Battle</span>
-      </Link>
+  const firstName = user?.firstName || "";
+  const lastName = user?.lastName || "";
+  const displayName =
+    [firstName, lastName].filter(Boolean).join(" ") || user?.username || "User";
 
-      <ClerkUserButton
-        appearance={{
-          elements: {
-            avatarBox: "w-10 h-10 border-2 border-purple-500",
-            userButtonPopoverCard: "bg-gray-800 border border-gray-700",
-            userButtonPopoverActions: "text-white",
-            userButtonPopoverActionButton: "hover:bg-gray-700",
-            userButtonPopoverActionButtonText: "text-gray-300",
-            userButtonPopoverActionButtonIcon: "text-purple-400",
-            userButtonPopoverFooter: "hidden",
-          },
-        }}
-      >
-        <ClerkUserButton.MenuItems>
-          {userId && (
-            <ClerkUserButton.Link
-              label="Profile"
-              labelIcon={<User size={16} />}
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors text-white">
+          <img
+            src={user?.imageUrl}
+            alt={displayName}
+            className="w-8 h-8 rounded-full border-2 border-purple-500"
+          />
+          <span className="hidden sm:inline text-sm font-medium">
+            {displayName}
+          </span>
+          <ChevronDown className="w-4 h-4 text-gray-400" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-56">
+        <DropdownMenuLabel className="sm:hidden">
+          {displayName}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator className="sm:hidden" />
+        {userId && (
+          <DropdownMenuItem asChild>
+            <Link
               href={`/profile/${userId}`}
-            />
-          )}
-          <ClerkUserButton.Action label="manageAccount" />
-        </ClerkUserButton.MenuItems>
-      </ClerkUserButton>
-    </div>
+              className="flex items-center gap-2"
+            >
+              <User className="w-4 h-4" />
+              Profile
+            </Link>
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem
+          onClick={() => clerk.openUserProfile()}
+          className="cursor-pointer"
+        >
+          <Settings className="w-4 h-4" />
+          Manage Account
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <SignOutButton>
+            <button className="flex items-center gap-2 w-full">
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </button>
+          </SignOutButton>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

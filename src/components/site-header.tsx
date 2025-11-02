@@ -1,13 +1,18 @@
 "use client";
 
-import { Home, Archive, Shield, Users, Radio } from "lucide-react";
+import { Home, Shield, Radio, Users, Menu, Mic2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "./auth/user-button";
 import { useAuth } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { useLiveBattles } from "@/lib/hooks/use-live-battles";
-import { useHasArchivedBattles } from "@/lib/hooks/use-has-archived-battles";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Cache admin status in memory to prevent flickering
 let cachedAdminStatus: boolean | null = null;
@@ -69,54 +74,17 @@ export function SiteHeader() {
   // Use custom hook to manage live battles (only enabled for admins)
   const { liveBattles } = useLiveBattles({ enabled: isAdmin });
 
-  // Check if there are any archived battles
-  const { hasArchived } = useHasArchivedBattles();
-
   return (
-    <div 
+    <div
       className="fixed top-0 left-0 right-0 z-30 p-3 bg-gray-900/95 border-b border-gray-800 backdrop-blur-sm"
-      style={{ height: 'var(--header-height)' }}
+      style={{ height: "var(--header-height)" }}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between h-full">
         <div className="flex items-center gap-4">
-          <Link
-            href="/"
-            className={`flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg ${
-              isActiveLink("/")
-                ? "text-white bg-gray-800 font-medium"
-                : "text-gray-400 hover:text-white hover:bg-gray-800"
-            }`}
-            prefetch={false}
-          >
-            <Home className="w-4 h-4" />
-            <span className="hidden sm:inline">Home</span>
-          </Link>
-          {hasArchived && (
-            <Link
-              href="/archive"
-              className={`flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg ${
-                isActiveLink("/archive")
-                  ? "text-white bg-gray-800 font-medium"
-                  : "text-gray-400 hover:text-white hover:bg-gray-800"
-              }`}
-              prefetch={false}
-            >
-              <Archive className="w-4 h-4" />
-              <span className="hidden sm:inline">Archive</span>
-            </Link>
-          )}
-          <Link
-            href="/community"
-            className={`flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg ${
-              isActiveLink("/community")
-                ? "text-white bg-gray-800 font-medium"
-                : "text-gray-400 hover:text-white hover:bg-gray-800"
-            }`}
-            prefetch={false}
-          >
-            <Users className="w-4 h-4" />
-            <span className="hidden sm:inline">Community</span>
-          </Link>
+          <UserButton />
+        </div>
+
+        <div className="flex items-center gap-3">
           {isAdmin && (
             <>
               <Link
@@ -144,9 +112,73 @@ export function SiteHeader() {
               )}
             </>
           )}
-        </div>
+          {/* Desktop Navigation Links */}
+          <Link
+            href="/"
+            className={`hidden md:flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg ${
+              isActiveLink("/")
+                ? "text-white bg-gray-800 font-medium"
+                : "text-gray-400 hover:text-white hover:bg-gray-800"
+            }`}
+            prefetch={false}
+          >
+            <Home className="w-4 h-4" />
+            <span>Home</span>
+          </Link>
+          <Link
+            href="/community"
+            className={`hidden md:flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg ${
+              isActiveLink("/community")
+                ? "text-white bg-gray-800 font-medium"
+                : "text-gray-400 hover:text-white hover:bg-gray-800"
+            }`}
+            prefetch={false}
+          >
+            <Users className="w-4 h-4" />
+            <span>Community</span>
+          </Link>
 
-        <UserButton />
+          <Link
+            href="/new-battle"
+            className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
+          >
+            <Mic2 size={16} />
+            <span>Create Battle</span>
+          </Link>
+
+          {/* Mobile Hamburger Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="md:hidden flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800">
+                <Menu className="w-4 h-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem asChild>
+                <Link
+                  href="/"
+                  className={`flex items-center gap-2 ${
+                    isActiveLink("/") ? "text-white font-medium" : ""
+                  }`}
+                >
+                  <Home className="w-4 h-4" />
+                  Home
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  href="/community"
+                  className={`flex items-center gap-2 ${
+                    isActiveLink("/community") ? "text-white font-medium" : ""
+                  }`}
+                >
+                  <Users className="w-4 h-4" />
+                  Community
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </div>
   );
