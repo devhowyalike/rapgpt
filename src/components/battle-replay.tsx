@@ -13,12 +13,13 @@ import { SongGenerator } from "./song-generator";
 import { SongPlayer } from "./song-player";
 import { getRoundVerses } from "@/lib/battle-engine";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, User, X } from "lucide-react";
-import Link from "next/link";
-import { VictoryConfetti } from "./victory-confetti";
+import { X } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { AnimatedEq } from "./animated-eq";
+import { WinnerBanner } from "./winner-banner";
+import { CreatorAttribution } from "./creator-attribution";
+import { RoundControls } from "./round-controls";
 
 interface BattleReplayProps {
   battle: Battle;
@@ -93,141 +94,27 @@ export function BattleReplay({ battle }: BattleReplayProps) {
 
   return (
     <div className="flex flex-col min-h-0 md:h-full bg-linear-to-b from-stage-darker to-stage-dark">
-      {/* Header with Replay Controls */}
+      {/* Header with Replay Controls - Unified responsive layout */}
       <div className="sticky md:relative left-0 right-0 z-20 p-4 md:p-6 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none top-(--header-height) md:top-auto">
         <div className="max-w-7xl mx-auto">
-          {/* Mobile: Stacked Layout */}
-          <div className="md:hidden flex flex-col gap-3">
-            {/* Battle Winner at Top */}
-            {battle.status === "incomplete" ? (
-              <motion.div
-                className="text-center mt-2"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-              >
-                <div className="text-2xl font-bold text-orange-400 font-(family-name:--font-bebas-neue)">
-                  ⏸️ MATCH PAUSED ⏸️
-                </div>
-              </motion.div>
-            ) : battle.winner ? (
-              <motion.div
-                className="text-center mt-2 relative"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-              >
-                <VictoryConfetti trigger={true} />
-                <div className="text-3xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue) relative z-10">
-                  🏆 WINNER:{" "}
-                  {battle.personas.left.id === battle.winner
-                    ? battle.personas.left.name
-                    : battle.personas.right.name}{" "}
-                  🏆
-                </div>
-              </motion.div>
-            ) : null}
-
-            {/* Creator Link (hidden on mobile when winner is shown) */}
-            {battle.creator && !battle.winner && (
-              <div className="text-center">
-                <Link
-                  href={`/profile/${battle.creator.userId}`}
-                  className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-blue-400 transition-colors"
-                >
-                  <User className="w-4 h-4" />
-                  <span>Created by {battle.creator.displayName}</span>
-                </Link>
-              </div>
-            )}
-
-            {/* Replay Controls - Round Counter */}
-            <div className="flex items-center justify-center gap-3">
-              <button
-                onClick={handlePrevRound}
-                disabled={!canGoPrev}
-                className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                title="Previous Round"
-              >
-                <ChevronLeft className="w-4 h-4 text-white" />
-              </button>
-              <div className="px-4 py-1.5 rounded-lg bg-linear-to-r from-blue-600 to-purple-600 text-white font-bold font-(family-name:--font-bebas-neue) text-lg">
-                Round {selectedRound} of 3
-              </div>
-              <button
-                onClick={handleNextRound}
-                disabled={!canGoNext}
-                className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                title="Next Round"
-              >
-                <ChevronRight className="w-4 h-4 text-white" />
-              </button>
-            </div>
-          </div>
-
-          {/* Desktop: Horizontal Layout */}
-          <div className="hidden md:flex md:items-center md:justify-between md:gap-8">
-            {/* Left Side: Battle Winner and Creator */}
-            <div className="shrink-0 flex flex-col gap-2">
-              {battle.status === "incomplete" ? (
-                <motion.div
-                  className="mt-2"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                >
-                  <div className="text-2xl lg:text-3xl font-bold text-orange-400 font-(family-name:--font-bebas-neue) whitespace-nowrap">
-                    ⏸️ MATCH PAUSED ⏸️
-                  </div>
-                </motion.div>
-              ) : battle.winner ? (
-                <motion.div
-                  className="mt-2 relative"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                >
-                  <VictoryConfetti trigger={true} />
-                  <div className="text-4xl lg:text-5xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue) whitespace-nowrap relative z-10">
-                    🏆 WINNER:{" "}
-                    {battle.personas.left.id === battle.winner
-                      ? battle.personas.left.name
-                      : battle.personas.right.name}{" "}
-                    🏆
-                  </div>
-                </motion.div>
-              ) : null}
-
-              {/* Creator Link */}
-              {battle.creator && (
-                <Link
-                  href={`/profile/${battle.creator.userId}`}
-                  className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-blue-400 transition-colors"
-                >
-                  <User className="w-4 h-4" />
-                  <span>Created by {battle.creator.displayName}</span>
-                </Link>
-              )}
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-8">
+            {/* Left Side: Winner/Paused and Creator */}
+            <div className="shrink-0 flex flex-col gap-2 items-center md:items-start">
+              <WinnerBanner battle={battle} />
+              <CreatorAttribution
+                battle={battle}
+                hideOnMobileWhenWinnerVisible
+              />
             </div>
 
             {/* Right Side: Round Controls */}
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handlePrevRound}
-                disabled={!canGoPrev}
-                className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                title="Previous Round"
-              >
-                <ChevronLeft className="w-5 h-5 text-white" />
-              </button>
-              <div className="px-6 py-2 rounded-lg bg-linear-to-r from-blue-600 to-purple-600 text-white font-bold font-(family-name:--font-bebas-neue) text-xl whitespace-nowrap">
-                Round {selectedRound} of 3
-              </div>
-              <button
-                onClick={handleNextRound}
-                disabled={!canGoNext}
-                className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                title="Next Round"
-              >
-                <ChevronRight className="w-5 h-5 text-white" />
-              </button>
-            </div>
+            <RoundControls
+              selectedRound={selectedRound}
+              canGoPrev={canGoPrev}
+              canGoNext={canGoNext}
+              onPrev={handlePrevRound}
+              onNext={handleNextRound}
+            />
           </div>
         </div>
       </div>
