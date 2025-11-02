@@ -1,4 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
 import { db } from "@/lib/db/client";
 import { battles, users, type BattleDB } from "@/lib/db/schema";
 import { desc, eq, and } from "drizzle-orm";
@@ -13,7 +14,7 @@ import { Lock, Globe, User as UserIcon, Swords } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 interface ProfilePageProps {
   params: Promise<{
@@ -64,9 +65,7 @@ export default async function ProfilePage({
     userBattles = await db
       .select()
       .from(battles)
-      .where(
-        eq(battles.createdBy, profileUserId)
-      )
+      .where(eq(battles.createdBy, profileUserId))
       .orderBy(desc(battles.createdAt));
   } else if (
     profileUser.isProfilePublic ||
@@ -89,10 +88,11 @@ export default async function ProfilePage({
     userBattles = [];
   }
 
-  const shareUrl =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : process.env.NEXT_PUBLIC_APP_URL || "";
+  // Get the current URL origin from headers
+  const headersList = await headers();
+  const host = headersList.get("host") || "";
+  const protocol = headersList.get("x-forwarded-proto") || "https";
+  const shareUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
 
   return (
     <div className="min-h-dvh bg-linear-to-br from-gray-900 via-purple-900 to-black">
