@@ -15,7 +15,7 @@ import { BattleBell } from "./battle-bell";
 import { VictoryConfetti } from "./victory-confetti";
 import { useEffect, useRef, useLayoutEffect, useState } from "react";
 import { Eye } from "lucide-react";
-import { RapGPTLogo } from "./rapgpt-logo";
+import { DEFAULT_STAGE } from "@/lib/shared/stages";
 
 interface BattleStageProps {
   battle: Battle;
@@ -174,7 +174,20 @@ export function BattleStage({
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-row md:flex-row items-center justify-between md:justify-start gap-2 md:gap-6">
             <div className="md:flex-1">
-              <RapGPTLogo size="lg" animated />
+              <div className="text-left">
+                <div className="text-xs md:text-base text-gray-400 uppercase tracking-wider">
+                  Stage
+                </div>
+                <div className="text-xl md:text-3xl font-bold text-white flex flex-col">
+                  <span>{DEFAULT_STAGE.name}</span>
+                  <span className="text-xs md:text-base text-gray-400 font-normal flex items-center gap-1">
+                    <span className="text-lg md:text-2xl">
+                      {DEFAULT_STAGE.flag}
+                    </span>
+                    {DEFAULT_STAGE.country}
+                  </span>
+                </div>
+              </div>
             </div>
 
             <BattleBell
