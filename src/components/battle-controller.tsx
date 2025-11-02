@@ -86,7 +86,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   useEffect(() => {
     if (isVotingPhase) {
       setMobileActiveTab("voting");
-      // Also open the drawer on mobile to make voting more visible
+      // Open drawer - CSS (md:hidden) ensures it only shows on mobile
       setShowMobileDrawer(true);
     }
   }, [isVotingPhase]);
