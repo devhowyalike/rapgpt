@@ -11,11 +11,11 @@ import { RoundTracker } from "./round-tracker";
 import { ScoreDisplay } from "./score-display";
 import { getRoundVerses, getBattleProgress } from "@/lib/battle-engine";
 import { motion } from "framer-motion";
-import { APP_TITLE } from "@/lib/constants";
 import { BattleBell } from "./battle-bell";
 import { VictoryConfetti } from "./victory-confetti";
 import { useEffect, useRef, useLayoutEffect, useState } from "react";
 import { Eye } from "lucide-react";
+import { RapGPTLogo } from "./rapgpt-logo";
 
 interface BattleStageProps {
   battle: Battle;
@@ -42,18 +42,19 @@ export function BattleStage({
 
   // Track if user has revealed scores for this round
   const [scoresRevealed, setScoresRevealed] = useState(false);
-  
+
   // Reset scoresRevealed when round changes
   useEffect(() => {
     setScoresRevealed(false);
   }, [battle.currentRound]);
 
   // Scores are available when voting is complete
-  const scoresAvailable = currentRoundScore && !isReadingPhase && !isVotingPhase;
-  
+  const scoresAvailable =
+    currentRoundScore && !isReadingPhase && !isVotingPhase;
+
   // Only show scores after user clicks reveal button
   const shouldShowScores = scoresAvailable && scoresRevealed;
-  
+
   // Show reveal button when scores are available but not yet revealed
   const shouldShowRevealButton = scoresAvailable && !scoresRevealed;
 
@@ -120,8 +121,9 @@ export function BattleStage({
   // Determine which persona to show on mobile
   // Keep showing only the second rapper until user reveals scores
   let mobileActiveSide: "left" | "right" | null = null;
-  const bothVersesComplete = currentRoundVerses.left && currentRoundVerses.right;
-  
+  const bothVersesComplete =
+    currentRoundVerses.left && currentRoundVerses.right;
+
   if (streamingPersonaId === battle.personas.left.id) {
     mobileActiveSide = "left";
   } else if (streamingPersonaId === battle.personas.right.id) {
@@ -136,11 +138,17 @@ export function BattleStage({
   } else if (bothVersesComplete && !scoresRevealed) {
     // Both verses complete but scores not revealed - keep showing the last performer
     // Determine who performed second
-    const leftVerseId = currentRoundVerses.left.id;
-    const rightVerseId = currentRoundVerses.right.id;
-    const leftVerseIndex = battle.verses.findIndex(v => v.id === leftVerseId);
-    const rightVerseIndex = battle.verses.findIndex(v => v.id === rightVerseId);
-    mobileActiveSide = rightVerseIndex > leftVerseIndex ? "right" : "left";
+    const leftVerseId = currentRoundVerses.left?.id;
+    const rightVerseId = currentRoundVerses.right?.id;
+    if (leftVerseId && rightVerseId) {
+      const leftVerseIndex = battle.verses.findIndex(
+        (v) => v.id === leftVerseId
+      );
+      const rightVerseIndex = battle.verses.findIndex(
+        (v) => v.id === rightVerseId
+      );
+      mobileActiveSide = rightVerseIndex > leftVerseIndex ? "right" : "left";
+    }
   } else if (bothVersesComplete && scoresRevealed) {
     // Scores revealed - show both personas for comparison
     mobileActiveSide = null;
@@ -165,15 +173,9 @@ export function BattleStage({
       <div className="sticky left-0 right-0 z-20 px-4 py-2 md:px-6 md:py-4 border-b border-gray-800 bg-stage-darker/95 backdrop-blur-sm top-0">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-row md:flex-row items-center justify-between md:justify-start gap-2 md:gap-6">
-            <motion.h1
-              className="text-2xl md:text-4xl lg:text-6xl font-bold tracking-wider leading-none md:flex-1"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <span className="bg-linear-to-r from-yellow-400 via-red-500 to-purple-600 text-transparent bg-clip-text">
-                {APP_TITLE}
-              </span>
-            </motion.h1>
+            <div className="md:flex-1">
+              <RapGPTLogo size="lg" animated />
+            </div>
 
             <BattleBell
               currentRound={battle.currentRound}
@@ -299,7 +301,7 @@ export function BattleStage({
           <div className="max-w-4xl mx-auto text-center">
             <motion.button
               onClick={handleRevealScores}
-              className="px-8 py-4 bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 hover:from-yellow-600 hover:via-orange-600 hover:to-red-600 rounded-lg text-white font-bold text-lg md:text-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-3 mx-auto"
+              className="px-8 py-4 bg-linear-to-r from-yellow-500 via-orange-500 to-red-500 hover:from-yellow-600 hover:via-orange-600 hover:to-red-600 rounded-lg text-white font-bold text-lg md:text-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-3 mx-auto"
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               whileHover={{ scale: 1.05 }}
