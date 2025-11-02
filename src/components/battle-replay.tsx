@@ -149,8 +149,10 @@ export function BattleReplay({
 
       {/* Split Screen Stage */}
       <div
-        className="flex-1 md:overflow-y-auto md:pb-0"
-        style={{ paddingBottom: mobileBottomPadding ?? "5rem" }}
+        className="flex-1 md:overflow-y-auto pb-[var(--mobile-bottom-padding,5rem)] md:pb-(--bottom-controls-height)"
+        style={{
+          ["--mobile-bottom-padding" as any]: mobileBottomPadding ?? "5rem",
+        }}
       >
         <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:min-h-full">
           {/* Left Persona */}
