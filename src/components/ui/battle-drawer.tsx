@@ -41,7 +41,7 @@ export function BattleDrawer({
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed top-0 left-0 right-0 bg-black/60 backdrop-blur-sm z-40"
+            className="fixed top-0 left-0 right-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
             style={
               excludeBottomControls
                 ? { bottom: "var(--bottom-controls-height)" }
@@ -58,7 +58,7 @@ export function BattleDrawer({
 
       {/* Content Drawer - Always mounted, never unmounted, all breakpoints */}
       <motion.div
-        className={`fixed inset-x-0 z-50 bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl max-h-[70vh] flex flex-col overflow-hidden ${
+        className={`fixed inset-x-0 z-50 bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl max-h-[70vh] flex flex-col overflow-hidden lg:hidden ${
           !open ? "pointer-events-none" : "pointer-events-auto"
         }`}
         style={

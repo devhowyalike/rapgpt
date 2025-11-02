@@ -582,7 +582,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                     votingTimeRemaining !== null &&
                     showVoting ? (
                     <div className="flex items-center justify-between gap-4 w-full">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 whitespace-nowrap">
                         <span className="text-2xl">⏱️</span>
                         <span className="text-lg font-medium">Vote Now!</span>
                         <span className="text-2xl font-bebas-neue">
@@ -590,7 +590,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                         </span>
                       </div>
                       <div className="flex items-center gap-3 flex-1 max-w-md">
-                        <span className="text-sm text-white/80 whitespace-nowrap">
+                        <span className="hidden md:inline text-sm text-white/80 whitespace-nowrap">
                           Vote in the sidebar →
                         </span>
                         <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden min-w-[100px]">
