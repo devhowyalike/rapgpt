@@ -83,11 +83,16 @@ export function BattleReplay({ battle }: BattleReplayProps) {
   };
 
   const handleSongButtonClick = () => {
-    // If song is playing, pause it (regardless of drawer state)
-    if (isSongPlaying) {
+    // If drawer is closed but song is playing, open it instead of pausing
+    if (isSongPlaying && !isDrawerOpen) {
+      handleTabClick("song");
+    } 
+    // If drawer is open and song is playing, pause it
+    else if (isSongPlaying && isDrawerOpen) {
       setIsSongPlaying(false);
-    } else {
-      // If song is not playing, toggle the drawer
+    } 
+    // If song is not playing, toggle the drawer
+    else {
       handleTabClick("song");
     }
   };
