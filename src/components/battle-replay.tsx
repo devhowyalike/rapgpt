@@ -20,12 +20,20 @@ import { WinnerBanner } from "./winner-banner";
 import { CreatorAttribution } from "./creator-attribution";
 import { RoundControls } from "./round-controls";
 import { BattleDrawer } from "./ui/battle-drawer";
+import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
 
 interface BattleReplayProps {
   battle: Battle;
+  /**
+   * Extra bottom padding for mobile to clear floating UI
+   */
+  mobileBottomPadding?: string;
 }
 
-export function BattleReplay({ battle }: BattleReplayProps) {
+export function BattleReplay({
+  battle,
+  mobileBottomPadding,
+}: BattleReplayProps) {
   const [selectedRound, setSelectedRound] = useState(1);
   const roundVerses = getRoundVerses(battle, selectedRound);
   const roundScore = battle.scores.find((s) => s.round === selectedRound);
@@ -57,6 +65,9 @@ export function BattleReplay({ battle }: BattleReplayProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSongPlaying, setIsSongPlaying] = useState(false);
 
+  // Ensure only one drawer is open at a time across the page
+  useExclusiveDrawer("replay-scores-song", isDrawerOpen, setIsDrawerOpen);
+
   // No JS offset needed when header is sticky
 
   const canGoPrev = selectedRound > 1;
@@ -71,15 +82,27 @@ export function BattleReplay({ battle }: BattleReplayProps) {
   };
 
   const handleTabClick = (tab: "scores" | "song") => {
+    // If clicking the same tab while open, close it
     if (activeTab === tab && isDrawerOpen) {
-      // Close drawer if clicking the same tab
       setIsDrawerOpen(false);
       setActiveTab(null);
-    } else {
-      // Open drawer with new tab
-      setActiveTab(tab);
-      setIsDrawerOpen(true);
+      return;
     }
+
+    // If switching tabs while the drawer is open, animate close then open
+    if (activeTab !== tab && isDrawerOpen) {
+      setIsDrawerOpen(false);
+      // Match BattleDrawer close animation duration (~300ms) with slight buffer
+      window.setTimeout(() => {
+        setActiveTab(tab);
+        setIsDrawerOpen(true);
+      }, 320);
+      return;
+    }
+
+    // Drawer is closed: open with the requested tab
+    setActiveTab(tab);
+    setIsDrawerOpen(true);
   };
 
   const handleSongButtonClick = () => {
@@ -125,7 +148,10 @@ export function BattleReplay({ battle }: BattleReplayProps) {
       </div>
 
       {/* Split Screen Stage */}
-      <div className="flex-1 md:overflow-y-auto pb-20 md:pb-0">
+      <div
+        className="flex-1 md:overflow-y-auto md:pb-0"
+        style={{ paddingBottom: mobileBottomPadding ?? "5rem" }}
+      >
         <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:min-h-full">
           {/* Left Persona */}
           <div className="flex flex-col min-h-[400px] md:min-h-0">

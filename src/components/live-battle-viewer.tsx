@@ -17,6 +17,7 @@ import { MessageSquare, ThumbsUp, Settings } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { BattleDrawer } from "@/components/ui/battle-drawer";
+import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
 
 interface LiveBattleViewerProps {
   initialBattle: Battle;
@@ -48,6 +49,9 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
     "comments"
   );
   const [hasInitiallyConnected, setHasInitiallyConnected] = useState(false);
+
+  // Ensure only one drawer is open at a time across the page
+  useExclusiveDrawer("viewer-comments-voting", showMobileDrawer, setShowMobileDrawer);
 
   // Check if user is admin
   const { sessionClaims, isLoaded } = useAuth();

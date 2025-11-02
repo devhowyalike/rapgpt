@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 
 interface BattleDrawerProps {
   open: boolean;
@@ -23,13 +23,25 @@ export function BattleDrawer({
   children,
   excludeBottomControls = false,
 }: BattleDrawerProps) {
+  // Close on Escape key like typical drawers/dialogs
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onOpenChange(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onOpenChange]);
+
   return (
     <>
       {/* Animated Overlay */}
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed top-0 left-0 right-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+            className="fixed top-0 left-0 right-0 bg-black/60 backdrop-blur-sm z-40"
             style={
               excludeBottomControls
                 ? { bottom: "var(--bottom-controls-height)" }
@@ -44,9 +56,9 @@ export function BattleDrawer({
         )}
       </AnimatePresence>
 
-      {/* Content Drawer - Always mounted, never unmounted - Mobile only */}
+      {/* Content Drawer - Always mounted, never unmounted, all breakpoints */}
       <motion.div
-        className={`fixed inset-x-0 z-50 bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl max-h-[70vh] flex flex-col overflow-hidden md:hidden ${
+        className={`fixed inset-x-0 z-50 bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl max-h-[70vh] flex flex-col overflow-hidden ${
           !open ? "pointer-events-none" : "pointer-events-auto"
         }`}
         style={

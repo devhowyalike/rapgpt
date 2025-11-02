@@ -29,6 +29,7 @@ import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { BattleDrawer } from "@/components/ui/battle-drawer";
+import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
 
 interface BattleControllerProps {
   initialBattle: Battle;
@@ -67,6 +68,13 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     "comments"
   );
   const [isLeaving, setIsLeaving] = useState(false);
+
+  // Ensure only one drawer is open at a time across the page
+  useExclusiveDrawer(
+    "mobile-comments-voting",
+    showMobileDrawer,
+    setShowMobileDrawer
+  );
 
   // Check if user is admin
   const { sessionClaims, isLoaded } = useAuth();
@@ -369,6 +377,12 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
   // If battle is completed or incomplete, use full replay mode
   if (battle.status === "completed" || battle.status === "incomplete") {
+    const mobileBottomPadding =
+      showCommenting || showVoting
+        ? battle.status === "completed"
+          ? "calc(var(--bottom-controls-height) + var(--fab-size) + var(--fab-gutter))"
+          : "calc(var(--fab-size) + var(--fab-gutter))"
+        : undefined;
     return (
       <>
         <SiteHeader />
@@ -376,7 +390,10 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
         <div className="flex flex-col h-[calc(100vh-var(--header-height))] md:flex-row">
           {/* Main Stage */}
           <div className="flex-1 flex flex-col min-h-0">
-            <BattleReplay battle={battle} />
+            <BattleReplay
+              battle={battle}
+              mobileBottomPadding={mobileBottomPadding}
+            />
 
             {/* Resume Button for Incomplete Battles */}
             {battle.status === "incomplete" && (
@@ -420,7 +437,17 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
         {/* Mobile Floating Action Buttons */}
         {(showCommenting || showVoting) && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40">
+          <div
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40"
+            style={
+              battle.status === "completed"
+                ? {
+                    bottom:
+                      "calc(var(--bottom-controls-height) + var(--fab-gutter))",
+                  }
+                : undefined
+            }
+          >
             {showCommenting && (
               <button
                 onClick={handleMobileCommentsClick}
@@ -459,6 +486,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
           open={showMobileDrawer}
           onOpenChange={setShowMobileDrawer}
           title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
+          excludeBottomControls={battle.status === "completed"}
         >
           <div className="flex-1 overflow-y-auto min-h-0">
             <BattleSidebar

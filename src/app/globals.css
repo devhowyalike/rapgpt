@@ -26,6 +26,9 @@
   --header-height: 52px;
   --live-banner-height: 60px;
   --bottom-controls-height: 72px; /* drawer offset for bottom buttons */
+  /* Mobile floating action buttons */
+  --fab-size: 56px; /* w-14 h-14 */
+  --fab-gutter: 24px; /* spacing above bottom edge/controls */
 }
 
 /* Desktop header heights - applied at md breakpoint (768px+) */
