@@ -119,8 +119,6 @@ export function BattleReplay({ battle }: BattleReplayProps) {
         </div>
       </div>
 
-      {/* No spacer necessary with sticky header */}
-
       {/* Split Screen Stage */}
       <div className="flex-1 md:overflow-y-auto pb-20">
         <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:min-h-full">
@@ -182,7 +180,7 @@ export function BattleReplay({ battle }: BattleReplayProps) {
             breakpoint="all"
             excludeBottomControls={true}
           >
-            <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
               <div className="p-4 md:p-6">
                 <div className={activeTab === "scores" ? "" : "hidden"}>
                   {roundScore && (

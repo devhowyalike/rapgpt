@@ -57,7 +57,7 @@ export function BattleDrawer({
             {/* Animated Content */}
             <Dialog.Content asChild forceMount>
               <motion.div
-                className={`fixed inset-x-0 z-50 bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl max-h-[70vh] flex flex-col ${hideOnDesktop}`}
+                className={`fixed inset-x-0 z-50 bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl max-h-[70vh] flex flex-col overflow-hidden ${hideOnDesktop}`}
                 style={
                   excludeBottomControls
                     ? { bottom: "var(--bottom-controls-height)" }
