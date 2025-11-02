@@ -122,8 +122,8 @@ export function BattleReplay({ battle }: BattleReplayProps) {
       {/* No spacer necessary with sticky header */}
 
       {/* Split Screen Stage */}
-      <div className="flex-1 md:overflow-y-auto pb-20 md:pb-0">
-        <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:h-full">
+      <div className="flex-1 md:overflow-y-auto pb-20">
+        <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:min-h-full">
           {/* Left Persona */}
           <div className="flex flex-col min-h-[400px] md:min-h-0">
             <div className="p-6 border-b border-gray-800">

@@ -189,7 +189,7 @@ export function BattleStage({
 
       {/* Split Screen Stage */}
       <div className="flex-1">
-        <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:h-full">
+        <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:min-h-full">
           {/* Left Persona */}
           <div
             className={`${
