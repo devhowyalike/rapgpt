@@ -519,7 +519,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                       !(isReadingPhase && showVoting))
                   }
                   className={`
-                    flex-1 px-6 py-3 rounded-lg text-white font-bold transition-all
+                    flex-1 px-2 py-2 rounded-lg text-white font-bold transition-all
                     ${
                       isReadingPhase
                         ? "bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
