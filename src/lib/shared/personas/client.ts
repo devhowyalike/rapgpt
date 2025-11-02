@@ -18,7 +18,7 @@ export const kennyK: ClientPersona = {
   name: 'Kenny K',
   bio: 'Master of the Dojo Technique. Z-Man\'s former bodyguard.',
   style: 'Boom Bap',
-  avatar: '/avatars/lyricist.png',
+  avatar: '/avatars/kenny-k.jpg',
   accentColor: '#00d4ff',
 };
 
@@ -27,7 +27,7 @@ export const ladyMuse: ClientPersona = {
   name: 'Lady Muse',
   bio: 'eBay influencer. Thief. Voted Australia\'s Most Likely to Player Hate, 1995.',
   style: 'Alt-Hop',
-  avatar: '/avatars/lyricist.png',
+  avatar: '/avatars/lady-muse.jpg',
   accentColor: '#00d4ff',
 };
 
@@ -36,7 +36,7 @@ export const timDawg: ClientPersona = {
   name: 'Tim Dawg',
   bio: 'Bronx all day, every day.',
   style: 'Boom Bap',
-  avatar: '/avatars/lyricist.png',
+  avatar: '/avatars/tim-dawg.jpg',
   accentColor: '#00d4ff',
 };
 
@@ -45,7 +45,7 @@ export const dawn: ClientPersona = {
   name: 'Dawn from En Vogue',
   bio: 'Lucy Pearl from Oakland, CA.',
   style: 'R&B',
-  avatar: '/avatars/lyricist.png',
+  avatar: '/avatars/dawn-en-vogue.jpg',
   accentColor: '#00d4ff',
 };
 

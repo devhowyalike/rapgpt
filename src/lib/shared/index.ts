@@ -5,4 +5,5 @@
 
 export * from './battle-types';
 export * from './personas';
+export * from './stages';
 

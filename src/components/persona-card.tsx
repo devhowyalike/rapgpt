@@ -53,13 +53,14 @@ export function PersonaCard({
             className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-4 bg-gray-800"
             style={{ borderColor: persona.accentColor }}
           >
-            {/* Placeholder - in production, use actual images */}
-            <div
-              className="w-full h-full flex items-center justify-center text-2xl md:text-3xl font-bold text-white"
-              style={{ backgroundColor: persona.accentColor + "40" }}
-            >
-              {persona.name.charAt(0)}
-            </div>
+            <Image
+              src={persona.avatar}
+              alt={persona.name}
+              width={80}
+              height={80}
+              className="w-full h-full object-cover"
+              priority
+            />
           </div>
 
           {isActive && (

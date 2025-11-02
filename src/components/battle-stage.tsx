@@ -11,10 +11,11 @@ import { RoundTracker } from "./round-tracker";
 import { ScoreDisplay } from "./score-display";
 import { getRoundVerses, getBattleProgress } from "@/lib/battle-engine";
 import { motion } from "framer-motion";
-import { APP_TITLE } from "@/lib/constants";
 import { BattleBell } from "./battle-bell";
 import { VictoryConfetti } from "./victory-confetti";
 import { useEffect, useRef, useLayoutEffect, useState } from "react";
+import { Eye } from "lucide-react";
+import { DEFAULT_STAGE } from "@/lib/shared/stages";
 
 interface BattleStageProps {
   battle: Battle;
@@ -39,10 +40,23 @@ export function BattleStage({
     (s) => s.round === battle.currentRound
   );
 
-  // Only show scores after voting is complete for the current round
-  // Scores should be hidden during reading and voting phases
-  const shouldShowScores =
+  // Track if user has revealed scores for this round
+  const [scoresRevealed, setScoresRevealed] = useState(false);
+
+  // Reset scoresRevealed when round changes
+  useEffect(() => {
+    setScoresRevealed(false);
+  }, [battle.currentRound]);
+
+  // Scores are available when voting is complete
+  const scoresAvailable =
     currentRoundScore && !isReadingPhase && !isVotingPhase;
+
+  // Only show scores after user clicks reveal button
+  const shouldShowScores = scoresAvailable && scoresRevealed;
+
+  // Show reveal button when scores are available but not yet revealed
+  const shouldShowRevealButton = scoresAvailable && !scoresRevealed;
 
   // Only show round winner badge after voting has been completed for the current round
   const shouldShowRoundWinner =
@@ -104,8 +118,12 @@ export function BattleStage({
     };
   }, [isMobile, battle.status, battle.winner]);
 
-  // Determine which persona to show on mobile (keep last performer up until next starts)
+  // Determine which persona to show on mobile
+  // Keep showing only the second rapper until user reveals scores
   let mobileActiveSide: "left" | "right" | null = null;
+  const bothVersesComplete =
+    currentRoundVerses.left && currentRoundVerses.right;
+
   if (streamingPersonaId === battle.personas.left.id) {
     mobileActiveSide = "left";
   } else if (streamingPersonaId === battle.personas.right.id) {
@@ -117,25 +135,37 @@ export function BattleStage({
   } else if (!currentRoundVerses.left && !currentRoundVerses.right) {
     // New round just started; show the current turn on mobile immediately
     mobileActiveSide = battle.currentTurn ?? null;
+  } else if (bothVersesComplete && !scoresRevealed) {
+    // Both verses complete but scores not revealed - keep showing the last performer
+    // Determine who performed second
+    const leftVerseId = currentRoundVerses.left?.id;
+    const rightVerseId = currentRoundVerses.right?.id;
+    if (leftVerseId && rightVerseId) {
+      const leftVerseIndex = battle.verses.findIndex(
+        (v) => v.id === leftVerseId
+      );
+      const rightVerseIndex = battle.verses.findIndex(
+        (v) => v.id === rightVerseId
+      );
+      mobileActiveSide = rightVerseIndex > leftVerseIndex ? "right" : "left";
+    }
+  } else if (bothVersesComplete && scoresRevealed) {
+    // Scores revealed - show both personas for comparison
+    mobileActiveSide = null;
   }
 
-  // When scores become visible on mobile, scroll them into view
+  // Handle reveal scores button click
   const scoreSectionRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (!shouldShowScores) return;
-    if (typeof window === "undefined") return;
-    // Tailwind md breakpoint ~ 768px; treat below as mobile
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    if (!isMobile) return;
-    // Allow initial animation frame before scrolling for smoother UX
-    const id = window.requestAnimationFrame(() => {
+  const handleRevealScores = () => {
+    setScoresRevealed(true);
+    // Scroll to scores after revealing
+    setTimeout(() => {
       scoreSectionRef.current?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
-    });
-    return () => window.cancelAnimationFrame(id);
-  }, [shouldShowScores]);
+    }, 100);
+  };
 
   return (
     <div className="flex flex-col h-full overflow-y-auto bg-linear-to-b from-stage-darker to-stage-dark overflow-x-hidden">
@@ -143,15 +173,22 @@ export function BattleStage({
       <div className="sticky left-0 right-0 z-20 px-4 py-2 md:px-6 md:py-4 border-b border-gray-800 bg-stage-darker/95 backdrop-blur-sm top-0">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-row md:flex-row items-center justify-between md:justify-start gap-2 md:gap-6">
-            <motion.h1
-              className="text-2xl md:text-4xl lg:text-6xl font-bold tracking-wider leading-none md:flex-1"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <span className="bg-linear-to-r from-yellow-400 via-red-500 to-purple-600 text-transparent bg-clip-text">
-                {APP_TITLE}
-              </span>
-            </motion.h1>
+            <div className="md:flex-1">
+              <div className="text-left">
+                <div className="text-xs md:text-base text-gray-400 uppercase tracking-wider">
+                  Stage
+                </div>
+                <div className="text-xl md:text-3xl font-bold text-white flex flex-col">
+                  <span>{DEFAULT_STAGE.name}</span>
+                  <span className="text-xs md:text-base text-gray-400 font-normal flex items-center gap-1">
+                    <span className="text-lg md:text-2xl">
+                      {DEFAULT_STAGE.flag}
+                    </span>
+                    {DEFAULT_STAGE.country}
+                  </span>
+                </div>
+              </div>
+            </div>
 
             <BattleBell
               currentRound={battle.currentRound}
@@ -266,7 +303,34 @@ export function BattleStage({
         </div>
       </div>
 
-      {/* Score Display (when round is complete and voting is done) */}
+      {/* Reveal Scores Button */}
+      {shouldShowRevealButton && currentRoundScore && (
+        <motion.div
+          className="p-4 md:p-6 border-t border-gray-800 bg-gray-900/50"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <div className="max-w-4xl mx-auto text-center">
+            <motion.button
+              onClick={handleRevealScores}
+              className="px-8 py-4 bg-linear-to-r from-yellow-500 via-orange-500 to-red-500 hover:from-yellow-600 hover:via-orange-600 hover:to-red-600 rounded-lg text-white font-bold text-lg md:text-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-3 mx-auto"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Eye className="w-6 h-6" />
+              Reveal Round {currentRoundScore.round} Scores
+            </motion.button>
+            <p className="text-gray-400 text-sm mt-3">
+              Ready to see who won? Compare both verses and check the scores.
+            </p>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Score Display (when user reveals scores) */}
       {shouldShowScores && currentRoundScore && (
         <motion.div
           ref={scoreSectionRef}
