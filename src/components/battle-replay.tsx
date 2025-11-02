@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Battle } from "@/lib/shared";
 import { PersonaCard } from "./persona-card";
 import { VerseDisplay } from "./verse-display";
@@ -13,7 +13,7 @@ import { SongGenerator } from "./song-generator";
 import { SongPlayer } from "./song-player";
 import { getRoundVerses } from "@/lib/battle-engine";
 import { motion } from "framer-motion";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { AnimatedEq } from "./animated-eq";
 import { WinnerBanner } from "./winner-banner";
@@ -37,13 +37,39 @@ export function BattleReplay({
   const [selectedRound, setSelectedRound] = useState(1);
   const roundVerses = getRoundVerses(battle, selectedRound);
   const roundScore = battle.scores.find((s) => s.round === selectedRound);
-  const { userId, sessionClaims, isLoaded } = useAuth();
+  const { sessionClaims, isLoaded } = useAuth();
+  const { user } = useUser();
   const router = useRouter();
+  const [dbUserId, setDbUserId] = useState<string | null>(null);
+
+  // Fetch internal database user ID
+  useEffect(() => {
+    if (!user?.id) {
+      setDbUserId(null);
+      return;
+    }
+
+    // Try to get from public metadata first
+    const cachedDbUserId = user.publicMetadata?.dbUserId as string | undefined;
+    if (cachedDbUserId) {
+      setDbUserId(cachedDbUserId);
+    } else {
+      // Fallback: fetch from API
+      fetch("/api/user/me")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.user?.id) {
+            setDbUserId(data.user.id);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [user]);
 
   // Check if current user is the battle creator or admin
   // Wait for Clerk to finish loading before checking admin status
   const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
-  const isCreator = userId && battle.creator?.userId === userId;
+  const isCreator = dbUserId && battle.creator?.userId === dbUserId;
 
   // Allow song generation for:
   // 1. Battle creators (verified ownership)
@@ -213,6 +239,7 @@ export function BattleReplay({
                   : "Generated Song"
               }
               excludeBottomControls={true}
+              mobileOnly={false}
             >
               <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
                 <div className="p-4 md:p-6">

@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { getBattleById, saveBattle } from '@/lib/battle-storage';
 import { generateSong } from '@/lib/suno/client';
+import { getOrCreateUser } from '@/lib/auth/sync-user';
 import type { SongGenerationBeatStyle } from '@/lib/shared/battle-types';
 
 export async function POST(
@@ -14,13 +15,17 @@ export async function POST(
 ) {
   try {
     // Authenticate user
-    const { userId, sessionClaims } = await auth();
-    if (!userId) {
+    const { userId: clerkUserId, sessionClaims } = await auth();
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: 'Unauthorized - please sign in' },
         { status: 401 }
       );
     }
+
+    // Get internal database user ID
+    const dbUser = await getOrCreateUser(clerkUserId);
+    const dbUserId = dbUser.id;
 
     const { id } = await params;
     
@@ -38,7 +43,7 @@ export async function POST(
     
     // Validate user is battle creator OR admin
     // Admins can generate songs for any battle (including legacy battles without creators)
-    const isCreator = battle.creator?.userId === userId;
+    const isCreator = battle.creator?.userId === dbUserId;
     if (!isCreator && !isAdmin) {
       return NextResponse.json(
         { error: 'Only the battle creator or an admin can generate songs' },
