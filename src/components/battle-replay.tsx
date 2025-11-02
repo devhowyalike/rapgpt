@@ -137,11 +137,11 @@ export function BattleReplay({
     if (isSongPlaying && !isDrawerOpen) {
       handleTabClick("song");
     }
-    // If drawer is open and song is playing, pause it
-    else if (isSongPlaying && isDrawerOpen) {
+    // If drawer is open with song tab AND song is playing, pause it
+    else if (isSongPlaying && isDrawerOpen && activeTab === "song") {
       setIsSongPlaying(false);
     }
-    // If song is not playing, toggle the drawer
+    // If drawer is open with different tab OR song is not playing, toggle/switch to song tab
     else {
       handleTabClick("song");
     }
