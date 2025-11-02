@@ -169,8 +169,8 @@ export function BattleReplay({ battle }: BattleReplayProps) {
         </div>
       </div>
 
-      {/* Unified Drawer */}
-      {(roundScore || showSongGenerator || showSongPlayer) && (
+      {/* Unified Drawer - Only show for completed battles */}
+      {battle.status === "completed" && (roundScore || showSongGenerator || showSongPlayer) && (
         <>
           <BattleDrawer
             open={isDrawerOpen}

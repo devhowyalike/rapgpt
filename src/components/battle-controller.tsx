@@ -380,7 +380,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
             {/* Resume Button for Incomplete Battles */}
             {battle.status === "incomplete" && (
-              <div className="p-4 pb-24 md:pb-4 bg-gray-900 border-t border-gray-800">
+              <div className="fixed md:relative bottom-0 left-0 right-0 z-50 p-4 bg-gray-900/95 md:bg-gray-900 backdrop-blur-sm md:backdrop-blur-none border-t border-gray-800">
                 <div className="max-w-4xl mx-auto">
                   <button
                     onClick={handleResumeBattle}
