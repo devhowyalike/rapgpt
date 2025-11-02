@@ -11,12 +11,6 @@ interface BattleDrawerProps {
   title: string;
   children: ReactNode;
   /**
-   * Control visibility at different breakpoints
-   * - "mobile-only": Only show on mobile (md:hidden) - default
-   * - "all": Show on all breakpoints
-   */
-  breakpoint?: "mobile-only" | "all";
-  /**
    * If true, excludes the bottom button area from the overlay
    * to allow bottom controls to remain clickable
    */
@@ -28,11 +22,8 @@ export function BattleDrawer({
   onOpenChange,
   title,
   children,
-  breakpoint = "mobile-only",
   excludeBottomControls = false,
 }: BattleDrawerProps) {
-  const hideOnDesktop = breakpoint === "mobile-only" ? "md:hidden" : "";
-
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <AnimatePresence>
@@ -41,7 +32,7 @@ export function BattleDrawer({
             {/* Animated Overlay */}
             <Dialog.Overlay asChild forceMount>
               <motion.div
-                className={`fixed top-0 left-0 right-0 bg-black/60 backdrop-blur-sm z-40 ${hideOnDesktop}`}
+                className="fixed top-0 left-0 right-0 bg-black/60 backdrop-blur-sm z-40"
                 style={
                   excludeBottomControls
                     ? { bottom: "var(--bottom-controls-height)" }
@@ -57,7 +48,7 @@ export function BattleDrawer({
             {/* Animated Content */}
             <Dialog.Content asChild forceMount>
               <motion.div
-                className={`fixed inset-x-0 z-50 bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl max-h-[70vh] flex flex-col overflow-hidden ${hideOnDesktop}`}
+                className="fixed inset-x-0 z-50 bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl max-h-[70vh] flex flex-col overflow-hidden"
                 style={
                   excludeBottomControls
                     ? { bottom: "var(--bottom-controls-height)" }

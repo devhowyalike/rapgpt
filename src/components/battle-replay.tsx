@@ -177,7 +177,6 @@ export function BattleReplay({ battle }: BattleReplayProps) {
                 ? "Generate Song"
                 : "Generated Song"
             }
-            breakpoint="all"
             excludeBottomControls={true}
           >
             <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
