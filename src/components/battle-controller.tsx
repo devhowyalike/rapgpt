@@ -28,7 +28,7 @@ import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { MobileDrawer } from "@/components/ui/mobile-drawer";
+import { BattleDrawer } from "@/components/ui/battle-drawer";
 
 interface BattleControllerProps {
   initialBattle: Battle;
@@ -455,7 +455,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
         )}
 
         {/* Mobile Drawer */}
-        <MobileDrawer
+        <BattleDrawer
           open={showMobileDrawer}
           onOpenChange={setShowMobileDrawer}
           title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
@@ -470,7 +470,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
               defaultTab={mobileActiveTab}
             />
           </div>
-        </MobileDrawer>
+        </BattleDrawer>
       </>
     );
   }
@@ -668,7 +668,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
       )}
 
       {/* Mobile Drawer */}
-      <MobileDrawer
+      <BattleDrawer
         open={showMobileDrawer}
         onOpenChange={setShowMobileDrawer}
         title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
@@ -684,7 +684,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
             defaultTab={mobileActiveTab}
           />
         </div>
-      </MobileDrawer>
+      </BattleDrawer>
 
       {/* Pause Battle Dialog */}
       <ConfirmationDialog

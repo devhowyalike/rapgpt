@@ -12,14 +12,14 @@ import { ScoreDisplay } from "./score-display";
 import { SongGenerator } from "./song-generator";
 import { SongPlayer } from "./song-player";
 import { getRoundVerses } from "@/lib/battle-engine";
-import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { motion } from "framer-motion";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { AnimatedEq } from "./animated-eq";
 import { WinnerBanner } from "./winner-banner";
 import { CreatorAttribution } from "./creator-attribution";
 import { RoundControls } from "./round-controls";
+import { BattleDrawer } from "./ui/battle-drawer";
 
 interface BattleReplayProps {
   battle: Battle;
@@ -166,105 +166,65 @@ export function BattleReplay({ battle }: BattleReplayProps) {
         </div>
       </div>
 
-      {/* Drawer Backdrop - Synchronized with drawer (all breakpoints) */}
-      <AnimatePresence>
-        {isDrawerOpen && activeTab && (
-          <motion.div
-            className="fixed inset-0 bg-black/50 z-20"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ type: "tween", ease: "easeOut", duration: 0.2 }}
-            onClick={() => setIsDrawerOpen(false)}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Bottom Action Drawer - Unified responsive drawer (always mounted) */}
+      {/* Unified Drawer */}
       {(roundScore || showSongGenerator || showSongPlayer) && (
         <>
-          <motion.div
-            className={
-              "fixed left-0 right-0 z-30 bg-gray-900 shadow-2xl border-t border-gray-800 pointer-events-none"
+          <BattleDrawer
+            open={isDrawerOpen}
+            onOpenChange={setIsDrawerOpen}
+            title={
+              activeTab === "scores"
+                ? "Round Scores"
+                : showSongGenerator
+                ? "Generate Song"
+                : "Generated Song"
             }
-            style={{ bottom: "var(--bottom-controls-height)" }}
-            animate={
-              isDrawerOpen && activeTab
-                ? { y: 0, opacity: 1 }
-                : { y: "100%", opacity: 0 }
-            }
-            initial={{ y: "100%", opacity: 0 }}
-            transition={{ type: "tween", ease: "easeOut", duration: 0.28 }}
+            breakpoint="all"
+            excludeBottomControls={true}
           >
-            <div
-              className={`max-w-4xl mx-auto ${
-                isDrawerOpen && activeTab ? "pointer-events-auto" : ""
-              }`}
-            >
-              {/* Close button */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
-                <h3 className="text-lg font-bold text-white">
-                  {activeTab === "scores"
-                    ? "Round Scores"
-                    : showSongGenerator
-                    ? "Generate Song"
-                    : "Generated Song"}
-                </h3>
-                <button
-                  onClick={() => setIsDrawerOpen(false)}
-                  className="p-2 rounded-lg hover:bg-gray-800 transition-colors"
+            <div className="flex-1 overflow-y-auto min-h-0">
+              <div className="p-4 md:p-6">
+                <div className={activeTab === "scores" ? "" : "hidden"}>
+                  {roundScore && (
+                    <div>
+                      <h3 className="text-xl md:text-2xl font-(family-name:--font-bebas-neue) text-center mb-4 text-yellow-400">
+                        ROUND {roundScore.round} SCORES
+                      </h3>
+                      <ScoreDisplay
+                        roundScore={roundScore}
+                        leftPersona={battle.personas.left}
+                        rightPersona={battle.personas.right}
+                      />
+                    </div>
+                  )}
+                </div>
+                <div
+                  className={`max-w-2xl mx-auto ${
+                    activeTab === "song" ? "" : "hidden"
+                  }`}
                 >
-                  <X className="w-5 h-5 text-gray-400" />
-                </button>
-              </div>
-
-              {/* Scrollable Content */}
-              <div className="overflow-y-auto max-h-[60vh]">
-                <div className="p-4 md:p-6 pb-8">
-                  <div className={activeTab === "scores" ? "" : "hidden"}>
-                    {roundScore && (
-                      <div>
-                        <h3 className="text-xl md:text-2xl font-(family-name:--font-bebas-neue) text-center mb-4 text-yellow-400">
-                          ROUND {roundScore.round} SCORES
-                        </h3>
-                        <ScoreDisplay
-                          roundScore={roundScore}
-                          leftPersona={battle.personas.left}
-                          rightPersona={battle.personas.right}
-                        />
-                      </div>
-                    )}
-                  </div>
-                  <div
-                    className={`max-w-2xl mx-auto ${
-                      activeTab === "song" ? "" : "hidden"
-                    }`}
-                  >
-                    {showSongGenerator && (
-                      <SongGenerator
-                        battleId={battle.id}
-                        onSongGenerated={() => router.refresh()}
-                      />
-                    )}
-                    {showSongPlayer && battle.generatedSong && (
-                      <SongPlayer
-                        song={battle.generatedSong}
-                        externalIsPlaying={isSongPlaying}
-                        onPlayStateChange={(playing) =>
-                          setIsSongPlaying(playing)
-                        }
-                        onTogglePlay={() => setIsSongPlaying(!isSongPlaying)}
-                      />
-                    )}
-                  </div>
+                  {showSongGenerator && (
+                    <SongGenerator
+                      battleId={battle.id}
+                      onSongGenerated={() => router.refresh()}
+                    />
+                  )}
+                  {showSongPlayer && battle.generatedSong && (
+                    <SongPlayer
+                      song={battle.generatedSong}
+                      externalIsPlaying={isSongPlaying}
+                      onPlayStateChange={(playing) => setIsSongPlaying(playing)}
+                      onTogglePlay={() => setIsSongPlaying(!isSongPlaying)}
+                    />
+                  )}
                 </div>
               </div>
             </div>
-          </motion.div>
+          </BattleDrawer>
 
           {/* Fixed Bottom Buttons */}
           <div
-            className="fixed bottom-0 left-0 right-0 z-40 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800"
+            className="fixed bottom-0 left-0 right-0 z-60 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800"
             style={{ height: "var(--bottom-controls-height)" }}
           >
             <div className="max-w-4xl mx-auto h-full px-2 md:px-4 flex items-center justify-center gap-2 md:gap-3">

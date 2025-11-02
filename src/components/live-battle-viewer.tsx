@@ -16,7 +16,7 @@ import { useBattleStore } from "@/lib/battle-store";
 import { MessageSquare, ThumbsUp, Settings } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
-import { MobileDrawer } from "@/components/ui/mobile-drawer";
+import { BattleDrawer } from "@/components/ui/battle-drawer";
 
 interface LiveBattleViewerProps {
   initialBattle: Battle;
@@ -425,7 +425,7 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
       )}
 
       {/* Mobile Drawer */}
-      <MobileDrawer
+      <BattleDrawer
         open={showMobileDrawer}
         onOpenChange={setShowMobileDrawer}
         title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
@@ -441,7 +441,7 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
             defaultTab={mobileActiveTab}
           />
         </div>
-      </MobileDrawer>
+      </BattleDrawer>
     </>
   );
 }
