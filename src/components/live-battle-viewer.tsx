@@ -317,10 +317,13 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
   return (
     <>
       <SiteHeader />
-      <div style={{ height: "52px" }} />
+      <div style={{ height: "var(--header-height)" }} />
 
       {/* Live Indicator Banner */}
-      <div className="bg-gray-900 border-b border-gray-800 p-3">
+      <div 
+        className="bg-gray-900 border-b border-gray-800 p-3"
+        style={{ height: 'var(--live-banner-height)' }}
+      >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <LiveIndicator
             isLive={battle.isLive}
@@ -351,7 +354,7 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
         </div>
       </div>
 
-      <div className="flex flex-col md:h-[calc(100vh-7.5rem)] md:flex-row">
+      <div className="flex flex-col md:h-[calc(100vh-var(--header-height)-var(--live-banner-height))] md:flex-row">
         {/* Battle Stage */}
         <div className="flex-1 flex flex-col min-h-0">
           <BattleStage

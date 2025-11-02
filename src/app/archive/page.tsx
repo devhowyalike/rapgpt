@@ -13,8 +13,8 @@ export default async function ArchivePage() {
   return (
     <>
       <SiteHeader />
-      <div style={{ height: "52px" }} />
-      <div className="min-h-[calc(100vh-3.5rem)] bg-linear-to-b from-stage-darker to-stage-dark">
+      <div style={{ height: "var(--header-height)" }} />
+      <div className="min-h-[calc(100vh-var(--header-height))] bg-linear-to-b from-stage-darker to-stage-dark">
         <div className="max-w-6xl mx-auto p-6">
           {/* Header */}
           <div className="mb-12">

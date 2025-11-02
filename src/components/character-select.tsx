@@ -163,14 +163,14 @@ export function CharacterSelect() {
   return (
     <>
       <SiteHeader />
-      <div style={{ height: "52px" }} />
+      <div style={{ height: "var(--header-height)" }} />
       <div className="bg-linear-to-b from-gray-950 via-gray-900 to-black relative">
         {/* Dramatic Background Effect */}
         <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_50%)] pointer-events-none" />
         <div className="fixed inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(0,0,0,0.8)_100%)] pointer-events-none" />
 
         {/* Main Container */}
-        <div className="relative z-10 flex flex-col min-h-[calc(100vh-52px)] justify-start pt-8 md:pt-16 lg:pt-20 pb-4 md:pb-8">
+        <div className="relative z-10 flex flex-col min-h-[calc(100vh-var(--header-height))] justify-start pt-8 md:pt-16 lg:pt-20 pb-4 md:pb-8">
           {/* Page Hero - Create Battle */}
           <div className="px-2 md:px-8 lg:px-16 mb-3 md:mb-6 lg:mb-8">
             <div className="text-center">

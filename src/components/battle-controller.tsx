@@ -372,8 +372,8 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     return (
       <>
         <SiteHeader />
-        <div style={{ height: "52px" }} />
-        <div className="flex flex-col h-[calc(100vh-52px)] md:h-[calc(100vh-3.5rem)] md:flex-row">
+        <div style={{ height: "var(--header-height)" }} />
+        <div className="flex flex-col h-[calc(100vh-var(--header-height))] md:flex-row">
           {/* Main Stage */}
           <div className="flex-1 flex flex-col min-h-0">
             <BattleReplay battle={battle} />
@@ -479,8 +479,8 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   return (
     <>
       <SiteHeader />
-      <div style={{ height: "52px" }} />
-      <div className="flex flex-col h-[calc(100vh-52px)] md:h-[calc(100vh-3.5rem)] md:flex-row">
+      <div style={{ height: "var(--header-height)" }} />
+      <div className="flex flex-col h-[calc(100vh-var(--header-height))] md:flex-row">
         {/* Main Stage */}
         <div className="flex-1 flex flex-col min-h-0">
           <BattleStage

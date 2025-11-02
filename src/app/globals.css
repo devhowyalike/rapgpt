@@ -21,6 +21,17 @@
   --input: hsl(0 0% 89.8%);
   --ring: hsl(0 0% 3.9%);
   --radius: 0.5rem;
+
+  /* Layout heights - centralized for scalability */
+  --header-height: 52px;
+  --live-banner-height: 60px;
+}
+
+/* Desktop header heights - applied at md breakpoint (768px+) */
+@media (min-width: 768px) {
+  :root {
+    --header-height: 3.5rem; /* 56px on desktop */
+  }
 }
 
 .dark {

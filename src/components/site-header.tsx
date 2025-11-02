@@ -73,8 +73,11 @@ export function SiteHeader() {
   const { hasArchived } = useHasArchivedBattles();
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-30 p-3 bg-gray-900/95 border-b border-gray-800 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <div 
+      className="fixed top-0 left-0 right-0 z-30 p-3 bg-gray-900/95 border-b border-gray-800 backdrop-blur-sm"
+      style={{ height: 'var(--header-height)' }}
+    >
+      <div className="max-w-7xl mx-auto flex items-center justify-between h-full">
         <div className="flex items-center gap-4">
           <Link
             href="/"

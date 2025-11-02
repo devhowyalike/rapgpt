@@ -122,7 +122,7 @@ export function BattleReplay({ battle }: BattleReplayProps) {
       {/* Header with Replay Controls */}
       <div
         ref={battleReplayHeaderRef}
-        className="fixed md:relative top-[52px] md:top-0 left-0 right-0 z-20 p-4 md:p-6 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none"
+        className="fixed md:relative left-0 right-0 z-20 p-4 md:p-6 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none [top:var(--header-height)] md:top-auto"
       >
         <div className="max-w-7xl mx-auto">
           {/* Mobile: Stacked Layout */}
@@ -368,7 +368,8 @@ export function BattleReplay({ battle }: BattleReplayProps) {
           <AnimatePresence>
             {isMobile && isDrawerOpen && activeTab && (
               <motion.div
-                className="fixed bottom-[52px] left-0 right-0 z-30 bg-gray-900 shadow-2xl"
+                className="fixed left-0 right-0 z-30 bg-gray-900 shadow-2xl"
+                style={{ bottom: "var(--header-height)" }}
                 initial={{ y: "100%", opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: "100%", opacity: 0 }}

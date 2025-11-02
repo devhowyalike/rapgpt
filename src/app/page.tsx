@@ -25,8 +25,8 @@ export default async function Home() {
   return (
     <>
       <SiteHeader />
-      <div style={{ height: "52px" }} />
-      <div className="min-h-[calc(100vh-3.5rem)] bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center justify-center p-6">
+      <div style={{ height: "var(--header-height)" }} />
+      <div className="min-h-[calc(100vh-var(--header-height))] bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center justify-center p-6">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           {/* Logo */}
           <h1 className="text-6xl md:text-8xl font-bold tracking-wider">
