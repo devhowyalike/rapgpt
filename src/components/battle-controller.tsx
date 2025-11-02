@@ -162,6 +162,11 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
       setVotingTimeRemaining(next);
       if (next <= 0 && battle) {
         completeVotingPhase(battle.currentRound);
+        
+        // On mobile, close the drawer and scroll to scores when voting ends
+        if (typeof window !== "undefined" && window.innerWidth < 768) {
+          setShowMobileDrawer(false);
+        }
       }
     }, 1000);
 
