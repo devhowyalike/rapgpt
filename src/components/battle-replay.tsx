@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, useRef, useLayoutEffect, useEffect } from "react";
+import { useState, useEffect } from "react";
 import type { Battle } from "@/lib/shared";
 import { PersonaCard } from "./persona-card";
 import { VerseDisplay } from "./verse-display";
@@ -30,8 +30,6 @@ export function BattleReplay({ battle }: BattleReplayProps) {
   const { userId, sessionClaims, isLoaded } = useAuth();
   const router = useRouter();
 
-  const battleReplayHeaderRef = useRef<HTMLDivElement>(null);
-  const [headerHeight, setHeaderHeight] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
   // Check if current user is the battle creator or admin
@@ -58,31 +56,6 @@ export function BattleReplay({ battle }: BattleReplayProps) {
   const [activeTab, setActiveTab] = useState<"scores" | "song" | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  useLayoutEffect(() => {
-    const headerEl = battleReplayHeaderRef.current;
-    if (!headerEl) return;
-
-    const updateHeaderHeight = () => {
-      setHeaderHeight(headerEl.offsetHeight);
-    };
-
-    // Initial measurement
-    updateHeaderHeight();
-
-    // Listen for window resizes
-    const onWindowResize = () => updateHeaderHeight();
-    window.addEventListener("resize", onWindowResize);
-
-    // Observe element size changes (content changes like winner banner)
-    const resizeObserver = new ResizeObserver(() => updateHeaderHeight());
-    resizeObserver.observe(headerEl);
-
-    return () => {
-      window.removeEventListener("resize", onWindowResize);
-      resizeObserver.disconnect();
-    };
-  }, []);
-
   // Check if mobile viewport
   useEffect(() => {
     const checkMobile = () => {
@@ -93,6 +66,8 @@ export function BattleReplay({ battle }: BattleReplayProps) {
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  // No JS offset needed when header is sticky
 
   const canGoPrev = selectedRound > 1;
   const canGoNext = selectedRound < 3;
@@ -121,8 +96,7 @@ export function BattleReplay({ battle }: BattleReplayProps) {
     <div className="flex flex-col min-h-0 md:h-full bg-linear-to-b from-stage-darker to-stage-dark">
       {/* Header with Replay Controls */}
       <div
-        ref={battleReplayHeaderRef}
-        className="fixed md:relative left-0 right-0 z-20 p-4 md:p-6 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none [top:var(--header-height)] md:top-auto"
+        className="sticky md:relative left-0 right-0 z-20 p-4 md:p-6 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none top-(--header-height) md:top-auto"
       >
         <div className="max-w-7xl mx-auto">
           {/* Mobile: Stacked Layout */}
@@ -261,8 +235,7 @@ export function BattleReplay({ battle }: BattleReplayProps) {
         </div>
       </div>
 
-      {/* Spacer for mobile fixed header */}
-      <div className="md:hidden" style={{ height: headerHeight }} />
+      {/* No spacer necessary with sticky header */}
 
       {/* Split Screen Stage */}
       <div className="flex-1 md:overflow-y-auto pb-20 md:pb-0">

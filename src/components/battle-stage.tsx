@@ -14,7 +14,7 @@ import { motion } from "framer-motion";
 import { APP_TITLE } from "@/lib/constants";
 import { BattleBell } from "./battle-bell";
 import { VictoryConfetti } from "./victory-confetti";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useLayoutEffect, useState } from "react";
 
 interface BattleStageProps {
   battle: Battle;
@@ -48,6 +48,61 @@ export function BattleStage({
   const shouldShowRoundWinner =
     votingCompletedRound !== null &&
     votingCompletedRound >= battle.currentRound;
+
+  // Mobile-only offset so the first persona does not render under the sticky trophy/header
+  const [isMobile, setIsMobile] = useState(false);
+  const trophyRef = useRef<HTMLDivElement | null>(null);
+  const [personaTopMargin, setPersonaTopMargin] = useState(0);
+
+  // Track viewport size for mobile logic
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Compute combined offset: site header height (CSS var) + trophy banner height
+  useLayoutEffect(() => {
+    if (!isMobile) {
+      setPersonaTopMargin(0);
+      return;
+    }
+
+    const recalc = () => {
+      const rootStyle = getComputedStyle(document.documentElement);
+      const headerVar = rootStyle.getPropertyValue("--header-height").trim();
+      const headerPx = parseFloat(headerVar || "0") || 0;
+
+      const trophyEl = trophyRef.current;
+      if (!trophyEl) {
+        setPersonaTopMargin(0);
+        return;
+      }
+
+      const rect = trophyEl.getBoundingClientRect();
+      const trophyStyle = getComputedStyle(trophyEl);
+      const mt = parseFloat(trophyStyle.marginTop || "0") || 0;
+      const mb = parseFloat(trophyStyle.marginBottom || "0") || 0;
+      const trophyTotal = rect.height + mt + mb;
+      // Include the distance from the top of the sticky header down to the trophy block
+      const distanceToTrophy = trophyEl.offsetTop || 0;
+
+      setPersonaTopMargin(headerPx + distanceToTrophy + trophyTotal);
+    };
+
+    recalc();
+    window.addEventListener("resize", recalc);
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined" && trophyRef.current) {
+      ro = new ResizeObserver(() => recalc());
+      ro.observe(trophyRef.current);
+    }
+    return () => {
+      window.removeEventListener("resize", recalc);
+      ro?.disconnect();
+    };
+  }, [isMobile, battle.status, battle.winner]);
 
   // Determine which persona to show on mobile (keep last performer up until next starts)
   let mobileActiveSide: "left" | "right" | null = null;
@@ -85,9 +140,7 @@ export function BattleStage({
   return (
     <div className="flex flex-col h-full overflow-y-auto bg-linear-to-b from-stage-darker to-stage-dark">
       {/* Header with Round Tracker */}
-      <div 
-        className="sticky top-0 left-0 right-0 z-20 px-4 py-3 md:px-6 md:py-4 border-b border-gray-800 bg-stage-darker/95 backdrop-blur-sm"
-      >
+      <div className="sticky left-0 right-0 z-20 px-4 py-3 md:px-6 md:py-4 border-b border-gray-800 bg-stage-darker/95 backdrop-blur-sm top-(--header-height)">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-row md:flex-row items-center justify-between md:justify-start gap-2 md:gap-6">
             <motion.h1
@@ -115,6 +168,7 @@ export function BattleStage({
 
           {battle.status === "completed" && battle.winner && (
             <motion.div
+              ref={trophyRef}
               className="mt-4 md:mt-6 text-center relative"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -144,7 +198,10 @@ export function BattleStage({
                 : "flex"
             } flex-col md:min-h-0`}
           >
-            <div className="p-3 md:p-4 border-b border-gray-800">
+            <div
+              className="p-3 md:p-4 border-b border-gray-800"
+              style={isMobile ? { marginTop: personaTopMargin } : undefined}
+            >
               <PersonaCard
                 persona={battle.personas.left}
                 position="left"
@@ -178,7 +235,10 @@ export function BattleStage({
                 : "flex"
             } flex-col md:min-h-0`}
           >
-            <div className="p-3 md:p-4 border-b border-gray-800">
+            <div
+              className="p-3 md:p-4 border-b border-gray-800"
+              style={isMobile ? { marginTop: personaTopMargin } : undefined}
+            >
               <PersonaCard
                 persona={battle.personas.right}
                 position="right"
