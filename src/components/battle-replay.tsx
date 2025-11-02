@@ -219,9 +219,17 @@ export function BattleReplay({
                   <div className={activeTab === "scores" ? "" : "hidden"}>
                     {roundScore && (
                       <div>
-                        <h3 className="text-xl md:text-2xl font-(family-name:--font-bebas-neue) text-center mb-4 text-yellow-400">
-                          ROUND {roundScore.round} SCORES
-                        </h3>
+                        {/* Round Navigation Controls */}
+                        <div className="flex justify-center mb-6">
+                          <RoundControls
+                            selectedRound={selectedRound}
+                            canGoPrev={canGoPrev}
+                            canGoNext={canGoNext}
+                            onPrev={handlePrevRound}
+                            onNext={handleNextRound}
+                          />
+                        </div>
+
                         <ScoreDisplay
                           roundScore={roundScore}
                           leftPersona={battle.personas.left}
