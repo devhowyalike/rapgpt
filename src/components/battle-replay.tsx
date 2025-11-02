@@ -48,6 +48,7 @@ export function BattleReplay({
   // Allow song generation for:
   // 1. Battle creators (verified ownership)
   // 2. Admins (can generate for any battle, including legacy ones)
+  // Also show generator if song generation was incomplete (has taskId but no audioUrl)
   const canGenerateSong =
     (isCreator || isAdmin) &&
     battle.status === "completed" &&
@@ -237,6 +238,7 @@ export function BattleReplay({
                     {showSongGenerator && (
                       <SongGenerator
                         battleId={battle.id}
+                        battle={battle}
                         onSongGenerated={() => router.refresh()}
                       />
                     )}

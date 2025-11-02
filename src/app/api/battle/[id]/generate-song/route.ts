@@ -54,12 +54,27 @@ export async function POST(
       );
     }
 
-    // Check if song already exists
-    if (battle.generatedSong) {
+    // Check if song already exists AND is complete
+    // Allow retrying if song generation was started but didn't complete (has taskId but no audioUrl)
+    if (battle.generatedSong?.audioUrl) {
       return NextResponse.json(
         { error: 'Song already generated for this battle' },
         { status: 400 }
       );
+    }
+    
+    // If there's an incomplete song, we can resume with the existing taskId
+    const existingTaskId = battle.generatedSong?.sunoTaskId;
+    if (existingTaskId) {
+      console.log('[API] Found existing incomplete song with taskId:', existingTaskId);
+      // Return the existing taskId so client can resume polling
+      return NextResponse.json({
+        success: true,
+        taskId: existingTaskId,
+        status: 'processing',
+        message: 'Resuming song generation. Polling for completion...',
+        isResume: true,
+      });
     }
 
     // Parse request body
