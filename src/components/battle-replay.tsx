@@ -95,9 +95,7 @@ export function BattleReplay({ battle }: BattleReplayProps) {
   return (
     <div className="flex flex-col min-h-0 md:h-full bg-linear-to-b from-stage-darker to-stage-dark">
       {/* Header with Replay Controls */}
-      <div
-        className="sticky md:relative left-0 right-0 z-20 p-4 md:p-6 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none top-(--header-height) md:top-auto"
-      >
+      <div className="sticky md:relative left-0 right-0 z-20 p-4 md:p-6 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none top-(--header-height) md:top-auto">
         <div className="max-w-7xl mx-auto">
           {/* Mobile: Stacked Layout */}
           <div className="md:hidden flex flex-col gap-3">
