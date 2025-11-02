@@ -86,11 +86,11 @@ export function BattleReplay({ battle }: BattleReplayProps) {
     // If drawer is closed but song is playing, open it instead of pausing
     if (isSongPlaying && !isDrawerOpen) {
       handleTabClick("song");
-    } 
+    }
     // If drawer is open and song is playing, pause it
     else if (isSongPlaying && isDrawerOpen) {
       setIsSongPlaying(false);
-    } 
+    }
     // If song is not playing, toggle the drawer
     else {
       handleTabClick("song");
@@ -125,7 +125,7 @@ export function BattleReplay({ battle }: BattleReplayProps) {
       </div>
 
       {/* Split Screen Stage */}
-      <div className="flex-1 md:overflow-y-auto pb-20">
+      <div className="flex-1 md:overflow-y-auto pb-20 md:pb-0">
         <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:min-h-full">
           {/* Left Persona */}
           <div className="flex flex-col min-h-[400px] md:min-h-0">
@@ -170,69 +170,72 @@ export function BattleReplay({ battle }: BattleReplayProps) {
       </div>
 
       {/* Unified Drawer - Only show for completed battles */}
-      {battle.status === "completed" && (roundScore || showSongGenerator || showSongPlayer) && (
-        <>
-          <BattleDrawer
-            open={isDrawerOpen}
-            onOpenChange={setIsDrawerOpen}
-            title={
-              activeTab === "scores"
-                ? "Round Scores"
-                : showSongGenerator
-                ? "Generate Song"
-                : "Generated Song"
-            }
-            excludeBottomControls={true}
-          >
-            <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
-              <div className="p-4 md:p-6">
-                <div className={activeTab === "scores" ? "" : "hidden"}>
-                  {roundScore && (
-                    <div>
-                      <h3 className="text-xl md:text-2xl font-(family-name:--font-bebas-neue) text-center mb-4 text-yellow-400">
-                        ROUND {roundScore.round} SCORES
-                      </h3>
-                      <ScoreDisplay
-                        roundScore={roundScore}
-                        leftPersona={battle.personas.left}
-                        rightPersona={battle.personas.right}
+      {battle.status === "completed" &&
+        (roundScore || showSongGenerator || showSongPlayer) && (
+          <>
+            <BattleDrawer
+              open={isDrawerOpen}
+              onOpenChange={setIsDrawerOpen}
+              title={
+                activeTab === "scores"
+                  ? "Round Scores"
+                  : showSongGenerator
+                  ? "Generate Song"
+                  : "Generated Song"
+              }
+              excludeBottomControls={true}
+            >
+              <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
+                <div className="p-4 md:p-6">
+                  <div className={activeTab === "scores" ? "" : "hidden"}>
+                    {roundScore && (
+                      <div>
+                        <h3 className="text-xl md:text-2xl font-(family-name:--font-bebas-neue) text-center mb-4 text-yellow-400">
+                          ROUND {roundScore.round} SCORES
+                        </h3>
+                        <ScoreDisplay
+                          roundScore={roundScore}
+                          leftPersona={battle.personas.left}
+                          rightPersona={battle.personas.right}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div
+                    className={`max-w-2xl mx-auto ${
+                      activeTab === "song" ? "" : "hidden"
+                    }`}
+                  >
+                    {showSongGenerator && (
+                      <SongGenerator
+                        battleId={battle.id}
+                        onSongGenerated={() => router.refresh()}
                       />
-                    </div>
-                  )}
-                </div>
-                <div
-                  className={`max-w-2xl mx-auto ${
-                    activeTab === "song" ? "" : "hidden"
-                  }`}
-                >
-                  {showSongGenerator && (
-                    <SongGenerator
-                      battleId={battle.id}
-                      onSongGenerated={() => router.refresh()}
-                    />
-                  )}
-                  {showSongPlayer && battle.generatedSong && (
-                    <SongPlayer
-                      song={battle.generatedSong}
-                      externalIsPlaying={isSongPlaying}
-                      onPlayStateChange={(playing) => setIsSongPlaying(playing)}
-                      onTogglePlay={() => setIsSongPlaying(!isSongPlaying)}
-                    />
-                  )}
+                    )}
+                    {showSongPlayer && battle.generatedSong && (
+                      <SongPlayer
+                        song={battle.generatedSong}
+                        externalIsPlaying={isSongPlaying}
+                        onPlayStateChange={(playing) =>
+                          setIsSongPlaying(playing)
+                        }
+                        onTogglePlay={() => setIsSongPlaying(!isSongPlaying)}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          </BattleDrawer>
+            </BattleDrawer>
 
-          {/* Fixed Bottom Buttons */}
-          <div
-            className="fixed bottom-0 left-0 right-0 z-60 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800"
-            style={{ height: "var(--bottom-controls-height)" }}
-          >
-            <div className="max-w-4xl mx-auto h-full px-2 md:px-4 flex items-center justify-center gap-2 md:gap-3">
-              <motion.button
-                onClick={() => handleTabClick("scores")}
-                className={`
+            {/* Fixed Bottom Buttons */}
+            <div
+              className="fixed bottom-0 left-0 right-0 z-60 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800"
+              style={{ height: "var(--bottom-controls-height)" }}
+            >
+              <div className="max-w-4xl mx-auto h-full px-2 md:px-4 flex items-center justify-center gap-2 md:gap-3">
+                <motion.button
+                  onClick={() => handleTabClick("scores")}
+                  className={`
                   flex-1 md:flex-none px-4 py-2.5 md:px-6 md:py-3 font-bold text-sm md:text-base
                   rounded-lg border-2 transition-all duration-200
                   ${
@@ -241,23 +244,23 @@ export function BattleReplay({ battle }: BattleReplayProps) {
                       : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
                   }
                 `}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span className="flex items-center justify-center gap-2">
-                  <span className="text-lg">📊</span>
-                  <span>Scores</span>
-                </span>
-              </motion.button>
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="text-lg">📊</span>
+                    <span>Scores</span>
+                  </span>
+                </motion.button>
 
-              {(showSongGenerator || showSongPlayer) && (
-                <motion.button
-                  onClick={
-                    showSongPlayer
-                      ? handleSongButtonClick
-                      : () => handleTabClick("song")
-                  }
-                  className={`
+                {(showSongGenerator || showSongPlayer) && (
+                  <motion.button
+                    onClick={
+                      showSongPlayer
+                        ? handleSongButtonClick
+                        : () => handleTabClick("song")
+                    }
+                    className={`
                     flex-1 md:flex-none px-4 py-2.5 md:px-6 md:py-3 font-bold text-sm md:text-base
                     rounded-lg border-2 transition-all duration-200
                     ${
@@ -270,43 +273,43 @@ export function BattleReplay({ battle }: BattleReplayProps) {
                         : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
                     }
                   `}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <span className="flex items-center justify-center gap-2">
-                    {showSongGenerator ? (
-                      <>
-                        <span
-                          className="text-lg inline-block"
-                          style={{ filter: "invert(1)" }}
-                        >
-                          🎵
-                        </span>
-                        <span>Make it an MP3</span>
-                      </>
-                    ) : isSongPlaying ? (
-                      <>
-                        <AnimatedEq className="text-white" />
-                        <span>Pause Song</span>
-                      </>
-                    ) : (
-                      <>
-                        <span
-                          className="text-lg inline-block"
-                          style={{ filter: "invert(1)" }}
-                        >
-                          🎵
-                        </span>
-                        <span>Song</span>
-                      </>
-                    )}
-                  </span>
-                </motion.button>
-              )}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <span className="flex items-center justify-center gap-2">
+                      {showSongGenerator ? (
+                        <>
+                          <span
+                            className="text-lg inline-block"
+                            style={{ filter: "invert(1)" }}
+                          >
+                            🎵
+                          </span>
+                          <span>Make it an MP3</span>
+                        </>
+                      ) : isSongPlaying ? (
+                        <>
+                          <AnimatedEq className="text-white" />
+                          <span>Pause Song</span>
+                        </>
+                      ) : (
+                        <>
+                          <span
+                            className="text-lg inline-block"
+                            style={{ filter: "invert(1)" }}
+                          >
+                            🎵
+                          </span>
+                          <span>Song</span>
+                        </>
+                      )}
+                    </span>
+                  </motion.button>
+                )}
+              </div>
             </div>
-          </div>
-        </>
-      )}
+          </>
+        )}
     </div>
   );
 }
