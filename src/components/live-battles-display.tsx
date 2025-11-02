@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Clock, Radio, Users } from "lucide-react";
 import type { Battle } from "@/lib/shared";
 import type { WebSocketEvent } from "@/lib/websocket/types";
@@ -146,8 +147,16 @@ export function LiveBattlesDisplay({
           {/* Matchup */}
           <div className="flex items-center justify-center gap-4 md:gap-8 mb-6 flex-wrap">
             <div className="text-center">
-              <div className="text-5xl mb-2">
-                {battle.personas.left.avatar || "🎤"}
+              <div className="mb-2 flex justify-center">
+                <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-blue-500">
+                  <Image
+                    src={battle.personas.left.avatar}
+                    alt={battle.personas.left.name}
+                    width={80}
+                    height={80}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
               <div className="text-lg font-bold text-white">
                 {battle.personas.left.name}
@@ -160,8 +169,16 @@ export function LiveBattlesDisplay({
             <div className="text-4xl font-bold text-red-500">VS</div>
 
             <div className="text-center">
-              <div className="text-5xl mb-2">
-                {battle.personas.right.avatar || "🎤"}
+              <div className="mb-2 flex justify-center">
+                <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-red-500">
+                  <Image
+                    src={battle.personas.right.avatar}
+                    alt={battle.personas.right.name}
+                    width={80}
+                    height={80}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
               <div className="text-lg font-bold text-white">
                 {battle.personas.right.name}

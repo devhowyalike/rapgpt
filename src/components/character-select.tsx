@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { SiteHeader } from "./site-header";
 import { useAuth } from "@clerk/nextjs";
 import { BattleOptions } from "./battle-options";
+import Image from "next/image";
 
 export function CharacterSelect() {
   const [player1, setPlayer1] = useState<ClientPersona | null>(null);
@@ -201,15 +202,19 @@ export function CharacterSelect() {
                     <div className="relative mb-2 group">
                       <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full animate-pulse" />
                       <div
-                        className="relative w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 border-blue-500 flex items-center justify-center text-2xl md:text-4xl lg:text-5xl text-white bg-linear-to-br from-gray-800 to-gray-900 shadow-2xl transform transition-transform hover:scale-105"
+                        className="relative w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 border-blue-500 overflow-hidden bg-linear-to-br from-gray-800 to-gray-900 shadow-2xl transform transition-transform hover:scale-105"
                         style={{
                           boxShadow: `0 0 40px rgba(59, 130, 246, 0.6)`,
                         }}
                       >
-                        {displayPersona.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
+                        <Image
+                          src={displayPersona.avatar}
+                          alt={displayPersona.name}
+                          width={144}
+                          height={144}
+                          className="w-full h-full object-cover"
+                          priority
+                        />
                       </div>
                     </div>
                     {/* Character Name */}
@@ -283,15 +288,19 @@ export function CharacterSelect() {
                     <div className="relative mb-2 group">
                       <div className="absolute inset-0 bg-red-500/20 blur-2xl rounded-full animate-pulse" />
                       <div
-                        className="relative w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 border-red-500 flex items-center justify-center text-2xl md:text-4xl lg:text-5xl text-white bg-linear-to-br from-gray-800 to-gray-900 shadow-2xl transform transition-transform hover:scale-105"
+                        className="relative w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 border-red-500 overflow-hidden bg-linear-to-br from-gray-800 to-gray-900 shadow-2xl transform transition-transform hover:scale-105"
                         style={{
                           boxShadow: `0 0 40px rgba(239, 68, 68, 0.6)`,
                         }}
                       >
-                        {displayPersona.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
+                        <Image
+                          src={displayPersona.avatar}
+                          alt={displayPersona.name}
+                          width={144}
+                          height={144}
+                          className="w-full h-full object-cover"
+                          priority
+                        />
                       </div>
                     </div>
                     {/* Character Name */}
@@ -331,7 +340,7 @@ export function CharacterSelect() {
           <div className="bg-linear-to-t from-black/90 via-black/70 to-transparent pt-2 pb-4">
             {/* Character Selection Grid */}
             <div className="max-w-5xl mx-auto px-2 md:px-4 lg:px-8 mb-3 md:mb-4">
-              <div className="flex justify-center items-center gap-3 md:gap-4">
+              <div className="flex justify-center items-center gap-4 md:gap-6 lg:gap-8">
                 {personas.map((persona) => {
                   const selected = isSelected(persona);
                   const label = getSelectionLabel(persona);
@@ -352,16 +361,16 @@ export function CharacterSelect() {
                       className={`
                         relative group
                         transition-all duration-300 transform
-                        hover:scale-110 hover:z-20
-                        ${selected ? "scale-110 z-10" : ""}
+                        hover:scale-105 md:hover:scale-110 hover:z-20
+                        ${selected ? "scale-105 md:scale-110 z-10" : ""}
                       `}
                     >
                       {/* Selection Indicator */}
                       {selected && (
                         <div
                           className={`
-                            absolute -top-2 -right-2 z-20
-                            w-8 h-8 rounded-full
+                            absolute top-0 right-0 z-20
+                            w-7 h-7 md:w-8 md:h-8 rounded-full
                             flex items-center justify-center
                             font-bold text-xs
                             ${
@@ -395,8 +404,7 @@ export function CharacterSelect() {
                           w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28
                           rounded-lg
                           border-4
-                          flex items-center justify-center
-                          text-2xl md:text-3xl font-bold text-white
+                          overflow-hidden
                           bg-linear-to-br from-gray-800 to-gray-900
                           transition-all duration-300
                           ${
@@ -407,16 +415,14 @@ export function CharacterSelect() {
                               : "border-gray-700 hover:border-yellow-400 hover:shadow-[0_0_20px_rgba(250,204,21,0.5)]"
                           }
                         `}
-                        style={{
-                          background: selected
-                            ? `linear-gradient(135deg, ${persona.accentColor}44 0%, #1f2937 100%)`
-                            : `linear-gradient(135deg, ${persona.accentColor}22 0%, #1f2937 100%)`,
-                        }}
                       >
-                        {persona.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
+                        <Image
+                          src={persona.avatar}
+                          alt={persona.name}
+                          width={112}
+                          height={112}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
 
                       {/* Character Name on Hover - only show for unselected characters */}
