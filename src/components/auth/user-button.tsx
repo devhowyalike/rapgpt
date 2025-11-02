@@ -78,20 +78,10 @@ export function UserButton() {
   }
 
   return (
-    <div className="flex items-center gap-2 sm:gap-4">
-      {userId && (
-        <Link
-          href={`/profile/${userId}`}
-          className="flex items-center gap-2 px-2 sm:px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm"
-        >
-          <User size={16} />
-          <span className="hidden sm:inline">Profile</span>
-        </Link>
-      )}
-
+    <div className="flex items-center gap-3 sm:gap-4">
       <Link
         href="/new-battle"
-        className="flex items-center gap-2 px-2 sm:px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
+        className="flex items-center gap-2 px-3 sm:px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
       >
         <Mic2 size={16} />
         <span className="hidden sm:inline">Create Battle</span>
@@ -111,6 +101,13 @@ export function UserButton() {
         }}
       >
         <ClerkUserButton.MenuItems>
+          {userId && (
+            <ClerkUserButton.Link
+              label="Profile"
+              labelIcon={<User size={16} />}
+              href={`/profile/${userId}`}
+            />
+          )}
           <ClerkUserButton.Action label="manageAccount" />
         </ClerkUserButton.MenuItems>
       </ClerkUserButton>
