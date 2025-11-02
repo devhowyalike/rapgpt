@@ -33,7 +33,12 @@ function formatTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
-export function SongPlayer({ song, onPlayStateChange, externalIsPlaying, onTogglePlay }: SongPlayerProps) {
+export function SongPlayer({
+  song,
+  onPlayStateChange,
+  externalIsPlaying,
+  onTogglePlay,
+}: SongPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -242,14 +247,14 @@ export function SongPlayer({ song, onPlayStateChange, externalIsPlaying, onToggl
             max={100}
             step={1}
             onValueChange={(value) => setVolume(value[0] / 100)}
-            className="w-24 cursor-pointer"
+            className="w-24 cursor-pointer [&_[data-slot=slider-range]]:bg-white [&_[data-slot=slider-track]]:bg-gray-700"
           />
         </div>
 
         {/* Generated Info */}
         <div className="text-xs text-gray-500 text-center pt-2 border-t border-gray-800">
           Generated on {new Date(song.generatedAt).toLocaleDateString()} •
-          Quality Matters
+          Quality Matters&trade;
         </div>
       </CardContent>
     </Card>
