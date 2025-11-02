@@ -3,9 +3,11 @@ import { users } from "@/lib/db/schema";
 import { desc, sql } from "drizzle-orm";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { GuestProfileCallout } from "@/components/guest-profile-callout";
 import { decrypt } from "@/lib/auth/encryption";
 import { Users as UsersIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
+import { auth } from "@clerk/nextjs/server";
 
 // Revalidate every 5 minutes
 export const revalidate = 300;
@@ -23,6 +25,10 @@ export default async function CommunityPage({
   const { page = "1" } = await searchParams;
   const pageNumber = Math.max(1, Number.parseInt(page) || 1);
   const offset = (pageNumber - 1) * PAGE_SIZE;
+
+  // Check authentication status
+  const { sessionClaims } = await auth();
+  const isAuthenticated = !!sessionClaims;
 
   // Fetch users with pagination and only needed fields
   const [allUsers, totalCountResult] = await Promise.all([
@@ -121,6 +127,8 @@ export default async function CommunityPage({
             })}
           </div>
         )}
+
+        {!isAuthenticated && <GuestProfileCallout />}
 
         {/* Pagination Controls */}
         {totalPages > 1 && (

@@ -77,7 +77,7 @@ export function UserButton() {
 
   if (!isSignedIn) {
     return (
-      <SignInButton mode="modal">
+      <SignInButton mode="modal" forceRedirectUrl="/">
         <button className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
           <User size={18} />
           <span className="hidden sm:inline">Sign In</span>

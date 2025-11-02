@@ -4,7 +4,7 @@ import { Home, Shield, Radio, Users, Menu, Mic2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "./auth/user-button";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, SignInButton } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { useLiveBattles } from "@/lib/hooks/use-live-battles";
 import {
@@ -19,7 +19,7 @@ let cachedAdminStatus: boolean | null = null;
 let cachedUserId: string | null = null;
 
 export function SiteHeader() {
-  const { userId, isLoaded } = useAuth();
+  const { userId, isLoaded, isSignedIn } = useAuth();
   const pathname = usePathname();
   // Start with cached value if available
   const [isAdmin, setIsAdmin] = useState(cachedAdminStatus ?? false);
@@ -138,13 +138,22 @@ export function SiteHeader() {
             <span>Community</span>
           </Link>
 
-          <Link
-            href="/new-battle"
-            className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
-          >
-            <Mic2 size={16} />
-            <span>Create Battle</span>
-          </Link>
+          {isSignedIn ? (
+            <Link
+              href="/new-battle"
+              className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
+            >
+              <Mic2 size={16} />
+              <span>Create Battle</span>
+            </Link>
+          ) : (
+            <SignInButton mode="modal" forceRedirectUrl="/new-battle">
+              <button className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm">
+                <Mic2 size={16} />
+                <span>Create Battle</span>
+              </button>
+            </SignInButton>
+          )}
 
           {/* Mobile Hamburger Menu */}
           <DropdownMenu>

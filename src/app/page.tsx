@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getLiveBattles, getFeaturedBattles } from "@/lib/battle-storage";
 import { SiteHeader } from "@/components/site-header";
 import { LiveBattlesDisplay } from "@/components/live-battles-display";
+import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { APP_TITLE, TAGLINE } from "@/lib/constants";
 import { auth } from "@clerk/nextjs/server";
 import { Calendar } from "lucide-react";
@@ -15,7 +16,7 @@ export default async function Home() {
   const { sessionClaims } = await auth();
   const isAdmin = sessionClaims?.metadata?.role === "admin";
   const isAuthenticated = !!sessionClaims;
-  
+
   // Check if there are any archived battles (completed battles with liveStartedAt)
   const featuredBattles = await getFeaturedBattles();
   const hasArchivedBattles = featuredBattles.some(
@@ -51,21 +52,7 @@ export default async function Home() {
               fictional video game characters, and R&B royalty to face off in
               epic real-time AI rap battles.
             </p>
-            {isAuthenticated ? (
-              <Link
-                href="/new-battle"
-                className="inline-block px-8 py-4 bg-linear-to-r from-yellow-500 to-red-600 hover:from-yellow-600 hover:to-red-700 rounded-lg text-white font-bold text-lg transition-all transform hover:scale-105 shadow-lg"
-              >
-                Start Beefin'
-              </Link>
-            ) : (
-              <Link
-                href="/sign-in"
-                className="inline-block px-8 py-4 bg-linear-to-r from-yellow-500 to-red-600 hover:from-yellow-600 hover:to-red-700 rounded-lg text-white font-bold text-lg transition-all transform hover:scale-105 shadow-lg"
-              >
-                Sign In to Create
-              </Link>
-            )}
+            <CreateBattleCTA isAuthenticated={isAuthenticated} />
           </div>
 
           {/* Features */}
