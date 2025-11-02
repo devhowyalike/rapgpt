@@ -449,7 +449,7 @@ export function BattleReplay({ battle }: BattleReplayProps) {
                         >
                           🎵
                         </span>
-                        <span>Generate Song</span>
+                        <span>Make it an MP3</span>
                       </>
                     ) : (
                       <>
