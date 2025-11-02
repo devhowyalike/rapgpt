@@ -22,6 +22,9 @@ interface SongPlayerProps {
     beatStyle: SongGenerationBeatStyle;
     generatedAt: number;
   };
+  onPlayStateChange?: (isPlaying: boolean) => void;
+  externalIsPlaying?: boolean;
+  onTogglePlay?: () => void;
 }
 
 function formatTime(seconds: number): string {
@@ -30,13 +33,28 @@ function formatTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
-export function SongPlayer({ song }: SongPlayerProps) {
+export function SongPlayer({ song, onPlayStateChange, externalIsPlaying, onTogglePlay }: SongPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isSeeking, setIsSeeking] = useState(false);
+
+  // Sync with external play state if controlled
+  useEffect(() => {
+    if (externalIsPlaying !== undefined && externalIsPlaying !== isPlaying) {
+      setIsPlaying(externalIsPlaying);
+      const audio = audioRef.current;
+      if (audio) {
+        if (externalIsPlaying) {
+          audio.play().catch(console.error);
+        } else {
+          audio.pause();
+        }
+      }
+    }
+  }, [externalIsPlaying]);
 
   // Update current time
   useEffect(() => {
@@ -56,6 +74,7 @@ export function SongPlayer({ song }: SongPlayerProps) {
     const handleEnded = () => {
       setIsPlaying(false);
       setCurrentTime(0);
+      onPlayStateChange?.(false);
     };
 
     audio.addEventListener("timeupdate", updateTime);
@@ -67,7 +86,7 @@ export function SongPlayer({ song }: SongPlayerProps) {
       audio.removeEventListener("loadedmetadata", updateDuration);
       audio.removeEventListener("ended", handleEnded);
     };
-  }, [isSeeking]);
+  }, [isSeeking, onPlayStateChange]);
 
   // Update volume
   useEffect(() => {
@@ -77,16 +96,23 @@ export function SongPlayer({ song }: SongPlayerProps) {
   }, [volume]);
 
   const togglePlay = async () => {
+    if (onTogglePlay) {
+      onTogglePlay();
+      return;
+    }
+
     const audio = audioRef.current;
     if (!audio) return;
 
     if (isPlaying) {
       audio.pause();
       setIsPlaying(false);
+      onPlayStateChange?.(false);
     } else {
       try {
         await audio.play();
         setIsPlaying(true);
+        onPlayStateChange?.(true);
       } catch (error) {
         console.error("Error playing audio:", error);
       }
