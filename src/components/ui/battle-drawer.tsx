@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { X } from "lucide-react";
 import { type ReactNode, useEffect } from "react";
 
@@ -29,6 +29,8 @@ export function BattleDrawer({
   excludeBottomControls = false,
   mobileOnly = true,
 }: BattleDrawerProps) {
+  const dragControls = useDragControls();
+
   // Close on Escape key like typical drawers/dialogs
   useEffect(() => {
     if (!open) return;
@@ -80,10 +82,41 @@ export function BattleDrawer({
           duration: 0.3,
           ease: [0.32, 0.72, 0, 1],
         }}
+        drag={open ? "y" : false}
+        dragControls={dragControls}
+        dragListener={false}
+        dragConstraints={{ top: 0 }}
+        dragElastic={{ top: 0, bottom: 0.2 }}
+        dragMomentum={false}
+        onDragEnd={(_, info) => {
+          // Close drawer if swiped down past threshold or with sufficient velocity
+          const shouldClose = info.offset.y > 100 || info.velocity.y > 500;
+          if (shouldClose) {
+            onOpenChange(false);
+          }
+        }}
       >
+        {/* Swipe Handle - only show when open */}
+        {open && (
+          <div
+            className="flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing touch-none"
+            onPointerDown={(e) => dragControls.start(e)}
+          >
+            <div className="w-12 h-1 bg-gray-700 rounded-full" />
+          </div>
+        )}
         {/* Header - only show when open */}
         {open && (
-          <div className="flex items-center justify-between p-4 border-b border-gray-800">
+          <div
+            className="flex items-center justify-between px-4 pb-4 border-b border-gray-800 cursor-grab active:cursor-grabbing touch-none"
+            onPointerDown={(e) => {
+              // Don't start drag if clicking the close button
+              if ((e.target as HTMLElement).closest("button")) {
+                return;
+              }
+              dragControls.start(e);
+            }}
+          >
             <h2 className="text-lg font-bold text-white">{title}</h2>
             <button
               onClick={() => onOpenChange(false)}
