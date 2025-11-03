@@ -17,7 +17,7 @@ export function RapGPTLogo({ size = "sm", animated = false }: RapGPTLogoProps) {
   };
 
   const content = (
-    <span className="bg-gradient-to-r from-yellow-400 via-red-500 to-purple-600 text-transparent bg-clip-text">
+    <span className="bg-linear-to-r from-yellow-400 via-red-500 to-purple-600 text-transparent bg-clip-text">
       {APP_TITLE}
     </span>
   );

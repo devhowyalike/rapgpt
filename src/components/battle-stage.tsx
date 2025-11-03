@@ -226,8 +226,13 @@ export function BattleStage({
 
       {/* Split Screen Stage */}
       <div className="flex-1">
-        <div className="max-w-7xl mx-auto h-full">
-          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 h-full">
+        <div className="relative max-w-7xl mx-auto h-full">
+          {/* Full-height center divider on desktop */}
+          <div
+            className="hidden md:block pointer-events-none absolute inset-y-0 left-1/2 w-px bg-gray-800"
+            aria-hidden="true"
+          />
+          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 divide-gray-800 h-full">
             {/* Left Persona */}
             <div
               className={`${
@@ -236,73 +241,73 @@ export function BattleStage({
                   : "flex"
               } flex-col md:min-h-0`}
             >
+              <div
+                className="p-3 md:p-4 border-b border-gray-800"
+                style={isMobile ? { marginTop: personaTopMargin } : undefined}
+              >
+                <PersonaCard
+                  persona={battle.personas.left}
+                  position="left"
+                  isActive={
+                    battle.currentTurn === "left" ||
+                    streamingPersonaId === battle.personas.left.id
+                  }
+                  isRoundWinner={
+                    shouldShowRoundWinner &&
+                    currentRoundScore?.winner === battle.personas.left.id
+                  }
+                />
+              </div>
+
+              <div className="flex-1 stage-spotlight">
+                <VerseDisplay
+                  verse={currentRoundVerses.left}
+                  persona={battle.personas.left}
+                  position="left"
+                  isStreaming={streamingPersonaId === battle.personas.left.id}
+                  streamingText={streamingText || undefined}
+                />
+              </div>
+            </div>
+
+            {/* Right Persona */}
             <div
-              className="p-3 md:p-4 border-b border-gray-800"
-              style={isMobile ? { marginTop: personaTopMargin } : undefined}
+              className={`${
+                mobileActiveSide && mobileActiveSide !== "right"
+                  ? "hidden md:flex"
+                  : "flex"
+              } flex-col md:min-h-0`}
             >
-              <PersonaCard
-                persona={battle.personas.left}
-                position="left"
-                isActive={
-                  battle.currentTurn === "left" ||
-                  streamingPersonaId === battle.personas.left.id
-                }
-                isRoundWinner={
-                  shouldShowRoundWinner &&
-                  currentRoundScore?.winner === battle.personas.left.id
-                }
-              />
-            </div>
+              <div
+                className="p-3 md:p-4 border-b border-gray-800"
+                style={isMobile ? { marginTop: personaTopMargin } : undefined}
+              >
+                <PersonaCard
+                  persona={battle.personas.right}
+                  position="right"
+                  isActive={
+                    battle.currentTurn === "right" ||
+                    streamingPersonaId === battle.personas.right.id
+                  }
+                  isRoundWinner={
+                    shouldShowRoundWinner &&
+                    currentRoundScore?.winner === battle.personas.right.id
+                  }
+                />
+              </div>
 
-            <div className="flex-1 stage-spotlight">
-              <VerseDisplay
-                verse={currentRoundVerses.left}
-                persona={battle.personas.left}
-                position="left"
-                isStreaming={streamingPersonaId === battle.personas.left.id}
-                streamingText={streamingText || undefined}
-              />
-            </div>
-          </div>
-
-          {/* Right Persona */}
-          <div
-            className={`${
-              mobileActiveSide && mobileActiveSide !== "right"
-                ? "hidden md:flex"
-                : "flex"
-            } flex-col md:min-h-0`}
-          >
-            <div
-              className="p-3 md:p-4 border-b border-gray-800"
-              style={isMobile ? { marginTop: personaTopMargin } : undefined}
-            >
-              <PersonaCard
-                persona={battle.personas.right}
-                position="right"
-                isActive={
-                  battle.currentTurn === "right" ||
-                  streamingPersonaId === battle.personas.right.id
-                }
-                isRoundWinner={
-                  shouldShowRoundWinner &&
-                  currentRoundScore?.winner === battle.personas.right.id
-                }
-              />
-            </div>
-
-            <div className="flex-1 stage-spotlight">
-              <VerseDisplay
-                verse={currentRoundVerses.right}
-                persona={battle.personas.right}
-                position="right"
-                isStreaming={streamingPersonaId === battle.personas.right.id}
-                streamingText={streamingText || undefined}
-              />
+              <div className="flex-1 stage-spotlight">
+                <VerseDisplay
+                  verse={currentRoundVerses.right}
+                  persona={battle.personas.right}
+                  position="right"
+                  isStreaming={streamingPersonaId === battle.personas.right.id}
+                  streamingText={streamingText || undefined}
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
       </div>
 
       {/* Reveal Scores Button */}

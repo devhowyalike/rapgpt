@@ -181,8 +181,13 @@ export function BattleReplay({
           ["--mobile-bottom-padding" as any]: mobileBottomPadding ?? "5rem",
         }}
       >
-        <div className="max-w-7xl mx-auto md:min-h-full">
-          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:min-h-full">
+        <div className="relative max-w-7xl mx-auto md:min-h-full">
+          {/* Full-height center divider on desktop */}
+          <div
+            className="hidden md:block pointer-events-none absolute inset-y-0 left-1/2 w-px bg-gray-800"
+            aria-hidden="true"
+          />
+          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 divide-gray-800 md:min-h-full">
             {/* Left Persona */}
             <div className="flex flex-col min-h-[400px] md:min-h-0">
               <div className="p-6 border-b border-gray-800">
@@ -306,7 +311,7 @@ export function BattleReplay({
                   onClick={() => handleTabClick("scores")}
                   className={`
                   flex-1 md:flex-none px-4 py-2.5 md:px-6 md:py-3 font-bold text-sm md:text-base
-                  rounded-lg border-2 transition-all duration-200
+                  rounded-lg border-2 transition-all duration-200 isolate
                   ${
                     activeTab === "scores" && isDrawerOpen
                       ? "bg-linear-to-r from-yellow-600 to-orange-600 border-yellow-500 text-white shadow-lg shadow-yellow-500/30"
@@ -331,7 +336,7 @@ export function BattleReplay({
                     }
                     className={`
                     flex-1 md:flex-none px-4 py-2.5 md:px-6 md:py-3 font-bold text-sm md:text-base
-                    rounded-lg border-2 transition-all duration-200
+                    rounded-lg border-2 transition-all duration-200 isolate
                     ${
                       isSongPlaying
                         ? "bg-linear-to-r from-green-600 to-emerald-600 border-green-500 text-white shadow-lg shadow-green-500/30"
