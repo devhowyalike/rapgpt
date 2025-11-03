@@ -162,7 +162,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
       setVotingTimeRemaining(next);
       if (next <= 0 && battle) {
         completeVotingPhase(battle.currentRound);
-        
+
         // On mobile, close the drawer and scroll to scores when voting ends
         if (typeof window !== "undefined" && window.innerWidth < 768) {
           setShowMobileDrawer(false);
@@ -392,52 +392,54 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
       <>
         <SiteHeader />
         <div style={{ height: "var(--header-height)" }} />
-        <div className="flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row">
-          {/* Main Stage */}
-          <div className="flex-1 flex flex-col min-h-0">
-            <BattleReplay
-              battle={battle}
-              mobileBottomPadding={mobileBottomPadding}
-            />
+        <div className="px-0 md:px-6">
+          <div className="max-w-7xl mx-auto flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row">
+            {/* Main Stage */}
+            <div className="flex-1 flex flex-col min-h-0">
+              <BattleReplay
+                battle={battle}
+                mobileBottomPadding={mobileBottomPadding}
+              />
 
-            {/* Resume Button for Incomplete Battles */}
-            {battle.status === "incomplete" && (
-              <div className="fixed md:relative bottom-0 left-0 right-0 z-50 p-4 bg-gray-900/95 md:bg-gray-900 backdrop-blur-sm md:backdrop-blur-none border-t border-gray-800">
-                <div className="max-w-4xl mx-auto">
-                  <button
-                    onClick={handleResumeBattle}
-                    disabled={isResuming}
-                    className="w-full md:w-auto px-6 py-3 bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all mx-auto"
-                  >
-                    {isResuming ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Resuming...
-                      </>
-                    ) : (
-                      <>
-                        <RotateCcw className="w-5 h-5" />
-                        Resume Battle
-                      </>
-                    )}
-                  </button>
+              {/* Resume Button for Incomplete Battles */}
+              {battle.status === "incomplete" && (
+                <div className="fixed md:relative bottom-0 left-0 right-0 z-50 p-4 bg-gray-900/95 md:bg-gray-900 backdrop-blur-sm md:backdrop-blur-none border-t border-gray-800">
+                  <div className="max-w-4xl mx-auto">
+                    <button
+                      onClick={handleResumeBattle}
+                      disabled={isResuming}
+                      className="w-full md:w-auto px-6 py-3 bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all mx-auto"
+                    >
+                      {isResuming ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Resuming...
+                        </>
+                      ) : (
+                        <>
+                          <RotateCcw className="w-5 h-5" />
+                          Resume Battle
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
+              )}
+            </div>
+
+            {/* Desktop Sidebar */}
+            {(showCommenting || showVoting) && (
+              <div className="hidden md:block w-96">
+                <BattleSidebar
+                  battle={battle}
+                  onVote={handleVote}
+                  onComment={handleComment}
+                  isArchived={true}
+                  votingCompletedRound={votingCompletedRound}
+                />
               </div>
             )}
           </div>
-
-          {/* Desktop Sidebar */}
-          {(showCommenting || showVoting) && (
-            <div className="hidden md:block w-96">
-              <BattleSidebar
-                battle={battle}
-                onVote={handleVote}
-                onComment={handleComment}
-                isArchived={true}
-                votingCompletedRound={votingCompletedRound}
-              />
-            </div>
-          )}
         </div>
 
         {/* Mobile Floating Action Buttons */}
@@ -513,45 +515,46 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     <>
       <SiteHeader />
       <div style={{ height: "var(--header-height)" }} />
-      <div className="flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row">
-        {/* Main Stage */}
-        <div className="flex-1 flex flex-col min-h-0">
-          <BattleStage
-            battle={battle}
-            streamingPersonaId={streamingPersonaId}
-            streamingText={streamingVerse}
-            isReadingPhase={isReadingPhase}
-            isVotingPhase={isVotingPhase}
-            votingCompletedRound={votingCompletedRound}
-          />
+      <div className="px-0 md:px-6">
+        <div className="max-w-7xl mx-auto flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row">
+          {/* Main Stage */}
+          <div className="flex-1 flex flex-col min-h-0">
+            <BattleStage
+              battle={battle}
+              streamingPersonaId={streamingPersonaId}
+              streamingText={streamingVerse}
+              isReadingPhase={isReadingPhase}
+              isVotingPhase={isVotingPhase}
+              votingCompletedRound={votingCompletedRound}
+            />
 
-          {/* Control Bar - Always visible during ongoing battles */}
-          {battle.status === "ongoing" && (
-            <div
-              className={`p-4 ${
-                showCommenting || showVoting ? "pb-24 md:pb-4" : "pb-4"
-              } bg-gray-900 border-t border-gray-800`}
-            >
-              <div className="max-w-4xl mx-auto flex flex-row gap-3">
-                {/* Primary Action Button - Changes based on state */}
-                <button
-                  onClick={
-                    isReadingPhase && showVoting
-                      ? handleBeginVoting
-                      : canAdvance
-                      ? handleAdvanceRound
-                      : canGenerate
-                      ? handleGenerateVerse
-                      : undefined
-                  }
-                  disabled={
-                    isGenerating ||
-                    isVotingPhase ||
-                    (!canGenerate &&
-                      !canAdvance &&
-                      !(isReadingPhase && showVoting))
-                  }
-                  className={`
+            {/* Control Bar - Always visible during ongoing battles */}
+            {battle.status === "ongoing" && (
+              <div
+                className={`p-4 ${
+                  showCommenting || showVoting ? "pb-24 md:pb-4" : "pb-4"
+                } bg-gray-900 border-t border-gray-800`}
+              >
+                <div className="max-w-4xl mx-auto flex flex-row gap-3">
+                  {/* Primary Action Button - Changes based on state */}
+                  <button
+                    onClick={
+                      isReadingPhase && showVoting
+                        ? handleBeginVoting
+                        : canAdvance
+                        ? handleAdvanceRound
+                        : canGenerate
+                        ? handleGenerateVerse
+                        : undefined
+                    }
+                    disabled={
+                      isGenerating ||
+                      isVotingPhase ||
+                      (!canGenerate &&
+                        !canAdvance &&
+                        !(isReadingPhase && showVoting))
+                    }
+                    className={`
                     flex-1 px-2 py-2 rounded-lg text-white font-bold transition-all
                     ${
                       isReadingPhase
@@ -572,96 +575,101 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                         : ""
                     }
                   `}
-                >
-                  {isGenerating ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Kicking ballistics...
-                    </div>
-                  ) : isReadingPhase && showVoting ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <CheckCircle className="w-5 h-5" />
-                      <span className="text-lg font-medium">Begin Voting</span>
-                    </div>
-                  ) : isVotingPhase &&
-                    votingTimeRemaining !== null &&
-                    showVoting ? (
-                    <div className="flex items-center justify-between gap-4 w-full">
-                      <div className="flex items-center gap-3 whitespace-nowrap">
-                        <span className="text-2xl">⏱️</span>
-                        <span className="text-lg font-medium">Vote Now!</span>
-                        <span className="text-2xl font-bebas-neue">
-                          {votingTimeRemaining}s
+                  >
+                    {isGenerating ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Kicking ballistics...
+                      </div>
+                    ) : isReadingPhase && showVoting ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span className="text-lg font-medium">
+                          Begin Voting
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 flex-1 max-w-md">
-                        <span className="hidden md:inline text-sm text-white/80 whitespace-nowrap">
-                          Vote in the sidebar →
-                        </span>
-                        <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden min-w-[100px]">
-                          <div
-                            className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
-                            style={{
-                              width: `${(votingTimeRemaining / 10) * 100}%`,
-                            }}
-                          />
+                    ) : isVotingPhase &&
+                      votingTimeRemaining !== null &&
+                      showVoting ? (
+                      <div className="flex items-center justify-between gap-4 w-full">
+                        <div className="flex items-center gap-3 whitespace-nowrap">
+                          <span className="text-2xl">⏱️</span>
+                          <span className="text-lg font-medium">Vote Now!</span>
+                          <span className="text-2xl font-bebas-neue">
+                            {votingTimeRemaining}s
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 flex-1 max-w-md">
+                          <span className="hidden md:inline text-sm text-white/80 whitespace-nowrap">
+                            Vote in the sidebar →
+                          </span>
+                          <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden min-w-[100px]">
+                            <div
+                              className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
+                              style={{
+                                width: `${(votingTimeRemaining / 10) * 100}%`,
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ) : canAdvance ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <ArrowRight className="w-5 h-5" />
-                      {battle.currentRound === 3
-                        ? "Reveal Winner"
-                        : "Next Round"}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center gap-2">
-                      <Play className="w-5 h-5" />
-                      {battle.verses.length === 0 ? "First up:" : "Next:"}{" "}
-                      {nextPerformer && battle.personas[nextPerformer].name}
-                    </div>
-                  )}
-                </button>
+                    ) : canAdvance ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <ArrowRight className="w-5 h-5" />
+                        {battle.currentRound === 3
+                          ? "Reveal Winner"
+                          : "Next Round"}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-2">
+                        <Play className="w-5 h-5" />
+                        {battle.verses.length === 0
+                          ? "First up:"
+                          : "Next:"}{" "}
+                        {nextPerformer && battle.personas[nextPerformer].name}
+                      </div>
+                    )}
+                  </button>
 
-                {/* Pause Battle Button */}
-                <button
-                  onClick={handleCancelBattle}
-                  disabled={isCanceling || isGenerating}
-                  className="px-3 sm:px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
-                >
-                  <Pause className="w-5 h-5" />
-                  <span className="hidden sm:inline">Pause Battle</span>
-                </button>
-
-                {/* Admin Control Panel Link */}
-                {isAdmin && (
-                  <Link
-                    href={`/admin/battles/${battle.id}/control`}
-                    className="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
+                  {/* Pause Battle Button */}
+                  <button
+                    onClick={handleCancelBattle}
+                    disabled={isCanceling || isGenerating}
+                    className="px-3 sm:px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
                   >
-                    <Settings className="w-5 h-5" />
-                    <span className="hidden sm:inline">Live Controls</span>
-                  </Link>
-                )}
+                    <Pause className="w-5 h-5" />
+                    <span className="hidden sm:inline">Pause Battle</span>
+                  </button>
+
+                  {/* Admin Control Panel Link */}
+                  {isAdmin && (
+                    <Link
+                      href={`/admin/battles/${battle.id}/control`}
+                      className="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
+                    >
+                      <Settings className="w-5 h-5" />
+                      <span className="hidden sm:inline">Live Controls</span>
+                    </Link>
+                  )}
+                </div>
               </div>
+            )}
+          </div>
+
+          {/* Desktop Sidebar */}
+          {(showCommenting || showVoting) && (
+            <div className="hidden md:block w-96">
+              <BattleSidebar
+                battle={battle}
+                onVote={handleVote}
+                onComment={handleComment}
+                isVotingPhase={isVotingPhase}
+                votingTimeRemaining={votingTimeRemaining}
+                votingCompletedRound={votingCompletedRound}
+              />
             </div>
           )}
         </div>
-
-        {/* Desktop Sidebar */}
-        {(showCommenting || showVoting) && (
-          <div className="hidden md:block w-96">
-            <BattleSidebar
-              battle={battle}
-              onVote={handleVote}
-              onComment={handleComment}
-              isVotingPhase={isVotingPhase}
-              votingTimeRemaining={votingTimeRemaining}
-              votingCompletedRound={votingCompletedRound}
-            />
-          </div>
-        )}
       </div>
 
       {/* Mobile Floating Action Buttons */}

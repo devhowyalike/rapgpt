@@ -51,7 +51,11 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
   const [hasInitiallyConnected, setHasInitiallyConnected] = useState(false);
 
   // Ensure only one drawer is open at a time across the page
-  useExclusiveDrawer("viewer-comments-voting", showMobileDrawer, setShowMobileDrawer);
+  useExclusiveDrawer(
+    "viewer-comments-voting",
+    showMobileDrawer,
+    setShowMobileDrawer
+  );
 
   // Check if user is admin
   const { sessionClaims, isLoaded } = useAuth();
@@ -59,10 +63,13 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
 
   // Determine if voting and commenting should be shown
   // Check both env flags (master switch) AND battle settings
-  const isVotingGloballyEnabled = process.env.NEXT_PUBLIC_USER_BATTLE_VOTING !== 'false';
-  const isCommentsGloballyEnabled = process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING !== 'false';
+  const isVotingGloballyEnabled =
+    process.env.NEXT_PUBLIC_USER_BATTLE_VOTING !== "false";
+  const isCommentsGloballyEnabled =
+    process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING !== "false";
   const showVoting = isVotingGloballyEnabled && (battle?.votingEnabled ?? true);
-  const showCommenting = isCommentsGloballyEnabled && (battle?.commentsEnabled ?? true);
+  const showCommenting =
+    isCommentsGloballyEnabled && (battle?.commentsEnabled ?? true);
 
   // Initialize battle state
   useEffect(() => {
@@ -237,7 +244,7 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
       setVotingTimeRemaining(next);
       if (next <= 0 && battle) {
         completeVotingPhase(battle.currentRound);
-        
+
         // On mobile, close the drawer and scroll to scores when voting ends
         if (typeof window !== "undefined" && window.innerWidth < 768) {
           setShowMobileDrawer(false);
@@ -329,9 +336,9 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
       <div style={{ height: "var(--header-height)" }} />
 
       {/* Live Indicator Banner */}
-      <div 
+      <div
         className="bg-gray-900 border-b border-gray-800 p-3"
-        style={{ height: 'var(--live-banner-height)' }}
+        style={{ height: "var(--live-banner-height)" }}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <LiveIndicator
@@ -363,32 +370,34 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
         </div>
       </div>
 
-      <div className="flex flex-col md:h-[calc(100dvh-var(--header-height)-var(--live-banner-height))] md:flex-row">
-        {/* Battle Stage */}
-        <div className="flex-1 flex flex-col min-h-0">
-          <BattleStage
-            battle={battle}
-            streamingPersonaId={streamingPersonaId}
-            streamingText={streamingVerse}
-            isReadingPhase={isReadingPhase}
-            isVotingPhase={isVotingPhase}
-            votingCompletedRound={votingCompletedRound}
-          />
-        </div>
-
-        {/* Desktop Sidebar */}
-        {(showCommenting || showVoting) && (
-          <div className="hidden md:block w-96">
-            <BattleSidebar
+      <div className="px-0 md:px-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:h-[calc(100dvh-var(--header-height)-var(--live-banner-height))] md:flex-row">
+          {/* Battle Stage */}
+          <div className="flex-1 flex flex-col min-h-0">
+            <BattleStage
               battle={battle}
-              onVote={handleVote}
-              onComment={handleComment}
+              streamingPersonaId={streamingPersonaId}
+              streamingText={streamingVerse}
+              isReadingPhase={isReadingPhase}
               isVotingPhase={isVotingPhase}
-              votingTimeRemaining={votingTimeRemaining}
               votingCompletedRound={votingCompletedRound}
             />
           </div>
-        )}
+
+          {/* Desktop Sidebar */}
+          {(showCommenting || showVoting) && (
+            <div className="hidden md:block w-96">
+              <BattleSidebar
+                battle={battle}
+                onVote={handleVote}
+                onComment={handleComment}
+                isVotingPhase={isVotingPhase}
+                votingTimeRemaining={votingTimeRemaining}
+                votingCompletedRound={votingCompletedRound}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Mobile Floating Action Buttons */}
