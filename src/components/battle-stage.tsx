@@ -175,7 +175,7 @@ export function BattleStage({
           <div className="md:flex-1">
             <div className="text-left">
               <div className="text-xs md:text-base text-gray-400 uppercase tracking-wider">
-                Stage
+                Stage:
               </div>
               <div className="text-xl md:text-3xl font-bold text-white flex flex-col">
                 <span>{DEFAULT_STAGE.name}</span>
