@@ -181,7 +181,8 @@ export function BattleReplay({
           ["--mobile-bottom-padding" as any]: mobileBottomPadding ?? "5rem",
         }}
       >
-        <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:min-h-full">
+        <div className="max-w-7xl mx-auto h-full">
+          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 h-full">
           {/* Left Persona */}
           <div className="flex flex-col min-h-[400px] md:min-h-0">
             <div className="p-6 border-b border-gray-800">
@@ -221,6 +222,7 @@ export function BattleReplay({
               />
             </div>
           </div>
+        </div>
         </div>
       </div>
 
