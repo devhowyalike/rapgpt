@@ -48,9 +48,9 @@ export default async function Home() {
               e-Beef is Served
             </h2>
             <p className="text-gray-300 text-lg mb-6 max-w-2xl mx-auto">
-              Choose your favorite rappers, former message board personalities,
-              fictional video game characters, and R&B royalty to face off in
-              epic real-time AI rap battles.
+              Choose your favorite rappers, message board personalities, video
+              game characters, and R&B royalty to face off in epic real-time AI
+              rap battles.
             </p>
             <CreateBattleCTA isAuthenticated={isAuthenticated} />
           </div>
