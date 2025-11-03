@@ -16,10 +16,33 @@ import { SelectionGrid } from "./selection/selection-grid";
 import { SelectionActions } from "./selection/selection-actions";
 import { ActionButton } from "./selection/action-button";
 import { BattleOptions } from "./battle-options";
+import { SessionRestoreLoading } from "./session-restore-loading";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function CharacterSelect() {
+const SESSION_STORAGE_KEY = "rapgpt_battle_selections";
+
+interface BattleSelections {
+  player1Id?: string;
+  player2Id?: string;
+  createAsLive: boolean;
+  votingEnabled: boolean;
+  commentsEnabled: boolean;
+  showStageSelect: boolean;
+}
+
+interface CharacterSelectProps {
+  /**
+   * Minimum time (in ms) to show the "Restoring Session" loading screen.
+   * This ensures users can see the loading feedback when restoring from sessionStorage.
+   * Set to 0 to disable the delay. Defaults to 500ms.
+   */
+  minLoadingDelay?: number;
+}
+
+export function CharacterSelect({
+  minLoadingDelay = 500,
+}: CharacterSelectProps = {}) {
   const [player1, setPlayer1] = useState<ClientPersona | null>(null);
   const [player2, setPlayer2] = useState<ClientPersona | null>(null);
   const [hoveredPersona, setHoveredPersona] = useState<ClientPersona | null>(
@@ -31,6 +54,7 @@ export function CharacterSelect() {
   const [votingEnabled, setVotingEnabled] = useState(true);
   const [commentsEnabled, setCommentsEnabled] = useState(true);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Check if features are globally enabled via env flags
   const isVotingGloballyEnabled =
@@ -70,6 +94,77 @@ export function CharacterSelect() {
   }, [userId, isLoaded]);
 
   const personas = getAllClientPersonas();
+
+  // Load from sessionStorage on mount
+  useEffect(() => {
+    if (isHydrated) return;
+
+    const loadSelections = async () => {
+      try {
+        const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
+        if (stored) {
+          const selections: BattleSelections = JSON.parse(stored);
+
+          // Restore player selections
+          if (selections.player1Id) {
+            const persona = personas.find((p) => p.id === selections.player1Id);
+            if (persona) setPlayer1(persona);
+          }
+          if (selections.player2Id) {
+            const persona = personas.find((p) => p.id === selections.player2Id);
+            if (persona) setPlayer2(persona);
+          }
+
+          // Restore battle options
+          setCreateAsLive(selections.createAsLive);
+          setVotingEnabled(selections.votingEnabled);
+          setCommentsEnabled(selections.commentsEnabled);
+          setShowStageSelect(selections.showStageSelect);
+
+          // Add a minimum delay so the loading screen is visible to users
+          // This provides visual feedback that the session is being restored
+          if (minLoadingDelay > 0) {
+            await new Promise((resolve) =>
+              setTimeout(resolve, minLoadingDelay)
+            );
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load selections from sessionStorage:", error);
+      }
+
+      setIsHydrated(true);
+    };
+
+    loadSelections();
+  }, [isHydrated, personas, minLoadingDelay]);
+
+  // Save to sessionStorage whenever selections change
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    try {
+      const selections: BattleSelections = {
+        player1Id: player1?.id,
+        player2Id: player2?.id,
+        createAsLive,
+        votingEnabled,
+        commentsEnabled,
+        showStageSelect,
+      };
+      sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(selections));
+    } catch (error) {
+      console.error("Failed to save selections to sessionStorage:", error);
+    }
+  }, [
+    player1,
+    player2,
+    createAsLive,
+    votingEnabled,
+    commentsEnabled,
+    showStageSelect,
+    isHydrated,
+  ]);
 
   const handlePersonaClick = (persona: ClientPersona) => {
     // Clear hover preview on touch devices after click
@@ -121,6 +216,11 @@ export function CharacterSelect() {
   // Show player2 if selected, otherwise show hoveredPersona as preview if player1 is selected but not player2
   const displayPlayer2 = player2 || (player1 && !player2 && hoveredPersona);
 
+  // Show loading screen while hydrating from sessionStorage
+  if (!isHydrated) {
+    return <SessionRestoreLoading />;
+  }
+
   return (
     <div className="relative min-h-dvh flex flex-col">
       <AnimatePresence initial={false} mode="wait">
@@ -145,6 +245,7 @@ export function CharacterSelect() {
               onVotingEnabledChange={setVotingEnabled}
               onCommentsEnabledChange={setCommentsEnabled}
               onCreateAsLiveChange={setCreateAsLive}
+              sessionStorageKey={SESSION_STORAGE_KEY}
             />
           </motion.div>
         ) : (

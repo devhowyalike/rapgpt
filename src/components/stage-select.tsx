@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getAllStages, type Stage } from "@/lib/shared/stages";
 import { useRouter } from "next/navigation";
 import { BattleOptions } from "./battle-options";
@@ -28,6 +28,11 @@ interface StageSelectProps {
   onVotingEnabledChange: (enabled: boolean) => void;
   onCommentsEnabledChange: (enabled: boolean) => void;
   onCreateAsLiveChange: (enabled: boolean) => void;
+  sessionStorageKey: string;
+}
+
+interface StageSelections {
+  stageId?: string;
 }
 
 export function StageSelect({
@@ -43,13 +48,53 @@ export function StageSelect({
   onVotingEnabledChange,
   onCommentsEnabledChange,
   onCreateAsLiveChange,
+  sessionStorageKey,
 }: StageSelectProps) {
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
   const [hoveredStage, setHoveredStage] = useState<Stage | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const router = useRouter();
 
   const stages = getAllStages();
+
+  // Load stage from sessionStorage on mount
+  useEffect(() => {
+    if (isHydrated) return;
+
+    try {
+      const stored = sessionStorage.getItem(sessionStorageKey);
+      if (stored) {
+        const selections = JSON.parse(stored);
+        const stageSelections = selections as StageSelections & {
+          stageId?: string;
+        };
+
+        if (stageSelections.stageId) {
+          const stage = stages.find((s) => s.id === stageSelections.stageId);
+          if (stage) setSelectedStage(stage);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load stage from sessionStorage:", error);
+    }
+
+    setIsHydrated(true);
+  }, [isHydrated, sessionStorageKey, stages]);
+
+  // Save stage to sessionStorage whenever it changes
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    try {
+      const stored = sessionStorage.getItem(sessionStorageKey);
+      const selections = stored ? JSON.parse(stored) : {};
+      selections.stageId = selectedStage?.id;
+      sessionStorage.setItem(sessionStorageKey, JSON.stringify(selections));
+    } catch (error) {
+      console.error("Failed to save stage to sessionStorage:", error);
+    }
+  }, [selectedStage, sessionStorageKey, isHydrated]);
 
   const handleRandomStage = () => {
     const randomIndex = Math.floor(Math.random() * stages.length);
@@ -89,6 +134,13 @@ export function StageSelect({
       }
 
       const { battleId } = await response.json();
+
+      // Clear sessionStorage after successful battle creation
+      try {
+        sessionStorage.removeItem(sessionStorageKey);
+      } catch (error) {
+        console.error("Failed to clear sessionStorage:", error);
+      }
 
       if (createAsLive) {
         router.push(`/admin/battles/${battleId}/control`);
