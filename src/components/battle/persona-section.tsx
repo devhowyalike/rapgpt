@@ -60,7 +60,7 @@ export function PersonaSection({
 
       <div className="flex-1 stage-spotlight">
         <VerseDisplay
-          verse={verse}
+          verse={verse ?? undefined}
           persona={persona}
           position={position}
           isStreaming={isStreaming}

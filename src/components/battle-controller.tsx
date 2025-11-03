@@ -8,28 +8,26 @@ import { useState, useEffect } from "react";
 import type { Battle } from "@/lib/shared";
 import { BattleStage } from "./battle-stage";
 import { BattleReplay } from "./battle-replay";
-import { BattleSidebar } from "./battle-sidebar";
 import { SiteHeader } from "./site-header";
 import { BattleLoading } from "./battle-loading";
 import { useBattleStore } from "@/lib/battle-store";
 import { getNextPerformer, isRoundComplete } from "@/lib/battle-engine";
-import {
-  Play,
-  ArrowRight,
-  RotateCcw,
-  AlertTriangle,
-  MessageSquare,
-  ThumbsUp,
-  Pause,
-  Settings,
-  CheckCircle,
-} from "lucide-react";
+import { RotateCcw, AlertTriangle } from "lucide-react";
 import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
 import { useAuth } from "@clerk/nextjs";
-import Link from "next/link";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { BattleDrawer } from "@/components/ui/battle-drawer";
 import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
+import { useBattleFeatures } from "@/lib/hooks/use-battle-features";
+import {
+  useBattleVote,
+  useBattleComment,
+} from "@/lib/hooks/use-battle-actions";
+import { useMobileDrawer } from "@/lib/hooks/use-mobile-drawer";
+import {
+  MobileActionButtons,
+  SidebarContainer,
+  BattleControlBar,
+} from "@/components/battle";
 
 interface BattleControllerProps {
   initialBattle: Battle;
@@ -63,11 +61,17 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   const [isResuming, setIsResuming] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
-  const [showMobileDrawer, setShowMobileDrawer] = useState(false);
-  const [mobileActiveTab, setMobileActiveTab] = useState<"comments" | "voting">(
-    "comments"
-  );
   const [isLeaving, setIsLeaving] = useState(false);
+
+  // Mobile drawer state
+  const {
+    showMobileDrawer,
+    mobileActiveTab,
+    setShowMobileDrawer,
+    setMobileActiveTab,
+    openCommentsDrawer,
+    openVotingDrawer,
+  } = useMobileDrawer();
 
   // Ensure only one drawer is open at a time across the page
   useExclusiveDrawer(
@@ -80,15 +84,8 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   const { sessionClaims, isLoaded } = useAuth();
   const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
 
-  // Determine if voting and commenting should be shown
-  // Check both env flags (master switch) AND battle settings
-  const isVotingGloballyEnabled =
-    process.env.NEXT_PUBLIC_USER_BATTLE_VOTING !== "false";
-  const isCommentsGloballyEnabled =
-    process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING !== "false";
-  const showVoting = isVotingGloballyEnabled && (battle?.votingEnabled ?? true);
-  const showCommenting =
-    isCommentsGloballyEnabled && (battle?.commentsEnabled ?? true);
+  // Feature flags for voting and commenting
+  const { showVoting, showCommenting } = useBattleFeatures(battle);
 
   // Automatically switch to voting tab when voting begins (for mobile)
   useEffect(() => {
@@ -179,6 +176,24 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     battle,
   ]);
 
+  // Battle action handlers - MUST be before any conditional returns (Rules of Hooks)
+  const handleVote = useBattleVote({
+    battleId: battle?.id || "",
+    onSuccess: (updatedBattle) => setBattle(updatedBattle),
+  });
+
+  const handleCommentSubmit = useBattleComment({
+    battle,
+    onSuccess: (comment) => {
+      if (battle) {
+        setBattle({
+          ...battle,
+          comments: [...battle.comments, comment],
+        });
+      }
+    },
+  });
+
   // Handler to manually start voting phase
   const handleBeginVoting = () => {
     if (!showVoting) return; // Don't start voting if it's disabled
@@ -261,60 +276,6 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     }
   };
 
-  const handleVote = async (
-    round: number,
-    personaId: string
-  ): Promise<boolean> => {
-    try {
-      const response = await fetch(`/api/battle/${battle.id}/vote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          round,
-          personaId,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Vote failed:", errorData.error);
-        return false;
-      }
-
-      const { battle: updatedBattle } = await response.json();
-      setBattle(updatedBattle);
-      return true;
-    } catch (error) {
-      console.error("Error voting:", error);
-      return false;
-    }
-  };
-
-  const handleComment = async (content: string) => {
-    try {
-      const response = await fetch(`/api/battle/${battle.id}/comment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content,
-          round: battle.currentRound,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Failed to submit comment");
-
-      const { comment } = await response.json();
-
-      // Update local battle state with the new comment
-      setBattle({
-        ...battle,
-        comments: [...battle.comments, comment],
-      });
-    } catch (error) {
-      console.error("Error commenting:", error);
-    }
-  };
-
   const handleAdvanceRound = async () => {
     // Reset both reading and voting phases when advancing
     setIsReadingPhase(false);
@@ -370,16 +331,6 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     !isReadingPhase &&
     !isVotingPhase;
 
-  const handleMobileCommentsClick = () => {
-    setMobileActiveTab("comments");
-    setShowMobileDrawer(true);
-  };
-
-  const handleMobileVotingClick = () => {
-    setMobileActiveTab("voting");
-    setShowMobileDrawer(true);
-  };
-
   // If battle is completed or incomplete, use full replay mode
   if (battle.status === "completed" || battle.status === "incomplete") {
     const mobileBottomPadding =
@@ -427,85 +378,37 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
               )}
             </div>
 
-            {/* Desktop Sidebar */}
-            {(showCommenting || showVoting) && (
-              <div className="hidden md:block w-96">
-                <BattleSidebar
-                  battle={battle}
-                  onVote={handleVote}
-                  onComment={handleComment}
-                  isArchived={true}
-                  votingCompletedRound={votingCompletedRound}
-                />
-              </div>
-            )}
+            {/* Sidebar - Desktop and Mobile */}
+            <SidebarContainer
+              battle={battle}
+              onVote={handleVote}
+              onComment={handleCommentSubmit}
+              showCommenting={showCommenting}
+              showVoting={showVoting}
+              isArchived={true}
+              votingCompletedRound={votingCompletedRound}
+              showMobileDrawer={showMobileDrawer}
+              onMobileDrawerChange={setShowMobileDrawer}
+              mobileActiveTab={mobileActiveTab}
+              excludeBottomControls={battle.status === "completed"}
+            />
           </div>
         </div>
 
         {/* Mobile Floating Action Buttons */}
-        {(showCommenting || showVoting) && (
-          <div
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40"
-            style={
-              battle.status === "completed"
-                ? {
-                    bottom:
-                      "calc(var(--bottom-controls-height) + var(--fab-gutter))",
-                  }
-                : undefined
-            }
-          >
-            {showCommenting && (
-              <button
-                onClick={handleMobileCommentsClick}
-                className={`
-                  w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
-                  ${
-                    showMobileDrawer && mobileActiveTab === "comments"
-                      ? "bg-blue-600/90 text-white border-blue-400/50 scale-110"
-                      : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-blue-600/90 hover:text-white hover:border-blue-500/50 hover:scale-105"
-                  }
-                `}
-              >
-                <MessageSquare className="w-6 h-6" strokeWidth={2.5} />
-              </button>
-            )}
-            {showVoting && (
-              <button
-                onClick={handleMobileVotingClick}
-                className={`
-                  w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
-                  ${
-                    showMobileDrawer && mobileActiveTab === "voting"
-                      ? "bg-purple-600/90 text-white border-purple-400/50 scale-110"
-                      : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-purple-600/90 hover:text-white hover:border-purple-500/50 hover:scale-105"
-                  }
-                `}
-              >
-                <ThumbsUp className="w-6 h-6" strokeWidth={2.5} />
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Mobile Drawer */}
-        <BattleDrawer
-          open={showMobileDrawer}
-          onOpenChange={setShowMobileDrawer}
-          title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
-          excludeBottomControls={battle.status === "completed"}
-        >
-          <div className="flex-1 overflow-y-auto min-h-0">
-            <BattleSidebar
-              battle={battle}
-              onVote={handleVote}
-              onComment={handleComment}
-              isArchived={true}
-              votingCompletedRound={votingCompletedRound}
-              defaultTab={mobileActiveTab}
-            />
-          </div>
-        </BattleDrawer>
+        <MobileActionButtons
+          showCommenting={showCommenting}
+          showVoting={showVoting}
+          onCommentsClick={openCommentsDrawer}
+          onVotingClick={openVotingDrawer}
+          activeTab={mobileActiveTab}
+          isDrawerOpen={showMobileDrawer}
+          bottomOffset={
+            battle.status === "completed"
+              ? "calc(var(--bottom-controls-height) + var(--fab-gutter))"
+              : undefined
+          }
+        />
       </>
     );
   }
@@ -530,202 +433,57 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
             {/* Control Bar - Always visible during ongoing battles */}
             {battle.status === "ongoing" && (
-              <div
-                className={`p-4 ${
-                  showCommenting || showVoting ? "pb-24 md:pb-4" : "pb-4"
-                } bg-gray-900 border-t border-gray-800`}
-              >
-                <div className="max-w-4xl mx-auto flex flex-row gap-3">
-                  {/* Primary Action Button - Changes based on state */}
-                  <button
-                    onClick={
-                      isReadingPhase && showVoting
-                        ? handleBeginVoting
-                        : canAdvance
-                        ? handleAdvanceRound
-                        : canGenerate
-                        ? handleGenerateVerse
-                        : undefined
-                    }
-                    disabled={
-                      isGenerating ||
-                      isVotingPhase ||
-                      (!canGenerate &&
-                        !canAdvance &&
-                        !(isReadingPhase && showVoting))
-                    }
-                    className={`
-                    flex-1 px-2 py-2 rounded-lg text-white font-bold transition-all
-                    ${
-                      isReadingPhase
-                        ? "bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
-                        : isVotingPhase
-                        ? "bg-linear-to-r from-purple-600 to-pink-600 animate-pulse"
-                        : canAdvance
-                        ? "bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 animate-pulse"
-                        : battle.verses.length === 0
-                        ? "bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                        : "bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"
-                    }
-                    ${
-                      isGenerating ||
-                      isVotingPhase ||
-                      (!canGenerate && !canAdvance && !isReadingPhase)
-                        ? "cursor-not-allowed"
-                        : ""
-                    }
-                  `}
-                  >
-                    {isGenerating ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Kicking ballistics...
-                      </div>
-                    ) : isReadingPhase && showVoting ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <CheckCircle className="w-5 h-5" />
-                        <span className="text-lg font-medium">
-                          Begin Voting
-                        </span>
-                      </div>
-                    ) : isVotingPhase &&
-                      votingTimeRemaining !== null &&
-                      showVoting ? (
-                      <div className="flex items-center justify-between gap-4 w-full">
-                        <div className="flex items-center gap-3 whitespace-nowrap">
-                          <span className="text-2xl">⏱️</span>
-                          <span className="text-lg font-medium">Vote Now!</span>
-                          <span className="text-2xl font-bebas-neue">
-                            {votingTimeRemaining}s
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3 flex-1 max-w-md">
-                          <span className="hidden md:inline text-sm text-white/80 whitespace-nowrap">
-                            Vote in the sidebar →
-                          </span>
-                          <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden min-w-[100px]">
-                            <div
-                              className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
-                              style={{
-                                width: `${(votingTimeRemaining / 10) * 100}%`,
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ) : canAdvance ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <ArrowRight className="w-5 h-5" />
-                        {battle.currentRound === 3
-                          ? "Reveal Winner"
-                          : "Next Round"}
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center gap-2">
-                        <Play className="w-5 h-5" />
-                        {battle.verses.length === 0
-                          ? "First up:"
-                          : "Next:"}{" "}
-                        {nextPerformer && battle.personas[nextPerformer].name}
-                      </div>
-                    )}
-                  </button>
-
-                  {/* Pause Battle Button */}
-                  <button
-                    onClick={handleCancelBattle}
-                    disabled={isCanceling || isGenerating}
-                    className="px-3 sm:px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
-                  >
-                    <Pause className="w-5 h-5" />
-                    <span className="hidden sm:inline">Pause Battle</span>
-                  </button>
-
-                  {/* Admin Control Panel Link */}
-                  {isAdmin && (
-                    <Link
-                      href={`/admin/battles/${battle.id}/control`}
-                      className="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
-                    >
-                      <Settings className="w-5 h-5" />
-                      <span className="hidden sm:inline">Live Controls</span>
-                    </Link>
-                  )}
-                </div>
-              </div>
+              <BattleControlBar
+                battle={battle}
+                isGenerating={isGenerating}
+                isCanceling={isCanceling}
+                canGenerate={!!canGenerate}
+                canAdvance={!!canAdvance}
+                isReadingPhase={isReadingPhase}
+                isVotingPhase={isVotingPhase}
+                votingTimeRemaining={votingTimeRemaining}
+                showVoting={showVoting}
+                showCommenting={showCommenting}
+                nextPerformerName={
+                  nextPerformer
+                    ? battle.personas[nextPerformer].name
+                    : undefined
+                }
+                isAdmin={isAdmin}
+                onGenerateVerse={handleGenerateVerse}
+                onAdvanceRound={handleAdvanceRound}
+                onBeginVoting={handleBeginVoting}
+                onCancelBattle={handleCancelBattle}
+              />
             )}
           </div>
 
-          {/* Desktop Sidebar */}
-          {(showCommenting || showVoting) && (
-            <div className="hidden md:block w-96">
-              <BattleSidebar
-                battle={battle}
-                onVote={handleVote}
-                onComment={handleComment}
-                isVotingPhase={isVotingPhase}
-                votingTimeRemaining={votingTimeRemaining}
-                votingCompletedRound={votingCompletedRound}
-              />
-            </div>
-          )}
+          {/* Sidebar - Desktop and Mobile */}
+          <SidebarContainer
+            battle={battle}
+            onVote={handleVote}
+            onComment={handleCommentSubmit}
+            showCommenting={showCommenting}
+            showVoting={showVoting}
+            isVotingPhase={isVotingPhase}
+            votingTimeRemaining={votingTimeRemaining}
+            votingCompletedRound={votingCompletedRound}
+            showMobileDrawer={showMobileDrawer}
+            onMobileDrawerChange={setShowMobileDrawer}
+            mobileActiveTab={mobileActiveTab}
+          />
         </div>
       </div>
 
       {/* Mobile Floating Action Buttons */}
-      {(showCommenting || showVoting) && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40">
-          {showCommenting && (
-            <button
-              onClick={handleMobileCommentsClick}
-              className={`
-                w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
-                ${
-                  showMobileDrawer && mobileActiveTab === "comments"
-                    ? "bg-blue-600/90 text-white border-blue-400/50 scale-110"
-                    : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-blue-600/90 hover:text-white hover:border-blue-500/50 hover:scale-105"
-                }
-              `}
-            >
-              <MessageSquare className="w-6 h-6" strokeWidth={2.5} />
-            </button>
-          )}
-          {showVoting && (
-            <button
-              onClick={handleMobileVotingClick}
-              className={`
-                w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
-                ${
-                  showMobileDrawer && mobileActiveTab === "voting"
-                    ? "bg-purple-600/90 text-white border-purple-400/50 scale-110"
-                    : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-purple-600/90 hover:text-white hover:border-purple-500/50 hover:scale-105"
-                }
-              `}
-            >
-              <ThumbsUp className="w-6 h-6" strokeWidth={2.5} />
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Mobile Drawer */}
-      <BattleDrawer
-        open={showMobileDrawer}
-        onOpenChange={setShowMobileDrawer}
-        title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
-      >
-        <div className="flex-1 overflow-y-auto min-h-0">
-          <BattleSidebar
-            battle={battle}
-            onVote={handleVote}
-            onComment={handleComment}
-            isVotingPhase={isVotingPhase}
-            votingTimeRemaining={votingTimeRemaining}
-            votingCompletedRound={votingCompletedRound}
-            defaultTab={mobileActiveTab}
-          />
-        </div>
-      </BattleDrawer>
+      <MobileActionButtons
+        showCommenting={showCommenting}
+        showVoting={showVoting}
+        onCommentsClick={openCommentsDrawer}
+        onVotingClick={openVotingDrawer}
+        activeTab={mobileActiveTab}
+        isDrawerOpen={showMobileDrawer}
+      />
 
       {/* Pause Battle Dialog */}
       <ConfirmationDialog
