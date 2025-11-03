@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Switch } from "./ui/switch";
 import {
   Radio,
@@ -48,6 +48,23 @@ export function BattleOptions({
   isCommentsGloballyEnabled = true,
 }: BattleOptionsProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Scroll to the options and focus when opened
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      // Use a small timeout to ensure the content is rendered before scrolling
+      setTimeout(() => {
+        containerRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+        // Focus the trigger element for accessibility
+        triggerRef.current?.focus();
+      }, 100);
+    }
+  }, [isOpen]);
 
   // Don't render if no options are available
   if (!isVotingGloballyEnabled && !isCommentsGloballyEnabled && !isAdmin) {
@@ -55,14 +72,20 @@ export function BattleOptions({
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto mb-6 flex justify-center">
+    <div
+      ref={containerRef}
+      className="w-full max-w-7xl mx-auto mb-6 flex justify-center"
+    >
       <Collapsible
         open={isOpen}
         onOpenChange={setIsOpen}
         className="w-full max-w-2xl"
       >
         <div className="bg-gray-800/50 border-2 border-gray-700 rounded-lg shadow-lg overflow-hidden">
-          <CollapsibleTrigger className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-800/70 transition-colors">
+          <CollapsibleTrigger
+            ref={triggerRef}
+            className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-800/70 transition-colors"
+          >
             <h3 className="text-white font-bold text-xl">Battle Options</h3>
             {isOpen ? (
               <ChevronUp className="w-5 h-5 text-gray-400" />
