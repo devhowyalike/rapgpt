@@ -14,12 +14,16 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { createInterface } from 'readline';
 import { AVAILABLE_PERSONAS } from '../src/lib/shared';
-import type { Persona, Battle } from '../src/lib/shared';
+import { getAllStages } from '../src/lib/shared/stages';
+import type { Persona, Battle, Stage } from '../src/lib/shared';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Available personas - imported from shared package
 const PERSONAS: Record<string, Persona> = AVAILABLE_PERSONAS;
+
+// Available stages
+const STAGES = getAllStages();
 
 // Create readline interface
 const rl = createInterface({
@@ -82,6 +86,22 @@ async function main() {
     process.exit(1);
   }
 
+  // Get stage
+  console.log('\nAvailable stages:');
+  STAGES.forEach(s => {
+    console.log(`  - ${s.id}: ${s.name} ${s.flag} (${s.country})`);
+  });
+  console.log('');
+  
+  const stageId = await ask('Enter the stage ID (or press Enter for default "canada"): ');
+  const selectedStageId = stageId.trim() || 'canada';
+  
+  if (!STAGES.find(s => s.id === selectedStageId)) {
+    console.error(`❌ Error: Stage "${selectedStageId}" not found. Available: ${STAGES.map(s => s.id).join(', ')}`);
+    rl.close();
+    process.exit(1);
+  }
+
   rl.close();
 
   // Create battle ID from event name
@@ -95,6 +115,7 @@ async function main() {
     month: now.toLocaleDateString('en-US', { month: 'long' }),
     year: now.getFullYear(),
     status: 'ongoing',
+    stageId: selectedStageId,
     personas: {
       left: PERSONAS[persona1Id],
       right: PERSONAS[persona2Id]

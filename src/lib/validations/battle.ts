@@ -76,6 +76,7 @@ export const battleSchema = z.object({
   month: z.string(),
   year: z.number().int(),
   status: z.enum(['upcoming', 'ongoing', 'completed', 'incomplete']),
+  stageId: z.string(),
   personas: z.object({
     left: personaSchema,
     right: personaSchema,
@@ -110,6 +111,7 @@ export const battleSchema = z.object({
 export const createBattleRequestSchema = z.object({
   leftPersonaId: z.string().min(1),
   rightPersonaId: z.string().min(1),
+  stageId: z.string().min(1),
 }).refine(data => data.leftPersonaId !== data.rightPersonaId, {
   message: 'Cannot battle the same persona',
 });

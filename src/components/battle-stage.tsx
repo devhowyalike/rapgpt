@@ -13,7 +13,7 @@ import { BattleBell } from "./battle-bell";
 import { VictoryConfetti } from "./victory-confetti";
 import { useEffect, useRef, useLayoutEffect, useState } from "react";
 import { Eye } from "lucide-react";
-import { DEFAULT_STAGE } from "@/lib/shared/stages";
+import { getStage, DEFAULT_STAGE } from "@/lib/shared/stages";
 import { useRoundData } from "@/lib/hooks/use-round-data";
 import { BattleHeader } from "./battle/battle-header";
 import { BattleSplitView } from "./battle/battle-split-view";
@@ -41,6 +41,9 @@ export function BattleStage({
     score: currentRoundScore,
     hasBothVerses: bothVersesComplete,
   } = useRoundData(battle, battle.currentRound);
+
+  // Get the stage for this battle
+  const stage = getStage(battle.stageId) || DEFAULT_STAGE;
 
   // Track if user has revealed scores for this round
   const [scoresRevealed, setScoresRevealed] = useState(false);
@@ -178,12 +181,12 @@ export function BattleStage({
                 Stage:
               </div>
               <div className="text-xl md:text-3xl font-bold text-white flex flex-col">
-                <span>{DEFAULT_STAGE.name}</span>
+                <span>{stage.name}</span>
                 <span className="text-xs md:text-base text-gray-400 font-normal flex items-center gap-1">
                   <span className="text-lg md:text-2xl">
-                    {DEFAULT_STAGE.flag}
+                    {stage.flag}
                   </span>
-                  {DEFAULT_STAGE.country}
+                  {stage.country}
                 </span>
               </div>
             </div>

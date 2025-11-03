@@ -15,11 +15,20 @@ export const canada: Stage = {
   name: "Futur's Den",
   country: 'Canada',
   flag: '🇨🇦',
-  backgroundImage: '/stages/canada.jpg',
+  backgroundImage: '/stages/futur2.jpg',
+};
+
+export const bronx: Stage = {
+  id: 'bronx',
+  name: '1520 Sedgwick Avenue',
+  country: 'Bronx, NY',
+  flag: '🇺🇸',
+  backgroundImage: '/stages/sedgwick.jpg',
 };
 
 export const AVAILABLE_STAGES: Record<string, Stage> = {
   canada,
+  bronx,
 };
 
 export function getStage(id: string): Stage | null {
