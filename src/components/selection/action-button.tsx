@@ -6,9 +6,13 @@ interface ActionButtonProps {
   children: React.ReactNode;
 }
 
-export function ActionButton({ onClick, disabled = false, children }: ActionButtonProps) {
+export function ActionButton({
+  onClick,
+  disabled = false,
+  children,
+}: ActionButtonProps) {
   return (
-    <div className="text-center pb-2 md:pb-4">
+    <div className="text-center mt-2 md:mt-7 pb-2 md:pb-4">
       <button
         onClick={onClick}
         disabled={disabled}
@@ -27,4 +31,3 @@ export function ActionButton({ onClick, disabled = false, children }: ActionButt
     </div>
   );
 }
-

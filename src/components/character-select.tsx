@@ -292,23 +292,6 @@ export function CharacterSelect() {
 
                 {/* Start Button */}
                 <SelectionActions>
-                  {/* Invisible BattleOptions placeholder to preserve layout between screens */}
-                  <div
-                    className="pointer-events-none invisible"
-                    aria-hidden="true"
-                  >
-                    <BattleOptions
-                      votingEnabled={votingEnabled}
-                      onVotingEnabledChange={() => {}}
-                      commentsEnabled={commentsEnabled}
-                      onCommentsEnabledChange={() => {}}
-                      createAsLive={createAsLive}
-                      onCreateAsLiveChange={() => {}}
-                      isAdmin={isAdmin}
-                      isVotingGloballyEnabled={isVotingGloballyEnabled}
-                      isCommentsGloballyEnabled={isCommentsGloballyEnabled}
-                    />
-                  </div>
                   <ActionButton
                     onClick={handleProceedToStageSelect}
                     disabled={!player1 || !player2}
