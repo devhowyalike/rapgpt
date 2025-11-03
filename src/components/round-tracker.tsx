@@ -53,12 +53,12 @@ export function RoundTracker({
                   transition-colors duration-300
                   ${
                     isRoundCompleted
-                      ? "bg-gradient-to-br from-yellow-400 to-yellow-600 text-black"
+                      ? "bg-linear-to-br from-yellow-400 to-yellow-600 text-black"
                       : ""
                   }
                   ${
                     isCurrent && !isRoundCompleted
-                      ? "bg-gradient-to-br from-blue-500 to-purple-600 text-white"
+                      ? "bg-linear-to-br from-blue-500 to-purple-600 text-white"
                       : ""
                   }
                   ${

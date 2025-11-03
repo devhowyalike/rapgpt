@@ -306,7 +306,7 @@ export function BattleReplay({
                   onClick={() => handleTabClick("scores")}
                   className={`
                   flex-1 md:flex-none px-4 py-2.5 md:px-6 md:py-3 font-bold text-sm md:text-base
-                  rounded-lg border-2 transition-all duration-200
+                  rounded-lg border-2 transition-all duration-200 isolate
                   ${
                     activeTab === "scores" && isDrawerOpen
                       ? "bg-linear-to-r from-yellow-600 to-orange-600 border-yellow-500 text-white shadow-lg shadow-yellow-500/30"
@@ -331,7 +331,7 @@ export function BattleReplay({
                     }
                     className={`
                     flex-1 md:flex-none px-4 py-2.5 md:px-6 md:py-3 font-bold text-sm md:text-base
-                    rounded-lg border-2 transition-all duration-200
+                    rounded-lg border-2 transition-all duration-200 isolate
                     ${
                       isSongPlaying
                         ? "bg-linear-to-r from-green-600 to-emerald-600 border-green-500 text-white shadow-lg shadow-green-500/30"
