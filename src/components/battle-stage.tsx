@@ -226,15 +226,16 @@ export function BattleStage({
 
       {/* Split Screen Stage */}
       <div className="flex-1">
-        <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:min-h-full">
-          {/* Left Persona */}
-          <div
-            className={`${
-              mobileActiveSide && mobileActiveSide !== "left"
-                ? "hidden md:flex"
-                : "flex"
-            } flex-col md:min-h-0`}
-          >
+        <div className="max-w-7xl mx-auto h-full">
+          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 h-full">
+            {/* Left Persona */}
+            <div
+              className={`${
+                mobileActiveSide && mobileActiveSide !== "left"
+                  ? "hidden md:flex"
+                  : "flex"
+              } flex-col md:min-h-0`}
+            >
             <div
               className="p-3 md:p-4 border-b border-gray-800"
               style={isMobile ? { marginTop: personaTopMargin } : undefined}
@@ -301,6 +302,7 @@ export function BattleStage({
             </div>
           </div>
         </div>
+      </div>
       </div>
 
       {/* Reveal Scores Button */}

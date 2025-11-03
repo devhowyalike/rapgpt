@@ -176,49 +176,53 @@ export function BattleReplay({
 
       {/* Split Screen Stage */}
       <div
-        className="flex-1 md:overflow-y-auto pb-[var(--mobile-bottom-padding,5rem)] md:pb-(--bottom-controls-height)"
+        className="flex-1 overflow-y-auto pb-(--mobile-bottom-padding,5rem) md:pb-(--bottom-controls-height)"
         style={{
           ["--mobile-bottom-padding" as any]: mobileBottomPadding ?? "5rem",
         }}
       >
-        <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:min-h-full">
-          {/* Left Persona */}
-          <div className="flex flex-col min-h-[400px] md:min-h-0">
-            <div className="p-6 border-b border-gray-800">
-              <PersonaCard
-                persona={battle.personas.left}
-                position="left"
-                isActive={false}
-                isRoundWinner={roundScore?.winner === battle.personas.left.id}
-              />
+        <div className="max-w-7xl mx-auto md:min-h-full">
+          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:min-h-full">
+            {/* Left Persona */}
+            <div className="flex flex-col min-h-[400px] md:min-h-0">
+              <div className="p-6 border-b border-gray-800">
+                <PersonaCard
+                  persona={battle.personas.left}
+                  position="left"
+                  isActive={false}
+                  isRoundWinner={roundScore?.winner === battle.personas.left.id}
+                />
+              </div>
+
+              <div className="flex-1 stage-spotlight">
+                <VerseDisplay
+                  verse={roundVerses.left}
+                  persona={battle.personas.left}
+                  position="left"
+                />
+              </div>
             </div>
 
-            <div className="flex-1 stage-spotlight">
-              <VerseDisplay
-                verse={roundVerses.left}
-                persona={battle.personas.left}
-                position="left"
-              />
-            </div>
-          </div>
+            {/* Right Persona */}
+            <div className="flex flex-col min-h-[400px] md:min-h-0">
+              <div className="p-6 border-b border-gray-800">
+                <PersonaCard
+                  persona={battle.personas.right}
+                  position="right"
+                  isActive={false}
+                  isRoundWinner={
+                    roundScore?.winner === battle.personas.right.id
+                  }
+                />
+              </div>
 
-          {/* Right Persona */}
-          <div className="flex flex-col min-h-[400px] md:min-h-0">
-            <div className="p-6 border-b border-gray-800">
-              <PersonaCard
-                persona={battle.personas.right}
-                position="right"
-                isActive={false}
-                isRoundWinner={roundScore?.winner === battle.personas.right.id}
-              />
-            </div>
-
-            <div className="flex-1 stage-spotlight">
-              <VerseDisplay
-                verse={roundVerses.right}
-                persona={battle.personas.right}
-                position="right"
-              />
+              <div className="flex-1 stage-spotlight">
+                <VerseDisplay
+                  verse={roundVerses.right}
+                  persona={battle.personas.right}
+                  position="right"
+                />
+              </div>
             </div>
           </div>
         </div>
