@@ -181,8 +181,13 @@ export function BattleReplay({
           ["--mobile-bottom-padding" as any]: mobileBottomPadding ?? "5rem",
         }}
       >
-        <div className="max-w-7xl mx-auto md:min-h-full">
-          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 md:min-h-full">
+        <div className="relative max-w-7xl mx-auto md:min-h-full">
+          {/* Full-height center divider on desktop */}
+          <div
+            className="hidden md:block pointer-events-none absolute inset-y-0 left-1/2 w-px bg-gray-800"
+            aria-hidden="true"
+          />
+          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 divide-gray-800 md:min-h-full">
             {/* Left Persona */}
             <div className="flex flex-col min-h-[400px] md:min-h-0">
               <div className="p-6 border-b border-gray-800">

@@ -226,8 +226,13 @@ export function BattleStage({
 
       {/* Split Screen Stage */}
       <div className="flex-1">
-        <div className="max-w-7xl mx-auto h-full">
-          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-800 h-full">
+        <div className="relative max-w-7xl mx-auto h-full">
+          {/* Full-height center divider on desktop */}
+          <div
+            className="hidden md:block pointer-events-none absolute inset-y-0 left-1/2 w-px bg-gray-800"
+            aria-hidden="true"
+          />
+          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 divide-gray-800 h-full">
             {/* Left Persona */}
             <div
               className={`${
