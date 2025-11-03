@@ -241,73 +241,73 @@ export function BattleStage({
                   : "flex"
               } flex-col md:min-h-0`}
             >
+              <div
+                className="p-3 md:p-4 border-b border-gray-800"
+                style={isMobile ? { marginTop: personaTopMargin } : undefined}
+              >
+                <PersonaCard
+                  persona={battle.personas.left}
+                  position="left"
+                  isActive={
+                    battle.currentTurn === "left" ||
+                    streamingPersonaId === battle.personas.left.id
+                  }
+                  isRoundWinner={
+                    shouldShowRoundWinner &&
+                    currentRoundScore?.winner === battle.personas.left.id
+                  }
+                />
+              </div>
+
+              <div className="flex-1 stage-spotlight">
+                <VerseDisplay
+                  verse={currentRoundVerses.left}
+                  persona={battle.personas.left}
+                  position="left"
+                  isStreaming={streamingPersonaId === battle.personas.left.id}
+                  streamingText={streamingText || undefined}
+                />
+              </div>
+            </div>
+
+            {/* Right Persona */}
             <div
-              className="p-3 md:p-4 border-b border-gray-800"
-              style={isMobile ? { marginTop: personaTopMargin } : undefined}
+              className={`${
+                mobileActiveSide && mobileActiveSide !== "right"
+                  ? "hidden md:flex"
+                  : "flex"
+              } flex-col md:min-h-0`}
             >
-              <PersonaCard
-                persona={battle.personas.left}
-                position="left"
-                isActive={
-                  battle.currentTurn === "left" ||
-                  streamingPersonaId === battle.personas.left.id
-                }
-                isRoundWinner={
-                  shouldShowRoundWinner &&
-                  currentRoundScore?.winner === battle.personas.left.id
-                }
-              />
-            </div>
+              <div
+                className="p-3 md:p-4 border-b border-gray-800"
+                style={isMobile ? { marginTop: personaTopMargin } : undefined}
+              >
+                <PersonaCard
+                  persona={battle.personas.right}
+                  position="right"
+                  isActive={
+                    battle.currentTurn === "right" ||
+                    streamingPersonaId === battle.personas.right.id
+                  }
+                  isRoundWinner={
+                    shouldShowRoundWinner &&
+                    currentRoundScore?.winner === battle.personas.right.id
+                  }
+                />
+              </div>
 
-            <div className="flex-1 stage-spotlight">
-              <VerseDisplay
-                verse={currentRoundVerses.left}
-                persona={battle.personas.left}
-                position="left"
-                isStreaming={streamingPersonaId === battle.personas.left.id}
-                streamingText={streamingText || undefined}
-              />
-            </div>
-          </div>
-
-          {/* Right Persona */}
-          <div
-            className={`${
-              mobileActiveSide && mobileActiveSide !== "right"
-                ? "hidden md:flex"
-                : "flex"
-            } flex-col md:min-h-0`}
-          >
-            <div
-              className="p-3 md:p-4 border-b border-gray-800"
-              style={isMobile ? { marginTop: personaTopMargin } : undefined}
-            >
-              <PersonaCard
-                persona={battle.personas.right}
-                position="right"
-                isActive={
-                  battle.currentTurn === "right" ||
-                  streamingPersonaId === battle.personas.right.id
-                }
-                isRoundWinner={
-                  shouldShowRoundWinner &&
-                  currentRoundScore?.winner === battle.personas.right.id
-                }
-              />
-            </div>
-
-            <div className="flex-1 stage-spotlight">
-              <VerseDisplay
-                verse={currentRoundVerses.right}
-                persona={battle.personas.right}
-                position="right"
-                isStreaming={streamingPersonaId === battle.personas.right.id}
-                streamingText={streamingText || undefined}
-              />
+              <div className="flex-1 stage-spotlight">
+                <VerseDisplay
+                  verse={currentRoundVerses.right}
+                  persona={battle.personas.right}
+                  position="right"
+                  isStreaming={streamingPersonaId === battle.personas.right.id}
+                  streamingText={streamingText || undefined}
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
       </div>
 
       {/* Reveal Scores Button */}
