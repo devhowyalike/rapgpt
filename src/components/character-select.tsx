@@ -276,15 +276,6 @@ export function CharacterSelect() {
                             className="w-full h-full object-cover"
                           />
                         </div>
-
-                        {/* Character Name on Hover - only show for unselected characters */}
-                        {!selected && (
-                          <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none">
-                            <div className="bg-black/90 px-3 py-1 rounded text-white text-xs font-bold border border-gray-700">
-                              {persona.name}
-                            </div>
-                          </div>
-                        )}
                       </button>
                     );
                   })}

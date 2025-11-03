@@ -178,15 +178,6 @@ export function StageSelect({
             </div>
           </div>
         )}
-
-        {/* Stage Name on Hover */}
-        {!selected && (
-          <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none">
-            <div className="bg-black/90 px-3 py-1 rounded text-white text-xs font-bold border border-gray-700">
-              {stage.name}
-            </div>
-          </div>
-        )}
       </button>
     );
   };
@@ -279,13 +270,6 @@ export function StageSelect({
                 <div className="text-white font-black text-[10px] md:text-xs tracking-wider">
                   RANDOM
                 </div>
-              </div>
-            </div>
-
-            {/* Tooltip */}
-            <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none">
-              <div className="bg-black/90 px-3 py-1 rounded text-white text-xs font-bold border border-purple-500">
-                Random Stage
               </div>
             </div>
           </button>
