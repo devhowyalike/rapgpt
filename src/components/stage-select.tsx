@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 import { BattleOptions } from "./battle-options";
 import type { ClientPersona } from "@/lib/shared/personas/client";
 import { SelectionLayout } from "./selection/selection-layout";
-import { SelectionContainer } from "./selection/selection-container";
-import { CenterDisplay } from "./selection/center-display";
 import { SelectionBottom } from "./selection/selection-bottom";
 import { SelectionGrid } from "./selection/selection-grid";
 import { SelectionActions } from "./selection/selection-actions";
@@ -236,16 +234,43 @@ export function StageSelect({
 
   return (
     <SelectionLayout title="Stage Select">
-      {/* Top Section - Stage Preview */}
-      <SelectionContainer>
-        {/* Spacer */}
-        <div className="w-20 md:w-32 lg:w-40" />
+      {/* Mobile: Stacked Layout, Desktop: Side-by-side Layout */}
+      <div className="flex-1 flex flex-col md:flex-row md:items-center md:justify-center gap-2 md:gap-12 lg:gap-16 px-4 md:px-8 pb-2 md:pb-8">
+        {/* Left Side - Stage Grid (Bottom on mobile, Left on desktop) */}
+        <div className="flex flex-col items-center gap-2 md:gap-6 order-2 md:order-1 mt-4 md:mt-0">
+          {/* Stage Selection Grid */}
+          <SelectionGrid gap="normal">
+            {stages.map((stage) => renderStageButton(stage))}
 
-        {/* Center - Stage Preview */}
-        <CenterDisplay title="" subtitle="">
-          <div className="mt-4 shrink-0 w-[240px] md:w-[384px] lg:w-[512px]">
+            {/* Random Stage Option */}
+            <button
+              onClick={handleRandomStage}
+              className={`
+                relative group
+                transition-all duration-300 transform
+                hover:scale-105 md:hover:scale-110 hover:z-20
+              `}
+            >
+              {/* Random Stage Card */}
+              <div className="w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-lg border-4 border-purple-500 overflow-hidden bg-linear-to-br from-purple-900 via-pink-900 to-purple-900 transition-all duration-300 hover:border-purple-400 hover:shadow-[0_0_30px_rgba(168,85,247,0.8)] flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl mb-0.5 animate-pulse">
+                    🎲
+                  </div>
+                  <div className="text-white font-black text-[10px] md:text-xs tracking-wider">
+                    RANDOM
+                  </div>
+                </div>
+              </div>
+            </button>
+          </SelectionGrid>
+        </div>
+
+        {/* Right Side - Stage Preview (Top on mobile, Right on desktop) */}
+        <div className="flex flex-col items-center gap-2 md:gap-6 order-1 md:order-2">
+          <div className="shrink-0 w-[240px] md:w-[384px] lg:w-[512px]">
             {/* Fixed height container to prevent layout shifts */}
-            <div className="relative mb-4 group">
+            <div className="relative mb-2 md:mb-4 group">
               {displayStage && (
                 <div className="absolute inset-0 bg-yellow-500/20 blur-3xl rounded-lg" />
               )}
@@ -292,42 +317,11 @@ export function StageSelect({
               </div>
             </div>
           </div>
-        </CenterDisplay>
+        </div>
+      </div>
 
-        {/* Spacer */}
-        <div className="w-20 md:w-32 lg:w-40" />
-      </SelectionContainer>
-
-      {/* Bottom Section - Stage Grid */}
+      {/* Bottom Section - Battle Options & Actions */}
       <SelectionBottom>
-        {/* Stage Selection Grid */}
-        <SelectionGrid gap="normal">
-          {stages.map((stage) => renderStageButton(stage))}
-
-          {/* Random Stage Option */}
-          <button
-            onClick={handleRandomStage}
-            className={`
-              relative group
-              transition-all duration-300 transform
-              hover:scale-105 md:hover:scale-110 hover:z-20
-            `}
-          >
-            {/* Random Stage Card */}
-            <div className="w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-lg border-4 border-purple-500 overflow-hidden bg-linear-to-br from-purple-900 via-pink-900 to-purple-900 transition-all duration-300 hover:border-purple-400 hover:shadow-[0_0_30px_rgba(168,85,247,0.8)] flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl mb-0.5 animate-pulse">
-                  🎲
-                </div>
-                <div className="text-white font-black text-[10px] md:text-xs tracking-wider">
-                  RANDOM
-                </div>
-              </div>
-            </div>
-          </button>
-        </SelectionGrid>
-
-        {/* Battle Options & Start Button */}
         <SelectionActions>
           <BattleOptions
             votingEnabled={votingEnabled}
