@@ -8,6 +8,6 @@ interface SelectionContainerProps {
 
 export function SelectionContainer({ children }: SelectionContainerProps) {
   return (
-    <div className="flex items-center justify-between pb-0">{children}</div>
+    <div className="flex items-center justify-between shrink-0 mb-6 md:mb-8">{children}</div>
   );
 }

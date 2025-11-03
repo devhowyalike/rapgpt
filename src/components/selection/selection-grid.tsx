@@ -12,13 +12,13 @@ export function SelectionGrid({
   gap = "normal",
 }: SelectionGridProps) {
   const gapClasses =
-    gap === "large" ? "gap-6 md:gap-8 lg:gap-10" : "gap-4 md:gap-6 lg:gap-8";
+    gap === "large" ? "gap-4 md:gap-8 lg:gap-10" : "gap-3 md:gap-6 lg:gap-8";
 
-  const paddingClasses = gap === "large" ? "pb-8" : "";
+  const paddingClasses = gap === "large" ? "pb-4 md:pb-8" : "";
 
   return (
     <div
-      className={`max-w-5xl mx-auto px-2 md:px-4 lg:px-8 mb-0 ${paddingClasses}`}
+      className={`max-w-5xl mx-auto px-2 md:px-4 lg:px-8 mb-3 ${paddingClasses}`}
     >
       <div
         className={`flex justify-center items-center ${gapClasses} flex-wrap`}

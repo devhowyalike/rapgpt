@@ -122,7 +122,7 @@ export function CharacterSelect() {
   const displayPlayer2 = player2 || (player1 && !player2 && hoveredPersona);
 
   return (
-    <div className="overflow-hidden relative min-h-screen">
+    <div className="relative min-h-dvh flex flex-col">
       <AnimatePresence initial={false} mode="wait">
         {showStageSelect && player1 && player2 ? (
           <motion.div
