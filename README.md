@@ -239,7 +239,27 @@ POSTGRES_DATABASE=your_database
 # Live/featured battles (admin-created) ALWAYS have voting and commenting enabled
 NEXT_PUBLIC_USER_BATTLE_VOTING=false        # Enable voting on user battles (default: false)
 NEXT_PUBLIC_USER_BATTLE_COMMENTING=false    # Enable commenting on user battles (default: false)
+
+# WebSocket Configuration
+# Set to 'true' to disable WebSockets (required for Vercel deployments)
+NEXT_PUBLIC_DISABLE_WEBSOCKETS=false        # Disable real-time WebSocket features (default: false)
 ```
+
+### WebSockets on Vercel
+
+**Important**: Vercel does not support WebSocket connections by default. You'll get 404 errors for the `/ws` endpoint.
+
+To deploy on Vercel, you **must** disable WebSockets:
+
+1. Add to Vercel environment variables: `NEXT_PUBLIC_DISABLE_WEBSOCKETS=true`
+2. Redeploy your application
+
+When disabled:
+- ✅ All core features work normally
+- ❌ Real-time updates disabled (users must refresh to see new content)
+- ❌ Live viewer counts not available
+
+**See [DISABLE_WEBSOCKETS.md](./DISABLE_WEBSOCKETS.md) for detailed setup instructions.**
 
 ## Tech Stack
 
@@ -255,9 +275,9 @@ NEXT_PUBLIC_USER_BATTLE_COMMENTING=false    # Enable commenting on user battles 
 
 - [x] Database migration (Vercel Postgres + Drizzle ORM)
 - [x] Request validation with Zod
-- [ ] User authentication (NextAuth.js or Clerk)
-- [ ] Admin interface for battle management
-- [ ] WebSocket for real-time updates
+- [x] User authentication (Clerk)
+- [x] Admin interface for battle management
+- [x] WebSocket for real-time updates (with optional disable for Vercel)
 - [ ] More personas (expand the roster)
 - [ ] Tournament mode (bracket-style competitions)
 - [ ] Custom persona creator
