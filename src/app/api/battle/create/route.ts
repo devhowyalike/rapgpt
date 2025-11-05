@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const { leftPersonaId, rightPersonaId, isFeatured, votingEnabled, commentsEnabled } = validation.data;
+    const { leftPersonaId, rightPersonaId, stageId, isFeatured, votingEnabled, commentsEnabled } = validation.data;
 
     // If creating a featured battle, verify user is admin
     if (isFeatured && user.role !== 'admin') {
@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
       month,
       year,
       status: 'ongoing',
+      stageId,
       personas: {
         left: leftPersona,
         right: rightPersona,

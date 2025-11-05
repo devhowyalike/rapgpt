@@ -54,6 +54,7 @@ export async function getBattleById(id: string): Promise<Battle | null> {
       month: battle.month,
       year: battle.year,
       status: battle.status as Battle['status'],
+      stageId: battle.stageId,
       personas: {
         left: battle.leftPersona,
         right: battle.rightPersona,
@@ -107,6 +108,7 @@ export async function saveBattle(
       month: battle.month,
       year: battle.year,
       status: battle.status,
+      stageId: battle.stageId,
       leftPersona: battle.personas.left,
       rightPersona: battle.personas.right,
       currentRound: battle.currentRound,
@@ -199,6 +201,7 @@ export async function getAllBattles(): Promise<Battle[]> {
         month: battle.month,
         year: battle.year,
         status: battle.status as Battle['status'],
+        stageId: battle.stageId,
         personas: {
           left: battle.leftPersona,
           right: battle.rightPersona,
@@ -272,6 +275,7 @@ export async function getFeaturedBattles(): Promise<Battle[]> {
         month: battle.month,
         year: battle.year,
         status: battle.status as Battle['status'],
+        stageId: battle.stageId,
         personas: {
           left: battle.leftPersona,
           right: battle.rightPersona,
@@ -354,6 +358,7 @@ export async function getLiveBattles(): Promise<Battle[]> {
         month: battle.month,
         year: battle.year,
         status: battle.status as Battle['status'],
+        stageId: battle.stageId,
         personas: {
           left: battle.leftPersona,
           right: battle.rightPersona,

@@ -33,6 +33,7 @@ export const battles = pgTable('battles', {
   month: text('month').notNull(),
   year: integer('year').notNull(),
   status: text('status').notNull(), // 'upcoming' | 'ongoing' | 'completed' | 'incomplete'
+  stageId: text('stage_id').notNull().default('canada'), // Stage where battle takes place
   
   // Store personas as JSONB (they're static data, no need to normalize)
   leftPersona: jsonb('left_persona').$type<Persona>().notNull(),

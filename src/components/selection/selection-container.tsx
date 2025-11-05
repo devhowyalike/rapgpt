@@ -1,0 +1,13 @@
+"use client";
+
+import { ReactNode } from "react";
+
+interface SelectionContainerProps {
+  children: ReactNode;
+}
+
+export function SelectionContainer({ children }: SelectionContainerProps) {
+  return (
+    <div className="flex items-center justify-between shrink-0 mb-6 md:mb-8">{children}</div>
+  );
+}

@@ -74,6 +74,7 @@ export interface Battle {
   month: string;
   year: number;
   status: BattleStatus;
+  stageId: string; // Stage where the battle takes place
   personas: {
     left: Persona;
     right: Persona;
