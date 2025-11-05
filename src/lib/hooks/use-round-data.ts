@@ -33,7 +33,10 @@ export function useRoundData(battle: Battle, round: number): RoundData {
     const isComplete = hasBothVerses && !!score;
 
     return {
-      verses,
+      verses: {
+        left: verses.left ?? null,
+        right: verses.right ?? null,
+      },
       score,
       isComplete,
       hasVerses,
