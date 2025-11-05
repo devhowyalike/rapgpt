@@ -6,12 +6,9 @@
 
 import { useState, useEffect } from "react";
 import type { Battle } from "@/lib/shared";
-import { PersonaCard } from "./persona-card";
-import { VerseDisplay } from "./verse-display";
 import { ScoreDisplay } from "./score-display";
 import { SongGenerator } from "./song-generator";
 import { SongPlayer } from "./song-player";
-import { getRoundVerses } from "@/lib/battle-engine";
 import { motion } from "framer-motion";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
@@ -21,6 +18,10 @@ import { CreatorAttribution } from "./creator-attribution";
 import { RoundControls } from "./round-controls";
 import { BattleDrawer } from "./ui/battle-drawer";
 import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
+import { useRoundData } from "@/lib/hooks/use-round-data";
+import { BattleHeader } from "./battle/battle-header";
+import { BattleSplitView } from "./battle/battle-split-view";
+import { BattleBottomControls } from "./battle/battle-bottom-controls";
 
 interface BattleReplayProps {
   battle: Battle;
@@ -35,8 +36,10 @@ export function BattleReplay({
   mobileBottomPadding,
 }: BattleReplayProps) {
   const [selectedRound, setSelectedRound] = useState(1);
-  const roundVerses = getRoundVerses(battle, selectedRound);
-  const roundScore = battle.scores.find((s) => s.round === selectedRound);
+  const { verses: roundVerses, score: roundScore } = useRoundData(
+    battle,
+    selectedRound
+  );
   const { sessionClaims, isLoaded } = useAuth();
   const { user } = useUser();
   const router = useRouter();
@@ -150,87 +153,41 @@ export function BattleReplay({
   return (
     <div className="flex flex-col min-h-0 md:h-full bg-linear-to-b from-stage-darker to-stage-dark">
       {/* Header with Replay Controls - Unified responsive layout */}
-      <div className="sticky md:relative left-0 right-0 z-20 p-4 md:p-6 border-b border-gray-800 bg-stage-darker/95 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none top-(--header-height) md:top-auto">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-8">
-            {/* Left Side: Winner/Paused and Creator */}
-            <div className="shrink-0 flex flex-col gap-2 items-center md:items-start">
-              <WinnerBanner battle={battle} />
-              <CreatorAttribution
-                battle={battle}
-                hideOnMobileWhenWinnerVisible
-              />
-            </div>
-
-            {/* Right Side: Round Controls */}
-            <RoundControls
-              selectedRound={selectedRound}
-              canGoPrev={canGoPrev}
-              canGoNext={canGoNext}
-              onPrev={handlePrevRound}
-              onNext={handleNextRound}
+      <BattleHeader
+        variant="blur"
+        className="md:bg-transparent md:backdrop-blur-none"
+      >
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-8">
+          {/* Left Side: Winner/Paused and Creator */}
+          <div className="shrink-0 flex flex-col gap-2 items-center md:items-start">
+            <WinnerBanner battle={battle} />
+            <CreatorAttribution
+              battle={battle}
+              hideOnMobileWhenWinnerVisible
             />
           </div>
+
+          {/* Right Side: Round Controls */}
+          <RoundControls
+            selectedRound={selectedRound}
+            canGoPrev={canGoPrev}
+            canGoNext={canGoNext}
+            onPrev={handlePrevRound}
+            onNext={handleNextRound}
+          />
         </div>
-      </div>
+      </BattleHeader>
 
       {/* Split Screen Stage */}
-      <div
-        className="flex-1 overflow-y-auto pb-(--mobile-bottom-padding,5rem) md:pb-(--bottom-controls-height)"
-        style={{
-          ["--mobile-bottom-padding" as any]: mobileBottomPadding ?? "5rem",
-        }}
-      >
-        <div className="relative max-w-7xl mx-auto md:min-h-full">
-          {/* Full-height center divider on desktop */}
-          <div
-            className="hidden md:block pointer-events-none absolute inset-y-0 left-1/2 w-px bg-gray-800"
-            aria-hidden="true"
-          />
-          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 divide-gray-800 md:min-h-full">
-            {/* Left Persona */}
-            <div className="flex flex-col min-h-[400px] md:min-h-0">
-              <div className="p-6 border-b border-gray-800">
-                <PersonaCard
-                  persona={battle.personas.left}
-                  position="left"
-                  isActive={false}
-                  isRoundWinner={roundScore?.winner === battle.personas.left.id}
-                />
-              </div>
-
-              <div className="flex-1 stage-spotlight">
-                <VerseDisplay
-                  verse={roundVerses.left}
-                  persona={battle.personas.left}
-                  position="left"
-                />
-              </div>
-            </div>
-
-            {/* Right Persona */}
-            <div className="flex flex-col min-h-[400px] md:min-h-0">
-              <div className="p-6 border-b border-gray-800">
-                <PersonaCard
-                  persona={battle.personas.right}
-                  position="right"
-                  isActive={false}
-                  isRoundWinner={
-                    roundScore?.winner === battle.personas.right.id
-                  }
-                />
-              </div>
-
-              <div className="flex-1 stage-spotlight">
-                <VerseDisplay
-                  verse={roundVerses.right}
-                  persona={battle.personas.right}
-                  position="right"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="flex-1 overflow-y-auto pb-36 md:pb-24">
+        <BattleSplitView
+          battle={battle}
+          leftVerse={roundVerses.left}
+          rightVerse={roundVerses.right}
+          roundScore={roundScore}
+          showRoundWinner={true}
+          cardPadding="p-6"
+        />
       </div>
 
       {/* Unified Drawer - Only show for completed battles */}
@@ -302,14 +259,10 @@ export function BattleReplay({
             </BattleDrawer>
 
             {/* Fixed Bottom Buttons */}
-            <div
-              className="fixed bottom-0 left-0 right-0 z-60 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800"
-              style={{ height: "var(--bottom-controls-height)" }}
-            >
-              <div className="max-w-4xl mx-auto h-full px-2 md:px-4 flex items-center justify-center gap-2 md:gap-3">
-                <motion.button
-                  onClick={() => handleTabClick("scores")}
-                  className={`
+            <BattleBottomControls>
+              <motion.button
+                onClick={() => handleTabClick("scores")}
+                className={`
                   flex-1 md:flex-none px-4 py-2.5 md:px-6 md:py-3 font-bold text-sm md:text-base
                   rounded-lg border-2 transition-all duration-200 isolate
                   ${
@@ -318,23 +271,23 @@ export function BattleReplay({
                       : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
                   }
                 `}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="text-lg">📊</span>
-                    <span>Scores</span>
-                  </span>
-                </motion.button>
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <span className="text-lg">📊</span>
+                  <span>Scores</span>
+                </span>
+              </motion.button>
 
-                {(showSongGenerator || showSongPlayer) && (
-                  <motion.button
-                    onClick={
-                      showSongPlayer
-                        ? handleSongButtonClick
-                        : () => handleTabClick("song")
-                    }
-                    className={`
+              {(showSongGenerator || showSongPlayer) && (
+                <motion.button
+                  onClick={
+                    showSongPlayer
+                      ? handleSongButtonClick
+                      : () => handleTabClick("song")
+                  }
+                  className={`
                     flex-1 md:flex-none px-4 py-2.5 md:px-6 md:py-3 font-bold text-sm md:text-base
                     rounded-lg border-2 transition-all duration-200 isolate
                     ${
@@ -347,41 +300,40 @@ export function BattleReplay({
                         : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
                     }
                   `}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <span className="flex items-center justify-center gap-2">
-                      {showSongGenerator ? (
-                        <>
-                          <span
-                            className="text-lg inline-block"
-                            style={{ filter: "invert(1)" }}
-                          >
-                            🎵
-                          </span>
-                          <span>Make it an MP3</span>
-                        </>
-                      ) : isSongPlaying ? (
-                        <>
-                          <AnimatedEq className="text-white" />
-                          <span>Pause Song</span>
-                        </>
-                      ) : (
-                        <>
-                          <span
-                            className="text-lg inline-block"
-                            style={{ filter: "invert(1)" }}
-                          >
-                            🎵
-                          </span>
-                          <span>Song</span>
-                        </>
-                      )}
-                    </span>
-                  </motion.button>
-                )}
-              </div>
-            </div>
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    {showSongGenerator ? (
+                      <>
+                        <span
+                          className="text-lg inline-block"
+                          style={{ filter: "invert(1)" }}
+                        >
+                          🎵
+                        </span>
+                        <span>Make it an MP3</span>
+                      </>
+                    ) : isSongPlaying ? (
+                      <>
+                        <AnimatedEq className="text-white" />
+                        <span>Pause Song</span>
+                      </>
+                    ) : (
+                      <>
+                        <span
+                          className="text-lg inline-block"
+                          style={{ filter: "invert(1)" }}
+                        >
+                          🎵
+                        </span>
+                        <span>Song</span>
+                      </>
+                    )}
+                  </span>
+                </motion.button>
+              )}
+            </BattleBottomControls>
           </>
         )}
     </div>

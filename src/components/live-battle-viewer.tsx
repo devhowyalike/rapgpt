@@ -7,17 +7,19 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Battle } from "@/lib/shared";
 import { BattleStage } from "./battle-stage";
-import { BattleSidebar } from "./battle-sidebar";
 import { SiteHeader } from "./site-header";
 import { LiveIndicator } from "./live-indicator";
 import { useWebSocket } from "@/lib/websocket/client";
 import type { WebSocketEvent } from "@/lib/websocket/types";
 import { useBattleStore } from "@/lib/battle-store";
-import { MessageSquare, ThumbsUp, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
-import { BattleDrawer } from "@/components/ui/battle-drawer";
 import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
+import { useBattleFeatures } from "@/lib/hooks/use-battle-features";
+import { useBattleVote, useBattleComment } from "@/lib/hooks/use-battle-actions";
+import { useMobileDrawer } from "@/lib/hooks/use-mobile-drawer";
+import { MobileActionButtons, SidebarContainer } from "@/components/battle";
 
 interface LiveBattleViewerProps {
   initialBattle: Battle;
@@ -44,25 +46,31 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
     setReadingTimeRemaining,
   } = useBattleStore();
 
-  const [showMobileDrawer, setShowMobileDrawer] = useState(false);
-  const [mobileActiveTab, setMobileActiveTab] = useState<"comments" | "voting">(
-    "comments"
-  );
   const [hasInitiallyConnected, setHasInitiallyConnected] = useState(false);
 
+  // Mobile drawer state
+  const {
+    showMobileDrawer,
+    mobileActiveTab,
+    setShowMobileDrawer,
+    setMobileActiveTab,
+    openCommentsDrawer,
+    openVotingDrawer,
+  } = useMobileDrawer();
+
   // Ensure only one drawer is open at a time across the page
-  useExclusiveDrawer("viewer-comments-voting", showMobileDrawer, setShowMobileDrawer);
+  useExclusiveDrawer(
+    "viewer-comments-voting",
+    showMobileDrawer,
+    setShowMobileDrawer
+  );
 
   // Check if user is admin
   const { sessionClaims, isLoaded } = useAuth();
   const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
 
-  // Determine if voting and commenting should be shown
-  // Check both env flags (master switch) AND battle settings
-  const isVotingGloballyEnabled = process.env.NEXT_PUBLIC_USER_BATTLE_VOTING !== 'false';
-  const isCommentsGloballyEnabled = process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING !== 'false';
-  const showVoting = isVotingGloballyEnabled && (battle?.votingEnabled ?? true);
-  const showCommenting = isCommentsGloballyEnabled && (battle?.commentsEnabled ?? true);
+  // Feature flags for voting and commenting
+  const { showVoting, showCommenting } = useBattleFeatures(battle);
 
   // Initialize battle state
   useEffect(() => {
@@ -237,7 +245,7 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
       setVotingTimeRemaining(next);
       if (next <= 0 && battle) {
         completeVotingPhase(battle.currentRound);
-        
+
         // On mobile, close the drawer and scroll to scores when voting ends
         if (typeof window !== "undefined" && window.innerWidth < 768) {
           setShowMobileDrawer(false);
@@ -254,70 +262,28 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
     completeVotingPhase,
   ]);
 
-  const handleVote = async (
-    round: number,
-    personaId: string
-  ): Promise<boolean> => {
-    if (!battle) return false;
+  // Battle action handlers - MUST be before any conditional returns (Rules of Hooks)
+  // For viewer, don't update local state for votes - wait for WebSocket broadcast
+  const handleVote = useBattleVote({
+    battleId: initialBattle.id,
+    onSuccess: () => {
+      // Don't update local state - WebSocket will broadcast the update
+    },
+  });
 
-    try {
-      const response = await fetch(`/api/battle/${battle.id}/vote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ round, personaId }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Vote failed:", errorData.error);
-        return false;
-      }
-
-      // Don't update local state - wait for WebSocket broadcast
-      return true;
-    } catch (error) {
-      console.error("Error voting:", error);
-      return false;
-    }
-  };
-
-  const handleComment = async (content: string) => {
-    if (!battle) return;
-
-    try {
-      const response = await fetch(`/api/battle/${battle.id}/comment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content,
-          round: battle.currentRound,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to submit comment");
-      }
-
-      const data = await response.json();
-
+  const handleCommentSubmit = useBattleComment({
+    battle: initialBattle,
+    onSuccess: (comment) => {
       // Optimistically update local state immediately (don't wait for WebSocket)
       // This ensures the user sees their comment right away
-      if (data.comment) {
+      if (battle) {
         setBattle({
           ...battle,
-          comments: [...battle.comments, data.comment],
+          comments: [...battle.comments, comment],
         });
       }
-    } catch (error) {
-      console.error("Error commenting:", error);
-      alert(
-        `Failed to post comment: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
-  };
+    },
+  });
 
   if (!battle) {
     return <div>Loading...</div>;
@@ -329,9 +295,9 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
       <div style={{ height: "var(--header-height)" }} />
 
       {/* Live Indicator Banner */}
-      <div 
+      <div
         className="bg-gray-900 border-b border-gray-800 p-3"
-        style={{ height: 'var(--live-banner-height)' }}
+        style={{ height: "var(--live-banner-height)" }}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <LiveIndicator
@@ -363,94 +329,46 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
         </div>
       </div>
 
-      <div className="flex flex-col md:h-[calc(100dvh-var(--header-height)-var(--live-banner-height))] md:flex-row">
-        {/* Battle Stage */}
-        <div className="flex-1 flex flex-col min-h-0">
-          <BattleStage
-            battle={battle}
-            streamingPersonaId={streamingPersonaId}
-            streamingText={streamingVerse}
-            isReadingPhase={isReadingPhase}
-            isVotingPhase={isVotingPhase}
-            votingCompletedRound={votingCompletedRound}
-          />
-        </div>
-
-        {/* Desktop Sidebar */}
-        {(showCommenting || showVoting) && (
-          <div className="hidden md:block w-96">
-            <BattleSidebar
+      <div className="px-0 md:px-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:h-[calc(100dvh-var(--header-height)-var(--live-banner-height))] md:flex-row">
+          {/* Battle Stage */}
+          <div className="flex-1 flex flex-col min-h-0">
+            <BattleStage
               battle={battle}
-              onVote={handleVote}
-              onComment={handleComment}
+              streamingPersonaId={streamingPersonaId}
+              streamingText={streamingVerse}
+              isReadingPhase={isReadingPhase}
               isVotingPhase={isVotingPhase}
-              votingTimeRemaining={votingTimeRemaining}
               votingCompletedRound={votingCompletedRound}
             />
           </div>
-        )}
-      </div>
 
-      {/* Mobile Floating Action Buttons */}
-      {(showCommenting || showVoting) && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40">
-          {showCommenting && (
-            <button
-              onClick={() => {
-                setMobileActiveTab("comments");
-                setShowMobileDrawer(true);
-              }}
-              className={`
-                w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
-                ${
-                  showMobileDrawer && mobileActiveTab === "comments"
-                    ? "bg-blue-600/90 text-white border-blue-400/50 scale-110"
-                    : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-blue-600/90 hover:text-white hover:border-blue-500/50 hover:scale-105"
-                }
-              `}
-            >
-              <MessageSquare className="w-6 h-6" strokeWidth={2.5} />
-            </button>
-          )}
-          {showVoting && (
-            <button
-              onClick={() => {
-                setMobileActiveTab("voting");
-                setShowMobileDrawer(true);
-              }}
-              className={`
-                w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
-                ${
-                  showMobileDrawer && mobileActiveTab === "voting"
-                    ? "bg-purple-600/90 text-white border-purple-400/50 scale-110"
-                    : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-purple-600/90 hover:text-white hover:border-purple-500/50 hover:scale-105"
-                }
-              `}
-            >
-              <ThumbsUp className="w-6 h-6" strokeWidth={2.5} />
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Mobile Drawer */}
-      <BattleDrawer
-        open={showMobileDrawer}
-        onOpenChange={setShowMobileDrawer}
-        title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
-      >
-        <div className="flex-1 overflow-y-auto min-h-0">
-          <BattleSidebar
+          {/* Sidebar - Desktop and Mobile */}
+          <SidebarContainer
             battle={battle}
             onVote={handleVote}
-            onComment={handleComment}
+            onComment={handleCommentSubmit}
+            showCommenting={showCommenting}
+            showVoting={showVoting}
             isVotingPhase={isVotingPhase}
             votingTimeRemaining={votingTimeRemaining}
             votingCompletedRound={votingCompletedRound}
-            defaultTab={mobileActiveTab}
+            showMobileDrawer={showMobileDrawer}
+            onMobileDrawerChange={setShowMobileDrawer}
+            mobileActiveTab={mobileActiveTab}
           />
         </div>
-      </BattleDrawer>
+      </div>
+
+      {/* Mobile Floating Action Buttons */}
+      <MobileActionButtons
+        showCommenting={showCommenting}
+        showVoting={showVoting}
+        onCommentsClick={openCommentsDrawer}
+        onVotingClick={openVotingDrawer}
+        activeTab={mobileActiveTab}
+        isDrawerOpen={showMobileDrawer}
+      />
     </>
   );
 }

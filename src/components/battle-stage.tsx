@@ -5,17 +5,18 @@
 "use client";
 
 import type { Battle } from "@/lib/shared";
-import { PersonaCard } from "./persona-card";
-import { VerseDisplay } from "./verse-display";
 import { RoundTracker } from "./round-tracker";
 import { ScoreDisplay } from "./score-display";
-import { getRoundVerses, getBattleProgress } from "@/lib/battle-engine";
+import { getBattleProgress } from "@/lib/battle-engine";
 import { motion } from "framer-motion";
 import { BattleBell } from "./battle-bell";
 import { VictoryConfetti } from "./victory-confetti";
 import { useEffect, useRef, useLayoutEffect, useState } from "react";
 import { Eye } from "lucide-react";
 import { DEFAULT_STAGE } from "@/lib/shared/stages";
+import { useRoundData } from "@/lib/hooks/use-round-data";
+import { BattleHeader } from "./battle/battle-header";
+import { BattleSplitView } from "./battle/battle-split-view";
 
 interface BattleStageProps {
   battle: Battle;
@@ -35,10 +36,11 @@ export function BattleStage({
   votingCompletedRound = null,
 }: BattleStageProps) {
   const progress = getBattleProgress(battle);
-  const currentRoundVerses = getRoundVerses(battle, battle.currentRound);
-  const currentRoundScore = battle.scores.find(
-    (s) => s.round === battle.currentRound
-  );
+  const {
+    verses: currentRoundVerses,
+    score: currentRoundScore,
+    hasBothVerses: bothVersesComplete,
+  } = useRoundData(battle, battle.currentRound);
 
   // Track if user has revealed scores for this round
   const [scoresRevealed, setScoresRevealed] = useState(false);
@@ -121,8 +123,6 @@ export function BattleStage({
   // Determine which persona to show on mobile
   // Keep showing only the second rapper until user reveals scores
   let mobileActiveSide: "left" | "right" | null = null;
-  const bothVersesComplete =
-    currentRoundVerses.left && currentRoundVerses.right;
 
   if (streamingPersonaId === battle.personas.left.id) {
     mobileActiveSide = "left";
@@ -170,144 +170,71 @@ export function BattleStage({
   return (
     <div className="flex flex-col h-full overflow-y-auto bg-linear-to-b from-stage-darker to-stage-dark overflow-x-hidden">
       {/* Header with Round Tracker */}
-      <div className="sticky left-0 right-0 z-20 px-4 py-2 md:px-6 md:py-4 border-b border-gray-800 bg-stage-darker/95 backdrop-blur-sm top-0">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-row md:flex-row items-center justify-between md:justify-start gap-2 md:gap-6">
-            <div className="md:flex-1">
-              <div className="text-left">
-                <div className="text-xs md:text-base text-gray-400 uppercase tracking-wider">
-                  Stage
-                </div>
-                <div className="text-xl md:text-3xl font-bold text-white flex flex-col">
-                  <span>{DEFAULT_STAGE.name}</span>
-                  <span className="text-xs md:text-base text-gray-400 font-normal flex items-center gap-1">
-                    <span className="text-lg md:text-2xl">
-                      {DEFAULT_STAGE.flag}
-                    </span>
-                    {DEFAULT_STAGE.country}
+      <BattleHeader sticky={true} variant="blur" className="top-0">
+        <div className="flex flex-row md:flex-row items-center justify-between md:justify-start gap-2 md:gap-6">
+          <div className="md:flex-1">
+            <div className="text-left">
+              <div className="text-xs md:text-base text-gray-400 uppercase tracking-wider">
+                Stage:
+              </div>
+              <div className="text-xl md:text-3xl font-bold text-white flex flex-col">
+                <span>{DEFAULT_STAGE.name}</span>
+                <span className="text-xs md:text-base text-gray-400 font-normal flex items-center gap-1">
+                  <span className="text-lg md:text-2xl">
+                    {DEFAULT_STAGE.flag}
                   </span>
-                </div>
+                  {DEFAULT_STAGE.country}
+                </span>
               </div>
             </div>
+          </div>
 
-            <BattleBell
+          <BattleBell
+            currentRound={battle.currentRound}
+            completedRounds={progress.completedRounds}
+          />
+
+          <div className="md:flex-1 md:flex md:justify-end">
+            <RoundTracker
               currentRound={battle.currentRound}
               completedRounds={progress.completedRounds}
             />
-
-            <div className="md:flex-1 md:flex md:justify-end">
-              <RoundTracker
-                currentRound={battle.currentRound}
-                completedRounds={progress.completedRounds}
-              />
-            </div>
           </div>
-
-          {battle.status === "completed" && battle.winner && (
-            <motion.div
-              ref={trophyRef}
-              className="mt-4 md:mt-6 text-center relative"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              <VictoryConfetti trigger={true} />
-              <div className="text-xl md:text-2xl lg:text-3xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue) relative z-10">
-                🏆 WINNER:{" "}
-                {battle.personas.left.id === battle.winner
-                  ? battle.personas.left.name
-                  : battle.personas.right.name}{" "}
-                🏆
-              </div>
-            </motion.div>
-          )}
         </div>
-      </div>
+
+        {battle.status === "completed" && battle.winner && (
+          <motion.div
+            ref={trophyRef}
+            className="mt-4 md:mt-6 text-center relative"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <VictoryConfetti trigger={true} />
+            <div className="text-xl md:text-2xl lg:text-3xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue) relative z-10">
+              🏆 WINNER:{" "}
+              {battle.personas.left.id === battle.winner
+                ? battle.personas.left.name
+                : battle.personas.right.name}{" "}
+              🏆
+            </div>
+          </motion.div>
+        )}
+      </BattleHeader>
 
       {/* Split Screen Stage */}
       <div className="flex-1">
-        <div className="relative max-w-7xl mx-auto h-full">
-          {/* Full-height center divider on desktop */}
-          <div
-            className="hidden md:block pointer-events-none absolute inset-y-0 left-1/2 w-px bg-gray-800"
-            aria-hidden="true"
-          />
-          <div className="grid md:grid-cols-2 divide-y md:divide-y-0 divide-gray-800 h-full">
-            {/* Left Persona */}
-            <div
-              className={`${
-                mobileActiveSide && mobileActiveSide !== "left"
-                  ? "hidden md:flex"
-                  : "flex"
-              } flex-col md:min-h-0`}
-            >
-              <div
-                className="p-3 md:p-4 border-b border-gray-800"
-                style={isMobile ? { marginTop: personaTopMargin } : undefined}
-              >
-                <PersonaCard
-                  persona={battle.personas.left}
-                  position="left"
-                  isActive={
-                    battle.currentTurn === "left" ||
-                    streamingPersonaId === battle.personas.left.id
-                  }
-                  isRoundWinner={
-                    shouldShowRoundWinner &&
-                    currentRoundScore?.winner === battle.personas.left.id
-                  }
-                />
-              </div>
-
-              <div className="flex-1 stage-spotlight">
-                <VerseDisplay
-                  verse={currentRoundVerses.left}
-                  persona={battle.personas.left}
-                  position="left"
-                  isStreaming={streamingPersonaId === battle.personas.left.id}
-                  streamingText={streamingText || undefined}
-                />
-              </div>
-            </div>
-
-            {/* Right Persona */}
-            <div
-              className={`${
-                mobileActiveSide && mobileActiveSide !== "right"
-                  ? "hidden md:flex"
-                  : "flex"
-              } flex-col md:min-h-0`}
-            >
-              <div
-                className="p-3 md:p-4 border-b border-gray-800"
-                style={isMobile ? { marginTop: personaTopMargin } : undefined}
-              >
-                <PersonaCard
-                  persona={battle.personas.right}
-                  position="right"
-                  isActive={
-                    battle.currentTurn === "right" ||
-                    streamingPersonaId === battle.personas.right.id
-                  }
-                  isRoundWinner={
-                    shouldShowRoundWinner &&
-                    currentRoundScore?.winner === battle.personas.right.id
-                  }
-                />
-              </div>
-
-              <div className="flex-1 stage-spotlight">
-                <VerseDisplay
-                  verse={currentRoundVerses.right}
-                  persona={battle.personas.right}
-                  position="right"
-                  isStreaming={streamingPersonaId === battle.personas.right.id}
-                  streamingText={streamingText || undefined}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+        <BattleSplitView
+          battle={battle}
+          leftVerse={currentRoundVerses.left}
+          rightVerse={currentRoundVerses.right}
+          roundScore={currentRoundScore}
+          showRoundWinner={shouldShowRoundWinner}
+          mobileActiveSide={mobileActiveSide}
+          streamingPersonaId={streamingPersonaId}
+          streamingText={streamingText}
+          mobileTopOffset={isMobile ? personaTopMargin : 0}
+        />
       </div>
 
       {/* Reveal Scores Button */}
