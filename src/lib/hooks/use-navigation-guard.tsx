@@ -30,26 +30,8 @@ export function useNavigationGuard({
   );
   const [navigationConfirmed, setNavigationConfirmed] = useState(false);
 
-  // Handle browser navigation (refresh, close tab, etc.)
-  useEffect(() => {
-    if (!when) return;
-
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      // Skip the browser dialog if user already confirmed navigation in custom dialog
-      if (navigationConfirmed) return;
-      
-      e.preventDefault();
-      // Modern browsers require returnValue to be set
-      e.returnValue = "";
-      return "";
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [when, navigationConfirmed]);
+  // Browser navigation (refresh, close tab, back button) is allowed without warning
+  // We only show the custom dialog for internal link clicks
 
   // Intercept internal link clicks
   useEffect(() => {
