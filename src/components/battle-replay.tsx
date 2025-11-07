@@ -35,6 +35,9 @@ export function BattleReplay({
   battle,
   mobileBottomPadding,
 }: BattleReplayProps) {
+  // Base mobile bottom padding to clear bottom controls; can be increased when FABs are present
+  const mobileContentPadding =
+    mobileBottomPadding ?? "var(--bottom-controls-height)";
   const [selectedRound, setSelectedRound] = useState(1);
   const { verses: roundVerses, score: roundScore } = useRoundData(
     battle,
@@ -161,10 +164,7 @@ export function BattleReplay({
           {/* Left Side: Winner/Paused and Creator */}
           <div className="shrink-0 flex flex-col gap-2 items-center md:items-start">
             <WinnerBanner battle={battle} />
-            <CreatorAttribution
-              battle={battle}
-              hideOnMobileWhenWinnerVisible
-            />
+            <CreatorAttribution battle={battle} hideOnMobileWhenWinnerVisible />
           </div>
 
           {/* Right Side: Round Controls */}
@@ -179,7 +179,12 @@ export function BattleReplay({
       </BattleHeader>
 
       {/* Split Screen Stage */}
-      <div className="flex-1 overflow-y-auto pb-36 md:pb-24">
+      <div
+        className="flex-1 overflow-y-auto pb-(--mobile-bottom-padding) md:pb-24"
+        style={{
+          ["--mobile-bottom-padding" as any]: mobileContentPadding,
+        }}
+      >
         <BattleSplitView
           battle={battle}
           leftVerse={roundVerses.left}
