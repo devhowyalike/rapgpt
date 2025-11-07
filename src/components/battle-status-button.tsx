@@ -1,16 +1,20 @@
+import { forwardRef } from "react";
 import { Globe, Lock, Radio, MoreVertical } from "lucide-react";
 
-interface BattleStatusButtonProps {
+interface BattleStatusButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   isPublic: boolean;
   isArchived: boolean;
 }
 
-export function BattleStatusButton({
-  isPublic,
-  isArchived,
-}: BattleStatusButtonProps) {
+export const BattleStatusButton = forwardRef<
+  HTMLButtonElement,
+  BattleStatusButtonProps
+>(({ isPublic, isArchived, ...props }, ref) => {
   return (
     <button
+      ref={ref}
+      {...props}
       className={`px-3 py-1.5 rounded flex items-center gap-1.5 text-xs transition-colors ${
         isPublic
           ? "bg-blue-600/30 text-blue-300 hover:bg-blue-600/40"
@@ -39,4 +43,6 @@ export function BattleStatusButton({
       <MoreVertical size={12} className="ml-0.5 hidden md:inline" />
     </button>
   );
-}
+});
+
+BattleStatusButton.displayName = "BattleStatusButton";
