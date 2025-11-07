@@ -79,7 +79,7 @@ export function BattleSplitView({
   return (
     <>
       <div
-        className={cn("relative max-w-7xl mx-auto", className)}
+        className={cn("relative max-w-7xl mx-auto md:min-h-full", className)}
         style={style}
       >
         {/* Full-height center divider on desktop */}
@@ -90,7 +90,7 @@ export function BattleSplitView({
 
         <div
           className={cn(
-            "grid md:grid-cols-2 divide-y md:divide-y-0 divide-gray-800",
+            "grid md:grid-cols-2 divide-y md:divide-y-0 divide-gray-800 md:min-h-full",
             contentClassName
           )}
         >
