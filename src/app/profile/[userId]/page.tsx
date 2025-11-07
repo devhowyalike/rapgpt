@@ -7,9 +7,9 @@ import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { decrypt } from "@/lib/auth/encryption";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
-import { MyBattleCard } from "@/components/my-battle-card";
 import { ProfileHeaderMenu } from "@/components/profile-header-menu";
 import { GuestProfileCallout } from "@/components/guest-profile-callout";
+import { ProfileBattlesFilter } from "@/components/profile-battles-filter";
 import { Lock, Globe, User as UserIcon, Swords } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -93,14 +93,6 @@ export default async function ProfilePage({
   const host = headersList.get("host") || "";
   const protocol = headersList.get("x-forwarded-proto") || "https";
   const shareUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
-
-  // Separate paused battles from completed battles
-  const pausedBattles = userBattles.filter(
-    (battle) => battle.status === "paused"
-  );
-  const completedBattles = userBattles.filter(
-    (battle) => battle.status !== "paused"
-  );
 
   return (
     <div className="min-h-dvh bg-linear-to-br from-gray-900 via-purple-900 to-black">
@@ -213,47 +205,12 @@ export default async function ProfilePage({
               )}
             </div>
           ) : (
-            <div className="space-y-8">
-              {/* Paused Battles Section */}
-              {pausedBattles.length > 0 && (
-                <div>
-                  <h3 className="font-bebas text-xl sm:text-2xl md:text-3xl text-white mb-4">
-                    Paused Battles
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
-                    {pausedBattles.map((battle) => (
-                      <MyBattleCard
-                        key={battle.id}
-                        battle={battle}
-                        shareUrl={shareUrl}
-                        showManagement={isOwnProfile}
-                        userIsProfilePublic={profileUser.isProfilePublic}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Completed Battles Section */}
-              {completedBattles.length > 0 && (
-                <div>
-                  <h3 className="font-bebas text-xl sm:text-2xl md:text-3xl text-white mb-4">
-                    Completed Battles
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
-                    {completedBattles.map((battle) => (
-                      <MyBattleCard
-                        key={battle.id}
-                        battle={battle}
-                        shareUrl={shareUrl}
-                        showManagement={isOwnProfile}
-                        userIsProfilePublic={profileUser.isProfilePublic}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <ProfileBattlesFilter
+              battles={userBattles}
+              shareUrl={shareUrl}
+              isOwnProfile={isOwnProfile}
+              userIsProfilePublic={profileUser.isProfilePublic}
+            />
           )}
         </div>
 
