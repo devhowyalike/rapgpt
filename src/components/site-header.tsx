@@ -38,6 +38,10 @@ import {
 let cachedAdminStatus: boolean | null = null;
 let cachedUserId: string | null = null;
 
+// Cache database user ID in memory to prevent flickering
+let cachedDbUserId: string | null = null;
+let cachedClerkUserId: string | null = null;
+
 export function SiteHeader() {
   const { userId, isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
@@ -46,7 +50,7 @@ export function SiteHeader() {
   // Start with cached value if available
   const [isAdmin, setIsAdmin] = useState(cachedAdminStatus ?? false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [dbUserId, setDbUserId] = useState<string | null>(null);
+  const [dbUserId, setDbUserId] = useState<string | null>(cachedDbUserId);
 
   // Helper to check if a link is active
   const isActiveLink = (href: string) => {
@@ -99,23 +103,37 @@ export function SiteHeader() {
   useEffect(() => {
     if (!user?.id) {
       setDbUserId(null);
+      cachedDbUserId = null;
+      cachedClerkUserId = null;
+      return;
+    }
+
+    // If the Clerk user ID hasn't changed and we have a cached DB user ID, use it
+    if (cachedClerkUserId === user.id && cachedDbUserId) {
+      if (dbUserId !== cachedDbUserId) {
+        setDbUserId(cachedDbUserId);
+      }
       return;
     }
 
     const dbId = user.publicMetadata?.dbUserId as string | undefined;
     if (dbId) {
       setDbUserId(dbId);
+      cachedDbUserId = dbId;
+      cachedClerkUserId = user.id;
     } else {
       fetch("/api/user/me")
         .then((res) => res.json())
         .then((data) => {
           if (data.user?.id) {
             setDbUserId(data.user.id);
+            cachedDbUserId = data.user.id;
+            cachedClerkUserId = user.id;
           }
         })
         .catch(console.error);
     }
-  }, [user]);
+  }, [user, dbUserId]);
 
   // Use custom hook to manage live battles (only enabled for admins)
   const { liveBattles } = useLiveBattles({ enabled: isAdmin });
@@ -178,7 +196,7 @@ export function SiteHeader() {
                                 {displayName}
                               </div>
                               <div className="text-xs text-gray-400">
-                                Member details
+                                Account settings
                               </div>
                             </div>
                             <ChevronLeft className="w-4 h-4 rotate-180" />
@@ -200,6 +218,21 @@ export function SiteHeader() {
                         Home
                       </Link>
                     </DropdownMenuItem>
+                    {dbUserId && (
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href={`/profile/${dbUserId}`}
+                          className={`flex items-center gap-2 ${
+                            pathname?.startsWith(`/profile/${dbUserId}`)
+                              ? "text-white font-medium"
+                              : ""
+                          }`}
+                        >
+                          <User className="w-4 h-4" />
+                          Profile
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem asChild>
                       <Link
                         href="/community"
@@ -284,17 +317,6 @@ export function SiteHeader() {
                     <DropdownMenuSeparator />
 
                     {/* User Menu Items */}
-                    {dbUserId && (
-                      <DropdownMenuItem asChild>
-                        <Link
-                          href={`/profile/${dbUserId}`}
-                          className="flex items-center gap-2"
-                        >
-                          <User className="w-4 h-4" />
-                          Profile
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
                     <DropdownMenuItem
                       onSelect={(e) => {
                         e.preventDefault();
@@ -323,6 +345,20 @@ export function SiteHeader() {
           <RapGPTLogo size="sm" />
 
           {/* Desktop Navigation Links */}
+          {dbUserId && (
+            <Link
+              href={`/profile/${dbUserId}`}
+              className={`hidden md:flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg ${
+                pathname?.startsWith(`/profile/${dbUserId}`)
+                  ? "text-white bg-gray-800 font-medium"
+                  : "text-gray-400 hover:text-white hover:bg-gray-800"
+              }`}
+              prefetch={false}
+            >
+              <User className="w-4 h-4" />
+              <span>Profile</span>
+            </Link>
+          )}
           <Link
             href="/community"
             className={`hidden md:flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg ${
