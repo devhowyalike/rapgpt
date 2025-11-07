@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { getLiveBattles, getFeaturedBattles } from "@/lib/battle-storage";
+import { getLiveBattles } from "@/lib/battle-storage";
 import { SiteHeader } from "@/components/site-header";
 import { LiveBattlesDisplay } from "@/components/live-battles-display";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
@@ -16,12 +15,6 @@ export default async function Home() {
   const { sessionClaims } = await auth();
   const isAdmin = sessionClaims?.metadata?.role === "admin";
   const isAuthenticated = !!sessionClaims;
-
-  // Check if there are any archived battles (completed battles with liveStartedAt)
-  const featuredBattles = await getFeaturedBattles();
-  const hasArchivedBattles = featuredBattles.some(
-    (b) => b.status === "completed" && b.liveStartedAt
-  );
 
   return (
     <>
@@ -104,17 +97,6 @@ export default async function Home() {
                 Participate in a live AI battle arena featuring surprise guests
                 and new roster additions.
               </p>
-
-              {hasArchivedBattles && (
-                <div className="flex gap-4 justify-center flex-wrap">
-                  <Link
-                    href="/archive"
-                    className="inline-block px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg text-white font-bold transition-all"
-                  >
-                    View Archive
-                  </Link>
-                </div>
-              )}
             </div>
           )}
 

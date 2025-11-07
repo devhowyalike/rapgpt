@@ -106,7 +106,6 @@ export async function PUT(
     }
 
     // Revalidate pages to show fresh data
-    revalidatePath('/archive');
     revalidatePath('/community');
     revalidatePath(`/battle/${id}`);
     revalidatePath(`/profile/${existingBattle.createdBy}`);
