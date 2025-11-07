@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { RoundScore, Persona } from "@/lib/shared";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { motion } from "framer-motion";
@@ -23,8 +23,24 @@ export function ScoreDisplay({
   className = "",
 }: ScoreDisplayProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const expandedRef = useRef<HTMLDivElement | null>(null);
+  const toggleRef = useRef<HTMLButtonElement | null>(null);
   const leftScore = roundScore.personaScores[leftPersona.id];
   const rightScore = roundScore.personaScores[rightPersona.id];
+
+  // When expanding, scroll the expanded details block into view and focus the toggle,
+  // mirroring the Battle Options behavior.
+  useEffect(() => {
+    if (!isExpanded) return;
+    const id = window.requestAnimationFrame(() => {
+      expandedRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      toggleRef.current?.focus();
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [isExpanded]);
 
   if (!leftScore || !rightScore) return null;
 
@@ -32,6 +48,7 @@ export function ScoreDisplay({
     <div className={className}>
       {/* Collapse Toggle Button */}
       <button
+        ref={toggleRef}
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-center justify-center gap-2 mb-2 md:mb-1.5 text-gray-400 hover:text-white transition-colors group"
       >
@@ -46,7 +63,7 @@ export function ScoreDisplay({
       </button>
 
       {isExpanded ? (
-        <div className="grid grid-cols-2 gap-2 md:gap-4">
+        <div ref={expandedRef} className="grid grid-cols-2 gap-2 md:gap-4">
           {/* Left Score - Expanded */}
           <motion.div
             className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2"
