@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import type { Battle } from "@/lib/shared";
 import { BattleStage } from "./battle-stage";
 import { BattleReplay } from "./battle-replay";
+import { useMobileFooterControls } from "@/lib/hooks/use-mobile-footer-controls";
 import { SiteHeader } from "./site-header";
 import { BattleLoading } from "./battle-loading";
 import { useBattleStore } from "@/lib/battle-store";
@@ -333,12 +334,13 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
 
   // If battle is completed, use full replay mode
   if (battle.status === "completed") {
-    const mobileBottomPadding =
-      showCommenting || showVoting
-        ? battle.status === "completed"
-          ? "calc(var(--bottom-controls-height) + var(--fab-size) + var(--fab-gutter))"
-          : "calc(var(--fab-size) + var(--fab-gutter))"
-        : undefined;
+    const { contentPaddingOverride, fabBottomOffset } = useMobileFooterControls(
+      {
+        hasBottomControls: true,
+        showCommenting,
+        showVoting,
+      }
+    );
     return (
       <>
         <SiteHeader />
@@ -349,7 +351,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
             <div className="flex-1 flex flex-col min-h-0">
               <BattleReplay
                 battle={battle}
-                mobileBottomPadding={mobileBottomPadding}
+                mobileBottomPadding={contentPaddingOverride}
               />
             </div>
 
@@ -378,11 +380,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
           onVotingClick={openVotingDrawer}
           activeTab={mobileActiveTab}
           isDrawerOpen={showMobileDrawer}
-          bottomOffset={
-            battle.status === "completed"
-              ? "calc(var(--bottom-controls-height) + var(--fab-gutter))"
-              : undefined
-          }
+          bottomOffset={fabBottomOffset}
         />
       </>
     );

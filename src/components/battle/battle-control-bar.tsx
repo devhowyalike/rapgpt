@@ -7,6 +7,7 @@
 import { Play, ArrowRight, Pause, Settings, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import type { Battle } from "@/lib/shared";
+import { useMobileFooterControls } from "@/lib/hooks/use-mobile-footer-controls";
 
 interface BattleControlBarProps {
   battle: Battle;
@@ -45,11 +46,19 @@ export function BattleControlBar({
   onBeginVoting,
   onCancelBattle,
 }: BattleControlBarProps) {
+  const { controlBarMobilePadding } = useMobileFooterControls({
+    hasBottomControls: false,
+    showCommenting,
+    showVoting,
+  });
+
   return (
     <div
-      className={`p-4 ${
-        showCommenting || showVoting ? "pb-24 md:pb-4" : "pb-4"
-      } bg-gray-900 border-t border-gray-800`}
+      className="p-4 pb-(--control-bar-pb) md:pb-4 bg-gray-900 border-t border-gray-800"
+      style={{
+        ["--control-bar-pb" as any]:
+          controlBarMobilePadding ?? "var(--control-bar-base-padding)",
+      }}
     >
       <div className="max-w-4xl mx-auto flex flex-row gap-3">
         {/* Primary Action Button - Changes based on state */}
@@ -100,9 +109,7 @@ export function BattleControlBar({
               <CheckCircle className="w-5 h-5" />
               <span className="text-lg font-medium">Begin Voting</span>
             </div>
-          ) : isVotingPhase &&
-            votingTimeRemaining !== null &&
-            showVoting ? (
+          ) : isVotingPhase && votingTimeRemaining !== null && showVoting ? (
             <div className="flex items-center justify-between gap-4 w-full">
               <div className="flex items-center gap-3 whitespace-nowrap">
                 <span className="text-2xl">⏱️</span>
@@ -163,4 +170,3 @@ export function BattleControlBar({
     </div>
   );
 }
-
