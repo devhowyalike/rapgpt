@@ -28,12 +28,16 @@ export function useNavigationGuard({
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(
     null
   );
+  const [navigationConfirmed, setNavigationConfirmed] = useState(false);
 
   // Handle browser navigation (refresh, close tab, etc.)
   useEffect(() => {
     if (!when) return;
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Skip the browser dialog if user already confirmed navigation in custom dialog
+      if (navigationConfirmed) return;
+      
       e.preventDefault();
       // Modern browsers require returnValue to be set
       e.returnValue = "";
@@ -45,7 +49,7 @@ export function useNavigationGuard({
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [when]);
+  }, [when, navigationConfirmed]);
 
   // Intercept internal link clicks
   useEffect(() => {
@@ -87,6 +91,9 @@ export function useNavigationGuard({
       if (onConfirm) {
         await onConfirm();
       }
+
+      // Mark navigation as confirmed to prevent browser's beforeunload dialog
+      setNavigationConfirmed(true);
 
       // Navigate to the pending URL
       if (pendingNavigation) {
