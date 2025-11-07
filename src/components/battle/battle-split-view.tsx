@@ -72,23 +72,30 @@ export function BattleSplitView({
   contentClassName,
   style,
 }: BattleSplitViewProps) {
-  const leftVisible =
-    mobileActiveSide === null || mobileActiveSide === "left";
+  const leftVisible = mobileActiveSide === null || mobileActiveSide === "left";
   const rightVisible =
     mobileActiveSide === null || mobileActiveSide === "right";
 
   return (
     <>
-      <div className={cn("relative max-w-7xl mx-auto h-full", className)} style={style}>
+      <div
+        className={cn("relative max-w-7xl mx-auto", className)}
+        style={style}
+      >
         {/* Full-height center divider on desktop */}
         <div
           className="hidden md:block pointer-events-none absolute inset-y-0 left-1/2 w-px bg-gray-800"
           aria-hidden="true"
         />
 
-        <div className={cn("grid md:grid-cols-2 divide-y md:divide-y-0 divide-gray-800 h-full", contentClassName)}>
-        {/* Left Persona */}
-        <PersonaSection
+        <div
+          className={cn(
+            "grid md:grid-cols-2 divide-y md:divide-y-0 divide-gray-800",
+            contentClassName
+          )}
+        >
+          {/* Left Persona */}
+          <PersonaSection
             persona={battle.personas.left}
             verse={leftVerse}
             position="left"
@@ -116,8 +123,7 @@ export function BattleSplitView({
               streamingPersonaId === battle.personas.right.id
             }
             isRoundWinner={
-              showRoundWinner &&
-              roundScore?.winner === battle.personas.right.id
+              showRoundWinner && roundScore?.winner === battle.personas.right.id
             }
             isStreaming={streamingPersonaId === battle.personas.right.id}
             streamingText={streamingText || undefined}
@@ -130,4 +136,3 @@ export function BattleSplitView({
     </>
   );
 }
-
