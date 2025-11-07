@@ -351,31 +351,6 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                 battle={battle}
                 mobileBottomPadding={mobileBottomPadding}
               />
-
-              {/* Resume Button for Paused Battles */}
-              {battle.status === "paused" && verses.length > 0 && (
-                <div className="fixed md:relative bottom-0 left-0 right-0 z-50 p-4 bg-gray-900/95 md:bg-gray-900 backdrop-blur-sm md:backdrop-blur-none border-t border-gray-800">
-                  <div className="max-w-4xl mx-auto">
-                    <button
-                      onClick={handleResumeBattle}
-                      disabled={isResuming}
-                      className="w-full md:w-auto px-6 py-3 bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all mx-auto"
-                    >
-                      {isResuming ? (
-                        <>
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Resuming...
-                        </>
-                      ) : (
-                        <>
-                          <RotateCcw className="w-5 h-5" />
-                          Resume Battle
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Sidebar - Desktop and Mobile */}
