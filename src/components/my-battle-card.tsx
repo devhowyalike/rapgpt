@@ -7,18 +7,16 @@ import {
   Share2,
   Trash2,
   AlertTriangle,
-  MoreVertical,
-  Crown,
-  Globe,
-  Lock,
   Radio,
-  Music2,
-  ThumbsUp,
-  MessageSquare,
   CheckCircle,
+  Lock,
+  Globe,
 } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { getStage, DEFAULT_STAGE } from "@/lib/shared/stages";
+import { BattleInfoPanel } from "@/components/battle-info-panel";
+import { BattleStatusButton } from "@/components/battle-status-button";
 
 interface MyBattleCardProps {
   battle: {
@@ -38,6 +36,7 @@ interface MyBattleCardProps {
     isFeatured?: boolean;
     votingEnabled?: boolean;
     commentsEnabled?: boolean;
+    stageId?: string;
     generatedSong?: {
       audioUrl: string;
       videoUrl?: string;
@@ -74,6 +73,7 @@ export function MyBattleCard({
   };
 
   const battleUrl = `${shareUrl}/battle/${battle.id}`;
+  const stage = getStage(battle.stageId || "") || DEFAULT_STAGE;
 
   // Sync local state with prop when battle.isPublic changes (e.g., after profile privacy toggle)
   useEffect(() => {
@@ -138,6 +138,10 @@ export function MyBattleCard({
   const currentRound = battle.currentRound || 1;
   const versesCount = battle.verses?.length || 0;
 
+  // Check if battle can be published
+  const cannotPublish =
+    !isPublic && (isPaused || !userIsProfilePublic || isArchived);
+
   // Calculate final stats for completed battles
   const calculateFinalStats = () => {
     if (!isCompleted || !battle.scores) return null;
@@ -168,52 +172,65 @@ export function MyBattleCard({
 
   const finalStats = calculateFinalStats();
 
+  // Format title with crown next to winner's name
+  const formatTitleWithCrown = () => {
+    if (
+      !isCompleted ||
+      !finalStats ||
+      !finalStats.winner ||
+      finalStats.winner === "tie"
+    ) {
+      return battle.title;
+    }
+
+    const winnerName =
+      finalStats.winner === personas.left.id
+        ? personas.left.name
+        : personas.right.name;
+
+    // Replace the winner's name with their name + crown
+    return battle.title.replace(winnerName, `${winnerName} 👑`);
+  };
+
+  // Prepare props for reusable components
+  const featureBadgesProps = {
+    votingEnabled: battle.votingEnabled,
+    commentsEnabled: battle.commentsEnabled,
+    hasGeneratedSong: !!battle.generatedSong?.audioUrl,
+  };
+
+  const battleResultsProps = finalStats
+    ? {
+        winner: finalStats.winner,
+        leftPersonaId: personas.left.id,
+        leftPersonaName: personas.left.name,
+        rightPersonaId: personas.right.id,
+        rightPersonaName: personas.right.name,
+        leftTotalScore: finalStats.leftTotalScore,
+        rightTotalScore: finalStats.rightTotalScore,
+        totalRounds: finalStats.totalRounds,
+      }
+    : null;
+
   return (
     <div
       className={`h-full flex flex-col bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-all ${
         isDeleting || isPending ? "opacity-50 pointer-events-none" : ""
       }`}
     >
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-start justify-between mb-4 gap-3">
         <div className="flex-1">
           <Link
             href={`/battle/${battle.id}`}
-            className="font-bebas text-3xl text-white hover:text-purple-400 transition-colors"
+            className="font-bebas text-2xl text-white hover:text-purple-400 transition-colors block"
           >
-            {battle.title}
+            {formatTitleWithCrown()}
           </Link>
         </div>
         {showManagement && (
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
-              <button
-                className={`px-3 py-1.5 rounded flex items-center gap-1.5 text-xs transition-colors ${
-                  isPublic
-                    ? "bg-blue-600/30 text-blue-300 hover:bg-blue-600/40"
-                    : isArchived
-                    ? "bg-purple-600/30 text-purple-300 hover:bg-purple-600/40"
-                    : "bg-gray-600/30 text-gray-300 hover:bg-gray-600/40"
-                }`}
-                title="Manage battle"
-              >
-                {isPublic ? (
-                  <>
-                    <Globe size={12} />
-                    Public
-                  </>
-                ) : isArchived ? (
-                  <>
-                    <Radio size={12} />
-                    Live Event
-                  </>
-                ) : (
-                  <>
-                    <Lock size={12} />
-                    Unpublished
-                  </>
-                )}
-                <MoreVertical size={12} className="ml-0.5" />
-              </button>
+              <BattleStatusButton isPublic={isPublic} isArchived={isArchived} />
             </DropdownMenu.Trigger>
             <DropdownMenu.Portal>
               <DropdownMenu.Content
@@ -230,22 +247,12 @@ export function MyBattleCard({
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   className={`flex items-center gap-2 px-3 py-2 text-sm rounded cursor-pointer outline-none ${
-                    !isPublic &&
-                    (isPaused || !userIsProfilePublic || isArchived)
+                    cannotPublish
                       ? "text-gray-500 cursor-not-allowed"
                       : "text-gray-200 hover:bg-gray-700"
                   }`}
-                  onClick={
-                    !isPublic &&
-                    (isPaused || !userIsProfilePublic || isArchived)
-                      ? undefined
-                      : handleTogglePublic
-                  }
-                  disabled={
-                    isTogglingPublic ||
-                    (!isPublic &&
-                      (isPaused || !userIsProfilePublic || isArchived))
-                  }
+                  onClick={cannotPublish ? undefined : handleTogglePublic}
+                  disabled={isTogglingPublic || cannotPublish}
                 >
                   {isPublic ? (
                     <>
@@ -286,13 +293,11 @@ export function MyBattleCard({
           </span>
         )}
         {/* Removed secondary archived badge per request */}
-        {showManagement && (
+        {showManagement && battle.status !== "completed" && (
           <>
             <span
-              className={`px-3 py-1 rounded ${
-                battle.status === "completed"
-                  ? "bg-green-600/30 text-green-300"
-                  : battle.status === "paused"
+              className={`px-3 py-1 rounded capitalize ${
+                battle.status === "paused"
                   ? "bg-orange-600/30 text-orange-300"
                   : "bg-gray-600/30 text-gray-400"
               }`}
@@ -301,81 +306,27 @@ export function MyBattleCard({
             </span>
           </>
         )}
-        <span className="text-gray-500">
-          Created {new Date(battle.createdAt).toLocaleDateString()}
-        </span>
-        {battle.votingEnabled !== false && (
-          <span
-            className="px-2 py-1 rounded bg-blue-600/20 text-blue-400 flex items-center gap-1.5 text-xs border border-blue-500/30"
-            title="Voting enabled"
-          >
-            <ThumbsUp size={12} />
-            <span>Voting</span>
-          </span>
-        )}
-        {battle.commentsEnabled !== false && (
-          <span
-            className="px-2 py-1 rounded bg-purple-600/20 text-purple-400 flex items-center gap-1.5 text-xs border border-purple-500/30"
-            title="Comments enabled"
-          >
-            <MessageSquare size={12} />
-            <span>Comments</span>
-          </span>
-        )}
-        {battle.generatedSong?.audioUrl ? (
-          <span
-            className="ml-auto inline-flex items-center justify-center rounded-full bg-green-500/15 text-green-400 px-2 py-0.5 border border-green-500/30"
-            title="Song generated"
-          >
-            <Music2 className="w-4 h-4" />
-          </span>
-        ) : null}
       </div>
 
       {isPaused && (
-        <div className="mb-4 p-3 bg-gray-900/50 rounded-lg border border-orange-500/20">
-          <p className="text-sm font-semibold text-orange-400 mb-2">
-            Battle Progress:
-          </p>
-          <ul className="text-sm text-gray-300 space-y-1">
-            <li>• Round {currentRound} of 3</li>
-            <li>
-              • {versesCount} {versesCount === 1 ? "verse" : "verses"} completed
-            </li>
-          </ul>
-        </div>
+        <BattleInfoPanel
+          type="progress"
+          createdAt={battle.createdAt}
+          stage={stage}
+          featureBadges={featureBadgesProps}
+          currentRound={currentRound}
+          versesCount={versesCount}
+        />
       )}
 
       {isCompleted && finalStats && (
-        <div className="mb-4 p-3 bg-gray-900/50 rounded-lg border border-green-500/20">
-          <p className="text-sm font-semibold text-green-400 mb-2">
-            Battle Results:
-          </p>
-          <ul className="text-sm text-gray-300 space-y-1">
-            <li className="flex items-center gap-1">
-              • Winner:{" "}
-              <span className="text-green-400 font-semibold flex items-center gap-1">
-                {finalStats.winner === personas.left.id
-                  ? personas.left.name
-                  : finalStats.winner === personas.right.id
-                  ? personas.right.name
-                  : finalStats.winner
-                  ? finalStats.winner
-                  : "Tie"}
-                {finalStats.winner && finalStats.winner !== "tie" ? (
-                  <>
-                    <Crown size={14} className="inline text-yellow-400" />
-                  </>
-                ) : null}
-              </span>
-            </li>
-            <li>
-              • Final Score: {finalStats.leftTotalScore} -{" "}
-              {finalStats.rightTotalScore}
-            </li>
-            <li>• {finalStats.totalRounds} rounds completed</li>
-          </ul>
-        </div>
+        <BattleInfoPanel
+          type="results"
+          createdAt={battle.createdAt}
+          stage={stage}
+          featureBadges={featureBadgesProps}
+          resultsStats={battleResultsProps}
+        />
       )}
 
       {/* Error message for toggle failures */}
