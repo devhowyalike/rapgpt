@@ -8,8 +8,6 @@ import {
   useClerk,
 } from "@clerk/nextjs";
 import { User, ChevronDown, LogOut, Settings } from "lucide-react";
-import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,51 +17,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// Cache user ID in memory to prevent flickering
-let cachedDbUserId: string | null = null;
-let cachedClerkUserId: string | null = null;
-
 export function UserButton() {
   const { isSignedIn, isLoaded } = useAuth();
   const { user } = useUser();
   const clerk = useClerk();
-  // Start with cached value if available
-  const [userId, setUserId] = useState<string | null>(cachedDbUserId);
-
-  useEffect(() => {
-    if (!user?.id) {
-      setUserId(null);
-      cachedDbUserId = null;
-      cachedClerkUserId = null;
-      return;
-    }
-
-    // If the Clerk user ID hasn't changed and we have a cached DB user ID, use it
-    if (cachedClerkUserId === user.id && cachedDbUserId) {
-      setUserId(cachedDbUserId);
-      return;
-    }
-
-    // Fetch the database user ID from the public metadata
-    const dbUserId = user.publicMetadata?.dbUserId as string | undefined;
-    if (dbUserId) {
-      setUserId(dbUserId);
-      cachedDbUserId = dbUserId;
-      cachedClerkUserId = user.id;
-    } else {
-      // Fallback: fetch from API
-      fetch("/api/user/me")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.user?.id) {
-            setUserId(data.user.id);
-            cachedDbUserId = data.user.id;
-            cachedClerkUserId = user.id;
-          }
-        })
-        .catch(console.error);
-    }
-  }, [user]);
 
   // Show loading skeleton while auth is loading on first mount
   if (!isLoaded) {
@@ -111,17 +68,6 @@ export function UserButton() {
           {displayName}
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="sm:hidden" />
-        {userId && (
-          <DropdownMenuItem asChild>
-            <Link
-              href={`/profile/${userId}`}
-              className="flex items-center gap-2"
-            >
-              <User className="w-4 h-4" />
-              Profile
-            </Link>
-          </DropdownMenuItem>
-        )}
         <DropdownMenuItem
           onClick={() => clerk.openUserProfile()}
           className="cursor-pointer"
