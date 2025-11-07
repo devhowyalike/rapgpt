@@ -143,15 +143,18 @@ export function BattleOptions({
                 </div>
               )}
 
-              {/* Go Live Toggle - Available to all authenticated users */}
-              <div className="flex items-center justify-between gap-3">
+              {/* Go Live Toggle - Coming Soon */}
+              <div className="flex items-center justify-between gap-3 opacity-50">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-purple-900/50 border border-purple-500/50">
                     <Radio size={20} className="text-purple-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-white font-semibold truncate">
-                      Go Live
+                      Go Live{" "}
+                      <span className="text-xs text-purple-400 ml-2">
+                        (Coming Soon)
+                      </span>
                     </div>
                     <div className="text-gray-400 text-sm">
                       Stream your battle & engage with your audience in
@@ -160,8 +163,9 @@ export function BattleOptions({
                   </div>
                 </div>
                 <Switch
-                  checked={createAsLive}
-                  onCheckedChange={onCreateAsLiveChange}
+                  checked={false}
+                  onCheckedChange={() => {}}
+                  disabled
                   className="shrink-0"
                 />
               </div>
