@@ -79,7 +79,7 @@ export function BattleOptions({
       <Collapsible
         open={isOpen}
         onOpenChange={setIsOpen}
-        className="w-full max-w-2xl"
+        className="w-full max-w-lg"
       >
         <div className="bg-gray-800/50 border-2 border-gray-700 rounded-lg shadow-lg overflow-hidden">
           <CollapsibleTrigger
@@ -97,7 +97,7 @@ export function BattleOptions({
             <div className="px-6 pb-6 pt-2 space-y-4">
               {/* Voting Toggle - Only show if globally enabled */}
               {isVotingGloballyEnabled && (
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-blue-900/50 border border-blue-500/50">
                       <ThumbsUp size={20} className="text-blue-400" />
@@ -106,7 +106,7 @@ export function BattleOptions({
                       <div className="text-white font-semibold truncate">
                         Enable Voting
                       </div>
-                      <div className="text-gray-400 text-sm">
+                      <div className="text-gray-400 text-sm text-pretty">
                         Allow viewers to vote for their favorite verses
                       </div>
                     </div>
@@ -121,7 +121,7 @@ export function BattleOptions({
 
               {/* Comments Toggle - Only show if globally enabled */}
               {isCommentsGloballyEnabled && (
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-green-900/50 border border-green-500/50">
                       <MessageSquare size={20} className="text-green-400" />
@@ -130,7 +130,7 @@ export function BattleOptions({
                       <div className="text-white font-semibold truncate">
                         Enable Comments
                       </div>
-                      <div className="text-gray-400 text-sm">
+                      <div className="text-gray-400 text-sm text-pretty">
                         Allow viewers to leave comments on the battle
                       </div>
                     </div>
@@ -144,7 +144,7 @@ export function BattleOptions({
               )}
 
               {/* Go Live Toggle - Coming Soon */}
-              <div className="flex items-center justify-between gap-3 opacity-50">
+              <div className="flex items-center justify-between gap-2 opacity-50">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-purple-900/50 border border-purple-500/50">
                     <Radio size={20} className="text-purple-400" />
@@ -156,7 +156,7 @@ export function BattleOptions({
                         (Coming Soon)
                       </span>
                     </div>
-                    <div className="text-gray-400 text-sm">
+                    <div className="text-gray-400 text-sm text-pretty">
                       Stream your battle & engage with your audience in
                       real-time
                     </div>

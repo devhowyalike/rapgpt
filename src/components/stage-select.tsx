@@ -8,7 +8,6 @@ import type { ClientPersona } from "@/lib/shared/personas/client";
 import { SelectionLayout } from "./selection/selection-layout";
 import { SelectionBottom } from "./selection/selection-bottom";
 import { SelectionGrid } from "./selection/selection-grid";
-import { SelectionActions } from "./selection/selection-actions";
 import { ActionButton } from "./selection/action-button";
 import { BackLink } from "./selection/back-link";
 import Image from "next/image";
@@ -322,7 +321,7 @@ export function StageSelect({
 
       {/* Bottom Section - Battle Options & Actions */}
       <SelectionBottom>
-        <SelectionActions>
+        <div className="max-w-7xl w-full mx-auto px-2 md:px-4 lg:px-8 space-y-2 md:space-y-4">
           <BattleOptions
             votingEnabled={votingEnabled}
             onVotingEnabledChange={onVotingEnabledChange}
@@ -351,7 +350,7 @@ export function StageSelect({
               ← Back to Character Select
             </BackLink>
           </div>
-        </SelectionActions>
+        </div>
       </SelectionBottom>
     </SelectionLayout>
   );
