@@ -106,7 +106,7 @@ export function BattleOptions({
                       <div className="text-white font-semibold truncate">
                         Enable Voting
                       </div>
-                      <div className="text-gray-400 text-sm line-clamp-2 text-pretty">
+                      <div className="text-gray-400 text-sm">
                         Allow viewers to vote for their favorite verses
                       </div>
                     </div>
@@ -130,7 +130,7 @@ export function BattleOptions({
                       <div className="text-white font-semibold truncate">
                         Enable Comments
                       </div>
-                      <div className="text-gray-400 text-sm line-clamp-2 text-pretty">
+                      <div className="text-gray-400 text-sm">
                         Allow viewers to leave comments on the battle
                       </div>
                     </div>
@@ -153,7 +153,7 @@ export function BattleOptions({
                     <div className="text-white font-semibold truncate">
                       Go Live
                     </div>
-                    <div className="text-gray-400 text-sm line-clamp-2 text-pretty">
+                    <div className="text-gray-400 text-sm">
                       Stream your battle & engage with your audience in
                       real-time
                     </div>
