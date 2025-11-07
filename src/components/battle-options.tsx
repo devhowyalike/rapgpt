@@ -24,11 +24,11 @@ interface BattleOptionsProps {
   commentsEnabled: boolean;
   /** Callback when comments enabled state changes */
   onCommentsEnabledChange: (enabled: boolean) => void;
-  /** Whether to create as live/featured battle (admin only) */
+  /** Whether to create as live/featured battle */
   createAsLive: boolean;
   /** Callback when create as live state changes */
   onCreateAsLiveChange: (enabled: boolean) => void;
-  /** Whether the current user is an admin */
+  /** Whether the current user is an admin (for backwards compatibility) */
   isAdmin: boolean;
   /** Whether voting is globally enabled via env flags */
   isVotingGloballyEnabled?: boolean;
@@ -67,7 +67,7 @@ export function BattleOptions({
   }, [isOpen]);
 
   // Don't render if no options are available
-  if (!isVotingGloballyEnabled && !isCommentsGloballyEnabled && !isAdmin) {
+  if (!isVotingGloballyEnabled && !isCommentsGloballyEnabled) {
     return null;
   }
 
@@ -79,7 +79,7 @@ export function BattleOptions({
       <Collapsible
         open={isOpen}
         onOpenChange={setIsOpen}
-        className="w-full max-w-2xl"
+        className="w-full max-w-lg"
       >
         <div className="bg-gray-800/50 border-2 border-gray-700 rounded-lg shadow-lg overflow-hidden">
           <CollapsibleTrigger
@@ -97,7 +97,7 @@ export function BattleOptions({
             <div className="px-6 pb-6 pt-2 space-y-4">
               {/* Voting Toggle - Only show if globally enabled */}
               {isVotingGloballyEnabled && (
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-blue-900/50 border border-blue-500/50">
                       <ThumbsUp size={20} className="text-blue-400" />
@@ -106,7 +106,7 @@ export function BattleOptions({
                       <div className="text-white font-semibold truncate">
                         Enable Voting
                       </div>
-                      <div className="text-gray-400 text-sm line-clamp-2 text-pretty">
+                      <div className="text-gray-400 text-sm text-pretty">
                         Allow viewers to vote for their favorite verses
                       </div>
                     </div>
@@ -121,7 +121,7 @@ export function BattleOptions({
 
               {/* Comments Toggle - Only show if globally enabled */}
               {isCommentsGloballyEnabled && (
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-green-900/50 border border-green-500/50">
                       <MessageSquare size={20} className="text-green-400" />
@@ -130,7 +130,7 @@ export function BattleOptions({
                       <div className="text-white font-semibold truncate">
                         Enable Comments
                       </div>
-                      <div className="text-gray-400 text-sm line-clamp-2 text-pretty">
+                      <div className="text-gray-400 text-sm text-pretty">
                         Allow viewers to leave comments on the battle
                       </div>
                     </div>
@@ -143,30 +143,32 @@ export function BattleOptions({
                 </div>
               )}
 
-              {/* Go Live Toggle - Only show for admins */}
-              {isAdmin && (
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-purple-900/50 border border-purple-500/50">
-                      <Radio size={20} className="text-purple-400" />
+              {/* Go Live Toggle - Coming Soon */}
+              <div className="flex items-center justify-between gap-2 opacity-50">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-purple-900/50 border border-purple-500/50">
+                    <Radio size={20} className="text-purple-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white font-semibold truncate">
+                      Go Live{" "}
+                      <span className="text-xs text-purple-400 ml-2">
+                        (Coming Soon)
+                      </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-white font-semibold truncate">
-                        Go Live
-                      </div>
-                      <div className="text-gray-400 text-sm line-clamp-2 text-pretty">
-                        Stream your battle & engage with your audience in
-                        real-time
-                      </div>
+                    <div className="text-gray-400 text-sm text-pretty">
+                      Stream your battle & engage with your audience in
+                      real-time
                     </div>
                   </div>
-                  <Switch
-                    checked={createAsLive}
-                    onCheckedChange={onCreateAsLiveChange}
-                    className="shrink-0"
-                  />
                 </div>
-              )}
+                <Switch
+                  checked={false}
+                  onCheckedChange={() => {}}
+                  disabled
+                  className="shrink-0"
+                />
+              </div>
             </div>
           </CollapsibleContent>
         </div>

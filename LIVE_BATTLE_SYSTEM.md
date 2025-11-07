@@ -33,7 +33,7 @@ The system works with Vercel's WebSocket support via upgrade requests. No specia
 ### Starting a Live Battle
 
 1. Navigate to `/admin/battles/[id]/control`
-2. Ensure the battle is in "ongoing" status
+2. Ensure the battle is in "paused" status
 3. Click **"Go Live"** to start broadcasting
 
 ### Control Modes
@@ -232,7 +232,7 @@ auto_play_config JSONB
 ### Admin Can't Control
 
 1. Verify user has admin role in database
-2. Check battle status is "ongoing"
+2. Check battle status is "paused"
 3. Ensure WebSocket connection is "connected"
 4. Refresh page and try again
 

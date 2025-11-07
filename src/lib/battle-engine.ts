@@ -101,11 +101,11 @@ export function isBattleComplete(battle: Battle): boolean {
 }
 
 /**
- * Determine if a battle is archived (completed or incomplete)
+ * Determine if a battle is archived (completed)
  * Archived battles should not accept new comments or votes
  */
 export function isBattleArchived(battle: Battle): boolean {
-  return battle.status === 'completed' || battle.status === 'incomplete';
+  return battle.status === 'completed';
 }
 
 /**

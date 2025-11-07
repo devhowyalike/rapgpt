@@ -32,10 +32,10 @@ export async function PATCH(
       );
     }
 
-    // Prevent publishing paused/incomplete battles
-    if (!battle.isPublic && battle.status === "incomplete") {
+    // Prevent publishing paused battles (not yet completed)
+    if (!battle.isPublic && battle.status === "paused") {
       return NextResponse.json(
-        { error: "Cannot publish paused battles. Resume the battle first." },
+        { error: "Cannot publish paused battles. Complete the battle first." },
         { status: 400 }
       );
     }

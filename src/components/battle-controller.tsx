@@ -96,16 +96,16 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     }
   }, [isVotingPhase]);
 
-  // Navigation guard - prevent leaving page during ongoing battle
+  // Navigation guard - prevent leaving page during paused battle
   const { NavigationDialog } = useNavigationGuard({
-    when: battle?.status === "ongoing",
+    when: battle?.status === "paused",
     title: "Pause Battle?",
     message: "Leave now? We'll pause your match.",
     onConfirm: async () => {
       if (battle) {
         setIsLeaving(true);
         await cancelBattle();
-        // Redirect to the battle page itself (it will show as completed/paused)
+        // Redirect to the battle page itself
         window.location.href = `/battle/${battle.id}`;
       }
     },
@@ -127,7 +127,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     if (
       roundComplete &&
       !nextPerformer &&
-      battle.status === "ongoing" &&
+      battle.status === "paused" &&
       !isReadingPhase &&
       !isVotingPhase &&
       votingCompletedRound !== battle.currentRound &&
@@ -297,7 +297,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     setCancelError(null);
     try {
       await cancelBattle();
-      // Redirect to the battle page itself (it will show as paused)
+      // Redirect to the battle page itself
       window.location.href = `/battle/${battle.id}`;
     } catch (error) {
       console.error("Error canceling battle:", error);
@@ -323,16 +323,16 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   const nextPerformer = getNextPerformer(battle);
   const roundComplete = isRoundComplete(battle, battle.currentRound);
   const canGenerate =
-    nextPerformer && !isGenerating && battle.status === "ongoing";
+    nextPerformer && !isGenerating && battle.status === "paused";
   const canAdvance =
     roundComplete &&
     !nextPerformer &&
-    battle.status === "ongoing" &&
+    battle.status === "paused" &&
     !isReadingPhase &&
     !isVotingPhase;
 
-  // If battle is completed or incomplete, use full replay mode
-  if (battle.status === "completed" || battle.status === "incomplete") {
+  // If battle is completed, use full replay mode
+  if (battle.status === "completed") {
     const mobileBottomPadding =
       showCommenting || showVoting
         ? battle.status === "completed"
@@ -351,31 +351,6 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                 battle={battle}
                 mobileBottomPadding={mobileBottomPadding}
               />
-
-              {/* Resume Button for Incomplete Battles */}
-              {battle.status === "incomplete" && (
-                <div className="fixed md:relative bottom-0 left-0 right-0 z-50 p-4 bg-gray-900/95 md:bg-gray-900 backdrop-blur-sm md:backdrop-blur-none border-t border-gray-800">
-                  <div className="max-w-4xl mx-auto">
-                    <button
-                      onClick={handleResumeBattle}
-                      disabled={isResuming}
-                      className="w-full md:w-auto px-6 py-3 bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all mx-auto"
-                    >
-                      {isResuming ? (
-                        <>
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Resuming...
-                        </>
-                      ) : (
-                        <>
-                          <RotateCcw className="w-5 h-5" />
-                          Resume Battle
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Sidebar - Desktop and Mobile */}
@@ -431,8 +406,8 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
               votingCompletedRound={votingCompletedRound}
             />
 
-            {/* Control Bar - Always visible during ongoing battles */}
-            {battle.status === "ongoing" && (
+            {/* Control Bar - Always visible during paused battles */}
+            {battle.status === "paused" && (
               <BattleControlBar
                 battle={battle}
                 isGenerating={isGenerating}

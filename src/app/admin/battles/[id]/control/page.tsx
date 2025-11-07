@@ -1,16 +1,17 @@
 /**
- * Admin control page for managing live battles
+ * Control page for managing live battles
+ * Accessible by battle creators and admins
  */
 
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getBattleById } from "@/lib/battle-storage";
-import { checkRole } from "@/lib/auth/roles";
+import { canManageBattle } from "@/lib/auth/roles";
 import { notFound } from "next/navigation";
 import { AdminBattleControl } from "@/components/admin/admin-battle-control";
 import { AdminErrorBoundary } from "@/components/admin/error-boundary";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function AdminBattleControlPage({
   params,
@@ -23,13 +24,14 @@ export default async function AdminBattleControlPage({
     redirect("/sign-in");
   }
 
-  // Check if user is admin (using Clerk session claims)
-  const adminCheck = await checkRole("admin");
-  if (!adminCheck) {
+  const { id } = await params;
+
+  // Check if user can manage this battle
+  const authCheck = await canManageBattle(id);
+  if (!authCheck.authorized) {
     redirect("/");
   }
 
-  const { id } = await params;
   const battle = await getBattleById(id);
 
   if (!battle) {

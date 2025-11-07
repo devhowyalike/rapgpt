@@ -7,9 +7,9 @@ import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { decrypt } from "@/lib/auth/encryption";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
-import { MyBattleCard } from "@/components/my-battle-card";
 import { ProfileHeaderMenu } from "@/components/profile-header-menu";
 import { GuestProfileCallout } from "@/components/guest-profile-callout";
+import { ProfileBattlesFilter } from "@/components/profile-battles-filter";
 import { Lock, Globe, User as UserIcon, Swords } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -205,17 +205,12 @@ export default async function ProfilePage({
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
-              {userBattles.map((battle) => (
-                <MyBattleCard
-                  key={battle.id}
-                  battle={battle}
-                  shareUrl={shareUrl}
-                  showManagement={isOwnProfile}
-                  userIsProfilePublic={profileUser.isProfilePublic}
-                />
-              ))}
-            </div>
+            <ProfileBattlesFilter
+              battles={userBattles}
+              shareUrl={shareUrl}
+              isOwnProfile={isOwnProfile}
+              userIsProfilePublic={profileUser.isProfilePublic}
+            />
           )}
         </div>
 

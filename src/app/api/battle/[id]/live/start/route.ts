@@ -3,7 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { getBattleById, saveBattle } from '@/lib/battle-storage';
 import { broadcastEvent } from '@/lib/websocket/broadcast-helper';
 import type { BattleLiveStartedEvent } from '@/lib/websocket/types';
-import { checkRole } from '@/lib/auth/roles';
+import { canManageBattle } from '@/lib/auth/roles';
 
 export async function POST(
   request: NextRequest,
@@ -19,16 +19,17 @@ export async function POST(
       });
     }
 
-    // Check if user is admin
-    const adminCheck = await checkRole('admin');
-    if (!adminCheck) {
-      return new Response(JSON.stringify({ error: 'Forbidden: Admin access required' }), {
-        status: 403,
+    const { id } = await params;
+
+    // Check if user can manage this battle
+    const authCheck = await canManageBattle(id);
+    if (!authCheck.authorized) {
+      return new Response(JSON.stringify({ error: authCheck.error }), {
+        status: authCheck.status,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    const { id } = await params;
     const battle = await getBattleById(id);
 
     if (!battle) {
@@ -38,9 +39,9 @@ export async function POST(
       });
     }
 
-    if (battle.status !== 'ongoing') {
+    if (battle.status !== 'paused') {
       return new Response(
-        JSON.stringify({ error: 'Battle must be in ongoing status to go live' }),
+        JSON.stringify({ error: 'Battle must be in paused status to go live' }),
         {
           status: 400,
           headers: { 'Content-Type': 'application/json' },

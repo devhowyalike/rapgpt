@@ -270,7 +270,7 @@ export function BattleSidebar({
             {isArchived && (
               <div className="bg-gray-800 rounded-lg p-3 m-4 mb-0">
                 <p className="text-center text-white text-sm">
-                  {battle.status === "incomplete"
+                  {battle.status === "paused"
                     ? "Comments are disabled for paused battles"
                     : "Comments are disabled for archived battles"}
                 </p>
@@ -367,7 +367,7 @@ export function BattleSidebar({
             {isArchived && battle.scores.length > 0 && (
               <div className="bg-gray-800 rounded-lg p-3 mb-4">
                 <p className="text-center text-white text-sm">
-                  {battle.status === "incomplete"
+                  {battle.status === "paused"
                     ? "Voting is disabled for paused battles"
                     : "Voting is disabled for archived battles"}
                 </p>

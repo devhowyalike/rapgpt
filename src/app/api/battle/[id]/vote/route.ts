@@ -166,8 +166,7 @@ export async function POST(
       } as VoteCastEvent);
     }
 
-    // Revalidate the archive page and battle page to show fresh data
-    revalidatePath('/archive');
+    // Revalidate the battle page to show fresh data
     revalidatePath(`/battle/${id}`);
 
     return new Response(JSON.stringify({ success: true, battle }), {

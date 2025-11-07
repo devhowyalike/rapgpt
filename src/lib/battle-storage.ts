@@ -309,12 +309,12 @@ export async function getFeaturedBattles(): Promise<Battle[]> {
 }
 
 /**
- * Get current month's battle (featured ongoing battle)
+ * Get current month's battle (featured paused battle)
  */
 export async function getCurrentBattle(): Promise<Battle | null> {
   const featuredBattles = await getFeaturedBattles();
-  // Only return ongoing featured battles, not completed ones
-  return featuredBattles.find(b => b.status === 'ongoing') || null;
+  // Only return paused featured battles, not completed ones
+  return featuredBattles.find(b => b.status === 'paused') || null;
 }
 
 /**

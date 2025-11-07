@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { getBattleById, saveBattle } from '@/lib/battle-storage';
-import { checkRole } from '@/lib/auth/roles';
+import { canManageBattle } from '@/lib/auth/roles';
 import { z } from 'zod';
 
 const controlModeSchema = z.object({
@@ -28,15 +28,6 @@ export async function POST(
       });
     }
 
-    // Check if user is admin
-    const adminCheck = await checkRole('admin');
-    if (!adminCheck) {
-      return new Response(JSON.stringify({ error: 'Forbidden: Admin access required' }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
     const { id } = await params;
     const body = await request.json();
     
@@ -52,6 +43,15 @@ export async function POST(
     }
 
     const { mode, config } = validation.data;
+
+    // Check if user can manage this battle
+    const authCheck = await canManageBattle(id);
+    if (!authCheck.authorized) {
+      return new Response(JSON.stringify({ error: authCheck.error }), {
+        status: authCheck.status,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
     const battle = await getBattleById(id);
 
