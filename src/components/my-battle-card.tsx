@@ -174,13 +174,16 @@ export function MyBattleCard({
 
   // Format title with crown next to winner's name
   const formatTitleWithCrown = () => {
+    // Replace "vs" with "vs." for consistency
+    let formattedTitle = battle.title.replace(/ vs /g, " vs. ");
+
     if (
       !isCompleted ||
       !finalStats ||
       !finalStats.winner ||
       finalStats.winner === "tie"
     ) {
-      return battle.title;
+      return formattedTitle;
     }
 
     const winnerName =
@@ -189,7 +192,7 @@ export function MyBattleCard({
         : personas.right.name;
 
     // Replace the winner's name with their name + crown
-    return battle.title.replace(winnerName, `${winnerName} 👑`);
+    return formattedTitle.replace(winnerName, `${winnerName} 👑`);
   };
 
   // Prepare props for reusable components
