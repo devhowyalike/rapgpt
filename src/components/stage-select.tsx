@@ -117,7 +117,7 @@ export function StageSelect({
           leftPersonaId: player1.id,
           rightPersonaId: player2.id,
           stageId: selectedStage.id,
-          isFeatured: createAsLive,
+          isFeatured: false, // Only admins can create featured battles
           votingEnabled,
           commentsEnabled,
         }),

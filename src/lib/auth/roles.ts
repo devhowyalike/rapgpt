@@ -113,3 +113,54 @@ export async function canManageResource(resourceOwnerId: string): Promise<boolea
   return user.id === resourceOwnerId;
 }
 
+/**
+ * Check if the current user can manage a battle (is owner or admin)
+ * Returns authorization result with user data or error response
+ */
+export async function canManageBattle(battleId: string): Promise<
+  | { authorized: true; user: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>; isOwner: boolean; isAdmin: boolean }
+  | { authorized: false; error: string; status: number }
+> {
+  const user = await getCurrentUser();
+  
+  if (!user) {
+    return {
+      authorized: false,
+      error: 'Forbidden: Access denied',
+      status: 403,
+    };
+  }
+
+  // Get battle record to check ownership
+  const { battles } = await import('@/lib/db/schema');
+  const battleRecord = await db.query.battles.findFirst({
+    where: eq(battles.id, battleId),
+  });
+
+  if (!battleRecord) {
+    return {
+      authorized: false,
+      error: 'Battle not found',
+      status: 404,
+    };
+  }
+
+  const isOwner = battleRecord.createdBy === user.id;
+  const isAdmin = user.role === 'admin';
+
+  if (!isOwner && !isAdmin) {
+    return {
+      authorized: false,
+      error: 'Forbidden: You can only control your own battles',
+      status: 403,
+    };
+  }
+
+  return {
+    authorized: true,
+    user,
+    isOwner,
+    isAdmin,
+  };
+}
+

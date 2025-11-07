@@ -24,11 +24,11 @@ interface BattleOptionsProps {
   commentsEnabled: boolean;
   /** Callback when comments enabled state changes */
   onCommentsEnabledChange: (enabled: boolean) => void;
-  /** Whether to create as live/featured battle (admin only) */
+  /** Whether to create as live/featured battle */
   createAsLive: boolean;
   /** Callback when create as live state changes */
   onCreateAsLiveChange: (enabled: boolean) => void;
-  /** Whether the current user is an admin */
+  /** Whether the current user is an admin (for backwards compatibility) */
   isAdmin: boolean;
   /** Whether voting is globally enabled via env flags */
   isVotingGloballyEnabled?: boolean;
@@ -67,7 +67,7 @@ export function BattleOptions({
   }, [isOpen]);
 
   // Don't render if no options are available
-  if (!isVotingGloballyEnabled && !isCommentsGloballyEnabled && !isAdmin) {
+  if (!isVotingGloballyEnabled && !isCommentsGloballyEnabled) {
     return null;
   }
 
@@ -143,30 +143,28 @@ export function BattleOptions({
                 </div>
               )}
 
-              {/* Go Live Toggle - Only show for admins */}
-              {isAdmin && (
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-purple-900/50 border border-purple-500/50">
-                      <Radio size={20} className="text-purple-400" />
+              {/* Go Live Toggle - Available to all authenticated users */}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-purple-900/50 border border-purple-500/50">
+                    <Radio size={20} className="text-purple-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white font-semibold truncate">
+                      Go Live
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-white font-semibold truncate">
-                        Go Live
-                      </div>
-                      <div className="text-gray-400 text-sm line-clamp-2 text-pretty">
-                        Stream your battle & engage with your audience in
-                        real-time
-                      </div>
+                    <div className="text-gray-400 text-sm line-clamp-2 text-pretty">
+                      Stream your battle & engage with your audience in
+                      real-time
                     </div>
                   </div>
-                  <Switch
-                    checked={createAsLive}
-                    onCheckedChange={onCreateAsLiveChange}
-                    className="shrink-0"
-                  />
                 </div>
-              )}
+                <Switch
+                  checked={createAsLive}
+                  onCheckedChange={onCreateAsLiveChange}
+                  className="shrink-0"
+                />
+              </div>
             </div>
           </CollapsibleContent>
         </div>
