@@ -184,9 +184,9 @@ export function BattlesTable({ battles }: BattlesTableProps) {
           break;
         case "matchup":
           aValue =
-            `${a.personas.left.name} vs ${a.personas.right.name}`.toLowerCase();
+            `${a.personas.left.name} vs. ${a.personas.right.name}`.toLowerCase();
           bValue =
-            `${b.personas.left.name} vs ${b.personas.right.name}`.toLowerCase();
+            `${b.personas.left.name} vs. ${b.personas.right.name}`.toLowerCase();
           break;
         case "creator":
           aValue = (a.creator?.displayName || "Unknown").toLowerCase();

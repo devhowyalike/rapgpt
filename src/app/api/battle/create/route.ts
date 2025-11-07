@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     // Create new battle
     const battle: Battle = {
       id: battleId,
-      title: `${leftPersona.name} vs ${rightPersona.name}`,
+      title: `${leftPersona.name} vs. ${rightPersona.name}`,
       month,
       year,
       status: 'paused',

@@ -222,7 +222,7 @@ export function MyBattleCard({
         <div className="flex-1">
           <Link
             href={`/battle/${battle.id}`}
-            className="font-bebas text-2xl text-white hover:text-purple-400 transition-colors block"
+            className="font-bebas text-2xl text-white hover:text-purple-400 transition-colors block text-pretty"
           >
             {formatTitleWithCrown()}
           </Link>

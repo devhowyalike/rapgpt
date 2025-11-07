@@ -187,7 +187,7 @@ export function AdminDashboardClient({
                         </Link>
                       </div>
                       <div className="text-gray-400 text-sm mt-1">
-                        {personas.left.name} vs {personas.right.name}
+                        {personas.left.name} vs. {personas.right.name}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
