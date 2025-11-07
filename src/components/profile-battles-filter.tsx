@@ -16,7 +16,6 @@ interface ProfileBattlesFilterProps {
 
 interface Filters {
   public: boolean;
-  published: boolean;
   paused: boolean;
   commentsEnabled: boolean;
   votingEnabled: boolean;
@@ -32,7 +31,6 @@ export function ProfileBattlesFilter({
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     public: false,
-    published: false,
     paused: false,
     commentsEnabled: false,
     votingEnabled: false,
@@ -44,9 +42,6 @@ export function ProfileBattlesFilter({
     return battles.filter((battle) => {
       // Public filter - if checked, show only public battles
       if (filters.public && !battle.isPublic) return false;
-
-      // Published filter - if checked, show only published battles (published = public)
-      if (filters.published && !battle.isPublic) return false;
 
       // Paused filter - if checked, show only paused battles
       if (filters.paused && battle.status !== "paused") return false;
@@ -79,7 +74,6 @@ export function ProfileBattlesFilter({
   const clearFilters = () => {
     setFilters({
       public: false,
-      published: false,
       paused: false,
       commentsEnabled: false,
       votingEnabled: false,
@@ -140,16 +134,6 @@ export function ProfileBattlesFilter({
                 label="Public"
                 checked={filters.public}
                 onCheckedChange={() => toggleFilter("public")}
-              />
-            )}
-
-            {/* Published Filter */}
-            {isOwnProfile && (
-              <FilterCheckbox
-                id="published"
-                label="Published"
-                checked={filters.published}
-                onCheckedChange={() => toggleFilter("published")}
               />
             )}
 
