@@ -12,8 +12,8 @@ import { z } from 'zod';
 const extendedBattleRequestSchema = createBattleRequestSchema.merge(
   z.object({
     isFeatured: z.boolean().optional().default(false),
-    votingEnabled: z.boolean().optional().default(true),
-    commentsEnabled: z.boolean().optional().default(true),
+    votingEnabled: z.boolean().optional().default(false),
+    commentsEnabled: z.boolean().optional().default(false),
     autoStartOnAdvance: z.boolean().optional().default(true),
   })
 );
