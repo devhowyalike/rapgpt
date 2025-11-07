@@ -138,12 +138,13 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
   }, [wsStatus, initialBattle.id, setBattle]);
 
   const handleGenerateVerse = useCallback(async () => {
-    if (!battle) return;
+    const { battle: latestBattle } = useBattleStore.getState();
+    if (!latestBattle) return;
 
-    const nextPerformer = getNextPerformer(battle);
+    const nextPerformer = getNextPerformer(latestBattle);
     if (!nextPerformer || isGenerating) return;
 
-    const personaId = battle.personas[nextPerformer].id;
+    const personaId = latestBattle.personas[nextPerformer].id;
     setIsGenerating(true);
     // Indicate performer is about to stream; rely on WebSocket for actual text
     setStreamingVerse(null, personaId);
@@ -153,7 +154,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          battle,
+          battle: latestBattle,
           personaId,
           isLive: true,
         }),
@@ -179,10 +180,15 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
     try {
       // Persist the updated battle from the store (avoids sending stale state)
       await saveBattle();
+      // Auto-start first verse on round advance if enabled (default true)
+      const { battle: latestBattle } = useBattleStore.getState();
+      if (latestBattle?.autoStartOnAdvance !== false) {
+        await handleGenerateVerse();
+      }
     } catch (error) {
       console.error("Error saving battle:", error);
     }
-  }, [battle, advanceRound, saveBattle]);
+  }, [battle, advanceRound, saveBattle, handleGenerateVerse]);
 
   // Auto-play mode
   useAutoPlay({

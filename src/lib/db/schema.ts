@@ -66,6 +66,8 @@ export const battles = pgTable('battles', {
     readingDuration?: number;
     votingDuration?: number;
   }>(), // Auto-play timing settings
+  // Battle option: auto-start first verse after advancing round (default true)
+  autoStartOnAdvance: boolean('auto_start_on_advance').notNull().default(true),
   
   // AI-generated song from battle verses
   generatedSong: jsonb('generated_song').$type<{

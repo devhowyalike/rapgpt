@@ -14,6 +14,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "./ui/collapsible";
+import { Play } from "lucide-react";
 
 interface BattleOptionsProps {
   /** Whether voting is enabled for this battle */
@@ -28,6 +29,10 @@ interface BattleOptionsProps {
   createAsLive: boolean;
   /** Callback when create as live state changes */
   onCreateAsLiveChange: (enabled: boolean) => void;
+  /** Whether advancing a round auto-starts the first verse */
+  autoStartOnAdvance?: boolean;
+  /** Callback when auto-start setting changes */
+  onAutoStartOnAdvanceChange?: (enabled: boolean) => void;
   /** Whether the current user is an admin (for backwards compatibility) */
   isAdmin: boolean;
   /** Whether voting is globally enabled via env flags */
@@ -43,6 +48,8 @@ export function BattleOptions({
   onCommentsEnabledChange,
   createAsLive,
   onCreateAsLiveChange,
+  autoStartOnAdvance = true,
+  onAutoStartOnAdvanceChange,
   isAdmin,
   isVotingGloballyEnabled = true,
   isCommentsGloballyEnabled = true,
@@ -142,6 +149,32 @@ export function BattleOptions({
                   />
                 </div>
               )}
+
+              {/* Auto-start first verse after advancing - Coming Soon */}
+              <div className="flex items-center justify-between gap-2 opacity-50">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-teal-900/50 border border-teal-500/50">
+                    <Play size={20} className="text-teal-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white font-semibold truncate">
+                      Auto-start verse on next round{" "}
+                      <span className="text-xs text-teal-400 ml-2">
+                        (Coming Soon)
+                      </span>
+                    </div>
+                    <div className="text-gray-400 text-sm text-pretty">
+                      When advancing rounds, immediately start the first artist
+                    </div>
+                  </div>
+                </div>
+                <Switch
+                  checked={true}
+                  onCheckedChange={() => {}}
+                  disabled
+                  className="shrink-0"
+                />
+              </div>
 
               {/* Go Live Toggle - Coming Soon */}
               <div className="flex items-center justify-between gap-2 opacity-50">
