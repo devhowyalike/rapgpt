@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       title: `${leftPersona.name} vs ${rightPersona.name}`,
       month,
       year,
-      status: 'ongoing',
+      status: 'paused',
       stageId,
       personas: {
         left: leftPersona,

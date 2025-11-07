@@ -39,9 +39,9 @@ export async function POST(
       });
     }
 
-    if (battle.status !== 'ongoing') {
+    if (battle.status !== 'paused') {
       return new Response(
-        JSON.stringify({ error: 'Battle must be in ongoing status to go live' }),
+        JSON.stringify({ error: 'Battle must be in paused status to go live' }),
         {
           status: 400,
           headers: { 'Content-Type': 'application/json' },

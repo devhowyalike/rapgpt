@@ -132,7 +132,7 @@ export function MyBattleCard({
   };
 
   // Calculate battle progress stats for paused battles
-  const isPaused = battle.status === "incomplete";
+  const isPaused = battle.status === "paused";
   const isCompleted = battle.status === "completed";
   const isArchived = !!battle.liveStartedAt && !battle.isLive;
   const currentRound = battle.currentRound || 1;
@@ -292,14 +292,12 @@ export function MyBattleCard({
               className={`px-3 py-1 rounded ${
                 battle.status === "completed"
                   ? "bg-green-600/30 text-green-300"
-                  : battle.status === "ongoing"
-                  ? "bg-yellow-600/30 text-yellow-300"
-                  : battle.status === "incomplete"
+                  : battle.status === "paused"
                   ? "bg-orange-600/30 text-orange-300"
                   : "bg-gray-600/30 text-gray-400"
               }`}
             >
-              {battle.status === "incomplete" ? "paused" : battle.status}
+              {battle.status}
             </span>
           </>
         )}
@@ -404,7 +402,7 @@ export function MyBattleCard({
               <Radio size={16} className="fill-white" />
               Join Live
             </>
-          ) : battle.status === "incomplete" ? (
+          ) : battle.status === "paused" ? (
             "Resume Beef"
           ) : battle.status === "completed" ? (
             "Replay Battle"

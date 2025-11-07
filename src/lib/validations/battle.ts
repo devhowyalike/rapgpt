@@ -75,7 +75,7 @@ export const battleSchema = z.object({
   title: z.string(),
   month: z.string(),
   year: z.number().int(),
-  status: z.enum(['upcoming', 'ongoing', 'completed', 'incomplete']),
+  status: z.enum(['upcoming', 'paused', 'completed']),
   stageId: z.string(),
   personas: z.object({
     left: personaSchema,

@@ -95,7 +95,7 @@ export async function PUT(
     await saveBattle(battle);
 
     // If battle is being paused, automatically unpublish it
-    if (battle.status === 'incomplete' && existingBattle.isPublic) {
+    if (battle.status === 'paused' && existingBattle.isPublic) {
       await db
         .update(battles)
         .set({

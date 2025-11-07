@@ -9,7 +9,7 @@ interface WinnerBannerProps {
 }
 
 export function WinnerBanner({ battle }: WinnerBannerProps) {
-  if (battle.status === "incomplete") {
+  if (battle.status === "paused") {
     return (
       <motion.div
         className="mt-2 text-center md:text-left"

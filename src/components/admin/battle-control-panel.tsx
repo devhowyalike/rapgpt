@@ -124,7 +124,7 @@ export function BattleControlPanel({
         {!isLive ? (
           <button
             onClick={handleStartLive}
-            disabled={isStarting || battle.status !== "ongoing"}
+            disabled={isStarting || battle.status !== "paused"}
             className="w-full px-4 py-3 bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
           >
             {isStarting ? (

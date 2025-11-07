@@ -173,12 +173,12 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
 
   cancelBattle: async () => {
     const { battle } = get();
-    if (!battle || battle.status !== 'ongoing') return;
+    if (!battle || battle.status !== 'paused') return;
 
     try {
       const updatedBattle: Battle = {
         ...battle,
-        status: 'incomplete',
+        status: 'paused',
         updatedAt: Date.now(),
       };
 
@@ -201,12 +201,12 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
 
   resumeBattle: async () => {
     const { battle } = get();
-    if (!battle || battle.status !== 'incomplete') return;
+    if (!battle || battle.status !== 'paused') return;
 
     try {
       const updatedBattle: Battle = {
         ...battle,
-        status: 'ongoing',
+        status: 'paused',
         updatedAt: Date.now(),
       };
 

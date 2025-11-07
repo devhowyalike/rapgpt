@@ -324,8 +324,8 @@ export function BattlesTable({ battles }: BattlesTableProps) {
                   className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                     battle.status === "completed"
                       ? "bg-green-900/30 text-green-400 border border-green-500/30"
-                      : battle.status === "ongoing"
-                      ? "bg-blue-900/30 text-blue-400 border border-blue-500/30"
+                      : battle.status === "paused"
+                      ? "bg-orange-900/30 text-orange-400 border border-orange-500/30"
                       : battle.status === "upcoming"
                       ? "bg-yellow-900/30 text-yellow-400 border border-yellow-500/30"
                       : "bg-gray-700/50 text-gray-400 border border-gray-600/30"

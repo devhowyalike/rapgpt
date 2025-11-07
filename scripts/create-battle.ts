@@ -114,7 +114,7 @@ async function main() {
     title: eventName.trim(),
     month: now.toLocaleDateString('en-US', { month: 'long' }),
     year: now.getFullYear(),
-    status: 'ongoing',
+    status: 'paused',
     stageId: selectedStageId,
     personas: {
       left: PERSONAS[persona1Id],

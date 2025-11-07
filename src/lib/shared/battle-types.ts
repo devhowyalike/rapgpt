@@ -2,7 +2,7 @@
  * Battle system types for Versuz platform
  */
 
-export type BattleStatus = 'upcoming' | 'ongoing' | 'completed' | 'incomplete';
+export type BattleStatus = 'upcoming' | 'paused' | 'completed';
 export type PersonaPosition = 'left' | 'right';
 export type SongGenerationBeatStyle = 'g-funk' | 'boom-bap' | 'trap';
 
