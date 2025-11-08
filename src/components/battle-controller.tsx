@@ -395,6 +395,18 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   }
 
   // Live battle mode
+  const { contentPaddingOverride } = useMobileFooterControls({
+    hasBottomControls: false,
+    showCommenting,
+    showVoting,
+  });
+
+  // Custom offset for FABs to sit above the battle control bar
+  const liveBattleFabOffset =
+    showCommenting || showVoting
+      ? "calc(var(--battle-control-bar-height) + var(--fab-gutter))"
+      : undefined;
+
   return (
     <>
       <SiteHeader />
@@ -410,6 +422,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
               isReadingPhase={isReadingPhase}
               isVotingPhase={isVotingPhase}
               votingCompletedRound={votingCompletedRound}
+              mobileBottomPadding={contentPaddingOverride}
             />
 
             {/* Control Bar - Always visible during paused battles */}
@@ -424,7 +437,6 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                 isVotingPhase={isVotingPhase}
                 votingTimeRemaining={votingTimeRemaining}
                 showVoting={showVoting}
-                showCommenting={showCommenting}
                 nextPerformerName={
                   nextPerformer
                     ? battle.personas[nextPerformer].name
@@ -464,6 +476,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
         onVotingClick={openVotingDrawer}
         activeTab={mobileActiveTab}
         isDrawerOpen={showMobileDrawer}
+        bottomOffset={liveBattleFabOffset}
       />
 
       {/* Pause Battle Dialog */}

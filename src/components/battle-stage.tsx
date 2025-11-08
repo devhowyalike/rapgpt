@@ -24,6 +24,7 @@ interface BattleStageProps {
   isReadingPhase?: boolean;
   isVotingPhase?: boolean;
   votingCompletedRound?: number | null;
+  mobileBottomPadding?: string;
 }
 
 export function BattleStage({
@@ -33,6 +34,7 @@ export function BattleStage({
   isReadingPhase = false,
   isVotingPhase = false,
   votingCompletedRound = null,
+  mobileBottomPadding,
 }: BattleStageProps) {
   const progress = getBattleProgress(battle);
   const {
@@ -167,7 +169,12 @@ export function BattleStage({
   }, [shouldShowScores]);
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto bg-linear-to-b from-stage-darker to-stage-dark overflow-x-hidden touch-scroll-container">
+    <div
+      className="flex flex-col h-full overflow-y-auto bg-linear-to-b from-stage-darker to-stage-dark overflow-x-hidden touch-scroll-container pb-(--mobile-bottom-padding) md:pb-0"
+      style={{
+        ["--mobile-bottom-padding" as any]: mobileBottomPadding || "0px",
+      }}
+    >
       {/* Header with Round Tracker */}
       <BattleHeader sticky={true} variant="blur" className="top-0">
         <div className="flex flex-row md:flex-row items-center justify-between md:justify-start gap-2 md:gap-6">

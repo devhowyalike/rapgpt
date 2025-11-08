@@ -102,10 +102,7 @@ export function BattleSplitView({
         />
 
         <div
-          className={cn(
-            "grid md:grid-cols-2 divide-y md:divide-y-0 divide-gray-800 md:min-h-full",
-            contentClassName
-          )}
+          className={cn("grid md:grid-cols-2 md:min-h-full", contentClassName)}
         >
           {/* Left Persona */}
           <PersonaSection

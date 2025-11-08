@@ -27,6 +27,7 @@
   --battle-header-height: 89px; /* battle header with round tracker and stage info */
   --live-banner-height: 60px;
   --bottom-controls-height: 72px; /* drawer offset for bottom buttons */
+  --battle-control-bar-height: 80px; /* height of the battle control bar (p-4 + button height) */
   /* Mobile floating action buttons */
   --fab-size: 56px; /* w-14 h-14 */
   --fab-gutter: 24px; /* spacing above bottom edge/controls */

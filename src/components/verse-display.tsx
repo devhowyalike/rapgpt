@@ -27,19 +27,8 @@ export function VerseDisplay({
   const streamingBars =
     streamingText?.split("\n").filter((line) => line.trim()) || [];
 
-  // Track if we just finished streaming to prevent re-animation
-  const previousStreamingRef = useRef(false);
-  const justFinishedStreaming = previousStreamingRef.current && !isStreaming;
-  
-  // Don't animate verses that are already complete (not currently streaming)
-  const skipAnimation = justFinishedStreaming;
-
   // Ref for streaming container to enable auto-scrolling
   const streamingContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    previousStreamingRef.current = isStreaming || false;
-  }, [isStreaming]);
 
   // Auto-scroll to bottom when streaming text updates
   useEffect(() => {
@@ -57,25 +46,15 @@ export function VerseDisplay({
         {verse && !isStreaming && (
           <motion.div
             key={verse.id}
-            initial={skipAnimation ? { opacity: 1 } : { opacity: 0 }}
+            initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: skipAnimation ? 0 : 0.2 }}
+            transition={{ duration: 0.2 }}
             className="space-y-3"
           >
             {bars.map((bar, index) => (
-              <motion.div
+              <div
                 key={`${verse.id}-${index}`}
-                initial={
-                  skipAnimation
-                    ? { opacity: 1, y: 0 }
-                    : { opacity: 0, y: 10 }
-                }
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.3,
-                  delay: skipAnimation ? 0 : index * 0.05,
-                }}
                 className={
                   "verse-line flex" + (index === bars.length - 1 ? " pb-2" : "")
                 }
@@ -92,7 +71,7 @@ export function VerseDisplay({
                 >
                   {bar.text}
                 </p>
-              </motion.div>
+              </div>
             ))}
           </motion.div>
         )}

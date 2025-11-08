@@ -66,9 +66,9 @@ export function PersonaSection({
         style={
           enableSticky
             ? {
-                top: isBattleEnd
-                  ? "var(--mobile-battle-end-height)"
-                  : "var(--mobile-round-end-height)",
+                // Battle end (completed): stick at top (0px)
+                // Active battle: stick below dynamic header height
+                top: isBattleEnd ? "0px" : `${mobileTopOffset}px`,
               }
             : undefined
         }

@@ -19,6 +19,7 @@ import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
 import { useBattleFeatures } from "@/lib/hooks/use-battle-features";
 import { useBattleVote, useBattleComment } from "@/lib/hooks/use-battle-actions";
 import { useMobileDrawer } from "@/lib/hooks/use-mobile-drawer";
+import { useMobileFooterControls } from "@/lib/hooks/use-mobile-footer-controls";
 import { MobileActionButtons, SidebarContainer } from "@/components/battle";
 
 interface LiveBattleViewerProps {
@@ -340,6 +341,11 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
               isReadingPhase={isReadingPhase}
               isVotingPhase={isVotingPhase}
               votingCompletedRound={votingCompletedRound}
+              mobileBottomPadding={useMobileFooterControls({
+                hasBottomControls: false,
+                showCommenting,
+                showVoting,
+              }).contentPaddingOverride}
             />
           </div>
 
@@ -368,6 +374,11 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
         onVotingClick={openVotingDrawer}
         activeTab={mobileActiveTab}
         isDrawerOpen={showMobileDrawer}
+        bottomOffset={useMobileFooterControls({
+          hasBottomControls: false,
+          showCommenting,
+          showVoting,
+        }).fabBottomOffset}
       />
     </>
   );
