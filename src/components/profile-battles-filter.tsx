@@ -16,7 +16,9 @@ interface ProfileBattlesFilterProps {
 
 interface Filters {
   public: boolean;
+  private: boolean;
   paused: boolean;
+  completed: boolean;
   commentsEnabled: boolean;
   votingEnabled: boolean;
   hasMp3: boolean;
@@ -31,7 +33,9 @@ export function ProfileBattlesFilter({
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     public: false,
+    private: false,
     paused: false,
+    completed: false,
     commentsEnabled: false,
     votingEnabled: false,
     hasMp3: false,
@@ -43,8 +47,14 @@ export function ProfileBattlesFilter({
       // Public filter - if checked, show only public battles
       if (filters.public && !battle.isPublic) return false;
 
+      // Private filter - if checked, show only private battles
+      if (filters.private && battle.isPublic) return false;
+
       // Paused filter - if checked, show only paused battles
       if (filters.paused && battle.status !== "paused") return false;
+
+      // Completed filter - if checked, show only completed battles
+      if (filters.completed && battle.status === "paused") return false;
 
       // Comments enabled filter - if checked, show only battles with comments enabled
       if (filters.commentsEnabled && !battle.commentsEnabled) return false;
@@ -68,13 +78,17 @@ export function ProfileBattlesFilter({
   );
 
   // Check if any filters are active
-  const hasActiveFilters = Object.values(filters).some((value) => value === true);
+  const hasActiveFilters = Object.values(filters).some(
+    (value) => value === true
+  );
 
   // Clear all filters
   const clearFilters = () => {
     setFilters({
       public: false,
+      private: false,
       paused: false,
+      completed: false,
       commentsEnabled: false,
       votingEnabled: false,
       hasMp3: false,
@@ -99,7 +113,7 @@ export function ProfileBattlesFilter({
         <Button
           onClick={() => setShowFilters(!showFilters)}
           variant="outline"
-          className="flex items-center gap-2 bg-gray-800/50 border-purple-500/20 hover:bg-gray-700/50 text-white"
+          className="flex items-center gap-2 bg-gray-800/50 border-purple-500/20 hover:bg-purple-600/30 hover:border-purple-500/40 text-white hover:text-white"
         >
           <Filter className="w-4 h-4" />
           <span>Filters</span>
@@ -115,7 +129,7 @@ export function ProfileBattlesFilter({
             onClick={clearFilters}
             variant="ghost"
             size="sm"
-            className="text-gray-400 hover:text-white"
+            className="text-gray-400 hover:text-black hover:bg-gray-200"
           >
             <X className="w-4 h-4 mr-1" />
             Clear filters
@@ -137,12 +151,30 @@ export function ProfileBattlesFilter({
               />
             )}
 
+            {/* Private Filter */}
+            {isOwnProfile && (
+              <FilterCheckbox
+                id="private"
+                label="Private"
+                checked={filters.private}
+                onCheckedChange={() => toggleFilter("private")}
+              />
+            )}
+
             {/* Paused Filter */}
             <FilterCheckbox
               id="paused"
               label="Paused"
               checked={filters.paused}
               onCheckedChange={() => toggleFilter("paused")}
+            />
+
+            {/* Completed Filter */}
+            <FilterCheckbox
+              id="completed"
+              label="Completed"
+              checked={filters.completed}
+              onCheckedChange={() => toggleFilter("completed")}
             />
 
             {/* Comments Enabled Filter */}
@@ -249,11 +281,7 @@ function FilterCheckbox({
 }: FilterCheckboxProps) {
   return (
     <div className="flex items-center space-x-2">
-      <Checkbox
-        id={id}
-        checked={checked}
-        onCheckedChange={onCheckedChange}
-      />
+      <Checkbox id={id} checked={checked} onCheckedChange={onCheckedChange} />
       <label
         htmlFor={id}
         className="text-sm text-gray-300 cursor-pointer select-none"
@@ -263,4 +291,3 @@ function FilterCheckbox({
     </div>
   );
 }
-
