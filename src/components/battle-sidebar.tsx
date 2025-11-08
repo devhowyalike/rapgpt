@@ -488,57 +488,64 @@ export function BattleSidebar({
                           const canVote = canVoteOnRound(roundScore.round);
 
                           return (
-                            <button
+                            <motion.div
                               key={persona.id}
-                              onClick={() =>
-                                handleVote(roundScore.round, persona.id)
-                              }
-                              disabled={!canVote || isSubmittingVote}
-                              className={`
-                            w-full p-3 rounded-lg border-2 transition-all
-                            ${
-                              isVoted
-                                ? "bg-linear-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400 shadow-lg shadow-yellow-400/20 hover:scale-[1.02] hover:border-yellow-500"
-                                : !canVote
-                                ? "bg-gray-700 border-gray-600 cursor-not-allowed"
-                                : `hover:scale-[1.02] hover:shadow-lg border-gray-600 ${hoverBorderColor}`
-                            }
-                            ${isSubmittingVote ? "opacity-50" : ""}
-                          `}
+                              layout
+                              transition={{
+                                layout: { type: "spring", stiffness: 350, damping: 25 }
+                              }}
                             >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <span
-                                    className="font-medium"
-                                    style={{ color: persona.accentColor }}
-                                  >
-                                    {persona.name}
-                                  </span>
-                                  {isVoted && (
-                                    <span className="text-yellow-400 text-xs">
-                                      ✓ Your vote
+                              <button
+                                onClick={() =>
+                                  handleVote(roundScore.round, persona.id)
+                                }
+                                disabled={!canVote || isSubmittingVote}
+                                className={`
+                              w-full p-3 rounded-lg border-2 transition-all
+                              ${
+                                isVoted
+                                  ? "bg-linear-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400 shadow-lg shadow-yellow-400/20 hover:scale-[1.02] hover:border-yellow-500"
+                                  : !canVote
+                                  ? "bg-gray-700 border-gray-600 cursor-not-allowed"
+                                  : `hover:scale-[1.02] hover:shadow-lg border-gray-600 ${hoverBorderColor}`
+                              }
+                              ${isSubmittingVote ? "opacity-50" : ""}
+                            `}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <span
+                                      className="font-medium"
+                                      style={{ color: persona.accentColor }}
+                                    >
+                                      {persona.name}
+                                    </span>
+                                    {isVoted && (
+                                      <span className="text-yellow-400 text-xs">
+                                        ✓ Your vote
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm text-gray-400">
+                                      {optimisticVotes}{" "}
+                                      {optimisticVotes === 1 ? "vote" : "votes"}
+                                    </span>
+                                    {roundScore.winner === persona.id && (
+                                      <span>🏆</span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="text-sm text-gray-400 mt-1">
+                                  Score: {score?.totalScore.toFixed(1)}
+                                  {isVoted && canVote && (
+                                    <span className="ml-2 text-xs text-yellow-400">
+                                      (click to undo)
                                     </span>
                                   )}
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm text-gray-400">
-                                    {optimisticVotes}{" "}
-                                    {optimisticVotes === 1 ? "vote" : "votes"}
-                                  </span>
-                                  {roundScore.winner === persona.id && (
-                                    <span>🏆</span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="text-sm text-gray-400 mt-1">
-                                Score: {score?.totalScore.toFixed(1)}
-                                {isVoted && canVote && (
-                                  <span className="ml-2 text-xs text-yellow-400">
-                                    (click to undo)
-                                  </span>
-                                )}
-                              </div>
-                            </button>
+                              </button>
+                            </motion.div>
                           );
                         }
                       )}

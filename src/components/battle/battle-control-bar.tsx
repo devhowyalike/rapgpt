@@ -86,8 +86,8 @@ export function BattleControlBar({
                 ? "bg-linear-to-r from-purple-600 to-pink-600 animate-pulse"
                 : canAdvance
                 ? "bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 animate-pulse"
-                : battle.verses.length === 0
-                ? "bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                : canGenerate
+                ? "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg shadow-green-500/50"
                 : "bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"
             }
             ${
