@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface VictoryConfettiProps {
   trigger: boolean;
@@ -44,6 +45,12 @@ export function VictoryConfetti({ trigger }: VictoryConfettiProps) {
   const stopTimeoutRef = useRef<number | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const [active, setActive] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure we're mounted on client before creating portal
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!trigger) return;
@@ -97,19 +104,23 @@ export function VictoryConfetti({ trigger }: VictoryConfettiProps) {
       for (let i = 0; i < count; i++) {
         const w = width();
         const h = height();
-        const startX = Math.random() * w;
-        const startY = h * 0.5;
-        const angle = Math.PI / 4 + (Math.random() * Math.PI) / 2; // 45-135 deg
-        const speed = 150 + Math.random() * 200; // px/s
+        // Start from upper-center of screen for explosion effect
+        const startX = w / 2;
+        const startY = h * 0.3; // 30% from top instead of center
+        // Random angle in ALL directions (360 degrees)
+        const angle = Math.random() * Math.PI * 2;
+        // Higher speed for more dramatic explosion
+        const speed = 200 + Math.random() * 400; // px/s
         const vx = Math.cos(angle) * speed;
-        const vy = -Math.sin(angle) * speed; // upwards
-        const size = 6 + Math.random() * 10;
+        const vy = Math.sin(angle) * speed;
+        // More size variation
+        const size = 4 + Math.random() * 14;
         const color =
           CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
         const rotation = Math.random() * Math.PI * 2;
         const rotationSpeed =
-          (Math.random() > 0.5 ? 1 : -1) * (Math.PI * (0.5 + Math.random()));
-        const maxLife = 2 + Math.random() * 1.5; // seconds
+          (Math.random() > 0.5 ? 1 : -1) * (Math.PI * (0.5 + Math.random() * 2));
+        const maxLife = 2.5 + Math.random() * 2; // seconds - longer life for wider spread
 
         particles.push({
           x: startX,
@@ -120,15 +131,15 @@ export function VictoryConfetti({ trigger }: VictoryConfettiProps) {
           color,
           rotation,
           rotationSpeed,
-          shape: Math.random() > 0.7 ? "circle" : "rect",
+          shape: Math.random() > 0.6 ? "circle" : "rect", // More rectangles
           life: 0,
           maxLife,
         });
       }
     };
 
-    // More particles for a celebratory effect
-    createParticles(100);
+    // EXPLOSION! More particles for dramatic effect
+    createParticles(200);
 
     let prev = performance.now();
     const gravity = 900; // px/s^2
@@ -204,14 +215,20 @@ export function VictoryConfetti({ trigger }: VictoryConfettiProps) {
     };
   }, [active]);
 
-  if (!active) return null;
+  if (!active || !mounted) return null;
 
-  return (
+  const confettiElement = (
     <div
       ref={wrapperRef}
-      className="absolute inset-0 pointer-events-none overflow-visible z-0"
+      className="fixed inset-0 pointer-events-none z-50"
     >
-      <canvas ref={canvasRef} />
+      <canvas 
+        ref={canvasRef} 
+        className="w-full h-full"
+      />
     </div>
   );
+
+  // Render to document.body using portal to escape any transform contexts
+  return createPortal(confettiElement, document.body);
 }
