@@ -41,14 +41,20 @@ export function PersonaSection({
 }: PersonaSectionProps) {
   return (
     <div
-      className={cn(
-        "flex flex-col min-h-[400px] md:min-h-0",
-        !visible && "hidden md:flex"
-      )}
+      className={cn("flex flex-col md:min-h-0", !visible && "hidden md:flex")}
     >
       <div
-        className={cn(cardPadding, "border-b border-gray-800")}
-        style={mobileTopOffset > 0 ? { marginTop: mobileTopOffset } : undefined}
+        className={cn(
+          cardPadding,
+          "border-b border-gray-800",
+          "persona-card-sticky",
+          "bg-gray-900 z-10"
+        )}
+        style={
+          mobileTopOffset > 0
+            ? { top: `calc(${mobileTopOffset}px - var(--header-height))` }
+            : { top: "calc(var(--header-height) - var(--header-height))" }
+        }
       >
         <PersonaCard
           persona={persona}
@@ -70,5 +76,3 @@ export function PersonaSection({
     </div>
   );
 }
-
-

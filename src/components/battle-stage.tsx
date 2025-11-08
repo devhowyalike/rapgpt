@@ -69,7 +69,7 @@ export function BattleStage({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Compute combined offset: site header height (CSS var) + trophy banner height
+  // Compute combined offset: site header height (CSS var) + BattleHeader height
   useLayoutEffect(() => {
     if (!isMobile) {
       setPersonaTopMargin(0);
@@ -81,29 +81,28 @@ export function BattleStage({
       const headerVar = rootStyle.getPropertyValue("--header-height").trim();
       const headerPx = parseFloat(headerVar || "0") || 0;
 
-      const trophyEl = trophyRef.current;
-      if (!trophyEl) {
-        setPersonaTopMargin(0);
-        return;
-      }
+      const headerEl = document.querySelector(
+        "[data-battle-header]"
+      ) as HTMLElement | null;
+      const battleHeaderHeight =
+        (headerEl?.getBoundingClientRect().height as number) || 0;
 
-      const rect = trophyEl.getBoundingClientRect();
-      const trophyStyle = getComputedStyle(trophyEl);
-      const mt = parseFloat(trophyStyle.marginTop || "0") || 0;
-      const mb = parseFloat(trophyStyle.marginBottom || "0") || 0;
-      const trophyTotal = rect.height + mt + mb;
-      // Include the distance from the top of the sticky header down to the trophy block
-      const distanceToTrophy = trophyEl.offsetTop || 0;
-
-      setPersonaTopMargin(headerPx + distanceToTrophy + trophyTotal);
+      // Use just the battle header height since BattleHeader is already positioned at top: var(--header-height)
+      // This avoids double-counting the site header offset
+      setPersonaTopMargin(battleHeaderHeight);
     };
 
     recalc();
     window.addEventListener("resize", recalc);
     let ro: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== "undefined" && trophyRef.current) {
-      ro = new ResizeObserver(() => recalc());
-      ro.observe(trophyRef.current);
+    if (typeof ResizeObserver !== "undefined") {
+      const headerEl = document.querySelector(
+        "[data-battle-header]"
+      ) as HTMLElement | null;
+      if (headerEl) {
+        ro = new ResizeObserver(() => recalc());
+        ro.observe(headerEl);
+      }
     }
     return () => {
       window.removeEventListener("resize", recalc);

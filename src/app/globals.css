@@ -159,3 +159,15 @@ body {
 .verse-line {
   animation: none;
 }
+
+/* Sticky persona cards on mobile */
+.persona-card-sticky {
+  position: sticky;
+  top: var(--header-height);
+}
+
+@media (min-width: 768px) {
+  .persona-card-sticky {
+    position: static;
+  }
+}

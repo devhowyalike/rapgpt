@@ -42,6 +42,7 @@ export function BattleHeader({
 
   return (
     <div
+      data-battle-header
       className={cn(
         "left-0 right-0 z-20 px-4 py-2 md:px-6 md:py-4 border-b border-gray-800",
         sticky && "sticky top-(--header-height) md:top-auto md:relative",

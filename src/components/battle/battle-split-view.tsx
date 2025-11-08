@@ -84,7 +84,7 @@ export function BattleSplitView({
       >
         {/* Full-height center divider on desktop */}
         <div
-          className="hidden md:block pointer-events-none absolute inset-y-0 left-1/2 w-px bg-gray-800"
+          className="hidden md:block pointer-events-none absolute inset-y-0 left-1/2 w-px bg-gray-800 z-20"
           aria-hidden="true"
         />
 
