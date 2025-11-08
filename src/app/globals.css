@@ -189,3 +189,10 @@ body {
   /* Create stacking context to prevent sticky z-index issues */
   transform: translateZ(0);
 }
+
+/* Promote animated elements to their own compositor layer */
+.gpu-accel {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
