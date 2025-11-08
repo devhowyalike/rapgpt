@@ -17,6 +17,7 @@ import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { getStage, DEFAULT_STAGE } from "@/lib/shared/stages";
 import { BattleInfoPanel } from "@/components/battle-info-panel";
 import { BattleStatusButton } from "@/components/battle-status-button";
+import { BattleFeatureBadges } from "@/components/battle-feature-badges";
 
 interface MyBattleCardProps {
   battle: {
@@ -221,7 +222,7 @@ export function MyBattleCard({
         isDeleting || isPending ? "opacity-50 pointer-events-none" : ""
       }`}
     >
-      <div className="flex items-start justify-between mb-4 gap-3">
+      <div className="flex items-start justify-between mb-2 gap-3">
         <div className="flex-1">
           <Link
             href={`/battle/${battle.id}`}
@@ -288,6 +289,14 @@ export function MyBattleCard({
         )}
       </div>
 
+      {/* Created date below title */}
+      <div className="text-xs text-gray-500 mb-2">
+        Created {battle.createdAt.toLocaleDateString()}
+      </div>
+
+      {/* Feature badges below date */}
+      <BattleFeatureBadges {...featureBadgesProps} />
+
       <div className="flex items-center gap-2 text-sm mb-4 flex-wrap">
         {battle.isLive && (
           <span className="px-3 py-1 rounded bg-red-600 text-white flex items-center gap-1.5 font-semibold animate-pulse">
@@ -311,12 +320,14 @@ export function MyBattleCard({
         )}
       </div>
 
+      {/* Spacer to push Battle Results to consistent position */}
+      <div className="flex-1 min-h-0" />
+
       {isPaused && (
         <BattleInfoPanel
           type="progress"
           createdAt={battle.createdAt}
           stage={stage}
-          featureBadges={featureBadgesProps}
           currentRound={currentRound}
           versesCount={versesCount}
         />
@@ -327,7 +338,6 @@ export function MyBattleCard({
           type="results"
           createdAt={battle.createdAt}
           stage={stage}
-          featureBadges={featureBadgesProps}
           resultsStats={battleResultsProps}
         />
       )}
@@ -338,9 +348,6 @@ export function MyBattleCard({
           <p className="text-sm text-red-300">{toggleError}</p>
         </div>
       )}
-
-      {/* Flexible spacer to push buttons to bottom */}
-      <div className="flex-1" />
 
       <div className="flex items-center gap-3">
         <Link
