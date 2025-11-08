@@ -159,7 +159,7 @@ export function BattleStage({
   }, [shouldShowScores]);
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto bg-linear-to-b from-stage-darker to-stage-dark overflow-x-hidden">
+    <div className="flex flex-col h-full overflow-y-auto bg-linear-to-b from-stage-darker to-stage-dark overflow-x-hidden touch-scroll-container">
       {/* Header with Round Tracker */}
       <BattleHeader sticky={true} variant="blur" className="top-0">
         <div className="flex flex-row md:flex-row items-center justify-between md:justify-start gap-2 md:gap-6">

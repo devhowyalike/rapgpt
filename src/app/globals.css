@@ -164,10 +164,22 @@ body {
 .persona-card-sticky {
   position: sticky;
   top: var(--header-height);
+  /* Ensure touch scrolling works smoothly with sticky elements */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 @media (min-width: 768px) {
   .persona-card-sticky {
     position: static;
   }
+}
+
+/* Ensure smooth touch scrolling on containers with sticky children */
+.touch-scroll-container {
+  -webkit-overflow-scrolling: touch;
+  /* Allow vertical panning, prevent interference from gestures */
+  touch-action: pan-y pinch-zoom;
+  /* Create stacking context to prevent sticky z-index issues */
+  transform: translateZ(0);
 }

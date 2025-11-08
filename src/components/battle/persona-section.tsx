@@ -37,7 +37,7 @@ export function PersonaSection({
   streamingText,
   mobileTopOffset = 0,
   visible = true,
-  cardPadding = "p-3 md:p-4",
+  cardPadding = "px-3 py-2 md:p-4",
 }: PersonaSectionProps) {
   return (
     <div

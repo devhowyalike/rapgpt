@@ -180,7 +180,7 @@ export function BattleReplay({
 
       {/* Split Screen Stage */}
       <div
-        className="flex-1 overflow-y-auto pb-(--mobile-bottom-padding) md:pb-24"
+        className="flex-1 overflow-y-auto pb-(--mobile-bottom-padding) md:pb-24 touch-scroll-container"
         style={{
           ["--mobile-bottom-padding" as any]: mobileContentPadding,
         }}
@@ -191,7 +191,7 @@ export function BattleReplay({
           rightVerse={roundVerses.right}
           roundScore={roundScore}
           showRoundWinner={true}
-          cardPadding="p-6"
+          cardPadding="px-3 py-2 md:p-4"
         />
       </div>
 
@@ -212,7 +212,7 @@ export function BattleReplay({
               excludeBottomControls={true}
               mobileOnly={false}
             >
-              <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 touch-scroll-container">
                 <div className="p-4 md:p-6">
                   <div className={activeTab === "scores" ? "" : "hidden"}>
                     {roundScore && (

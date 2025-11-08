@@ -68,7 +68,7 @@ export function SidebarContainer({
           title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
           excludeBottomControls={excludeBottomControls}
         >
-          <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="flex-1 overflow-y-auto min-h-0 touch-scroll-container">
             <BattleSidebar
               battle={battle}
               onVote={onVote}

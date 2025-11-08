@@ -263,7 +263,7 @@ export function BattleSidebar({
       )}
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto touch-scroll-container">
         {showCommenting && activeTab === "comments" && (
           <div className="flex flex-col h-full">
             {/* Archived Message - Always visible at top */}
@@ -278,7 +278,7 @@ export function BattleSidebar({
             )}
 
             {/* Comments List */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 touch-scroll-container">
               <AnimatePresence initial={false}>
                 {battle.comments.map((comment) => (
                   <motion.div
