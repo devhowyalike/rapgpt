@@ -81,7 +81,7 @@ export function PersonaSection({
         />
       </div>
 
-      <div className="flex-1 stage-spotlight">
+      <div className="flex-1">
         <VerseDisplay
           verse={verse ?? undefined}
           persona={persona}
