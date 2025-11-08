@@ -209,10 +209,12 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   }
 
   const handleGenerateVerse = async () => {
-    const nextPerformer = getNextPerformer(battle);
+    const { battle: latestBattle } = useBattleStore.getState();
+    if (!latestBattle) return;
+    const nextPerformer = getNextPerformer(latestBattle);
     if (!nextPerformer || isGenerating) return;
 
-    const personaId = battle.personas[nextPerformer].id;
+    const personaId = latestBattle.personas[nextPerformer].id;
     setIsGenerating(true);
     setStreamingVerse(null, personaId);
 
@@ -221,7 +223,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          battle,
+          battle: latestBattle,
           personaId,
         }),
       });
@@ -285,6 +287,12 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     setVotingTimeRemaining(null);
     advanceRound();
     await saveBattle();
+    // Auto-start first verse on round advance if enabled (default true)
+    const { battle: latestBattle } = useBattleStore.getState();
+    if (latestBattle?.autoStartOnAdvance !== false) {
+      // Trigger generation for the first artist in the new round
+      await handleGenerateVerse();
+    }
   };
 
   const handleCancelBattle = () => {

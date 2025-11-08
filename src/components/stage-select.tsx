@@ -25,6 +25,8 @@ interface StageSelectProps {
   onVotingEnabledChange: (enabled: boolean) => void;
   onCommentsEnabledChange: (enabled: boolean) => void;
   onCreateAsLiveChange: (enabled: boolean) => void;
+  autoStartOnAdvance: boolean;
+  onAutoStartOnAdvanceChange: (enabled: boolean) => void;
   sessionStorageKey: string;
 }
 
@@ -45,6 +47,8 @@ export function StageSelect({
   onVotingEnabledChange,
   onCommentsEnabledChange,
   onCreateAsLiveChange,
+  autoStartOnAdvance,
+  onAutoStartOnAdvanceChange,
   sessionStorageKey,
 }: StageSelectProps) {
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
@@ -119,6 +123,7 @@ export function StageSelect({
           isFeatured: false, // Only admins can create featured battles
           votingEnabled,
           commentsEnabled,
+          autoStartOnAdvance,
         }),
         signal: controller.signal,
       });
@@ -329,6 +334,8 @@ export function StageSelect({
             onCommentsEnabledChange={onCommentsEnabledChange}
             createAsLive={createAsLive}
             onCreateAsLiveChange={onCreateAsLiveChange}
+            autoStartOnAdvance={autoStartOnAdvance}
+            onAutoStartOnAdvanceChange={onAutoStartOnAdvanceChange}
             isAdmin={isAdmin}
             isVotingGloballyEnabled={isVotingGloballyEnabled}
             isCommentsGloballyEnabled={isCommentsGloballyEnabled}

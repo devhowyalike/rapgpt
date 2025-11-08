@@ -24,7 +24,7 @@ export function RoundTracker({
     <>
       {/* Mobile: Show only current round text */}
       <div className={`md:hidden flex items-center justify-center ${className}`}>
-        <span className="text-sm text-gray-400 font-medium">
+        <span className="text-sm text-gray-400 font-medium whitespace-nowrap">
           Round {currentRound} of {ROUNDS_PER_BATTLE}
         </span>
       </div>

@@ -73,7 +73,9 @@ export function VerseDisplay({
                   duration: 0.3,
                   delay: justFinishedStreaming ? 0 : index * 0.05,
                 }}
-                className="verse-line flex"
+                className={
+                  "verse-line flex" + (index === bars.length - 1 ? " pb-2" : "")
+                }
               >
                 <span
                   className="text-sm opacity-50 w-8 shrink-0"
@@ -100,7 +102,7 @@ export function VerseDisplay({
             animate={{ opacity: 1 }}
             exit={{ opacity: 1 }}
             transition={{ duration: 0.2 }}
-            className="space-y-3"
+            className="space-y-3 pb-12 md:pb-16"
           >
             {streamingBars.map((line, index) => (
               <motion.div
@@ -124,6 +126,24 @@ export function VerseDisplay({
                 </p>
               </motion.div>
             ))}
+            {streamingBars.length === 0 && (
+              <motion.div
+                className="flex items-center gap-2 mt-4"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+              >
+                <div
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: persona.accentColor }}
+                />
+                <span
+                  className="text-sm"
+                  style={{ color: persona.accentColor }}
+                >
+                  {persona.name} is spitting...
+                </span>
+              </motion.div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -136,21 +156,7 @@ export function VerseDisplay({
         </div>
       )}
 
-      {isStreaming && (
-        <motion.div
-          className="flex items-center gap-2 mt-4"
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
-        >
-          <div
-            className="w-2 h-2 rounded-full"
-            style={{ backgroundColor: persona.accentColor }}
-          />
-          <span className="text-sm" style={{ color: persona.accentColor }}>
-            {persona.name} is spitting...
-          </span>
-        </motion.div>
-      )}
+      {isStreaming && null}
     </div>
   );
 }

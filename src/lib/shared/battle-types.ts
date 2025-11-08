@@ -96,6 +96,11 @@ export interface Battle {
   isFeatured?: boolean; // true = admin featured battle, false = user battle
   votingEnabled?: boolean; // Enable/disable voting (default: true)
   commentsEnabled?: boolean; // Enable/disable comments (default: true)
+  /**
+   * If true (default), advancing the round will automatically start the first verse
+   * If false, show the "Next: [artist]" prompt and require an explicit start
+   */
+  autoStartOnAdvance?: boolean;
   // Live battle fields
   isLive?: boolean;
   liveStartedAt?: number;

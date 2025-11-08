@@ -72,6 +72,7 @@ export async function getBattleById(id: string): Promise<Battle | null> {
       isFeatured: battle.isFeatured,
       votingEnabled: battle.votingEnabled ?? true,
       commentsEnabled: battle.commentsEnabled ?? true,
+      autoStartOnAdvance: battle.autoStartOnAdvance ?? true,
       // Live battle fields
       isLive: battle.isLive,
       liveStartedAt: battle.liveStartedAt?.getTime(),
@@ -124,6 +125,7 @@ export async function saveBattle(
       liveStartedAt: battle.liveStartedAt ? new Date(battle.liveStartedAt) : null,
       adminControlMode: battle.adminControlMode || 'manual',
       autoPlayConfig: battle.autoPlayConfig || null,
+      autoStartOnAdvance: battle.autoStartOnAdvance ?? true,
       // AI-generated song
       generatedSong: battle.generatedSong || null,
     };
@@ -219,6 +221,7 @@ export async function getAllBattles(): Promise<Battle[]> {
         isFeatured: battle.isFeatured,
         votingEnabled: battle.votingEnabled ?? true,
         commentsEnabled: battle.commentsEnabled ?? true,
+        autoStartOnAdvance: battle.autoStartOnAdvance ?? true,
         // Live battle fields
         isLive: battle.isLive,
         liveStartedAt: battle.liveStartedAt?.getTime(),
@@ -293,6 +296,7 @@ export async function getFeaturedBattles(): Promise<Battle[]> {
         isFeatured: battle.isFeatured,
         votingEnabled: battle.votingEnabled ?? true,
         commentsEnabled: battle.commentsEnabled ?? true,
+        autoStartOnAdvance: battle.autoStartOnAdvance ?? true,
         // Live battle fields
         isLive: battle.isLive,
         liveStartedAt: battle.liveStartedAt?.getTime(),

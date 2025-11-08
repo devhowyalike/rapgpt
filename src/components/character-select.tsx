@@ -29,6 +29,7 @@ interface BattleSelections {
   votingEnabled: boolean;
   commentsEnabled: boolean;
   showStageSelect: boolean;
+  autoStartOnAdvance: boolean;
 }
 
 interface CharacterSelectProps {
@@ -51,8 +52,9 @@ export function CharacterSelect({
   const [showStageSelect, setShowStageSelect] = useState(false);
   const [createAsLive, setCreateAsLive] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [votingEnabled, setVotingEnabled] = useState(true);
-  const [commentsEnabled, setCommentsEnabled] = useState(true);
+  const [votingEnabled, setVotingEnabled] = useState(false);
+  const [commentsEnabled, setCommentsEnabled] = useState(false);
+  const [autoStartOnAdvance, setAutoStartOnAdvance] = useState(true);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -120,6 +122,7 @@ export function CharacterSelect({
           setVotingEnabled(selections.votingEnabled);
           setCommentsEnabled(selections.commentsEnabled);
           setShowStageSelect(selections.showStageSelect);
+          setAutoStartOnAdvance(selections.autoStartOnAdvance ?? true);
 
           // Add a minimum delay so the loading screen is visible to users
           // This provides visual feedback that the session is being restored
@@ -151,6 +154,7 @@ export function CharacterSelect({
         votingEnabled,
         commentsEnabled,
         showStageSelect,
+        autoStartOnAdvance,
       };
       sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(selections));
     } catch (error) {
@@ -163,6 +167,7 @@ export function CharacterSelect({
     votingEnabled,
     commentsEnabled,
     showStageSelect,
+    autoStartOnAdvance,
     isHydrated,
   ]);
 
@@ -245,6 +250,8 @@ export function CharacterSelect({
               onVotingEnabledChange={setVotingEnabled}
               onCommentsEnabledChange={setCommentsEnabled}
               onCreateAsLiveChange={setCreateAsLive}
+              autoStartOnAdvance={autoStartOnAdvance}
+              onAutoStartOnAdvanceChange={setAutoStartOnAdvance}
               sessionStorageKey={SESSION_STORAGE_KEY}
             />
           </motion.div>

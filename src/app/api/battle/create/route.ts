@@ -12,8 +12,9 @@ import { z } from 'zod';
 const extendedBattleRequestSchema = createBattleRequestSchema.merge(
   z.object({
     isFeatured: z.boolean().optional().default(false),
-    votingEnabled: z.boolean().optional().default(true),
-    commentsEnabled: z.boolean().optional().default(true),
+    votingEnabled: z.boolean().optional().default(false),
+    commentsEnabled: z.boolean().optional().default(false),
+    autoStartOnAdvance: z.boolean().optional().default(true),
   })
 );
 
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const { leftPersonaId, rightPersonaId, stageId, isFeatured, votingEnabled, commentsEnabled } = validation.data;
+    const { leftPersonaId, rightPersonaId, stageId, isFeatured, votingEnabled, commentsEnabled, autoStartOnAdvance } = validation.data;
 
     // If creating a featured battle, verify user is admin
     if (isFeatured && user.role !== 'admin') {
@@ -91,6 +92,7 @@ export async function POST(request: NextRequest) {
       winner: null,
       createdAt: now,
       updatedAt: now,
+      autoStartOnAdvance,
     };
 
     // Save battle with createdBy, isFeatured, votingEnabled, and commentsEnabled

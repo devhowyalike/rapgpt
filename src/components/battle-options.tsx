@@ -8,12 +8,69 @@ import {
   MessageSquare,
   ChevronDown,
   ChevronUp,
+  Play,
+  type LucideIcon,
 } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "./ui/collapsible";
+
+interface OptionRowProps {
+  icon: LucideIcon;
+  iconColor: string;
+  iconBgColor: string;
+  title: string;
+  description: string;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  disabled?: boolean;
+  badge?: string;
+}
+
+function OptionRow({
+  icon: Icon,
+  iconColor,
+  iconBgColor,
+  title,
+  description,
+  checked,
+  onCheckedChange,
+  disabled = false,
+  badge,
+}: OptionRowProps) {
+  return (
+    <div
+      className={`flex items-center justify-between gap-2 ${
+        disabled ? "opacity-50" : ""
+      }`}
+    >
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div
+          className={`flex items-center justify-center w-10 h-10 shrink-0 rounded-full ${iconBgColor}`}
+        >
+          <Icon size={20} className={iconColor} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-white font-semibold text-pretty">
+            {title}{" "}
+            {badge && (
+              <span className={`text-xs ${iconColor} ml-2`}>{badge}</span>
+            )}
+          </div>
+          <div className="text-gray-400 text-sm text-pretty">{description}</div>
+        </div>
+      </div>
+      <Switch
+        checked={checked}
+        onCheckedChange={onCheckedChange}
+        disabled={disabled}
+        className="shrink-0"
+      />
+    </div>
+  );
+}
 
 interface BattleOptionsProps {
   /** Whether voting is enabled for this battle */
@@ -28,6 +85,10 @@ interface BattleOptionsProps {
   createAsLive: boolean;
   /** Callback when create as live state changes */
   onCreateAsLiveChange: (enabled: boolean) => void;
+  /** Whether advancing a round auto-starts the first verse */
+  autoStartOnAdvance?: boolean;
+  /** Callback when auto-start setting changes */
+  onAutoStartOnAdvanceChange?: (enabled: boolean) => void;
   /** Whether the current user is an admin (for backwards compatibility) */
   isAdmin: boolean;
   /** Whether voting is globally enabled via env flags */
@@ -43,6 +104,8 @@ export function BattleOptions({
   onCommentsEnabledChange,
   createAsLive,
   onCreateAsLiveChange,
+  autoStartOnAdvance = true,
+  onAutoStartOnAdvanceChange,
   isAdmin,
   isVotingGloballyEnabled = true,
   isCommentsGloballyEnabled = true,
@@ -97,78 +160,55 @@ export function BattleOptions({
             <div className="px-6 pb-6 pt-2 space-y-4">
               {/* Voting Toggle - Only show if globally enabled */}
               {isVotingGloballyEnabled && (
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-blue-900/50 border border-blue-500/50">
-                      <ThumbsUp size={20} className="text-blue-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-white font-semibold truncate">
-                        Enable Voting
-                      </div>
-                      <div className="text-gray-400 text-sm text-pretty">
-                        Allow viewers to vote for their favorite verses
-                      </div>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={votingEnabled}
-                    onCheckedChange={onVotingEnabledChange}
-                    className="shrink-0"
-                  />
-                </div>
+                <OptionRow
+                  icon={ThumbsUp}
+                  iconColor="text-blue-400"
+                  iconBgColor="bg-blue-900/50 border border-blue-500/50"
+                  title="Enable Voting"
+                  description="Allow viewers to vote for their favorite verses"
+                  checked={votingEnabled}
+                  onCheckedChange={onVotingEnabledChange}
+                />
               )}
 
               {/* Comments Toggle - Only show if globally enabled */}
               {isCommentsGloballyEnabled && (
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-green-900/50 border border-green-500/50">
-                      <MessageSquare size={20} className="text-green-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-white font-semibold truncate">
-                        Enable Comments
-                      </div>
-                      <div className="text-gray-400 text-sm text-pretty">
-                        Allow viewers to leave comments on the battle
-                      </div>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={commentsEnabled}
-                    onCheckedChange={onCommentsEnabledChange}
-                    className="shrink-0"
-                  />
-                </div>
+                <OptionRow
+                  icon={MessageSquare}
+                  iconColor="text-green-400"
+                  iconBgColor="bg-green-900/50 border border-green-500/50"
+                  title="Enable Comments"
+                  description="Allow viewers to leave comments on the battle"
+                  checked={commentsEnabled}
+                  onCheckedChange={onCommentsEnabledChange}
+                />
               )}
 
+              {/* Auto-start first verse after advancing - Coming Soon */}
+              <OptionRow
+                icon={Play}
+                iconColor="text-teal-400"
+                iconBgColor="bg-teal-900/50 border border-teal-500/50"
+                title="Auto-start verse on next round"
+                description="When advancing rounds, immediately start the first artist"
+                checked={true}
+                onCheckedChange={() => {}}
+                disabled={true}
+                badge="(Coming Soon)"
+              />
+
               {/* Go Live Toggle - Coming Soon */}
-              <div className="flex items-center justify-between gap-2 opacity-50">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-purple-900/50 border border-purple-500/50">
-                    <Radio size={20} className="text-purple-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-white font-semibold truncate">
-                      Go Live{" "}
-                      <span className="text-xs text-purple-400 ml-2">
-                        (Coming Soon)
-                      </span>
-                    </div>
-                    <div className="text-gray-400 text-sm text-pretty">
-                      Stream your battle & engage with your audience in
-                      real-time
-                    </div>
-                  </div>
-                </div>
-                <Switch
-                  checked={false}
-                  onCheckedChange={() => {}}
-                  disabled
-                  className="shrink-0"
-                />
-              </div>
+              <OptionRow
+                icon={Radio}
+                iconColor="text-purple-400"
+                iconBgColor="bg-purple-900/50 border border-purple-500/50"
+                title="Go Live"
+                description="Stream your battle & engage with your audience in real-time"
+                checked={false}
+                onCheckedChange={() => {}}
+                disabled={true}
+                badge="(Coming Soon)"
+              />
             </div>
           </CollapsibleContent>
         </div>

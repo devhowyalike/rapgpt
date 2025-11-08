@@ -105,6 +105,8 @@ export const battleSchema = z.object({
     readingDuration: z.number().optional(),
     votingDuration: z.number().optional(),
   }).optional(),
+  // Battle options
+  autoStartOnAdvance: z.boolean().optional(),
 });
 
 // API Request/Response schemas

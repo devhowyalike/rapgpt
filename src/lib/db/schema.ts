@@ -53,8 +53,8 @@ export const battles = pgTable('battles', {
   createdBy: text('created_by').references(() => users.id), // null for legacy battles
   isFeatured: boolean('is_featured').notNull().default(false), // true = admin featured, false = user battle
   isPublic: boolean('is_public').notNull().default(false), // Battle visibility on user profiles
-  votingEnabled: boolean('voting_enabled').notNull().default(true), // Enable/disable voting
-  commentsEnabled: boolean('comments_enabled').notNull().default(true), // Enable/disable comments
+  votingEnabled: boolean('voting_enabled').notNull().default(false), // Enable/disable voting
+  commentsEnabled: boolean('comments_enabled').notNull().default(false), // Enable/disable comments
   
   // Live battle fields
   isLive: boolean('is_live').notNull().default(false), // Battle currently in live mode
@@ -66,6 +66,8 @@ export const battles = pgTable('battles', {
     readingDuration?: number;
     votingDuration?: number;
   }>(), // Auto-play timing settings
+  // Battle option: auto-start first verse after advancing round (default true)
+  autoStartOnAdvance: boolean('auto_start_on_advance').notNull().default(true),
   
   // AI-generated song from battle verses
   generatedSong: jsonb('generated_song').$type<{
