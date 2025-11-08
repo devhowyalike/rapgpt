@@ -55,6 +55,17 @@ interface BattleSplitViewProps {
    * Inline styles for content wrapper
    */
   style?: React.CSSProperties;
+  /**
+   * Enable sticky positioning on persona cards (mobile only)
+   * @default true
+   */
+  enableStickyPersonas?: boolean;
+  /**
+   * Is this the end of a battle (completed) vs end of a round (active battle)?
+   * Used to determine the correct sticky offset height
+   * @default false - assumes end of round in active battle
+   */
+  isBattleEnd?: boolean;
 }
 
 export function BattleSplitView({
@@ -71,6 +82,8 @@ export function BattleSplitView({
   className,
   contentClassName,
   style,
+  enableStickyPersonas = true,
+  isBattleEnd = false,
 }: BattleSplitViewProps) {
   const leftVisible = mobileActiveSide === null || mobileActiveSide === "left";
   const rightVisible =
@@ -111,6 +124,8 @@ export function BattleSplitView({
             mobileTopOffset={leftVisible ? mobileTopOffset : 0}
             visible={leftVisible}
             cardPadding={cardPadding}
+            enableSticky={enableStickyPersonas}
+            isBattleEnd={isBattleEnd}
           />
 
           {/* Right Persona */}
@@ -130,6 +145,8 @@ export function BattleSplitView({
             mobileTopOffset={rightVisible ? mobileTopOffset : 0}
             visible={rightVisible}
             cardPadding={cardPadding}
+            enableSticky={enableStickyPersonas}
+            isBattleEnd={isBattleEnd}
           />
         </div>
       </div>

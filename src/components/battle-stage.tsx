@@ -144,6 +144,14 @@ export function BattleStage({
     mobileActiveSide = null;
   }
 
+  // Enable sticky personas only at end of round (voting/scores) or end of battle
+  // NOT during active verse generation/streaming
+  const enableStickyPersonas =
+    isReadingPhase ||
+    isVotingPhase ||
+    !!scoresAvailable ||
+    battle.status === "completed";
+
   // When scores become visible on mobile, scroll them into view
   const scoreSectionRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -223,6 +231,8 @@ export function BattleStage({
           streamingPersonaId={streamingPersonaId}
           streamingText={streamingText}
           mobileTopOffset={isMobile ? personaTopMargin : 0}
+          enableStickyPersonas={enableStickyPersonas}
+          isBattleEnd={false}
         />
       </div>
 

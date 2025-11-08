@@ -25,6 +25,17 @@ interface PersonaSectionProps {
    * @default "p-3 md:p-4" for stage, "p-6" for replay
    */
   cardPadding?: string;
+  /**
+   * Enable sticky positioning on mobile
+   * @default true
+   */
+  enableSticky?: boolean;
+  /**
+   * Is this the end of a battle (completed) vs end of a round (active battle)?
+   * Used to determine the correct sticky offset height
+   * @default false - assumes end of round in active battle
+   */
+  isBattleEnd?: boolean;
 }
 
 export function PersonaSection({
@@ -38,6 +49,8 @@ export function PersonaSection({
   mobileTopOffset = 0,
   visible = true,
   cardPadding = "px-3 py-2 md:p-4",
+  enableSticky = true,
+  isBattleEnd = false,
 }: PersonaSectionProps) {
   return (
     <div
@@ -47,13 +60,17 @@ export function PersonaSection({
         className={cn(
           cardPadding,
           "border-b border-gray-800",
-          "persona-card-sticky",
+          enableSticky && "persona-card-sticky",
           "bg-gray-900 z-10"
         )}
         style={
-          mobileTopOffset > 0
-            ? { top: `calc(${mobileTopOffset}px - var(--header-height))` }
-            : { top: "calc(var(--header-height) - var(--header-height))" }
+          enableSticky
+            ? {
+                top: isBattleEnd
+                  ? "var(--mobile-battle-end-height)"
+                  : "var(--mobile-round-end-height)",
+              }
+            : undefined
         }
       >
         <PersonaCard

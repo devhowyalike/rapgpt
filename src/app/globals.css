@@ -24,6 +24,7 @@
 
   /* Layout heights - centralized for scalability */
   --header-height: 52px;
+  --battle-header-height: 89px; /* battle header with round tracker and stage info */
   --live-banner-height: 60px;
   --bottom-controls-height: 72px; /* drawer offset for bottom buttons */
   /* Mobile floating action buttons */
@@ -31,6 +32,11 @@
   --fab-gutter: 24px; /* spacing above bottom edge/controls */
   /* Control bar padding */
   --control-bar-base-padding: 1rem; /* p-4 equivalent */
+  /* Sticky persona offsets for different battle states */
+  --mobile-round-end-height: var(
+    --battle-header-height
+  ); /* active battle, end of round - below site header + battle header */
+  --mobile-battle-end-height: 0px; /* completed battle replay - stick at top */
 }
 
 /* Desktop header heights - applied at md breakpoint (768px+) */
