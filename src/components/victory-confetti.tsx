@@ -119,7 +119,8 @@ export function VictoryConfetti({ trigger }: VictoryConfettiProps) {
           CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
         const rotation = Math.random() * Math.PI * 2;
         const rotationSpeed =
-          (Math.random() > 0.5 ? 1 : -1) * (Math.PI * (0.5 + Math.random() * 2));
+          (Math.random() > 0.5 ? 1 : -1) *
+          (Math.PI * (0.5 + Math.random() * 2));
         const maxLife = 2.5 + Math.random() * 2; // seconds - longer life for wider spread
 
         particles.push({
@@ -218,14 +219,8 @@ export function VictoryConfetti({ trigger }: VictoryConfettiProps) {
   if (!active || !mounted) return null;
 
   const confettiElement = (
-    <div
-      ref={wrapperRef}
-      className="fixed inset-0 pointer-events-none z-50"
-    >
-      <canvas 
-        ref={canvasRef} 
-        className="w-full h-full"
-      />
+    <div ref={wrapperRef} className="fixed inset-0 pointer-events-none z-50">
+      <canvas ref={canvasRef} className="w-full h-full" />
     </div>
   );
 
