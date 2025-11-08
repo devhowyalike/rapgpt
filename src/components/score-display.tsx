@@ -50,7 +50,7 @@ export function ScoreDisplay({
       <button
         ref={toggleRef}
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-center gap-2 mb-2 md:mb-1.5 text-gray-400 hover:text-white transition-colors group"
+        className="w-full flex items-center justify-center gap-2 mb-3 text-gray-400 hover:text-white transition-colors group outline-none"
       >
         <span className="text-sm font-medium">
           {isExpanded ? "Hide Details" : "Show Details"}
@@ -165,17 +165,17 @@ export function ScoreDisplay({
           </motion.div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-2 md:gap-3">
+        <div className="grid grid-cols-2 gap-2 md:gap-4">
           {/* Left Score - Collapsed */}
           <motion.div
-            className="bg-gray-900/50 rounded-lg p-2 md:p-3 border-2 flex flex-col items-center justify-center"
+            className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2 flex flex-col items-center justify-center"
             style={{ borderColor: leftPersona.accentColor + "40" }}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: 0.3 }}
           >
             <div
-              className="text-xs font-medium mb-1 opacity-80"
+              className="text-xs font-medium mb-1 md:mb-2 opacity-80"
               style={{ color: leftPersona.accentColor }}
             >
               {leftPersona.name}
@@ -190,14 +190,14 @@ export function ScoreDisplay({
 
           {/* Right Score - Collapsed */}
           <motion.div
-            className="bg-gray-900/50 rounded-lg p-2 md:p-3 border-2 flex flex-col items-center justify-center"
+            className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2 flex flex-col items-center justify-center"
             style={{ borderColor: rightPersona.accentColor + "40" }}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: 0.4 }}
           >
             <div
-              className="text-xs font-medium mb-1 opacity-80"
+              className="text-xs font-medium mb-1 md:mb-2 opacity-80"
               style={{ color: rightPersona.accentColor }}
             >
               {rightPersona.name}
