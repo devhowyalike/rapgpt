@@ -4,8 +4,13 @@ import { useState, useMemo } from "react";
 import { type BattleDB } from "@/lib/db/schema";
 import { MyBattleCard } from "@/components/my-battle-card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Filter, X } from "lucide-react";
+import { Filter, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface ProfileBattlesFilterProps {
   battles: BattleDB[];
@@ -31,6 +36,8 @@ export function ProfileBattlesFilter({
   userIsProfilePublic,
 }: ProfileBattlesFilterProps) {
   const [showFilters, setShowFilters] = useState(false);
+  const [isPausedOpen, setIsPausedOpen] = useState(true);
+  const [isCompletedOpen, setIsCompletedOpen] = useState(true);
   const [filters, setFilters] = useState<Filters>({
     public: false,
     private: false,
@@ -222,42 +229,63 @@ export function ProfileBattlesFilter({
         <div className="space-y-8">
           {/* Paused Battles Section */}
           {pausedBattles.length > 0 && (
-            <div>
-              <h3 className="font-bebas text-xl sm:text-2xl md:text-3xl text-white mb-4">
-                Paused Battles ({pausedBattles.length})
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
-                {pausedBattles.map((battle) => (
-                  <MyBattleCard
-                    key={battle.id}
-                    battle={battle}
-                    shareUrl={shareUrl}
-                    showManagement={isOwnProfile}
-                    userIsProfilePublic={userIsProfilePublic}
-                  />
-                ))}
-              </div>
-            </div>
+            <Collapsible open={isPausedOpen} onOpenChange={setIsPausedOpen}>
+              <CollapsibleTrigger className="flex items-center gap-2 mb-4 cursor-pointer group w-full">
+                <h3 className="font-bebas text-xl sm:text-2xl md:text-3xl text-white">
+                  Paused Battles ({pausedBattles.length})
+                </h3>
+                {isPausedOpen ? (
+                  <ChevronUp className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 group-hover:text-white transition-colors" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 group-hover:text-white transition-colors" />
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
+                  {pausedBattles.map((battle) => (
+                    <MyBattleCard
+                      key={battle.id}
+                      battle={battle}
+                      shareUrl={shareUrl}
+                      showManagement={isOwnProfile}
+                      userIsProfilePublic={userIsProfilePublic}
+                    />
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           )}
 
           {/* Completed Battles Section */}
           {completedBattles.length > 0 && (
-            <div>
-              <h3 className="font-bebas text-xl sm:text-2xl md:text-3xl text-white mb-4">
-                Completed Battles ({completedBattles.length})
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
-                {completedBattles.map((battle) => (
-                  <MyBattleCard
-                    key={battle.id}
-                    battle={battle}
-                    shareUrl={shareUrl}
-                    showManagement={isOwnProfile}
-                    userIsProfilePublic={userIsProfilePublic}
-                  />
-                ))}
-              </div>
-            </div>
+            <Collapsible
+              open={isCompletedOpen}
+              onOpenChange={setIsCompletedOpen}
+            >
+              <CollapsibleTrigger className="flex items-center gap-2 mb-4 cursor-pointer group w-full">
+                <h3 className="font-bebas text-xl sm:text-2xl md:text-3xl text-white">
+                  Completed Battles ({completedBattles.length})
+                </h3>
+                {isCompletedOpen ? (
+                  <ChevronUp className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 group-hover:text-white transition-colors" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 group-hover:text-white transition-colors" />
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
+                  {completedBattles.map((battle) => (
+                    <MyBattleCard
+                      key={battle.id}
+                      battle={battle}
+                      shareUrl={shareUrl}
+                      showManagement={isOwnProfile}
+                      userIsProfilePublic={userIsProfilePublic}
+                    />
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           )}
         </div>
       )}
