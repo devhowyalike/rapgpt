@@ -40,7 +40,7 @@ export const BattleStatusButton = forwardRef<
           <span className="hidden md:inline">Unpublished</span>
         </>
       )}
-      <MoreVertical size={12} className="ml-0.5 hidden md:inline" />
+      <MoreVertical size={12} className="ml-0.5" />
     </button>
   );
 });
