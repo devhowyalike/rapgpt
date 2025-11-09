@@ -53,10 +53,15 @@ export function BattleStage({
   // Show scores automatically when available (no manual reveal button)
   const shouldShowScores = !!scoresAvailable;
 
-  // Only show round winner badge after voting has been completed for the current round
+  // Show round winner badge when:
+  // 1. Voting is enabled (true or undefined/default) AND voting has been completed for the current round, OR
+  // 2. Voting is explicitly disabled (false) AND the round has scores (is complete)
   const shouldShowRoundWinner =
-    votingCompletedRound !== null &&
-    votingCompletedRound >= battle.currentRound;
+    currentRoundScore &&
+    ((battle.votingEnabled !== false &&
+      votingCompletedRound !== null &&
+      votingCompletedRound >= battle.currentRound) ||
+      (battle.votingEnabled === false && !isReadingPhase && !isVotingPhase));
 
   // Mobile-only offset so the first persona does not render under the sticky trophy/header
   const [isMobile, setIsMobile] = useState(false);

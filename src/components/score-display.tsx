@@ -17,6 +17,7 @@ interface PersonaScoreCardProps {
   animationDirection: number; // -20 for left, 20 for right
   animationDelay: number;
   votingEnabled: boolean;
+  isWinner: boolean;
 }
 
 function PersonaScoreCard({
@@ -26,6 +27,7 @@ function PersonaScoreCard({
   animationDirection,
   animationDelay,
   votingEnabled,
+  isWinner,
 }: PersonaScoreCardProps) {
   if (isExpanded) {
     return (
@@ -38,10 +40,11 @@ function PersonaScoreCard({
       >
         <div className="text-center">
           <div
-            className="text-xs font-medium mb-1 md:mb-2 opacity-80"
+            className="text-xs font-medium mb-1 md:mb-2 opacity-80 flex items-center justify-center gap-1"
             style={{ color: persona.accentColor }}
           >
-            {persona.name}
+            <span>{persona.name}</span>
+            {isWinner && <span className="text-yellow-400">👑</span>}
           </div>
           <div
             className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
@@ -92,10 +95,11 @@ function PersonaScoreCard({
       transition={{ duration: 0.4, delay: animationDelay }}
     >
       <div
-        className="text-xs font-medium mb-1 md:mb-2 opacity-80"
+        className="text-xs font-medium mb-1 md:mb-2 opacity-80 flex items-center gap-1"
         style={{ color: persona.accentColor }}
       >
-        {persona.name}
+        <span>{persona.name}</span>
+        {isWinner && <span className="text-yellow-400">👑</span>}
       </div>
       <div
         className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
@@ -170,6 +174,7 @@ export function ScoreDisplay({
           animationDirection={-20}
           animationDelay={0.3}
           votingEnabled={votingEnabled}
+          isWinner={roundScore.winner === leftPersona.id}
         />
         <PersonaScoreCard
           persona={rightPersona}
@@ -178,6 +183,7 @@ export function ScoreDisplay({
           animationDirection={20}
           animationDelay={0.4}
           votingEnabled={votingEnabled}
+          isWinner={roundScore.winner === rightPersona.id}
         />
       </div>
     </div>
