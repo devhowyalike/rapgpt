@@ -218,7 +218,7 @@ export function MyBattleCard({
 
   return (
     <div
-      className={`flex flex-col min-h-[320px] bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-all ${
+      className={`flex flex-col md:min-h-[320px] bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-all ${
         isDeleting || isPending ? "opacity-50 pointer-events-none" : ""
       }`}
     >
@@ -294,34 +294,30 @@ export function MyBattleCard({
         Created {battle.createdAt.toLocaleDateString()}
       </div>
 
-      {/* Feature badges below date */}
-      <BattleFeatureBadges {...featureBadgesProps} />
-
-      <div className="flex items-center gap-2 text-sm mb-4 flex-wrap">
+      {/* Paused badge and Feature badges on same row */}
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
         {battle.isLive && (
           <span className="px-3 py-1 rounded bg-red-600 text-white flex items-center gap-1.5 font-semibold animate-pulse">
             <Radio size={14} className="fill-white" />
             LIVE
           </span>
         )}
-        {/* Removed secondary archived badge per request */}
         {showManagement && battle.status !== "completed" && (
-          <>
-            <span
-              className={`px-3 py-1 rounded capitalize ${
-                battle.status === "paused"
-                  ? "bg-orange-600/30 text-orange-300"
-                  : "bg-gray-600/30 text-gray-400"
-              }`}
-            >
-              {battle.status}
-            </span>
-          </>
+          <span
+            className={`px-3 py-1 rounded capitalize text-sm ${
+              battle.status === "paused"
+                ? "bg-orange-600/30 text-orange-300"
+                : "bg-gray-600/30 text-gray-400"
+            }`}
+          >
+            {battle.status}
+          </span>
         )}
+        <BattleFeatureBadges {...featureBadgesProps} />
       </div>
 
-      {/* Spacer to push Battle Results to consistent position */}
-      <div className="flex-1 min-h-0" />
+      {/* Spacer to push Battle Results to consistent position on desktop only */}
+      <div className="hidden md:flex md:flex-1 md:min-h-0" />
 
       {isPaused && (
         <BattleInfoPanel
