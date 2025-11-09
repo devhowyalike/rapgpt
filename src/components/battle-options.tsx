@@ -187,7 +187,7 @@ export function BattleOptions({
               {/* Auto-start first verse after advancing - Coming Soon */}
               <OptionRow
                 icon={Play}
-                iconColor="text-teal-400"
+                iconColor="text-purple-400"
                 iconBgColor="bg-teal-900/50 border border-teal-500/50"
                 title="Auto-start verse on next round"
                 description="When advancing rounds, immediately start the first artist"

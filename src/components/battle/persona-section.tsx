@@ -25,6 +25,17 @@ interface PersonaSectionProps {
    * @default "p-3 md:p-4" for stage, "p-6" for replay
    */
   cardPadding?: string;
+  /**
+   * Enable sticky positioning on mobile
+   * @default true
+   */
+  enableSticky?: boolean;
+  /**
+   * Is this the end of a battle (completed) vs end of a round (active battle)?
+   * Used to determine the correct sticky offset height
+   * @default false - assumes end of round in active battle
+   */
+  isBattleEnd?: boolean;
 }
 
 export function PersonaSection({
@@ -37,18 +48,30 @@ export function PersonaSection({
   streamingText,
   mobileTopOffset = 0,
   visible = true,
-  cardPadding = "p-3 md:p-4",
+  cardPadding = "px-3 py-2 md:p-4",
+  enableSticky = true,
+  isBattleEnd = false,
 }: PersonaSectionProps) {
   return (
     <div
-      className={cn(
-        "flex flex-col min-h-[400px] md:min-h-0",
-        !visible && "hidden md:flex"
-      )}
+      className={cn("flex flex-col md:min-h-0", !visible && "hidden md:flex")}
     >
       <div
-        className={cn(cardPadding, "border-b border-gray-800")}
-        style={mobileTopOffset > 0 ? { marginTop: mobileTopOffset } : undefined}
+        className={cn(
+          cardPadding,
+          "border-b border-gray-800",
+          enableSticky && "persona-card-sticky",
+          "bg-gray-900 z-10"
+        )}
+        style={
+          enableSticky
+            ? {
+                // Battle end (completed): stick at top (0px)
+                // Active battle: stick below dynamic header height
+                top: isBattleEnd ? "0px" : `${mobileTopOffset}px`,
+              }
+            : undefined
+        }
       >
         <PersonaCard
           persona={persona}
@@ -58,7 +81,7 @@ export function PersonaSection({
         />
       </div>
 
-      <div className="flex-1 stage-spotlight">
+      <div className="flex-1">
         <VerseDisplay
           verse={verse ?? undefined}
           persona={persona}
@@ -70,5 +93,3 @@ export function PersonaSection({
     </div>
   );
 }
-
-

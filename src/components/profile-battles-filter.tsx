@@ -4,8 +4,63 @@ import { useState, useMemo } from "react";
 import { type BattleDB } from "@/lib/db/schema";
 import { MyBattleCard } from "@/components/my-battle-card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Filter, X } from "lucide-react";
+import { Filter, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+
+interface CollapsibleBattleSectionProps {
+  title: string;
+  battles: BattleDB[];
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  shareUrl: string;
+  isOwnProfile: boolean;
+  userIsProfilePublic: boolean;
+}
+
+function CollapsibleBattleSection({
+  title,
+  battles,
+  isOpen,
+  onOpenChange,
+  shareUrl,
+  isOwnProfile,
+  userIsProfilePublic,
+}: CollapsibleBattleSectionProps) {
+  if (battles.length === 0) return null;
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={onOpenChange}>
+      <CollapsibleTrigger className="flex items-center gap-2 mb-4 cursor-pointer group w-full">
+        <h3 className="font-bebas text-xl sm:text-2xl md:text-3xl text-white">
+          {title} ({battles.length})
+        </h3>
+        {isOpen ? (
+          <ChevronUp className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 group-hover:text-white transition-colors" />
+        ) : (
+          <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 group-hover:text-white transition-colors" />
+        )}
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+          {battles.map((battle) => (
+            <MyBattleCard
+              key={battle.id}
+              battle={battle}
+              shareUrl={shareUrl}
+              showManagement={isOwnProfile}
+              userIsProfilePublic={userIsProfilePublic}
+            />
+          ))}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
 
 interface ProfileBattlesFilterProps {
   battles: BattleDB[];
@@ -16,7 +71,9 @@ interface ProfileBattlesFilterProps {
 
 interface Filters {
   public: boolean;
+  private: boolean;
   paused: boolean;
+  completed: boolean;
   commentsEnabled: boolean;
   votingEnabled: boolean;
   hasMp3: boolean;
@@ -29,9 +86,13 @@ export function ProfileBattlesFilter({
   userIsProfilePublic,
 }: ProfileBattlesFilterProps) {
   const [showFilters, setShowFilters] = useState(false);
+  const [isPausedOpen, setIsPausedOpen] = useState(true);
+  const [isCompletedOpen, setIsCompletedOpen] = useState(true);
   const [filters, setFilters] = useState<Filters>({
     public: false,
+    private: false,
     paused: false,
+    completed: false,
     commentsEnabled: false,
     votingEnabled: false,
     hasMp3: false,
@@ -43,8 +104,14 @@ export function ProfileBattlesFilter({
       // Public filter - if checked, show only public battles
       if (filters.public && !battle.isPublic) return false;
 
+      // Private filter - if checked, show only private battles
+      if (filters.private && battle.isPublic) return false;
+
       // Paused filter - if checked, show only paused battles
       if (filters.paused && battle.status !== "paused") return false;
+
+      // Completed filter - if checked, show only completed battles
+      if (filters.completed && battle.status === "paused") return false;
 
       // Comments enabled filter - if checked, show only battles with comments enabled
       if (filters.commentsEnabled && !battle.commentsEnabled) return false;
@@ -68,13 +135,17 @@ export function ProfileBattlesFilter({
   );
 
   // Check if any filters are active
-  const hasActiveFilters = Object.values(filters).some((value) => value === true);
+  const hasActiveFilters = Object.values(filters).some(
+    (value) => value === true
+  );
 
   // Clear all filters
   const clearFilters = () => {
     setFilters({
       public: false,
+      private: false,
       paused: false,
+      completed: false,
       commentsEnabled: false,
       votingEnabled: false,
       hasMp3: false,
@@ -99,7 +170,7 @@ export function ProfileBattlesFilter({
         <Button
           onClick={() => setShowFilters(!showFilters)}
           variant="outline"
-          className="flex items-center gap-2 bg-gray-800/50 border-purple-500/20 hover:bg-gray-700/50 text-white"
+          className="flex items-center gap-2 bg-gray-800/50 border-purple-500/20 hover:bg-purple-600/30 hover:border-purple-500/40 text-white hover:text-white"
         >
           <Filter className="w-4 h-4" />
           <span>Filters</span>
@@ -115,7 +186,7 @@ export function ProfileBattlesFilter({
             onClick={clearFilters}
             variant="ghost"
             size="sm"
-            className="text-gray-400 hover:text-white"
+            className="text-gray-400 hover:text-black hover:bg-gray-200"
           >
             <X className="w-4 h-4 mr-1" />
             Clear filters
@@ -137,12 +208,30 @@ export function ProfileBattlesFilter({
               />
             )}
 
+            {/* Private Filter */}
+            {isOwnProfile && (
+              <FilterCheckbox
+                id="private"
+                label="Private"
+                checked={filters.private}
+                onCheckedChange={() => toggleFilter("private")}
+              />
+            )}
+
             {/* Paused Filter */}
             <FilterCheckbox
               id="paused"
               label="Paused"
               checked={filters.paused}
               onCheckedChange={() => toggleFilter("paused")}
+            />
+
+            {/* Completed Filter */}
+            <FilterCheckbox
+              id="completed"
+              label="Completed"
+              checked={filters.completed}
+              onCheckedChange={() => toggleFilter("completed")}
             />
 
             {/* Comments Enabled Filter */}
@@ -189,44 +278,26 @@ export function ProfileBattlesFilter({
       ) : (
         <div className="space-y-8">
           {/* Paused Battles Section */}
-          {pausedBattles.length > 0 && (
-            <div>
-              <h3 className="font-bebas text-xl sm:text-2xl md:text-3xl text-white mb-4">
-                Paused Battles ({pausedBattles.length})
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
-                {pausedBattles.map((battle) => (
-                  <MyBattleCard
-                    key={battle.id}
-                    battle={battle}
-                    shareUrl={shareUrl}
-                    showManagement={isOwnProfile}
-                    userIsProfilePublic={userIsProfilePublic}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+          <CollapsibleBattleSection
+            title="Paused Battles"
+            battles={pausedBattles}
+            isOpen={isPausedOpen}
+            onOpenChange={setIsPausedOpen}
+            shareUrl={shareUrl}
+            isOwnProfile={isOwnProfile}
+            userIsProfilePublic={userIsProfilePublic}
+          />
 
           {/* Completed Battles Section */}
-          {completedBattles.length > 0 && (
-            <div>
-              <h3 className="font-bebas text-xl sm:text-2xl md:text-3xl text-white mb-4">
-                Completed Battles ({completedBattles.length})
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
-                {completedBattles.map((battle) => (
-                  <MyBattleCard
-                    key={battle.id}
-                    battle={battle}
-                    shareUrl={shareUrl}
-                    showManagement={isOwnProfile}
-                    userIsProfilePublic={userIsProfilePublic}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+          <CollapsibleBattleSection
+            title="Completed Battles"
+            battles={completedBattles}
+            isOpen={isCompletedOpen}
+            onOpenChange={setIsCompletedOpen}
+            shareUrl={shareUrl}
+            isOwnProfile={isOwnProfile}
+            userIsProfilePublic={userIsProfilePublic}
+          />
         </div>
       )}
     </div>
@@ -249,11 +320,7 @@ function FilterCheckbox({
 }: FilterCheckboxProps) {
   return (
     <div className="flex items-center space-x-2">
-      <Checkbox
-        id={id}
-        checked={checked}
-        onCheckedChange={onCheckedChange}
-      />
+      <Checkbox id={id} checked={checked} onCheckedChange={onCheckedChange} />
       <label
         htmlFor={id}
         className="text-sm text-gray-300 cursor-pointer select-none"
@@ -263,4 +330,3 @@ function FilterCheckbox({
     </div>
   );
 }
-

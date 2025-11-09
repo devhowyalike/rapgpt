@@ -12,7 +12,7 @@ export function BattleFeatureBadges({
   hasGeneratedSong = false,
 }: BattleFeatureBadgesProps) {
   return (
-    <div className="flex items-center gap-2 flex-wrap mb-2">
+    <>
       {votingEnabled !== false && (
         <span
           className="px-2 py-1 rounded bg-blue-600/20 text-blue-400 flex items-center gap-1.5 text-xs border border-blue-500/30"
@@ -40,6 +40,6 @@ export function BattleFeatureBadges({
           <span className="hidden md:inline">MP3</span>
         </span>
       )}
-    </div>
+    </>
   );
 }

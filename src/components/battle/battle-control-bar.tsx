@@ -7,7 +7,6 @@
 import { Play, ArrowRight, Pause, Settings, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import type { Battle } from "@/lib/shared";
-import { useMobileFooterControls } from "@/lib/hooks/use-mobile-footer-controls";
 
 interface BattleControlBarProps {
   battle: Battle;
@@ -19,7 +18,6 @@ interface BattleControlBarProps {
   isVotingPhase: boolean;
   votingTimeRemaining: number | null;
   showVoting: boolean;
-  showCommenting: boolean;
   nextPerformerName?: string;
   isAdmin?: boolean;
   onGenerateVerse: () => void;
@@ -38,7 +36,6 @@ export function BattleControlBar({
   isVotingPhase,
   votingTimeRemaining,
   showVoting,
-  showCommenting,
   nextPerformerName,
   isAdmin = false,
   onGenerateVerse,
@@ -46,20 +43,8 @@ export function BattleControlBar({
   onBeginVoting,
   onCancelBattle,
 }: BattleControlBarProps) {
-  const { controlBarMobilePadding } = useMobileFooterControls({
-    hasBottomControls: false,
-    showCommenting,
-    showVoting,
-  });
-
   return (
-    <div
-      className="p-4 pb-(--control-bar-pb) md:pb-4 bg-gray-900 border-t border-gray-800"
-      style={{
-        ["--control-bar-pb" as any]:
-          controlBarMobilePadding ?? "var(--control-bar-base-padding)",
-      }}
-    >
+    <div className="p-4 bg-gray-900 border-t border-gray-800">
       <div className="max-w-4xl mx-auto flex flex-row gap-3">
         {/* Primary Action Button - Changes based on state */}
         <button
@@ -86,8 +71,8 @@ export function BattleControlBar({
                 ? "bg-linear-to-r from-purple-600 to-pink-600 animate-pulse"
                 : canAdvance
                 ? "bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 animate-pulse"
-                : battle.verses.length === 0
-                ? "bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                : canGenerate
+                ? "bg-linear-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg shadow-green-500/50"
                 : "bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"
             }
             ${

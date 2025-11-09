@@ -8,19 +8,12 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import type { Stage } from "@/lib/shared/stages";
-import { BattleMetadata } from "@/components/battle-metadata";
-import { BattleFeatureBadges } from "@/components/battle-feature-badges";
 import { BattleResultsStats } from "@/components/battle-results-stats";
 
 interface BattleInfoPanelProps {
   type: "progress" | "results";
   createdAt: Date;
   stage: Stage;
-  featureBadges: {
-    votingEnabled?: boolean;
-    commentsEnabled?: boolean;
-    hasGeneratedSong: boolean;
-  };
   // Progress-specific props
   currentRound?: number;
   versesCount?: number;
@@ -41,7 +34,6 @@ export function BattleInfoPanel({
   type,
   createdAt,
   stage,
-  featureBadges,
   currentRound,
   versesCount,
   resultsStats,
@@ -58,33 +50,39 @@ export function BattleInfoPanel({
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-4">
       <div className={`p-3 bg-gray-900/50 rounded-lg border ${borderColor}`}>
-        <BattleMetadata createdAt={createdAt} stage={stage} />
-        <div className="flex flex-col gap-2 mb-2">
-          <BattleFeatureBadges {...featureBadges} />
-          <CollapsibleTrigger className="flex items-center gap-1 cursor-pointer">
-            <p className={`text-sm font-semibold ${titleColor}`}>{title}</p>
-            <ChevronDown
-              size={16}
-              className={`${titleColor} transform transition-transform ${
-                isOpen ? "rotate-180" : ""
-              }`}
-            />
-          </CollapsibleTrigger>
-        </div>
-        {/* Collapsible content across all breakpoints */}
+        {/* Collapsible trigger */}
+        <CollapsibleTrigger className="w-full flex items-center justify-between cursor-pointer hover:opacity-80 transition-opacity">
+          <p className={`text-sm font-semibold ${titleColor}`}>{title}</p>
+          <ChevronDown
+            size={16}
+            className={`${titleColor} transform transition-transform ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
+        </CollapsibleTrigger>
+
+        {/* All other content is collapsible */}
         <CollapsibleContent>
-          <div className="mt-2">
-            {isProgress ? (
-              <ul className="text-sm text-gray-300 space-y-1">
-                <li>• Round {currentRound} of 3</li>
-                <li>
-                  • {versesCount} {versesCount === 1 ? "verse" : "verses"}{" "}
-                  completed
-                </li>
-              </ul>
-            ) : (
-              resultsStats && <BattleResultsStats {...resultsStats} />
-            )}
+          <div className="space-y-2 mt-2">
+            {/* Stage info */}
+            <div className="text-xs text-gray-500">
+              Stage: {stage.flag} {stage.name}, {stage.country}
+            </div>
+
+            {/* Battle details */}
+            <div>
+              {isProgress ? (
+                <ul className="text-sm text-gray-300 space-y-1">
+                  <li>• Round {currentRound} of 3</li>
+                  <li>
+                    • {versesCount} {versesCount === 1 ? "verse" : "verses"}{" "}
+                    completed
+                  </li>
+                </ul>
+              ) : (
+                resultsStats && <BattleResultsStats {...resultsStats} />
+              )}
+            </div>
           </div>
         </CollapsibleContent>
       </div>

@@ -47,6 +47,8 @@ export function BattleReplay({
   const { user } = useUser();
   const router = useRouter();
   const [dbUserId, setDbUserId] = useState<string | null>(null);
+  const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Fetch internal database user ID
   useEffect(() => {
@@ -101,7 +103,35 @@ export function BattleReplay({
   // Ensure only one drawer is open at a time across the page
   useExclusiveDrawer("replay-scores-song", isDrawerOpen, setIsDrawerOpen);
 
-  // No JS offset needed when header is sticky
+  // Track scroll position to collapse header on mobile
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    const scrollContainer = document.querySelector("[data-scroll-container]");
+    if (!scrollContainer) return;
+
+    // Do not collapse header on desktop; ensure it's expanded
+    if (!isMobile) {
+      setIsHeaderCollapsed(false);
+      return;
+    }
+
+    const handleScroll = () => {
+      const scrollTop = scrollContainer.scrollTop;
+      // Collapse after scrolling 50px (mobile only)
+      setIsHeaderCollapsed(scrollTop > 50);
+    };
+
+    scrollContainer.addEventListener("scroll", handleScroll);
+    return () => scrollContainer.removeEventListener("scroll", handleScroll);
+  }, [isMobile]);
 
   const canGoPrev = selectedRound > 1;
   const canGoNext = selectedRound < 3;
@@ -158,13 +188,28 @@ export function BattleReplay({
       {/* Header with Replay Controls - Unified responsive layout */}
       <BattleHeader
         variant="blur"
-        className="md:bg-transparent md:backdrop-blur-none"
+        className="md:bg-transparent md:backdrop-blur-none transition-all duration-300"
+        compact={isHeaderCollapsed}
       >
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-8">
+        <div
+          className={`transition-all duration-300 ${
+            isHeaderCollapsed
+              ? "flex flex-row items-center justify-between gap-2 md:flex-row md:gap-3"
+              : "flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-8"
+          }`}
+        >
           {/* Left Side: Winner/Paused and Creator */}
-          <div className="shrink-0 flex flex-col gap-2 items-center md:items-start">
-            <WinnerBanner battle={battle} />
-            <CreatorAttribution battle={battle} hideOnMobileWhenWinnerVisible />
+          <div
+            className={`shrink-0 flex flex-col items-center md:items-start transition-all duration-300 ${
+              isHeaderCollapsed ? "gap-0" : "gap-2"
+            }`}
+          >
+            <WinnerBanner battle={battle} collapsed={isHeaderCollapsed} />
+            <CreatorAttribution
+              battle={battle}
+              hideOnMobileWhenWinnerVisible
+              hideWhenCollapsed={isHeaderCollapsed}
+            />
           </div>
 
           {/* Right Side: Round Controls */}
@@ -174,12 +219,14 @@ export function BattleReplay({
             canGoNext={canGoNext}
             onPrev={handlePrevRound}
             onNext={handleNextRound}
+            compact={isHeaderCollapsed}
           />
         </div>
       </BattleHeader>
 
       {/* Split Screen Stage */}
       <div
+        data-scroll-container
         className="flex-1 overflow-y-auto pb-(--mobile-bottom-padding) md:pb-24"
         style={{
           ["--mobile-bottom-padding" as any]: mobileContentPadding,
@@ -191,7 +238,8 @@ export function BattleReplay({
           rightVerse={roundVerses.right}
           roundScore={roundScore}
           showRoundWinner={true}
-          cardPadding="p-6"
+          cardPadding="px-3 py-2 md:p-4"
+          isBattleEnd={true}
         />
       </div>
 
@@ -212,7 +260,7 @@ export function BattleReplay({
               excludeBottomControls={true}
               mobileOnly={false}
             >
-              <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 touch-scroll-container">
                 <div className="p-4 md:p-6">
                   <div className={activeTab === "scores" ? "" : "hidden"}>
                     {roundScore && (
@@ -232,6 +280,7 @@ export function BattleReplay({
                           roundScore={roundScore}
                           leftPersona={battle.personas.left}
                           rightPersona={battle.personas.right}
+                          votingEnabled={battle.votingEnabled ?? true}
                         />
                       </div>
                     )}

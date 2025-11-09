@@ -24,13 +24,20 @@
 
   /* Layout heights - centralized for scalability */
   --header-height: 52px;
+  --battle-header-height: 89px; /* battle header with round tracker and stage info */
   --live-banner-height: 60px;
   --bottom-controls-height: 72px; /* drawer offset for bottom buttons */
+  --battle-control-bar-height: 80px; /* height of the battle control bar (p-4 + button height) */
   /* Mobile floating action buttons */
   --fab-size: 56px; /* w-14 h-14 */
   --fab-gutter: 24px; /* spacing above bottom edge/controls */
   /* Control bar padding */
   --control-bar-base-padding: 1rem; /* p-4 equivalent */
+  /* Sticky persona offsets for different battle states */
+  --mobile-round-end-height: var(
+    --battle-header-height
+  ); /* active battle, end of round - below site header + battle header */
+  --mobile-battle-end-height: 0px; /* completed battle replay - stick at top */
 }
 
 /* Desktop header heights - applied at md breakpoint (768px+) */
@@ -158,4 +165,35 @@ body {
 /* Let Framer Motion drive verse line animations to avoid double-trigger */
 .verse-line {
   animation: none;
+}
+
+/* Sticky persona cards on mobile */
+.persona-card-sticky {
+  position: sticky;
+  top: var(--header-height);
+  /* Ensure touch scrolling works smoothly with sticky elements */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+@media (min-width: 768px) {
+  .persona-card-sticky {
+    position: static;
+  }
+}
+
+/* Ensure smooth touch scrolling on containers with sticky children */
+.touch-scroll-container {
+  -webkit-overflow-scrolling: touch;
+  /* Allow vertical panning, prevent interference from gestures */
+  touch-action: pan-y pinch-zoom;
+  /* Create stacking context to prevent sticky z-index issues */
+  transform: translateZ(0);
+}
+
+/* Promote animated elements to their own compositor layer */
+.gpu-accel {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }

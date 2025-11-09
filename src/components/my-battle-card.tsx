@@ -17,6 +17,7 @@ import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { getStage, DEFAULT_STAGE } from "@/lib/shared/stages";
 import { BattleInfoPanel } from "@/components/battle-info-panel";
 import { BattleStatusButton } from "@/components/battle-status-button";
+import { BattleFeatureBadges } from "@/components/battle-feature-badges";
 
 interface MyBattleCardProps {
   battle: {
@@ -217,11 +218,11 @@ export function MyBattleCard({
 
   return (
     <div
-      className={`h-full flex flex-col bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-all ${
+      className={`flex flex-col md:min-h-[320px] bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-all ${
         isDeleting || isPending ? "opacity-50 pointer-events-none" : ""
       }`}
     >
-      <div className="flex items-start justify-between mb-4 gap-3">
+      <div className="flex items-start justify-between mb-2 gap-3">
         <div className="flex-1">
           <Link
             href={`/battle/${battle.id}`}
@@ -288,35 +289,41 @@ export function MyBattleCard({
         )}
       </div>
 
-      <div className="flex items-center gap-2 text-sm mb-4 flex-wrap">
+      {/* Created date below title */}
+      <div className="text-xs text-gray-500 mb-2">
+        Created {battle.createdAt.toLocaleDateString()}
+      </div>
+
+      {/* Paused badge and Feature badges on same row */}
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
         {battle.isLive && (
           <span className="px-3 py-1 rounded bg-red-600 text-white flex items-center gap-1.5 font-semibold animate-pulse">
             <Radio size={14} className="fill-white" />
             LIVE
           </span>
         )}
-        {/* Removed secondary archived badge per request */}
         {showManagement && battle.status !== "completed" && (
-          <>
-            <span
-              className={`px-3 py-1 rounded capitalize ${
-                battle.status === "paused"
-                  ? "bg-orange-600/30 text-orange-300"
-                  : "bg-gray-600/30 text-gray-400"
-              }`}
-            >
-              {battle.status}
-            </span>
-          </>
+          <span
+            className={`px-3 py-1 rounded capitalize text-sm ${
+              battle.status === "paused"
+                ? "bg-orange-600/30 text-orange-300"
+                : "bg-gray-600/30 text-gray-400"
+            }`}
+          >
+            {battle.status}
+          </span>
         )}
+        <BattleFeatureBadges {...featureBadgesProps} />
       </div>
+
+      {/* Spacer to push Battle Results to consistent position on desktop only */}
+      <div className="hidden md:flex md:flex-1 md:min-h-0" />
 
       {isPaused && (
         <BattleInfoPanel
           type="progress"
           createdAt={battle.createdAt}
           stage={stage}
-          featureBadges={featureBadgesProps}
           currentRound={currentRound}
           versesCount={versesCount}
         />
@@ -327,7 +334,6 @@ export function MyBattleCard({
           type="results"
           createdAt={battle.createdAt}
           stage={stage}
-          featureBadges={featureBadgesProps}
           resultsStats={battleResultsProps}
         />
       )}
@@ -338,9 +344,6 @@ export function MyBattleCard({
           <p className="text-sm text-red-300">{toggleError}</p>
         </div>
       )}
-
-      {/* Flexible spacer to push buttons to bottom */}
-      <div className="flex-1" />
 
       <div className="flex items-center gap-3">
         <Link

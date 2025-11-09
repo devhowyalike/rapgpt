@@ -24,6 +24,7 @@ interface BattleStageProps {
   isReadingPhase?: boolean;
   isVotingPhase?: boolean;
   votingCompletedRound?: number | null;
+  mobileBottomPadding?: string;
 }
 
 export function BattleStage({
@@ -33,6 +34,7 @@ export function BattleStage({
   isReadingPhase = false,
   isVotingPhase = false,
   votingCompletedRound = null,
+  mobileBottomPadding,
 }: BattleStageProps) {
   const progress = getBattleProgress(battle);
   const {
@@ -51,10 +53,15 @@ export function BattleStage({
   // Show scores automatically when available (no manual reveal button)
   const shouldShowScores = !!scoresAvailable;
 
-  // Only show round winner badge after voting has been completed for the current round
+  // Show round winner badge when:
+  // 1. Voting is enabled (true or undefined/default) AND voting has been completed for the current round, OR
+  // 2. Voting is explicitly disabled (false) AND the round has scores (is complete)
   const shouldShowRoundWinner =
-    votingCompletedRound !== null &&
-    votingCompletedRound >= battle.currentRound;
+    currentRoundScore &&
+    ((battle.votingEnabled !== false &&
+      votingCompletedRound !== null &&
+      votingCompletedRound >= battle.currentRound) ||
+      (battle.votingEnabled === false && !isReadingPhase && !isVotingPhase));
 
   // Mobile-only offset so the first persona does not render under the sticky trophy/header
   const [isMobile, setIsMobile] = useState(false);
@@ -69,7 +76,7 @@ export function BattleStage({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Compute combined offset: site header height (CSS var) + trophy banner height
+  // Compute combined offset: site header height (CSS var) + BattleHeader height
   useLayoutEffect(() => {
     if (!isMobile) {
       setPersonaTopMargin(0);
@@ -81,29 +88,28 @@ export function BattleStage({
       const headerVar = rootStyle.getPropertyValue("--header-height").trim();
       const headerPx = parseFloat(headerVar || "0") || 0;
 
-      const trophyEl = trophyRef.current;
-      if (!trophyEl) {
-        setPersonaTopMargin(0);
-        return;
-      }
+      const headerEl = document.querySelector(
+        "[data-battle-header]"
+      ) as HTMLElement | null;
+      const battleHeaderHeight =
+        (headerEl?.getBoundingClientRect().height as number) || 0;
 
-      const rect = trophyEl.getBoundingClientRect();
-      const trophyStyle = getComputedStyle(trophyEl);
-      const mt = parseFloat(trophyStyle.marginTop || "0") || 0;
-      const mb = parseFloat(trophyStyle.marginBottom || "0") || 0;
-      const trophyTotal = rect.height + mt + mb;
-      // Include the distance from the top of the sticky header down to the trophy block
-      const distanceToTrophy = trophyEl.offsetTop || 0;
-
-      setPersonaTopMargin(headerPx + distanceToTrophy + trophyTotal);
+      // Use just the battle header height since BattleHeader is already positioned at top: var(--header-height)
+      // This avoids double-counting the site header offset
+      setPersonaTopMargin(battleHeaderHeight);
     };
 
     recalc();
     window.addEventListener("resize", recalc);
     let ro: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== "undefined" && trophyRef.current) {
-      ro = new ResizeObserver(() => recalc());
-      ro.observe(trophyRef.current);
+    if (typeof ResizeObserver !== "undefined") {
+      const headerEl = document.querySelector(
+        "[data-battle-header]"
+      ) as HTMLElement | null;
+      if (headerEl) {
+        ro = new ResizeObserver(() => recalc());
+        ro.observe(headerEl);
+      }
     }
     return () => {
       window.removeEventListener("resize", recalc);
@@ -145,6 +151,14 @@ export function BattleStage({
     mobileActiveSide = null;
   }
 
+  // Enable sticky personas only at end of round (voting/scores) or end of battle
+  // NOT during active verse generation/streaming
+  const enableStickyPersonas =
+    isReadingPhase ||
+    isVotingPhase ||
+    !!scoresAvailable ||
+    battle.status === "completed";
+
   // When scores become visible on mobile, scroll them into view
   const scoreSectionRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -160,19 +174,24 @@ export function BattleStage({
   }, [shouldShowScores]);
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto bg-linear-to-b from-stage-darker to-stage-dark overflow-x-hidden">
+    <div
+      className="flex flex-col h-full overflow-y-auto bg-linear-to-b from-stage-darker to-stage-dark overflow-x-hidden touch-scroll-container pb-(--mobile-bottom-padding) md:pb-0"
+      style={{
+        ["--mobile-bottom-padding" as any]: mobileBottomPadding || "0px",
+      }}
+    >
       {/* Header with Round Tracker */}
       <BattleHeader sticky={true} variant="blur" className="top-0">
         <div className="flex flex-row md:flex-row items-center justify-between md:justify-start gap-2 md:gap-6">
           <div className="md:flex-1">
             <div className="text-left">
-              <div className="text-xs md:text-base text-gray-400 uppercase tracking-wider">
+              <div className="text-xs md:text-base text-gray-400 uppercase tracking-wider hidden md:block">
                 Stage:
               </div>
-              <div className="text-xl md:text-3xl font-bold text-white flex flex-col">
+              <div className="text-lg md:text-3xl font-bold text-white flex flex-col">
                 <span>{stage.name}</span>
-                <span className="text-xs md:text-base text-gray-400 font-normal flex items-center gap-1">
-                  <span className="text-lg md:text-2xl">{stage.flag}</span>
+                <span className="text-[11px] md:text-base text-gray-400 font-normal flex items-center gap-1">
+                  <span className="text-base md:text-2xl">{stage.flag}</span>
                   {stage.country}
                 </span>
               </div>
@@ -224,6 +243,8 @@ export function BattleStage({
           streamingPersonaId={streamingPersonaId}
           streamingText={streamingText}
           mobileTopOffset={isMobile ? personaTopMargin : 0}
+          enableStickyPersonas={enableStickyPersonas}
+          isBattleEnd={false}
         />
       </div>
 
@@ -249,6 +270,7 @@ export function BattleStage({
               roundScore={currentRoundScore}
               leftPersona={battle.personas.left}
               rightPersona={battle.personas.right}
+              votingEnabled={battle.votingEnabled ?? true}
             />
           </div>
         </motion.div>
