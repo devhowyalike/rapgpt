@@ -185,7 +185,8 @@ export function BattleOptions({
               )}
 
               {/* Auto-start first verse after advancing - Coming Soon */}
-              <OptionRow
+              {/* Temporarily disabled auto-start option */}
+              {/* <OptionRow
                 icon={Play}
                 iconColor="text-purple-400"
                 iconBgColor="bg-teal-900/50 border border-teal-500/50"
@@ -195,7 +196,7 @@ export function BattleOptions({
                 onCheckedChange={() => {}}
                 disabled={true}
                 badge="(Coming Soon)"
-              />
+              /> */}
 
               {/* Go Live Toggle - Coming Soon */}
               <OptionRow
