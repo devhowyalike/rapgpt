@@ -143,6 +143,17 @@ export function SiteHeader() {
   const displayName =
     [firstName, lastName].filter(Boolean).join(" ") || user?.username || "User";
 
+  const createBattleButtonClasses =
+    "flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium";
+
+  const CreateBattleContent = () => (
+    <>
+      <Mic2 size={16} />
+      <span className="hidden sm:inline">Create Battle</span>
+      <span className="sm:hidden">Battle</span>
+    </>
+  );
+
   return (
     <div
       className="fixed top-0 left-0 right-0 z-30 p-3 bg-gray-900/95 border-b border-gray-800 backdrop-blur-sm"
@@ -413,20 +424,13 @@ export function SiteHeader() {
 
           {/* Create Battle Button */}
           {isSignedIn ? (
-            <Link
-              href="/new-battle"
-              className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium"
-            >
-              <Mic2 size={16} />
-              <span className="hidden sm:inline">Create </span>
-              <span>Battle</span>
+            <Link href="/new-battle" className={createBattleButtonClasses}>
+              <CreateBattleContent />
             </Link>
           ) : (
             <SignInButton mode="modal" forceRedirectUrl="/new-battle">
-              <button className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium">
-                <Mic2 size={16} />
-                <span className="hidden sm:inline">Create </span>
-                <span>Battle</span>
+              <button className={createBattleButtonClasses}>
+                <CreateBattleContent />
               </button>
             </SignInButton>
           )}
