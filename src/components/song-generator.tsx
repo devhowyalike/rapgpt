@@ -364,7 +364,7 @@ export function SongGenerator({
         {/* Info Text */}
         <div className="text-xs text-gray-500 text-center">
           {hasIncompleteSong
-            ? "Song generation can take 1-5 minutes. Check back in a few minutes if it times out."
+            ? "Song generation can take 1-5 minutes. Check back in a few minutes."
             : `Song generation typically takes 3-5 minutes. ${APP_TITLE} will create a unique song blending both personas' styles and your chosen beat.`}
         </div>
       </CardContent>

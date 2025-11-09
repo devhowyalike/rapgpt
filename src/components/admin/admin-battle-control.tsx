@@ -419,6 +419,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
             isReadingPhase={false}
             isVotingPhase={false}
             votingCompletedRound={null}
+            scoreDelaySeconds={5}
           />
 
           {/* Sidebar for comments/voting */}

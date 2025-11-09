@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Battle } from "@/lib/shared";
 import { BattleStage } from "./battle-stage";
 import { BattleReplay } from "./battle-replay";
@@ -29,12 +29,21 @@ import {
   SidebarContainer,
   BattleControlBar,
 } from "@/components/battle";
+import { useScoreRevealDelay } from "@/lib/hooks/use-score-reveal-delay";
 
 interface BattleControllerProps {
   initialBattle: Battle;
+  /**
+   * Delay, in seconds, before revealing scores once available.
+   * Default: 5 seconds.
+   */
+  scoreDelaySeconds?: number;
 }
 
-export function BattleController({ initialBattle }: BattleControllerProps) {
+export function BattleController({
+  initialBattle,
+  scoreDelaySeconds = 5,
+}: BattleControllerProps) {
   const {
     battle,
     setBattle,
@@ -63,6 +72,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [isLeaving, setIsLeaving] = useState(false);
+  const [isPreGenerating, setIsPreGenerating] = useState(false);
 
   // Mobile drawer state
   const {
@@ -177,6 +187,16 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     battle,
   ]);
 
+  // Score reveal delay (shared logic) to drive "Calculating Score..." on the button
+  const currentRoundScore =
+    battle?.scores.find((s) => s.round === battle.currentRound) || null;
+  const scoresAvailableRound =
+    currentRoundScore && !isReadingPhase && !isVotingPhase
+      ? currentRoundScore.round
+      : null;
+  const { revealedRound: revealedByDelay, isDelaying: isCalculatingScores } =
+    useScoreRevealDelay(scoresAvailableRound, scoreDelaySeconds);
+
   // Battle action handlers - MUST be before any conditional returns (Rules of Hooks)
   const handleVote = useBattleVote({
     battleId: battle?.id || "",
@@ -215,6 +235,8 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     if (!nextPerformer || isGenerating) return;
 
     const personaId = latestBattle.personas[nextPerformer].id;
+    // Clear any pre-generating visual state as real generation begins
+    setIsPreGenerating(false);
     setIsGenerating(true);
     setStreamingVerse(null, personaId);
 
@@ -285,6 +307,12 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
     setReadingTimeRemaining(null);
     setIsVotingPhase(false);
     setVotingTimeRemaining(null);
+    // If auto-start is enabled, set a pre-generating visual state immediately to avoid flicker
+    const willAutoStart =
+      (useBattleStore.getState().battle?.autoStartOnAdvance ?? true) !== false;
+    if (willAutoStart) {
+      setIsPreGenerating(true);
+    }
     advanceRound();
     await saveBattle();
     // Auto-start first verse on round advance if enabled (default true)
@@ -422,6 +450,7 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
               isReadingPhase={isReadingPhase}
               isVotingPhase={isVotingPhase}
               votingCompletedRound={votingCompletedRound}
+              scoreDelaySeconds={scoreDelaySeconds}
               mobileBottomPadding={contentPaddingOverride}
             />
 
@@ -435,6 +464,8 @@ export function BattleController({ initialBattle }: BattleControllerProps) {
                 canAdvance={!!canAdvance}
                 isReadingPhase={isReadingPhase}
                 isVotingPhase={isVotingPhase}
+                isCalculatingScores={isCalculatingScores}
+                isPreGenerating={isPreGenerating}
                 votingTimeRemaining={votingTimeRemaining}
                 showVoting={showVoting}
                 nextPerformerName={
