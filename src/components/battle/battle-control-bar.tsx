@@ -7,6 +7,7 @@
 import { Play, ArrowRight, Pause, Settings, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import type { Battle } from "@/lib/shared";
+import { ScoreCalcAnimation } from "@/components/score-calc-animation";
 
 interface BattleControlBarProps {
   battle: Battle;
@@ -98,8 +99,8 @@ export function BattleControlBar({
           `}
         >
           {isCalculatingScores ? (
-            <div className="flex items-center justify-center gap-2">
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="flex items-center justify-center gap-3">
+              <ScoreCalcAnimation />
               <span className="text-lg font-medium">Calculating Score...</span>
             </div>
           ) : isGenerating || isPreGenerating ? (
