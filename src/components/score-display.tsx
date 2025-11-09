@@ -8,12 +8,14 @@ import { useEffect, useRef, useState } from "react";
 import type { RoundScore, Persona } from "@/lib/shared";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { motion } from "framer-motion";
+import { APP_TITLE } from "@/lib/constants";
 
 interface ScoreDisplayProps {
   roundScore: RoundScore;
   leftPersona: Persona;
   rightPersona: Persona;
   className?: string;
+  votingEnabled?: boolean;
 }
 
 export function ScoreDisplay({
@@ -21,6 +23,7 @@ export function ScoreDisplay({
   leftPersona,
   rightPersona,
   className = "",
+  votingEnabled = true,
 }: ScoreDisplayProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const expandedRef = useRef<HTMLDivElement | null>(null);
@@ -85,10 +88,12 @@ export function ScoreDisplay({
               >
                 {leftScore.totalScore.toFixed(1)}
               </div>
-              <div className="text-xs text-gray-400 mt-1">
-                Auto: {leftScore.automated.total.toFixed(1)} | Votes:{" "}
-                {leftScore.userVotes}
-              </div>
+              {votingEnabled && (
+                <div className="text-xs text-gray-400 mt-1">
+                  {APP_TITLE}: {leftScore.automated.total.toFixed(1)} | Votes:{" "}
+                  {leftScore.userVotes}
+                </div>
+              )}
 
               {/* Score Breakdown */}
               <div className="mt-2 md:mt-3 space-y-0.5 md:space-y-1 text-xs text-left">
@@ -135,10 +140,12 @@ export function ScoreDisplay({
               >
                 {rightScore.totalScore.toFixed(1)}
               </div>
-              <div className="text-xs text-gray-400 mt-1">
-                Auto: {rightScore.automated.total.toFixed(1)} | Votes:{" "}
-                {rightScore.userVotes}
-              </div>
+              {votingEnabled && (
+                <div className="text-xs text-gray-400 mt-1">
+                  {APP_TITLE}: {rightScore.automated.total.toFixed(1)} | Votes:{" "}
+                  {rightScore.userVotes}
+                </div>
+              )}
 
               {/* Score Breakdown */}
               <div className="mt-2 md:mt-3 space-y-0.5 md:space-y-1 text-xs text-left">

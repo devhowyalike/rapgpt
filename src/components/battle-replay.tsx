@@ -280,6 +280,7 @@ export function BattleReplay({
                           roundScore={roundScore}
                           leftPersona={battle.personas.left}
                           rightPersona={battle.personas.right}
+                          votingEnabled={battle.votingEnabled ?? true}
                         />
                       </div>
                     )}

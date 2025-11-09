@@ -265,6 +265,7 @@ export function BattleStage({
               roundScore={currentRoundScore}
               leftPersona={battle.personas.left}
               rightPersona={battle.personas.right}
+              votingEnabled={battle.votingEnabled ?? true}
             />
           </div>
         </motion.div>
