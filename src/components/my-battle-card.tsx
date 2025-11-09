@@ -218,7 +218,7 @@ export function MyBattleCard({
 
   return (
     <div
-      className={`h-full flex flex-col bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-all ${
+      className={`flex flex-col min-h-[320px] bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-all ${
         isDeleting || isPending ? "opacity-50 pointer-events-none" : ""
       }`}
     >
