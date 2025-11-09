@@ -50,7 +50,7 @@ export function WinnerBanner({ battle, collapsed = false }: WinnerBannerProps) {
         <div
           className={`font-bold text-yellow-400 font-(family-name:--font-bebas-neue) whitespace-nowrap relative z-10 transition-all duration-300 ${
             collapsed
-              ? "text-base md:text-lg"
+              ? "text-2xl md:text-lg"
               : "text-3xl md:text-4xl lg:text-5xl"
           }`}
         >

@@ -185,13 +185,13 @@ export function BattleStage({
         <div className="flex flex-row md:flex-row items-center justify-between md:justify-start gap-2 md:gap-6">
           <div className="md:flex-1">
             <div className="text-left">
-              <div className="text-xs md:text-base text-gray-400 uppercase tracking-wider">
+              <div className="text-xs md:text-base text-gray-400 uppercase tracking-wider hidden md:block">
                 Stage:
               </div>
-              <div className="text-xl md:text-3xl font-bold text-white flex flex-col">
+              <div className="text-lg md:text-3xl font-bold text-white flex flex-col">
                 <span>{stage.name}</span>
-                <span className="text-xs md:text-base text-gray-400 font-normal flex items-center gap-1">
-                  <span className="text-lg md:text-2xl">{stage.flag}</span>
+                <span className="text-[11px] md:text-base text-gray-400 font-normal flex items-center gap-1">
+                  <span className="text-base md:text-2xl">{stage.flag}</span>
                   {stage.country}
                 </span>
               </div>
