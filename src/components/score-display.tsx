@@ -10,6 +10,103 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { APP_TITLE } from "@/lib/constants";
 
+interface PersonaScoreCardProps {
+  persona: Persona;
+  score: RoundScore["personaScores"][string];
+  isExpanded: boolean;
+  animationDirection: number; // -20 for left, 20 for right
+  animationDelay: number;
+  votingEnabled: boolean;
+}
+
+function PersonaScoreCard({
+  persona,
+  score,
+  isExpanded,
+  animationDirection,
+  animationDelay,
+  votingEnabled,
+}: PersonaScoreCardProps) {
+  if (isExpanded) {
+    return (
+      <motion.div
+        className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2"
+        style={{ borderColor: persona.accentColor + "40" }}
+        initial={{ opacity: 0, x: animationDirection }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4, delay: animationDelay }}
+      >
+        <div className="text-center">
+          <div
+            className="text-xs font-medium mb-1 md:mb-2 opacity-80"
+            style={{ color: persona.accentColor }}
+          >
+            {persona.name}
+          </div>
+          <div
+            className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
+            style={{ color: persona.accentColor }}
+          >
+            {score.totalScore.toFixed(1)}
+          </div>
+          {votingEnabled && (
+            <div className="text-xs text-gray-400 mt-1">
+              {APP_TITLE}: {score.automated.total.toFixed(1)} | Votes:{" "}
+              {score.userVotes}
+            </div>
+          )}
+
+          {/* Score Breakdown */}
+          <div className="mt-2 md:mt-3 space-y-0.5 md:space-y-1 text-xs text-left">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Rhyme:</span>
+              <span className="text-white">
+                {score.automated.rhymeScheme.toFixed(1)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Wordplay:</span>
+              <span className="text-white">
+                {score.automated.wordplay.toFixed(1)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Flow:</span>
+              <span className="text-white">
+                {score.automated.flow.toFixed(1)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Collapsed view
+  return (
+    <motion.div
+      className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2 flex flex-col items-center justify-center"
+      style={{ borderColor: persona.accentColor + "40" }}
+      initial={{ opacity: 0, x: animationDirection }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.4, delay: animationDelay }}
+    >
+      <div
+        className="text-xs font-medium mb-1 md:mb-2 opacity-80"
+        style={{ color: persona.accentColor }}
+      >
+        {persona.name}
+      </div>
+      <div
+        className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
+        style={{ color: persona.accentColor }}
+      >
+        {score.totalScore.toFixed(1)}
+      </div>
+    </motion.div>
+  );
+}
+
 interface ScoreDisplayProps {
   roundScore: RoundScore;
   leftPersona: Persona;
@@ -65,159 +162,24 @@ export function ScoreDisplay({
         )}
       </button>
 
-      {isExpanded ? (
-        <div ref={expandedRef} className="grid grid-cols-2 gap-2 md:gap-4">
-          {/* Left Score - Expanded */}
-          <motion.div
-            className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2"
-            style={{ borderColor: leftPersona.accentColor + "40" }}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-          >
-            <div className="text-center">
-              <div
-                className="text-xs font-medium mb-1 md:mb-2 opacity-80"
-                style={{ color: leftPersona.accentColor }}
-              >
-                {leftPersona.name}
-              </div>
-              <div
-                className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
-                style={{ color: leftPersona.accentColor }}
-              >
-                {leftScore.totalScore.toFixed(1)}
-              </div>
-              {votingEnabled && (
-                <div className="text-xs text-gray-400 mt-1">
-                  {APP_TITLE}: {leftScore.automated.total.toFixed(1)} | Votes:{" "}
-                  {leftScore.userVotes}
-                </div>
-              )}
-
-              {/* Score Breakdown */}
-              <div className="mt-2 md:mt-3 space-y-0.5 md:space-y-1 text-xs text-left">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Rhyme:</span>
-                  <span className="text-white">
-                    {leftScore.automated.rhymeScheme.toFixed(1)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Wordplay:</span>
-                  <span className="text-white">
-                    {leftScore.automated.wordplay.toFixed(1)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Flow:</span>
-                  <span className="text-white">
-                    {leftScore.automated.flow.toFixed(1)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Right Score - Expanded */}
-          <motion.div
-            className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2"
-            style={{ borderColor: rightPersona.accentColor + "40" }}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, delay: 0.4 }}
-          >
-            <div className="text-center">
-              <div
-                className="text-xs font-medium mb-1 md:mb-2 opacity-80"
-                style={{ color: rightPersona.accentColor }}
-              >
-                {rightPersona.name}
-              </div>
-              <div
-                className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
-                style={{ color: rightPersona.accentColor }}
-              >
-                {rightScore.totalScore.toFixed(1)}
-              </div>
-              {votingEnabled && (
-                <div className="text-xs text-gray-400 mt-1">
-                  {APP_TITLE}: {rightScore.automated.total.toFixed(1)} | Votes:{" "}
-                  {rightScore.userVotes}
-                </div>
-              )}
-
-              {/* Score Breakdown */}
-              <div className="mt-2 md:mt-3 space-y-0.5 md:space-y-1 text-xs text-left">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Rhyme:</span>
-                  <span className="text-white">
-                    {rightScore.automated.rhymeScheme.toFixed(1)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Wordplay:</span>
-                  <span className="text-white">
-                    {rightScore.automated.wordplay.toFixed(1)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Flow:</span>
-                  <span className="text-white">
-                    {rightScore.automated.flow.toFixed(1)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-2 md:gap-4">
-          {/* Left Score - Collapsed */}
-          <motion.div
-            className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2 flex flex-col items-center justify-center"
-            style={{ borderColor: leftPersona.accentColor + "40" }}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-          >
-            <div
-              className="text-xs font-medium mb-1 md:mb-2 opacity-80"
-              style={{ color: leftPersona.accentColor }}
-            >
-              {leftPersona.name}
-            </div>
-            <div
-              className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
-              style={{ color: leftPersona.accentColor }}
-            >
-              {leftScore.totalScore.toFixed(1)}
-            </div>
-          </motion.div>
-
-          {/* Right Score - Collapsed */}
-          <motion.div
-            className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2 flex flex-col items-center justify-center"
-            style={{ borderColor: rightPersona.accentColor + "40" }}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, delay: 0.4 }}
-          >
-            <div
-              className="text-xs font-medium mb-1 md:mb-2 opacity-80"
-              style={{ color: rightPersona.accentColor }}
-            >
-              {rightPersona.name}
-            </div>
-            <div
-              className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
-              style={{ color: rightPersona.accentColor }}
-            >
-              {rightScore.totalScore.toFixed(1)}
-            </div>
-          </motion.div>
-        </div>
-      )}
+      <div ref={expandedRef} className="grid grid-cols-2 gap-2 md:gap-4">
+        <PersonaScoreCard
+          persona={leftPersona}
+          score={leftScore}
+          isExpanded={isExpanded}
+          animationDirection={-20}
+          animationDelay={0.3}
+          votingEnabled={votingEnabled}
+        />
+        <PersonaScoreCard
+          persona={rightPersona}
+          score={rightScore}
+          isExpanded={isExpanded}
+          animationDirection={20}
+          animationDelay={0.4}
+          votingEnabled={votingEnabled}
+        />
+      </div>
     </div>
   );
 }
