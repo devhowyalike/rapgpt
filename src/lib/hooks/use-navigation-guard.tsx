@@ -8,6 +8,7 @@ import { useEffect, useCallback, useState } from "react";
 import { usePathname } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 import { AlertTriangle } from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface UseNavigationGuardOptions {
   when: boolean;
@@ -130,7 +131,7 @@ export function useNavigationGuard({
                   >
                     {isConfirming ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <LoadingSpinner size="sm" />
                         Leaving...
                       </>
                     ) : (
