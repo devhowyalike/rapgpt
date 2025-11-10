@@ -164,7 +164,7 @@ export function BattleOptions({
                   icon={ThumbsUp}
                   iconColor="text-blue-400"
                   iconBgColor="bg-blue-900/50 border border-blue-500/50"
-                  title="Enable Voting"
+                  title="Voting"
                   description="Allow viewers to vote for their favorite verses"
                   checked={votingEnabled}
                   onCheckedChange={onVotingEnabledChange}
@@ -177,7 +177,7 @@ export function BattleOptions({
                   icon={MessageSquare}
                   iconColor="text-green-400"
                   iconBgColor="bg-green-900/50 border border-green-500/50"
-                  title="Enable Comments"
+                  title="Comments"
                   description="Allow viewers to leave comments on the battle"
                   checked={commentsEnabled}
                   onCheckedChange={onCommentsEnabledChange}
