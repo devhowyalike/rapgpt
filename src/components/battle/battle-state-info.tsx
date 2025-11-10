@@ -3,7 +3,7 @@
  */
 
 import type { Battle } from "@/lib/shared";
-import { ROUNDS_PER_BATTLE } from "@/lib/shared";
+import { ROUNDS_PER_BATTLE, getDisplayRound } from "@/lib/shared";
 
 interface BattleStateInfoProps {
   battle: Battle;
@@ -16,7 +16,7 @@ export function BattleStateInfo({ battle, className }: BattleStateInfoProps) {
       <div className="flex justify-between">
         <span className="text-gray-400">Round:</span>
         <span className="text-white font-medium">
-          {Math.min(battle.currentRound, ROUNDS_PER_BATTLE)}/{ROUNDS_PER_BATTLE}
+          {getDisplayRound(battle)}/{ROUNDS_PER_BATTLE}
         </span>
       </div>
       <div className="flex justify-between">

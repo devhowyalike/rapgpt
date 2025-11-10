@@ -24,8 +24,13 @@ export function getAdvanceRoundButtonText(
 /**
  * Get the display-safe current round (clamped to max rounds)
  * Useful for completed battles where currentRound may be ROUNDS_PER_BATTLE + 1
+ * @param battleOrRound Battle object or round number
  */
-export function getDisplayRound(battle: Battle): number {
-  return Math.min(battle.currentRound, ROUNDS_PER_BATTLE);
+export function getDisplayRound(battleOrRound: Battle | number): number {
+  const currentRound =
+    typeof battleOrRound === "number"
+      ? battleOrRound
+      : battleOrRound.currentRound;
+  return Math.min(currentRound, ROUNDS_PER_BATTLE);
 }
 

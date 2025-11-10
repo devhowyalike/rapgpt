@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface SessionRestoreLoadingProps {
   /**
@@ -30,7 +31,7 @@ export function SessionRestoreLoading({
         className="text-center"
       >
         <div className="mb-6">
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-yellow-400" />
+          <LoadingSpinner size="2xl" variant="highlight" className="inline-block" />
         </div>
         <h2 className="text-2xl md:text-3xl font-black text-yellow-400 mb-2 uppercase">
           {title}

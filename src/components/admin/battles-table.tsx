@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 import type { Battle } from "@/lib/shared";
-import { ROUNDS_PER_BATTLE } from "@/lib/shared";
+import { ROUNDS_PER_BATTLE, getDisplayRound } from "@/lib/shared";
 import {
   Table,
   TableBody,
@@ -372,7 +372,7 @@ export function BattlesTable({ battles }: BattlesTableProps) {
                 {battle.comments.length}
               </TableCell>
               <TableCell className="text-gray-400 text-sm">
-                {Math.min(battle.currentRound, ROUNDS_PER_BATTLE)}/{ROUNDS_PER_BATTLE}
+                {getDisplayRound(battle)}/{ROUNDS_PER_BATTLE}
               </TableCell>
               <TableCell className="text-center">
                 {battle.generatedSong?.audioUrl ? (
