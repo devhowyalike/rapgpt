@@ -181,7 +181,7 @@ export function AdminDashboardClient({
                       <div className="flex items-center gap-2 flex-wrap">
                         <Link
                           href={`/battle/${battle.id}`}
-                          className="text-white font-semibold hover:text-purple-400 transition-colors"
+                          className="text-white font-semibold hover:text-purple-400 transition-colors underline underline-offset-2"
                         >
                           {battle.title}
                         </Link>
