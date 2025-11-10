@@ -113,6 +113,26 @@ export const votes = pgTable('votes', {
   uniqueVote: unique().on(table.battleId, table.round, table.userId),
 }));
 
+/**
+ * Battle token usage - per generation call token accounting
+ * Provider-agnostic usage captured via AI SDK LanguageModelUsage
+ */
+export const battleTokenUsage = pgTable('battle_token_usage', {
+  id: text('id').primaryKey(),
+  battleId: text('battle_id').notNull().references(() => battles.id, { onDelete: 'cascade' }),
+  round: integer('round'),
+  personaId: text('persona_id'),
+  provider: text('provider').notNull(),
+  model: text('model').notNull(),
+  inputTokens: integer('input_tokens'),
+  outputTokens: integer('output_tokens'),
+  totalTokens: integer('total_tokens'),
+  reasoningTokens: integer('reasoning_tokens'),
+  cachedInputTokens: integer('cached_input_tokens'),
+  status: text('status').notNull().default('completed'), // 'completed' | 'error'
+  createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
+});
+
 // Type inference for TypeScript
 export type UserDB = typeof users.$inferSelect;
 export type UserInsert = typeof users.$inferInsert;
@@ -122,4 +142,6 @@ export type CommentDB = typeof comments.$inferSelect;
 export type CommentInsert = typeof comments.$inferInsert;
 export type VoteDB = typeof votes.$inferSelect;
 export type VoteInsert = typeof votes.$inferInsert;
+export type BattleTokenUsageDB = typeof battleTokenUsage.$inferSelect;
+export type BattleTokenUsageInsert = typeof battleTokenUsage.$inferInsert;
 

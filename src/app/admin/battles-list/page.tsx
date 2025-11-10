@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { BattlesTable } from "@/components/admin/battles-table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { getAllBattlesTokenTotals } from "@/lib/usage-storage";
 
 // Revalidate every 5 seconds to show live status
 export const revalidate = 5;
@@ -19,6 +20,7 @@ export default async function BattlesListPage() {
   }
 
   const battles = await getAllBattles();
+  const tokenTotalsMap = await getAllBattlesTokenTotals();
 
   return (
     <div className="min-h-[100dvh] bg-linear-to-br from-gray-900 via-purple-900 to-black">
@@ -40,7 +42,7 @@ export default async function BattlesListPage() {
           </Button>
         </div>
 
-        <BattlesTable battles={battles} />
+        <BattlesTable battles={battles} tokenTotalsMap={tokenTotalsMap} />
       </div>
     </div>
   );

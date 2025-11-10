@@ -49,9 +49,16 @@ type SortDirection = "asc" | "desc";
 
 interface BattlesTableProps {
   battles: Battle[];
+  tokenTotalsMap?: Record<
+    string,
+    { inputTokens: number; outputTokens: number; totalTokens: number }
+  >;
 }
 
-export function BattlesTable({ battles }: BattlesTableProps) {
+export function BattlesTable({
+  battles,
+  tokenTotalsMap = {},
+}: BattlesTableProps) {
   const router = useRouter();
   const [sortField, setSortField] = React.useState<SortField>("createdAt");
   const [sortDirection, setSortDirection] =
@@ -228,6 +235,9 @@ export function BattlesTable({ battles }: BattlesTableProps) {
     </Button>
   );
 
+  const formatTokens = (value: number | string | undefined) =>
+    value == null ? "0" : Number(value).toLocaleString();
+
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg overflow-hidden">
       {selectedBattles.size > 0 && (
@@ -283,6 +293,11 @@ export function BattlesTable({ battles }: BattlesTableProps) {
             </TableHead>
             <TableHead className="text-gray-300">
               <SortButton field="round">Round</SortButton>
+            </TableHead>
+            <TableHead className="text-gray-300 text-right">In</TableHead>
+            <TableHead className="text-gray-300 text-right">Out</TableHead>
+            <TableHead className="text-gray-300 text-right pr-6">
+              Tokens
             </TableHead>
             <TableHead className="text-gray-300 text-center">
               <SortButton field="musicGenerated">Music Generated</SortButton>
@@ -374,6 +389,15 @@ export function BattlesTable({ battles }: BattlesTableProps) {
               <TableCell className="text-gray-400 text-sm">
                 {getDisplayRound(battle)}/{ROUNDS_PER_BATTLE}
               </TableCell>
+              <TableCell className="text-right text-gray-300">
+                {formatTokens(tokenTotalsMap[battle.id]?.inputTokens)}
+              </TableCell>
+              <TableCell className="text-right text-gray-300">
+                {formatTokens(tokenTotalsMap[battle.id]?.outputTokens)}
+              </TableCell>
+              <TableCell className="text-right text-gray-300 pr-6">
+                {formatTokens(tokenTotalsMap[battle.id]?.totalTokens)}
+              </TableCell>
               <TableCell className="text-center">
                 {battle.generatedSong?.audioUrl ? (
                   <div className="flex items-center justify-center gap-1">
@@ -403,6 +427,15 @@ export function BattlesTable({ battles }: BattlesTableProps) {
                       >
                         <Eye className="mr-2 h-4 w-4" />
                         View
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={`/admin/battles/${battle.id}/usage`}
+                        className="flex items-center cursor-pointer"
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        View Usage
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />

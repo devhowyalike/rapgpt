@@ -6,6 +6,7 @@ import { buildSystemPrompt, getFirstVerseMessage } from '@/lib/context-overrides
 import { z } from 'zod';
 import { broadcastEvent } from '@/lib/websocket/broadcast-helper';
 import type { VerseStreamingEvent, VerseCompleteEvent } from '@/lib/websocket/types';
+import { recordBattleTokenUsage } from '@/lib/usage-storage';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -97,8 +98,11 @@ export async function POST(req: Request) {
     // Build dynamic system prompt with opponent-specific context and overrides
     const systemPrompt = buildSystemPrompt(persona.systemPrompt, personaId, opponentPersona.id, opponentPersona.name);
 
+    const provider = 'anthropic';
+    const modelName = 'claude-3-5-haiku-latest';
+
     const result = streamText({
-      model: anthropic('claude-3-5-haiku-latest'),
+      model: anthropic(modelName),
       system: systemPrompt,
       messages: [
         {
@@ -107,6 +111,26 @@ export async function POST(req: Request) {
         },
       ],
       temperature: 0.9,
+      onFinish: async ({ usage }) => {
+        try {
+          await recordBattleTokenUsage({
+            id: (globalThis as any).crypto?.randomUUID?.() ?? `${battle.id}-${Date.now()}`,
+            battleId: battle.id,
+            round: battle.currentRound,
+            personaId,
+            provider,
+            model: modelName,
+            inputTokens: usage?.inputTokens ?? null,
+            outputTokens: usage?.outputTokens ?? null,
+            totalTokens: usage?.totalTokens ?? null,
+            reasoningTokens: usage?.reasoningTokens ?? null,
+            cachedInputTokens: usage?.cachedInputTokens ?? null,
+            status: 'completed',
+          });
+        } catch (err) {
+          console.error('[Generate Verse] Failed to record token usage:', err);
+        }
+      },
     });
 
     // If live, create custom stream that broadcasts to WebSocket
