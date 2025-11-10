@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod';
+import { sanitizeText } from '@/lib/sanitization';
 
 // Persona validation
 export const personaSchema = z.object({
@@ -129,7 +130,7 @@ export const voteRequestSchema = z.object({
 });
 
 export const commentRequestSchema = z.object({
-  content: z.string().min(1).max(500).trim(),
+  content: z.string().min(1).max(500).trim().transform(sanitizeText),
   round: z.number().int().min(1).max(3).optional(),
   // username removed - comes from authenticated user
 });
