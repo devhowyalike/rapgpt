@@ -22,7 +22,9 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.26",
+    "@ai-sdk/openai": "^2.0.65",
     "@ai-sdk/react": "^2.0.68",
+    "@anthropic-ai/sdk": "^0.68.0",
     "@clerk/nextjs": "^6.34.0",
     "@radix-ui/react-checkbox": "^1.3.3",
     "@radix-ui/react-collapsible": "^1.1.12",
