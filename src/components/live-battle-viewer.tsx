@@ -341,6 +341,7 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
               isReadingPhase={isReadingPhase}
               isVotingPhase={isVotingPhase}
               votingCompletedRound={votingCompletedRound}
+              scoreDelaySeconds={5}
               mobileBottomPadding={useMobileFooterControls({
                 hasBottomControls: false,
                 showCommenting,

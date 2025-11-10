@@ -16,6 +16,7 @@ import { getStage, DEFAULT_STAGE } from "@/lib/shared/stages";
 import { useRoundData } from "@/lib/hooks/use-round-data";
 import { BattleHeader } from "./battle/battle-header";
 import { BattleSplitView } from "./battle/battle-split-view";
+import { useScoreRevealDelay } from "@/lib/hooks/use-score-reveal-delay";
 
 interface BattleStageProps {
   battle: Battle;
@@ -25,6 +26,11 @@ interface BattleStageProps {
   isVotingPhase?: boolean;
   votingCompletedRound?: number | null;
   mobileBottomPadding?: string;
+  /**
+   * Delay, in seconds, before revealing scores once available.
+   * Default: 5 seconds. Set to 0 to reveal immediately.
+   */
+  scoreDelaySeconds?: number;
 }
 
 export function BattleStage({
@@ -35,6 +41,7 @@ export function BattleStage({
   isVotingPhase = false,
   votingCompletedRound = null,
   mobileBottomPadding,
+  scoreDelaySeconds = 5,
 }: BattleStageProps) {
   const progress = getBattleProgress(battle);
   const {
@@ -50,8 +57,18 @@ export function BattleStage({
   const scoresAvailable =
     currentRoundScore && !isReadingPhase && !isVotingPhase;
 
-  // Show scores automatically when available (no manual reveal button)
-  const shouldShowScores = !!scoresAvailable;
+  // Centralized score reveal delay via shared hook
+  const scoresAvailableRound =
+    scoresAvailable && currentRoundScore ? currentRoundScore.round : null;
+  const { revealedRound } = useScoreRevealDelay(
+    scoresAvailableRound,
+    scoreDelaySeconds
+  );
+
+  const shouldShowScores =
+    !!scoresAvailable &&
+    !!currentRoundScore &&
+    revealedRound === currentRoundScore.round;
 
   // Show round winner badge when:
   // 1. Voting is enabled (true or undefined/default) AND voting has been completed for the current round, OR

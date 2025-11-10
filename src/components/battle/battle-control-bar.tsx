@@ -7,6 +7,7 @@
 import { Play, ArrowRight, Pause, Settings, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import type { Battle } from "@/lib/shared";
+import { ScoreCalcAnimation } from "@/components/score-calc-animation";
 
 interface BattleControlBarProps {
   battle: Battle;
@@ -16,6 +17,8 @@ interface BattleControlBarProps {
   canAdvance: boolean;
   isReadingPhase: boolean;
   isVotingPhase: boolean;
+  isCalculatingScores?: boolean;
+  isPreGenerating?: boolean;
   votingTimeRemaining: number | null;
   showVoting: boolean;
   nextPerformerName?: string;
@@ -34,6 +37,8 @@ export function BattleControlBar({
   canAdvance,
   isReadingPhase,
   isVotingPhase,
+  isCalculatingScores = false,
+  isPreGenerating = false,
   votingTimeRemaining,
   showVoting,
   nextPerformerName,
@@ -49,7 +54,9 @@ export function BattleControlBar({
         {/* Primary Action Button - Changes based on state */}
         <button
           onClick={
-            isReadingPhase && showVoting
+            isCalculatingScores
+              ? undefined
+              : isReadingPhase && showVoting
               ? onBeginVoting
               : canAdvance
               ? onAdvanceRound
@@ -59,13 +66,19 @@ export function BattleControlBar({
           }
           disabled={
             isGenerating ||
+            isPreGenerating ||
             isVotingPhase ||
+            isCalculatingScores ||
             (!canGenerate && !canAdvance && !(isReadingPhase && showVoting))
           }
           className={`
             flex-1 px-2 py-2 rounded-lg text-white font-bold transition-all
             ${
-              isReadingPhase
+              isCalculatingScores
+                ? "bg-linear-to-r from-amber-600 to-yellow-600"
+                : isGenerating || isPreGenerating
+                ? "bg-linear-to-r from-teal-600 to-cyan-600"
+                : isReadingPhase
                 ? "bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
                 : isVotingPhase
                 ? "bg-linear-to-r from-purple-600 to-pink-600 animate-pulse"
@@ -78,13 +91,19 @@ export function BattleControlBar({
             ${
               isGenerating ||
               isVotingPhase ||
+              isCalculatingScores ||
               (!canGenerate && !canAdvance && !isReadingPhase)
                 ? "cursor-not-allowed"
                 : ""
             }
           `}
         >
-          {isGenerating ? (
+          {isCalculatingScores ? (
+            <div className="flex items-center justify-center gap-3">
+              <ScoreCalcAnimation />
+              <span className="text-lg font-medium">Calculating Score...</span>
+            </div>
+          ) : isGenerating || isPreGenerating ? (
             <div className="flex items-center justify-center gap-2">
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               Kicking ballistics...
