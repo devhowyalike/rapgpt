@@ -74,7 +74,10 @@ export function BattleInfoPanel({
             <div>
               {isProgress ? (
                 <ul className="text-sm text-gray-300 space-y-1">
-                  <li>• Round {Math.min(currentRound || 1, ROUNDS_PER_BATTLE)} of {ROUNDS_PER_BATTLE}</li>
+                  <li>
+                    • Round {Math.min(currentRound || 1, ROUNDS_PER_BATTLE)} of{" "}
+                    {ROUNDS_PER_BATTLE}
+                  </li>
                   <li>
                     • {versesCount} {versesCount === 1 ? "verse" : "verses"}{" "}
                     completed
