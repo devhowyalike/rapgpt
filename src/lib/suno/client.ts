@@ -4,6 +4,7 @@
  */
 
 import type { Battle, Persona, SongGenerationBeatStyle } from '@/lib/shared/battle-types';
+import { ROUNDS_PER_BATTLE } from '@/lib/shared/battle-types';
 
 const SUNO_API_BASE_URL = process.env.SUNO_API_BASE_URL || 'https://api.sunoapi.org';
 const SUNO_API_KEY = process.env.SUNO_API_KEY;
@@ -73,7 +74,7 @@ export function formatLyricsForSuno(battle: Battle): string {
   const lyrics: string[] = [];
   
   // Group verses by round
-  for (let round = 1; round <= 3; round++) {
+  for (let round = 1; round <= ROUNDS_PER_BATTLE; round++) {
     const roundVerses = battle.verses.filter(v => v.round === round);
     
     if (roundVerses.length > 0) {

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Clock, Radio, Users } from "lucide-react";
 import type { Battle } from "@/lib/shared";
+import { ROUNDS_PER_BATTLE } from "@/lib/shared";
 import type { WebSocketEvent } from "@/lib/websocket/types";
 
 interface LiveBattlesDisplayProps {
@@ -199,7 +200,7 @@ export function LiveBattlesDisplay({
           <div className="flex items-center justify-center gap-6 mb-6 flex-wrap text-sm text-gray-300">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              <span>Round {battle.currentRound}/3</span>
+              <span>Round {Math.min(battle.currentRound, ROUNDS_PER_BATTLE)}/{ROUNDS_PER_BATTLE}</span>
             </div>
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4" />

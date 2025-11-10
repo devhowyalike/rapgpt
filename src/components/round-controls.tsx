@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ROUNDS_PER_BATTLE } from "@/lib/shared";
 
 interface RoundControlsProps {
   selectedRound: number;
@@ -40,7 +41,7 @@ export function RoundControls({
           ? 'px-3 py-1 md:px-4 md:py-1.5 text-sm md:text-base' 
           : 'px-4 py-1.5 md:px-6 md:py-2 text-lg md:text-xl'
       }`}>
-        Round {selectedRound} of 3
+        Round {selectedRound} of {ROUNDS_PER_BATTLE}
       </div>
       <button
         onClick={onNext}

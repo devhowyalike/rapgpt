@@ -17,6 +17,7 @@ import {
   Clock,
 } from "lucide-react";
 import type { Battle } from "@/lib/shared";
+import { ROUNDS_PER_BATTLE } from "@/lib/shared";
 import type { ConnectionStatus } from "@/lib/websocket/types";
 
 interface BattleControlPanelProps {
@@ -305,7 +306,7 @@ export function BattleControlPanel({
             className="w-full px-4 py-3 bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
           >
             <ArrowRight className="w-5 h-5" />
-            {battle.currentRound === 3 ? "End Battle" : "Next Round"}
+            {battle.currentRound === ROUNDS_PER_BATTLE ? "End Battle" : "Next Round"}
           </button>
 
           {/* Current State Info */}
@@ -313,7 +314,7 @@ export function BattleControlPanel({
             <div className="flex justify-between">
               <span className="text-gray-400">Round:</span>
               <span className="text-white font-medium">
-                {battle.currentRound}/3
+                {Math.min(battle.currentRound, ROUNDS_PER_BATTLE)}/{ROUNDS_PER_BATTLE}
               </span>
             </div>
             <div className="flex justify-between">
