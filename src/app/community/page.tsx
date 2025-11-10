@@ -1,6 +1,6 @@
 import { db } from "@/lib/db/client";
 import { users } from "@/lib/db/schema";
-import { desc, sql } from "drizzle-orm";
+import { desc, sql, eq } from "drizzle-orm";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { GuestProfileCallout } from "@/components/guest-profile-callout";
@@ -30,7 +30,7 @@ export default async function CommunityPage({
   const { sessionClaims } = await auth();
   const isAuthenticated = !!sessionClaims;
 
-  // Fetch users with pagination and only needed fields
+  // Fetch users with pagination and only needed fields (only public profiles)
   const [allUsers, totalCountResult] = await Promise.all([
     db
       .select({
@@ -41,10 +41,14 @@ export default async function CommunityPage({
         createdAt: users.createdAt,
       })
       .from(users)
+      .where(eq(users.isProfilePublic, true))
       .orderBy(desc(users.createdAt))
       .limit(PAGE_SIZE)
       .offset(offset),
-    db.select({ count: sql<number>`count(*)::int` }).from(users),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(users)
+      .where(eq(users.isProfilePublic, true)),
   ]);
 
   const totalUsers = totalCountResult[0]?.count || 0;
