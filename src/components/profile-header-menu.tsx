@@ -137,8 +137,8 @@ export function ProfileHeaderMenu({
         title={isPublic ? "Make Profile Private?" : "Make Profile Public?"}
         description={
           isPublic
-            ? "Making your profile private will automatically unpublish any currently public battles. Your battles won't be deleted, but they will no longer appear on your public profile."
-            : "Making your profile public will allow others to view your profile and any battles you choose to publish. You can individually publish battles after making your profile public."
+            ? "Making your profile private will automatically unpublish any currently public battles and remove you from the community page. Your battles won't be deleted, but they will no longer be visible to others."
+            : "Making your profile public will add you to the community page and allow others to view your profile and any battles you choose to publish. You can individually publish battles after making your profile public."
         }
         confirmLabel={isPublic ? "Make Private" : "Make Public"}
         onConfirm={handleTogglePrivacy}

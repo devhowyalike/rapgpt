@@ -19,7 +19,7 @@ export function BattleFeatureBadges({
           title="Voting enabled"
         >
           <ThumbsUp size={12} />
-          <span className="hidden md:inline">Voting</span>
+          <span>Voting</span>
         </span>
       )}
       {commentsEnabled !== false && (
@@ -28,7 +28,7 @@ export function BattleFeatureBadges({
           title="Comments enabled"
         >
           <MessageSquare size={12} />
-          <span className="hidden md:inline">Comments</span>
+          <span>Comments</span>
         </span>
       )}
       {hasGeneratedSong && (
@@ -37,7 +37,7 @@ export function BattleFeatureBadges({
           title="Song generated"
         >
           <Music2 size={12} />
-          <span className="hidden md:inline">MP3</span>
+          <span>MP3</span>
         </span>
       )}
     </>

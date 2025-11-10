@@ -7,6 +7,7 @@
 import { Play, ArrowRight, Pause, Settings, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import type { Battle } from "@/lib/shared";
+import { ROUNDS_PER_BATTLE } from "@/lib/shared";
 import { ScoreCalcAnimation } from "@/components/score-calc-animation";
 
 interface BattleControlBarProps {
@@ -139,7 +140,7 @@ export function BattleControlBar({
           ) : canAdvance ? (
             <div className="flex items-center justify-center gap-2">
               <ArrowRight className="w-5 h-5" />
-              {battle.currentRound === 3 ? "Reveal Winner" : "Next Round"}
+              {battle.currentRound === ROUNDS_PER_BATTLE ? "Reveal Winner" : "Next Round"}
             </div>
           ) : (
             <div className="flex items-center justify-center gap-2">

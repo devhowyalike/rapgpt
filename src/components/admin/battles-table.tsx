@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import type { Battle } from "@/lib/shared";
+import { ROUNDS_PER_BATTLE } from "@/lib/shared";
 import {
   Table,
   TableBody,
@@ -309,7 +310,10 @@ export function BattlesTable({ battles }: BattlesTableProps) {
                 />
               </TableCell>
               <TableCell className="font-medium text-white">
-                <div className="flex items-center gap-2">
+                <Link
+                  href={`/battle/${battle.id}`}
+                  className="flex items-center gap-2 hover:text-purple-400 transition-colors underline underline-offset-2"
+                >
                   {battle.isLive && (
                     <div className="flex items-center gap-1">
                       <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
@@ -317,7 +321,7 @@ export function BattlesTable({ battles }: BattlesTableProps) {
                     </div>
                   )}
                   <span className="truncate max-w-[200px]">{battle.title}</span>
-                </div>
+                </Link>
               </TableCell>
               <TableCell>
                 <span
@@ -368,7 +372,7 @@ export function BattlesTable({ battles }: BattlesTableProps) {
                 {battle.comments.length}
               </TableCell>
               <TableCell className="text-gray-400 text-sm">
-                {battle.currentRound}/3
+                {Math.min(battle.currentRound, ROUNDS_PER_BATTLE)}/{ROUNDS_PER_BATTLE}
               </TableCell>
               <TableCell className="text-center">
                 {battle.generatedSong?.audioUrl ? (
