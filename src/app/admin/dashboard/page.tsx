@@ -9,6 +9,8 @@ import Link from "next/link";
 import { Shield, Star } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { AdminDashboardClient } from "@/components/admin/admin-dashboard-client";
+import { MonthlyTokenUsage } from "@/components/admin/monthly-token-usage";
+import { getCurrentMonthTokenTotals } from "@/lib/usage-storage";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +36,9 @@ export default async function AdminDashboardPage() {
     const currentDbUser = await db.query.users.findFirst({
       where: eq(users.clerkId, clerkUserId!),
     });
+
+    // Get monthly token totals
+    const monthlyTokens = await getCurrentMonthTokenTotals();
 
     // Decrypt user data for display
     const decryptedUsers = allUsers.map((user) => {
@@ -80,8 +85,13 @@ export default async function AdminDashboardPage() {
             </Link>
           </div>
 
-          <AdminDashboardClient 
-            users={decryptedUsers} 
+          {/* Monthly Token Usage */}
+          <div className="mb-8">
+            <MonthlyTokenUsage totals={monthlyTokens} />
+          </div>
+
+          <AdminDashboardClient
+            users={decryptedUsers}
             currentUserId={currentDbUser?.id}
           />
         </div>

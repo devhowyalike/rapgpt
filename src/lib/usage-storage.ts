@@ -160,4 +160,53 @@ export async function getBattleTokenTotalsByModel(battleId: string): Promise<Bat
   }));
 }
 
+export interface MonthlyTokenTotals {
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  reasoningTokens: number;
+  cachedInputTokens: number;
+  month: string;
+  year: number;
+}
+
+/**
+ * Get aggregate token totals for the current month.
+ * Returns totals for all usage events in the current calendar month.
+ */
+export async function getCurrentMonthTokenTotals(): Promise<MonthlyTokenTotals> {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1; // JS months are 0-indexed
+  
+  // Get first day of current month
+  const startOfMonth = new Date(year, month - 1, 1);
+  
+  // Get first day of next month
+  const startOfNextMonth = new Date(year, month, 1);
+
+  const [result] = await db
+    .select({
+      inputTokens: sql<number>`coalesce(sum(${battleTokenUsage.inputTokens})::float8, 0)`,
+      outputTokens: sql<number>`coalesce(sum(${battleTokenUsage.outputTokens})::float8, 0)`,
+      totalTokens: sql<number>`coalesce(sum(${battleTokenUsage.totalTokens})::float8, 0)`,
+      reasoningTokens: sql<number>`coalesce(sum(${battleTokenUsage.reasoningTokens})::float8, 0)`,
+      cachedInputTokens: sql<number>`coalesce(sum(${battleTokenUsage.cachedInputTokens})::float8, 0)`,
+    })
+    .from(battleTokenUsage)
+    .where(
+      sql`${battleTokenUsage.createdAt} >= ${startOfMonth} AND ${battleTokenUsage.createdAt} < ${startOfNextMonth}`
+    );
+
+  return {
+    inputTokens: Number(result?.inputTokens ?? 0),
+    outputTokens: Number(result?.outputTokens ?? 0),
+    totalTokens: Number(result?.totalTokens ?? 0),
+    reasoningTokens: Number(result?.reasoningTokens ?? 0),
+    cachedInputTokens: Number(result?.cachedInputTokens ?? 0),
+    month: now.toLocaleString('en-US', { month: 'long' }),
+    year,
+  };
+}
+
 
