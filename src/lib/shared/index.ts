@@ -4,6 +4,7 @@
  */
 
 export * from './battle-types';
+export * from './battle-helpers';
 export * from './personas';
 export * from './stages';
 

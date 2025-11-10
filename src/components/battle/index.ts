@@ -10,5 +10,6 @@ export { BattleBottomControls } from "./battle-bottom-controls";
 export { MobileActionButtons } from "./mobile-action-buttons";
 export { SidebarContainer } from "./sidebar-container";
 export { BattleControlBar } from "./battle-control-bar";
+export { BattleStateInfo } from "./battle-state-info";
 
 

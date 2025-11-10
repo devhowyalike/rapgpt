@@ -17,8 +17,10 @@ import {
   Clock,
 } from "lucide-react";
 import type { Battle } from "@/lib/shared";
-import { ROUNDS_PER_BATTLE } from "@/lib/shared";
+import { getAdvanceRoundButtonText } from "@/lib/shared";
 import type { ConnectionStatus } from "@/lib/websocket/types";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { BattleStateInfo } from "@/components/battle/battle-state-info";
 
 interface BattleControlPanelProps {
   battle: Battle;
@@ -130,7 +132,7 @@ export function BattleControlPanel({
           >
             {isStarting ? (
               <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <LoadingSpinner />
                 Starting Live...
               </>
             ) : (
@@ -153,7 +155,7 @@ export function BattleControlPanel({
             >
               {isStopping ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <LoadingSpinner size="sm" />
                   Stopping...
                 </>
               ) : (
@@ -289,7 +291,7 @@ export function BattleControlPanel({
           >
             {isGenerating ? (
               <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <LoadingSpinner />
                 Generating...
               </>
             ) : (
@@ -306,32 +308,14 @@ export function BattleControlPanel({
             className="w-full px-4 py-3 bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
           >
             <ArrowRight className="w-5 h-5" />
-            {battle.currentRound === ROUNDS_PER_BATTLE ? "End Battle" : "Next Round"}
+            {getAdvanceRoundButtonText(battle, "End Battle", "Next Round")}
           </button>
 
           {/* Current State Info */}
-          <div className="mt-4 p-3 bg-gray-800 rounded-lg space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-400">Round:</span>
-              <span className="text-white font-medium">
-                {Math.min(battle.currentRound, ROUNDS_PER_BATTLE)}/{ROUNDS_PER_BATTLE}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Turn:</span>
-              <span className="text-white font-medium">
-                {battle.currentTurn
-                  ? battle.personas[battle.currentTurn].name
-                  : "Round Complete"}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Verses:</span>
-              <span className="text-white font-medium">
-                {battle.verses.length}
-              </span>
-            </div>
-          </div>
+          <BattleStateInfo
+            battle={battle}
+            className="mt-4 p-3 bg-gray-800 rounded-lg space-y-2 text-sm"
+          />
         </div>
       )}
 

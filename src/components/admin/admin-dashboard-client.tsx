@@ -6,6 +6,7 @@ import { Shield, User, Star, Music, Eye, EyeOff } from "lucide-react";
 import { DeleteBattleButton } from "@/components/admin/delete-battle-button";
 import { DeleteUserButton } from "@/components/admin/delete-user-button";
 import type { UserDB, BattleDB } from "@/lib/db/schema";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface AdminDashboardClientProps {
   users: Array<UserDB & { displayName: string; email: string }>;
@@ -140,7 +141,7 @@ export function AdminDashboardClient({
         ) : isLoadingBattles ? (
           <div className="flex items-center justify-center h-[400px] text-gray-400">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4" />
+              <LoadingSpinner size="xl" variant="accent" className="mx-auto mb-4" />
               <p>Loading battles...</p>
             </div>
           </div>

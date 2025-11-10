@@ -8,7 +8,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import type { Stage } from "@/lib/shared/stages";
-import { ROUNDS_PER_BATTLE } from "@/lib/shared";
+import { ROUNDS_PER_BATTLE, getDisplayRound } from "@/lib/shared";
+import type { Battle } from "@/lib/shared";
 import { BattleResultsStats } from "@/components/battle-results-stats";
 
 interface BattleInfoPanelProps {
@@ -75,7 +76,7 @@ export function BattleInfoPanel({
               {isProgress ? (
                 <ul className="text-sm text-gray-300 space-y-1">
                   <li>
-                    • Round {Math.min(currentRound || 1, ROUNDS_PER_BATTLE)} of{" "}
+                    • Round {getDisplayRound(currentRound || 1)} of{" "}
                     {ROUNDS_PER_BATTLE}
                   </li>
                   <li>

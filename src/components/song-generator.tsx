@@ -8,12 +8,12 @@
 import { useState, useEffect } from "react";
 import { Music2, Zap, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import type {
@@ -303,7 +303,7 @@ export function SongGenerator({
           >
             {isGenerating ? (
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <LoadingSpinner />
                 <span>
                   {isResuming ? "Checking Status" : "Generating Song"}...{" "}
                   {progress}%
