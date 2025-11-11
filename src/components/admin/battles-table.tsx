@@ -36,22 +36,27 @@ import { useRouter } from "next/navigation";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 type SortField =
-  | "title"
+  | "matchup"
   | "status"
   | "createdAt"
   | "verses"
   | "comments"
-  | "matchup"
   | "creator"
-  | "round"
-  | "musicGenerated";
+  | "tokens";
 type SortDirection = "asc" | "desc";
 
 interface BattlesTableProps {
   battles: Battle[];
+  tokenTotalsMap?: Record<
+    string,
+    { inputTokens: number; outputTokens: number; totalTokens: number }
+  >;
 }
 
-export function BattlesTable({ battles }: BattlesTableProps) {
+export function BattlesTable({
+  battles,
+  tokenTotalsMap = {},
+}: BattlesTableProps) {
   const router = useRouter();
   const [sortField, setSortField] = React.useState<SortField>("createdAt");
   const [sortDirection, setSortDirection] =
@@ -163,9 +168,11 @@ export function BattlesTable({ battles }: BattlesTableProps) {
       let bValue: string | number;
 
       switch (sortField) {
-        case "title":
-          aValue = a.title.toLowerCase();
-          bValue = b.title.toLowerCase();
+        case "matchup":
+          aValue =
+            `${a.personas.left.name} vs. ${a.personas.right.name}`.toLowerCase();
+          bValue =
+            `${b.personas.left.name} vs. ${b.personas.right.name}`.toLowerCase();
           break;
         case "status":
           aValue = a.status;
@@ -183,23 +190,13 @@ export function BattlesTable({ battles }: BattlesTableProps) {
           aValue = a.comments.length;
           bValue = b.comments.length;
           break;
-        case "matchup":
-          aValue =
-            `${a.personas.left.name} vs. ${a.personas.right.name}`.toLowerCase();
-          bValue =
-            `${b.personas.left.name} vs. ${b.personas.right.name}`.toLowerCase();
-          break;
         case "creator":
           aValue = (a.creator?.displayName || "Unknown").toLowerCase();
           bValue = (b.creator?.displayName || "Unknown").toLowerCase();
           break;
-        case "round":
-          aValue = a.currentRound;
-          bValue = b.currentRound;
-          break;
-        case "musicGenerated":
-          aValue = a.generatedSong?.audioUrl ? 1 : 0;
-          bValue = b.generatedSong?.audioUrl ? 1 : 0;
+        case "tokens":
+          aValue = tokenTotalsMap[a.id]?.totalTokens || 0;
+          bValue = tokenTotalsMap[b.id]?.totalTokens || 0;
           break;
         default:
           return 0;
@@ -209,7 +206,7 @@ export function BattlesTable({ battles }: BattlesTableProps) {
       if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
-  }, [battles, sortField, sortDirection]);
+  }, [battles, sortField, sortDirection, tokenTotalsMap]);
 
   const SortButton = ({
     field,
@@ -227,6 +224,9 @@ export function BattlesTable({ battles }: BattlesTableProps) {
       <ArrowUpDown className="ml-2 h-4 w-4" />
     </Button>
   );
+
+  const formatTokens = (value: number | string | undefined) =>
+    value == null ? "0" : Number(value).toLocaleString();
 
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg overflow-hidden">
@@ -261,13 +261,10 @@ export function BattlesTable({ battles }: BattlesTableProps) {
               />
             </TableHead>
             <TableHead className="text-gray-300">
-              <SortButton field="title">Title</SortButton>
+              <SortButton field="matchup">Matchup</SortButton>
             </TableHead>
             <TableHead className="text-gray-300">
               <SortButton field="status">Status</SortButton>
-            </TableHead>
-            <TableHead className="text-gray-300">
-              <SortButton field="matchup">Matchup</SortButton>
             </TableHead>
             <TableHead className="text-gray-300">
               <SortButton field="creator">Creator</SortButton>
@@ -275,18 +272,21 @@ export function BattlesTable({ battles }: BattlesTableProps) {
             <TableHead className="text-gray-300">
               <SortButton field="createdAt">Created</SortButton>
             </TableHead>
-            <TableHead className="text-gray-300 text-center">
+            <TableHead className="text-gray-300 text-center w-20">
               <SortButton field="verses">Verses</SortButton>
             </TableHead>
-            <TableHead className="text-gray-300 text-center">
+            <TableHead className="text-gray-300 text-center w-24">
               <SortButton field="comments">Comments</SortButton>
             </TableHead>
-            <TableHead className="text-gray-300">
-              <SortButton field="round">Round</SortButton>
+            <TableHead className="text-gray-300">Round</TableHead>
+            <TableHead className="text-gray-300 text-right">In</TableHead>
+            <TableHead className="text-gray-300 text-right">Out</TableHead>
+            <TableHead className="text-gray-300 pr-6">
+              <div className="flex items-center justify-end">
+                <SortButton field="tokens">Tokens</SortButton>
+              </div>
             </TableHead>
-            <TableHead className="text-gray-300 text-center">
-              <SortButton field="musicGenerated">Music Generated</SortButton>
-            </TableHead>
+            <TableHead className="text-gray-300 text-center">Music</TableHead>
             <TableHead className="text-gray-300">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -309,18 +309,34 @@ export function BattlesTable({ battles }: BattlesTableProps) {
                   aria-label={`Select ${battle.title}`}
                 />
               </TableCell>
-              <TableCell className="font-medium text-white">
+              <TableCell>
                 <Link
                   href={`/battle/${battle.id}`}
-                  className="flex items-center gap-2 hover:text-purple-400 transition-colors underline underline-offset-2"
+                  className="hover:text-purple-400 transition-colors"
                 >
-                  {battle.isLive && (
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                      <Radio className="w-4 h-4 text-red-400" />
+                  <div className="flex items-center gap-2">
+                    {battle.isLive && (
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                        <Radio className="w-4 h-4 text-red-400" />
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1 text-sm">
+                      <span
+                        className="font-medium truncate max-w-[80px]"
+                        style={{ color: battle.personas.left.accentColor }}
+                      >
+                        {battle.personas.left.name}
+                      </span>
+                      <span className="text-gray-500">vs</span>
+                      <span
+                        className="font-medium truncate max-w-[80px]"
+                        style={{ color: battle.personas.right.accentColor }}
+                      >
+                        {battle.personas.right.name}
+                      </span>
                     </div>
-                  )}
-                  <span className="truncate max-w-[200px]">{battle.title}</span>
+                  </div>
                 </Link>
               </TableCell>
               <TableCell>
@@ -338,41 +354,36 @@ export function BattlesTable({ battles }: BattlesTableProps) {
                   {battle.status}
                 </span>
               </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-1 text-sm">
-                  <span
-                    className="font-medium truncate max-w-[80px]"
-                    style={{ color: battle.personas.left.accentColor }}
-                  >
-                    {battle.personas.left.name}
-                  </span>
-                  <span className="text-gray-500">vs</span>
-                  <span
-                    className="font-medium truncate max-w-[80px]"
-                    style={{ color: battle.personas.right.accentColor }}
-                  >
-                    {battle.personas.right.name}
-                  </span>
-                </div>
-              </TableCell>
               <TableCell className="text-gray-400 text-sm">
                 {battle.creator?.displayName || "Unknown"}
               </TableCell>
               <TableCell className="text-gray-400 text-sm whitespace-nowrap">
-                {new Date(battle.createdAt).toLocaleDateString("en-US", {
+                {new Date(battle.createdAt).toLocaleString("en-US", {
                   month: "short",
                   day: "numeric",
                   year: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
                 })}
               </TableCell>
-              <TableCell className="text-center text-gray-300">
+              <TableCell className="text-center text-gray-300 w-20">
                 {battle.verses.length}
               </TableCell>
-              <TableCell className="text-center text-gray-300">
+              <TableCell className="text-center text-gray-300 w-24">
                 {battle.comments.length}
               </TableCell>
               <TableCell className="text-gray-400 text-sm">
                 {getDisplayRound(battle)}/{ROUNDS_PER_BATTLE}
+              </TableCell>
+              <TableCell className="text-right text-gray-300">
+                {formatTokens(tokenTotalsMap[battle.id]?.inputTokens)}
+              </TableCell>
+              <TableCell className="text-right text-gray-300">
+                {formatTokens(tokenTotalsMap[battle.id]?.outputTokens)}
+              </TableCell>
+              <TableCell className="text-right text-gray-300 pr-6">
+                {formatTokens(tokenTotalsMap[battle.id]?.totalTokens)}
               </TableCell>
               <TableCell className="text-center">
                 {battle.generatedSong?.audioUrl ? (
@@ -403,6 +414,15 @@ export function BattlesTable({ battles }: BattlesTableProps) {
                       >
                         <Eye className="mr-2 h-4 w-4" />
                         View
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={`/admin/battles/${battle.id}/usage`}
+                        className="flex items-center cursor-pointer"
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        View Usage
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />

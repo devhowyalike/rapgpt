@@ -1,11 +1,12 @@
-import { anthropic } from '@ai-sdk/anthropic';
-import { streamText } from 'ai';
 import { getPersona } from '@/lib/shared';
 import type { Battle, Verse } from '@/lib/shared';
 import { buildSystemPrompt, getFirstVerseMessage } from '@/lib/context-overrides';
 import { z } from 'zod';
 import { broadcastEvent } from '@/lib/websocket/broadcast-helper';
 import type { VerseStreamingEvent, VerseCompleteEvent } from '@/lib/websocket/types';
+import { recordBattleTokenUsage } from '@/lib/usage-storage';
+import { getActiveModelConfig } from '@/lib/ai/model-config';
+import { generateVerse } from '@/lib/ai/verse-generator';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -97,16 +98,16 @@ export async function POST(req: Request) {
     // Build dynamic system prompt with opponent-specific context and overrides
     const systemPrompt = buildSystemPrompt(persona.systemPrompt, personaId, opponentPersona.id, opponentPersona.name);
 
-    const result = streamText({
-      model: anthropic('claude-3-5-haiku-latest'),
-      system: systemPrompt,
-      messages: [
-        {
-          role: 'user',
-          content: userMessage,
-        },
-      ],
-      temperature: 0.9,
+    // Get active model configuration
+    const modelConfig = getActiveModelConfig();
+    console.log(`[Generate Verse] Using model: ${modelConfig.modelName} (${modelConfig.provider})`);
+    console.log(`[Generate Verse] Caching enabled: ${modelConfig.supportsCaching}`);
+
+    // Generate verse using unified interface
+    const result = await generateVerse({
+      systemPrompt,
+      userMessage,
+      model: modelConfig,
     });
 
     // If live, create custom stream that broadcasts to WebSocket
@@ -168,6 +169,27 @@ export async function POST(req: Request) {
               round: battle.currentRound,
             } as VerseCompleteEvent);
             
+            // Record usage after streaming completes
+            try {
+              const usage = await result.getUsage();
+              await recordBattleTokenUsage({
+                id: crypto.randomUUID(),
+                battleId: battle.id,
+                round: battle.currentRound,
+                personaId,
+                provider: modelConfig.provider,
+                model: modelConfig.modelName,
+                inputTokens: usage.inputTokens,
+                outputTokens: usage.outputTokens,
+                totalTokens: usage.totalTokens,
+                reasoningTokens: null,
+                cachedInputTokens: usage.cachedInputTokens,
+                status: 'completed',
+              });
+            } catch (err) {
+              console.error('[Generate Verse] Failed to record token usage:', err);
+            }
+            
             controller.close();
           } catch (error) {
             controller.error(error);
@@ -182,7 +204,47 @@ export async function POST(req: Request) {
       });
     }
 
-    return result.toTextStreamResponse();
+    // Standard streaming - return as ReadableStream with usage tracking
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of result.textStream) {
+            controller.enqueue(new TextEncoder().encode(chunk));
+          }
+          
+          // Record usage after streaming completes
+          try {
+            const usage = await result.getUsage();
+            await recordBattleTokenUsage({
+              id: crypto.randomUUID(),
+              battleId: battle.id,
+              round: battle.currentRound,
+              personaId,
+              provider: modelConfig.provider,
+              model: modelConfig.modelName,
+              inputTokens: usage.inputTokens,
+              outputTokens: usage.outputTokens,
+              totalTokens: usage.totalTokens,
+              reasoningTokens: null,
+              cachedInputTokens: usage.cachedInputTokens,
+              status: 'completed',
+            });
+          } catch (err) {
+            console.error('[Generate Verse] Failed to record token usage:', err);
+          }
+          
+          controller.close();
+        } catch (error) {
+          controller.error(error);
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+      },
+    });
   } catch (error) {
     console.error('Error generating verse:', error);
     return new Response(JSON.stringify({ error: 'Failed to generate verse' }), {
