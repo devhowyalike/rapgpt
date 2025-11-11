@@ -6,7 +6,6 @@ import {
   ArrowUpDown,
   Radio,
   MoreVertical,
-  Eye,
   Trash2,
   AlertTriangle,
   Music,
