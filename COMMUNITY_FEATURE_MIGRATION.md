@@ -7,7 +7,7 @@ This guide will help you apply the database migration for the Community feature.
 The migration adds two new fields:
 
 - `is_public` (boolean, default: false) to the `battles` table
-- `is_profile_public` (boolean, default: true) to the `users` table
+- `is_profile_public` (boolean, default: false) to the `users` table
 
 ## Migration File
 
@@ -35,7 +35,7 @@ If you prefer to run the SQL manually, connect to your database and execute:
 
 ```sql
 ALTER TABLE "battles" ADD COLUMN "is_public" boolean DEFAULT false NOT NULL;
-ALTER TABLE "users" ADD COLUMN "is_profile_public" boolean DEFAULT true NOT NULL;
+ALTER TABLE "users" ADD COLUMN "is_profile_public" boolean DEFAULT false NOT NULL;
 ```
 
 ## Verification
@@ -66,8 +66,9 @@ WHERE table_name = 'users' AND column_name = 'is_profile_public';
 ### Default Behavior:
 
 - New battles are **private by default**
-- User profiles are **public by default**
+- User profiles are **private by default**
 - Users must explicitly publish a battle for it to appear on their profile
+- Users must make their profile public for others to see their published battles
 
 ## Testing
 

@@ -58,7 +58,7 @@ export async function getOrCreateUser(clerkUserId: string) {
     encryptedDisplayName: encryptedName,
     imageUrl: clerkUser.imageUrl || null,
     role: isFirstUser ? "admin" : "user",
-    isProfilePublic: true,
+    isProfilePublic: false,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

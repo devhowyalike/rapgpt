@@ -18,7 +18,7 @@ The Community feature has been successfully implemented, allowing users to:
 Added two new fields:
 
 - `isPublic` (boolean, default: false) to `battles` table - Controls battle visibility on profiles
-- `isProfilePublic` (boolean, default: true) to `users` table - Controls profile visibility
+- `isProfilePublic` (boolean, default: false) to `users` table - Controls profile visibility
 
 **Migration**: `drizzle/0001_slimy_harry_osborn.sql`
 
@@ -114,7 +114,7 @@ Added two new fields:
 ### For New Users:
 
 1. Sign up and automatically appear in the Community page
-2. Profile is public by default
+2. Profile is private by default
 3. All battles are private by default
 
 ### Publishing Battles:
@@ -127,9 +127,9 @@ Added two new fields:
 ### Profile Privacy:
 
 1. Visit your own profile via "My Profile" link in user menu
-2. Click "Make Profile Private" button
-3. Profile still appears in Community but no battles visible to others
-4. Click "Make Profile Public" to reverse
+2. Click "Make Profile Public" button to make profile visible to others
+3. Profile still appears in Community but no battles visible to others unless profile is public
+4. Click "Make Profile Private" to reverse
 
 ### Viewing Others:
 

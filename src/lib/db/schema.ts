@@ -19,7 +19,7 @@ export const users = pgTable('users', {
   encryptedDisplayName: text('encrypted_display_name'), // Encrypted user-set display name
   imageUrl: text('image_url'), // Not encrypted (public profile picture URL)
   role: text('role').notNull().default('user'), // 'admin' | 'user'
-  isProfilePublic: boolean('is_profile_public').notNull().default(true), // Profile visibility
+  isProfilePublic: boolean('is_profile_public').notNull().default(false), // Profile visibility
   createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow(),
 });

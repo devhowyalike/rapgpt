@@ -86,6 +86,7 @@ export async function POST(req: Request) {
           encryptedDisplayName: encryptedName, // Initially same as name
           imageUrl: image_url || null,
           role: isFirstUser ? 'admin' : 'user',
+          isProfilePublic: false,
         });
 
         console.log(`✅ User created: ${id} (${isFirstUser ? 'Admin' : 'User'})`);
