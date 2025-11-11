@@ -20,6 +20,7 @@ export const kennyK: ClientPersona = {
   style: 'Boom Bap',
   avatar: '/avatars/kenny-k.jpg',
   accentColor: '#00d4ff',
+  musicStyleDescription: 'underground hip-hop, jazzy samples, intricate wordplay, abstract lyrics, boom bap drums, laid-back flow with complex rhyme schemes, rare funk samples',
 };
 
 export const ladyMuse: ClientPersona = {
@@ -29,6 +30,7 @@ export const ladyMuse: ClientPersona = {
   style: 'Alt-Hop',
   avatar: '/avatars/lady-muse.jpg',
   accentColor: '#00d4ff',
+  musicStyleDescription: 'alternative hip-hop, experimental beats, eclectic samples, playful delivery, genre-blending production, unconventional flow patterns, edgy electronic elements',
 };
 
 export const timDawg: ClientPersona = {
@@ -38,6 +40,7 @@ export const timDawg: ClientPersona = {
   style: 'Boom Bap',
   avatar: '/avatars/tim-dawg.jpg',
   accentColor: '#00d4ff',
+  musicStyleDescription: 'classic East Coast boom bap, hard-hitting drums, street poetry, aggressive delivery, raw authentic sound, gritty urban aesthetics',
 };
 
 export const dawn: ClientPersona = {
@@ -47,6 +50,7 @@ export const dawn: ClientPersona = {
   style: 'R&B',
   avatar: '/avatars/dawn-en-vogue.jpg',
   accentColor: '#00d4ff',
+  musicStyleDescription: 'smooth R&B vocals, soulful melodies, melodic rap-singing hybrid, neo-soul influences, rich harmonies, emotional delivery',
 };
 
 export const CLIENT_PERSONAS: Record<string, ClientPersona> = {

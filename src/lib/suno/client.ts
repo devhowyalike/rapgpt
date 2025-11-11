@@ -110,6 +110,7 @@ export function formatLyricsForSuno(battle: Battle): string {
 
 /**
  * Build song generation prompt combining persona styles and beat selection
+ * Uses musicStyleDescription when available to avoid copyrighted artist names
  */
 export function buildSongPrompt(
   leftPersona: Persona,
@@ -118,19 +119,28 @@ export function buildSongPrompt(
 ): string {
   const beatPrompt = BEAT_STYLE_PROMPTS[beatStyle];
   
-  // Extract style characteristics from personas
-  const styles: string[] = [];
+  // Use detailed music style descriptions if available, otherwise fall back to basic style field
+  const styleDescriptions: string[] = [];
   
-  if (leftPersona.style) styles.push(leftPersona.style);
-  if (rightPersona.style) styles.push(rightPersona.style);
+  if (leftPersona.musicStyleDescription) {
+    styleDescriptions.push(leftPersona.musicStyleDescription);
+  } else if (leftPersona.style) {
+    styleDescriptions.push(leftPersona.style);
+  }
   
-  // Create a combined prompt
-  const styleDescription = styles.length > 0 
-    ? `incorporating ${styles.join(' and ')} influences, `
+  if (rightPersona.musicStyleDescription) {
+    styleDescriptions.push(rightPersona.musicStyleDescription);
+  } else if (rightPersona.style) {
+    styleDescriptions.push(rightPersona.style);
+  }
+  
+  // Create a combined prompt with descriptive characteristics
+  const styleDescription = styleDescriptions.length > 0 
+    ? `featuring ${styleDescriptions.join(' contrasted with ')}, ` 
     : '';
   
-  const prompt = `${beatPrompt}, ${styleDescription}rap battle format, energetic delivery, clear vocals, competitive flow`;
-  console.log('[Suno] Built style prompt:', {
+  const prompt = `${beatPrompt}, ${styleDescription}rap battle format, energetic delivery, clear vocals, competitive back-and-forth flow`;
+  console.log('[Music Generation] Built style prompt:', {
     beatStyle,
     prompt,
     length: prompt.length,

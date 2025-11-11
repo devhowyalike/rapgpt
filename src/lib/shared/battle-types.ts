@@ -14,6 +14,7 @@ export interface Persona {
   avatar: string;
   accentColor: string;
   systemPrompt: string;
+  musicStyleDescription?: string; // Platform-agnostic music generation descriptors (no copyrighted artist names)
 }
 
 export interface Bar {
