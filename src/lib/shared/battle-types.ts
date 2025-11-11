@@ -15,6 +15,7 @@ export interface Persona {
   accentColor: string;
   systemPrompt: string;
   musicStyleDescription?: string; // Platform-agnostic music generation descriptors (no copyrighted artist names)
+  vocalGender?: 'm' | 'f'; // Vocal gender for music generation APIs
 }
 
 export interface Bar {

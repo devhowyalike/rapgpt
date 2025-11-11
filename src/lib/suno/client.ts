@@ -17,6 +17,7 @@ interface SunoGenerateRequest {
   instrumental: boolean;
   model: 'V3_5' | 'V4' | 'V4_5' | 'V4_5PLUS' | 'V5';
   callBackUrl?: string;
+  vocalGender?: 'm' | 'f';
 }
 
 interface SunoGenerateResponse {
@@ -109,6 +110,32 @@ export function formatLyricsForSuno(battle: Battle): string {
 }
 
 /**
+ * Determine vocal gender for song generation based on battle personas
+ * If both personas have the same gender, use it
+ * If mixed gender battle, prefer undefined to let the API handle variation
+ */
+function determineVocalGender(
+  leftPersona: Persona,
+  rightPersona: Persona
+): 'm' | 'f' | undefined {
+  const leftGender = leftPersona.vocalGender;
+  const rightGender = rightPersona.vocalGender;
+  
+  // If both personas have the same gender preference, use it
+  if (leftGender && rightGender && leftGender === rightGender) {
+    return leftGender;
+  }
+  
+  // Mixed gender battle - let API handle the variation naturally
+  // or if one is defined and the other isn't, use the defined one
+  if (leftGender && !rightGender) return leftGender;
+  if (rightGender && !leftGender) return rightGender;
+  
+  // Let the API decide naturally for mixed gender battles
+  return undefined;
+}
+
+/**
  * Build song generation prompt combining persona styles and beat selection
  * Uses musicStyleDescription when available to avoid copyrighted artist names
  */
@@ -163,6 +190,7 @@ export async function generateSong(
   const lyrics = formatLyricsForSuno(battle);
   const style = buildSongPrompt(battle.personas.left, battle.personas.right, beatStyle);
   const title = `${battle.title} - ${beatStyle.toUpperCase()} Battle`;
+  const vocalGender = determineVocalGender(battle.personas.left, battle.personas.right);
   
   const requestBody: SunoGenerateRequest = {
     prompt: lyrics,
@@ -172,6 +200,7 @@ export async function generateSong(
     instrumental: false,
     model: 'V4_5', // V4.5 model - good balance of quality and speed
     callBackUrl: 'https://example.com/callback', // Dummy callback - we poll instead
+    vocalGender: vocalGender,
   };
   
   console.log('[Suno] Generating song with request:', {
@@ -180,6 +209,7 @@ export async function generateSong(
     style_length: style.length,
     title_length: title.length,
     model: requestBody.model,
+    vocalGender: requestBody.vocalGender,
   });
   
   const response = await fetch(`${SUNO_API_BASE_URL}/api/v1/generate`, {
