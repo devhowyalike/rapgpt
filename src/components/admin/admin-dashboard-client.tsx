@@ -192,6 +192,13 @@ export function AdminDashboardClient({
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
+                      <Link
+                        href={`/admin/battles/${battle.id}`}
+                        className="p-2 bg-gray-600 hover:bg-gray-500 text-white rounded transition-colors"
+                        title="View Battle Details"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Link>
                       <DeleteBattleButton
                         battleId={battle.id}
                         battleTitle={battle.title}

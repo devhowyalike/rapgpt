@@ -16,7 +16,6 @@ export interface BattleTokenUsageEvent {
   inputTokens?: number | null;
   outputTokens?: number | null;
   totalTokens?: number | null;
-  reasoningTokens?: number | null;
   cachedInputTokens?: number | null;
   status?: 'completed' | 'error';
   createdAt?: Date;
@@ -36,7 +35,6 @@ export async function recordBattleTokenUsage(event: BattleTokenUsageEvent): Prom
     inputTokens: event.inputTokens ?? null,
     outputTokens: event.outputTokens ?? null,
     totalTokens: event.totalTokens ?? null,
-    reasoningTokens: event.reasoningTokens ?? null,
     cachedInputTokens: event.cachedInputTokens ?? null,
     status: event.status ?? 'completed',
     createdAt: event.createdAt ?? new Date(),
@@ -49,6 +47,7 @@ export interface BattleTokenTotals {
   inputTokens: number;
   outputTokens: number;
   totalTokens: number;
+  cachedInputTokens: number;
 }
 
 /**
@@ -61,6 +60,7 @@ export async function getBattleTokenTotals(battleId: string): Promise<BattleToke
       inputTokens: sql<number>`coalesce(sum(${battleTokenUsage.inputTokens})::float8, 0)`,
       outputTokens: sql<number>`coalesce(sum(${battleTokenUsage.outputTokens})::float8, 0)`,
       totalTokens: sql<number>`coalesce(sum(${battleTokenUsage.totalTokens})::float8, 0)`,
+      cachedInputTokens: sql<number>`coalesce(sum(${battleTokenUsage.cachedInputTokens})::float8, 0)`,
     })
     .from(battleTokenUsage)
     .where(eq(battleTokenUsage.battleId, battleId));
@@ -69,6 +69,7 @@ export async function getBattleTokenTotals(battleId: string): Promise<BattleToke
     inputTokens: Number(result?.inputTokens ?? 0),
     outputTokens: Number(result?.outputTokens ?? 0),
     totalTokens: Number(result?.totalTokens ?? 0),
+    cachedInputTokens: Number(result?.cachedInputTokens ?? 0),
   };
 }
 
@@ -83,6 +84,7 @@ export async function getAllBattlesTokenTotals(): Promise<Record<string, BattleT
       inputTokens: sql<number>`coalesce(sum(${battleTokenUsage.inputTokens})::float8, 0)`,
       outputTokens: sql<number>`coalesce(sum(${battleTokenUsage.outputTokens})::float8, 0)`,
       totalTokens: sql<number>`coalesce(sum(${battleTokenUsage.totalTokens})::float8, 0)`,
+      cachedInputTokens: sql<number>`coalesce(sum(${battleTokenUsage.cachedInputTokens})::float8, 0)`,
     })
     .from(battleTokenUsage)
     .groupBy(battleTokenUsage.battleId);
@@ -93,6 +95,7 @@ export async function getAllBattlesTokenTotals(): Promise<Record<string, BattleT
       inputTokens: Number(r.inputTokens ?? 0),
       outputTokens: Number(r.outputTokens ?? 0),
       totalTokens: Number(r.totalTokens ?? 0),
+      cachedInputTokens: Number(r.cachedInputTokens ?? 0),
     };
   }
   return map;
@@ -108,7 +111,6 @@ export interface BattleTokenEventRow {
   inputTokens: number | null;
   outputTokens: number | null;
   totalTokens: number | null;
-  reasoningTokens: number | null;
   cachedInputTokens: number | null;
   status: 'completed' | 'error';
   createdAt: Date;
@@ -164,7 +166,6 @@ export interface MonthlyTokenTotals {
   inputTokens: number;
   outputTokens: number;
   totalTokens: number;
-  reasoningTokens: number;
   cachedInputTokens: number;
   month: string;
   year: number;
@@ -190,7 +191,6 @@ export async function getCurrentMonthTokenTotals(): Promise<MonthlyTokenTotals> 
       inputTokens: sql<number>`coalesce(sum(${battleTokenUsage.inputTokens})::float8, 0)`,
       outputTokens: sql<number>`coalesce(sum(${battleTokenUsage.outputTokens})::float8, 0)`,
       totalTokens: sql<number>`coalesce(sum(${battleTokenUsage.totalTokens})::float8, 0)`,
-      reasoningTokens: sql<number>`coalesce(sum(${battleTokenUsage.reasoningTokens})::float8, 0)`,
       cachedInputTokens: sql<number>`coalesce(sum(${battleTokenUsage.cachedInputTokens})::float8, 0)`,
     })
     .from(battleTokenUsage)
@@ -202,7 +202,6 @@ export async function getCurrentMonthTokenTotals(): Promise<MonthlyTokenTotals> 
     inputTokens: Number(result?.inputTokens ?? 0),
     outputTokens: Number(result?.outputTokens ?? 0),
     totalTokens: Number(result?.totalTokens ?? 0),
-    reasoningTokens: Number(result?.reasoningTokens ?? 0),
     cachedInputTokens: Number(result?.cachedInputTokens ?? 0),
     month: now.toLocaleString('en-US', { month: 'long' }),
     year,

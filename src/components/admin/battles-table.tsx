@@ -6,15 +6,18 @@ import {
   ArrowUpDown,
   Radio,
   MoreVertical,
-  Eye,
   Trash2,
   AlertTriangle,
   Music,
   Check,
   X,
+  Play,
+  FileText,
+  Hash,
 } from "lucide-react";
 import type { Battle } from "@/lib/shared";
 import { ROUNDS_PER_BATTLE, getDisplayRound } from "@/lib/shared";
+import type { BattleTokenTotals } from "@/lib/usage-storage";
 import {
   Table,
   TableBody,
@@ -47,10 +50,7 @@ type SortDirection = "asc" | "desc";
 
 interface BattlesTableProps {
   battles: Battle[];
-  tokenTotalsMap?: Record<
-    string,
-    { inputTokens: number; outputTokens: number; totalTokens: number }
-  >;
+  tokenTotalsMap?: Record<string, BattleTokenTotals>;
 }
 
 export function BattlesTable({
@@ -281,6 +281,7 @@ export function BattlesTable({
             <TableHead className="text-gray-300">Round</TableHead>
             <TableHead className="text-gray-300 text-right">In</TableHead>
             <TableHead className="text-gray-300 text-right">Out</TableHead>
+            <TableHead className="text-gray-300 text-right">Cached</TableHead>
             <TableHead className="text-gray-300 pr-6">
               <div className="flex items-center justify-end">
                 <SortButton field="tokens">Tokens</SortButton>
@@ -382,6 +383,9 @@ export function BattlesTable({
               <TableCell className="text-right text-gray-300">
                 {formatTokens(tokenTotalsMap[battle.id]?.outputTokens)}
               </TableCell>
+              <TableCell className="text-right text-orange-300">
+                {formatTokens(tokenTotalsMap[battle.id]?.cachedInputTokens)}
+              </TableCell>
               <TableCell className="text-right text-gray-300 pr-6">
                 {formatTokens(tokenTotalsMap[battle.id]?.totalTokens)}
               </TableCell>
@@ -409,11 +413,20 @@ export function BattlesTable({
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
                       <Link
+                        href={`/admin/battles/${battle.id}`}
+                        className="flex items-center cursor-pointer"
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        View Details
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
                         href={`/battle/${battle.id}`}
                         className="flex items-center cursor-pointer"
                       >
-                        <Eye className="mr-2 h-4 w-4" />
-                        View
+                        <Play className="mr-2 h-4 w-4" />
+                        Replay Battle
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -421,8 +434,8 @@ export function BattlesTable({
                         href={`/admin/battles/${battle.id}/usage`}
                         className="flex items-center cursor-pointer"
                       >
-                        <Eye className="mr-2 h-4 w-4" />
-                        View Usage
+                        <Hash className="mr-2 h-4 w-4" />
+                        View Token Usage
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />

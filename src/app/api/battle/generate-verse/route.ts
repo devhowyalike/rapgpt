@@ -182,7 +182,6 @@ export async function POST(req: Request) {
                 inputTokens: usage.inputTokens,
                 outputTokens: usage.outputTokens,
                 totalTokens: usage.totalTokens,
-                reasoningTokens: null,
                 cachedInputTokens: usage.cachedInputTokens,
                 status: 'completed',
               });
@@ -225,7 +224,6 @@ export async function POST(req: Request) {
               inputTokens: usage.inputTokens,
               outputTokens: usage.outputTokens,
               totalTokens: usage.totalTokens,
-              reasoningTokens: null,
               cachedInputTokens: usage.cachedInputTokens,
               status: 'completed',
             });

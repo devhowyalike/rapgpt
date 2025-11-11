@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingUp, Zap, ArrowUpRight, ArrowDownRight, Coins } from "lucide-react";
+import { Zap, ArrowUpRight, ArrowDownRight, Coins } from "lucide-react";
 import type { MonthlyTokenTotals } from "@/lib/usage-storage";
 
 interface MonthlyTokenUsageProps {
@@ -39,14 +39,6 @@ export function MonthlyTokenUsage({ totals }: MonthlyTokenUsageProps) {
       borderColor: "border-green-500/30",
     },
     {
-      label: "Reasoning Tokens",
-      value: totals.reasoningTokens,
-      icon: TrendingUp,
-      color: "text-yellow-400",
-      bgColor: "bg-yellow-500/20",
-      borderColor: "border-yellow-500/30",
-    },
-    {
       label: "Cached Input",
       value: totals.cachedInputTokens,
       icon: Zap,
@@ -68,7 +60,7 @@ export function MonthlyTokenUsage({ totals }: MonthlyTokenUsageProps) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
