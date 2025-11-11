@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import {
-  getAllClientPersonas,
+  getPrimaryClientPersonas,
+  getPersonaGroups,
+  getClientPersona,
   type ClientPersona,
 } from "@/lib/shared/personas/client";
 import { useAuth } from "@clerk/nextjs";
@@ -30,6 +32,7 @@ interface BattleSelections {
   commentsEnabled: boolean;
   showStageSelect: boolean;
   autoStartOnAdvance: boolean;
+  selectionStep?: "player1" | "player2" | "complete";
 }
 
 interface CharacterSelectProps {
@@ -46,6 +49,12 @@ export function CharacterSelect({
 }: CharacterSelectProps = {}) {
   const [player1, setPlayer1] = useState<ClientPersona | null>(null);
   const [player2, setPlayer2] = useState<ClientPersona | null>(null);
+  const [lastInteractedSlot, setLastInteractedSlot] = useState<
+    "player1" | "player2" | null
+  >(null);
+  const [selectionStep, setSelectionStep] = useState<
+    "player1" | "player2" | "complete"
+  >("player1");
   const [hoveredPersona, setHoveredPersona] = useState<ClientPersona | null>(
     null
   );
@@ -95,7 +104,9 @@ export function CharacterSelect({
     checkAdminStatus();
   }, [userId, isLoaded]);
 
-  const personas = getAllClientPersonas();
+  // Only show primary personas in the grid
+  const primaryPersonas = getPrimaryClientPersonas();
+  const personaGroups = getPersonaGroups();
 
   // Load from sessionStorage on mount
   useEffect(() => {
@@ -109,11 +120,11 @@ export function CharacterSelect({
 
           // Restore player selections
           if (selections.player1Id) {
-            const persona = personas.find((p) => p.id === selections.player1Id);
+            const persona = getClientPersona(selections.player1Id);
             if (persona) setPlayer1(persona);
           }
           if (selections.player2Id) {
-            const persona = personas.find((p) => p.id === selections.player2Id);
+            const persona = getClientPersona(selections.player2Id);
             if (persona) setPlayer2(persona);
           }
 
@@ -123,6 +134,7 @@ export function CharacterSelect({
           setCommentsEnabled(selections.commentsEnabled);
           setShowStageSelect(selections.showStageSelect);
           setAutoStartOnAdvance(selections.autoStartOnAdvance ?? true);
+          setSelectionStep(selections.selectionStep ?? "player1");
 
           // Add a minimum delay so the loading screen is visible to users
           // This provides visual feedback that the session is being restored
@@ -140,7 +152,7 @@ export function CharacterSelect({
     };
 
     loadSelections();
-  }, [isHydrated, personas, minLoadingDelay]);
+  }, [isHydrated, minLoadingDelay]);
 
   // Save to sessionStorage whenever selections change
   useEffect(() => {
@@ -155,6 +167,7 @@ export function CharacterSelect({
         commentsEnabled,
         showStageSelect,
         autoStartOnAdvance,
+        selectionStep,
       };
       sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(selections));
     } catch (error) {
@@ -168,43 +181,139 @@ export function CharacterSelect({
     commentsEnabled,
     showStageSelect,
     autoStartOnAdvance,
+    selectionStep,
     isHydrated,
   ]);
 
-  const handlePersonaClick = (persona: ClientPersona) => {
+  const nextVariantId = (
+    primaryId: string,
+    currentId?: string | null
+  ): string | null => {
+    const group = personaGroups[primaryId] || [primaryId];
+    if (!currentId) return group[0] ?? null;
+    const i = group.indexOf(currentId);
+    if (i === -1) return group[0] ?? null;
+    return i < group.length - 1 ? group[i + 1] : null; // null => deselect
+  };
+
+  const handlePersonaClick = (primary: ClientPersona) => {
     // Clear hover preview on touch devices after click
     if (isTouchDevice) {
       setHoveredPersona(null);
     }
 
-    // Check if clicking a selected character (deselect)
-    if (player1?.id === persona.id) {
-      setPlayer1(null);
+    const group = personaGroups[primary.id] || [primary.id];
+    const p1InGroup = !!(player1 && group.includes(player1.id));
+    const p2InGroup = !!(player2 && group.includes(player2.id));
+
+    // Lock selection based on current step
+    if (selectionStep === "player1") {
+      // Only allow P1 selection/cycling
+      if (p1InGroup) {
+        // Cycle P1's costume
+        const currentId = player1?.id ?? null;
+        const nextId = nextVariantId(primary.id, currentId);
+        if (nextId) {
+          const nextPersona = getClientPersona(nextId);
+          if (nextPersona) {
+            setPlayer1(nextPersona);
+          }
+        } else {
+          setPlayer1(null);
+        }
+      } else {
+        // Select P1
+        const nextId = nextVariantId(primary.id, null);
+        const nextPersona = nextId ? getClientPersona(nextId) : null;
+        if (nextPersona) {
+          setPlayer1(nextPersona);
+        }
+      }
       return;
     }
 
-    if (player2?.id === persona.id) {
-      setPlayer2(null);
+    if (selectionStep === "player2") {
+      // Only allow P2 selection/cycling
+      if (p2InGroup) {
+        // Cycle P2's costume
+        const currentId = player2?.id ?? null;
+        const nextId = nextVariantId(primary.id, currentId);
+        if (nextId) {
+          const nextPersona = getClientPersona(nextId);
+          if (nextPersona) {
+            setPlayer2(nextPersona);
+          }
+        } else {
+          setPlayer2(null);
+        }
+      } else {
+        // Select P2
+        const nextId = nextVariantId(primary.id, null);
+        const nextPersona = nextId ? getClientPersona(nextId) : null;
+        if (nextPersona) {
+          setPlayer2(nextPersona);
+        }
+      }
       return;
     }
 
-    // Select logic - assign to first empty slot
-    if (!player1) {
-      setPlayer1(persona);
-    } else if (!player2) {
-      setPlayer2(persona);
+    // If selection is complete, allow cycling both
+    if (selectionStep === "complete") {
+      // If neither slot has this group selected, do nothing (selections are locked)
+      if (!p1InGroup && !p2InGroup) {
+        return;
+      }
+
+      // If one or both slots have this group's variant, cycle that slot
+      let target: "player1" | "player2" | null = null;
+      if (p1InGroup && p2InGroup) {
+        target = lastInteractedSlot ?? "player1";
+      } else if (p1InGroup) {
+        target = "player1";
+      } else if (p2InGroup) {
+        target = "player2";
+      }
+
+      if (target === "player1") {
+        const currentId = player1?.id ?? null;
+        const nextId = nextVariantId(primary.id, currentId);
+        if (nextId) {
+          const nextPersona = getClientPersona(nextId);
+          if (nextPersona) {
+            setPlayer1(nextPersona);
+            setLastInteractedSlot("player1");
+          }
+        } else {
+          setPlayer1(null);
+          setLastInteractedSlot("player1");
+        }
+        return;
+      }
+
+      if (target === "player2") {
+        const currentId = player2?.id ?? null;
+        const nextId = nextVariantId(primary.id, currentId);
+        if (nextId) {
+          const nextPersona = getClientPersona(nextId);
+          if (nextPersona) {
+            setPlayer2(nextPersona);
+            setLastInteractedSlot("player2");
+          }
+        } else {
+          setPlayer2(null);
+          setLastInteractedSlot("player2");
+        }
+        return;
+      }
     }
-    // If both slots full and clicking an unselected character, do nothing
   };
 
-  const isSelected = (persona: ClientPersona) => {
-    return player1?.id === persona.id || player2?.id === persona.id;
-  };
-
-  const getSelectionLabel = (persona: ClientPersona) => {
-    if (player1?.id === persona.id) return "P1";
-    if (player2?.id === persona.id) return "P2";
-    return null;
+  const isCardSelected = (primaryId: string) => {
+    const group = personaGroups[primaryId] || [primaryId];
+    return (
+      (player1 && group.includes(player1.id)) ||
+      (player2 && group.includes(player2.id))
+    );
   };
 
   const handleProceedToStageSelect = () => {
@@ -301,9 +410,11 @@ export function CharacterSelect({
               <SelectionBottom>
                 {/* Character Selection Grid */}
                 <SelectionGrid gap="normal">
-                  {personas.map((persona) => {
-                    const selected = isSelected(persona);
-                    const label = getSelectionLabel(persona);
+                  {primaryPersonas.map((persona) => {
+                    const group = personaGroups[persona.id] || [persona.id];
+                    const p1InGroup = !!(player1 && group.includes(player1.id));
+                    const p2InGroup = !!(player2 && group.includes(player2.id));
+                    const selected = p1InGroup || p2InGroup;
 
                     return (
                       <button
@@ -325,23 +436,38 @@ export function CharacterSelect({
                         ${selected ? "scale-105 md:scale-110 z-10" : ""}
                       `}
                       >
-                        {/* Selection Indicator */}
+                        {/* Selection Indicators (support both P1 and P2) */}
                         {selected && (
-                          <div
-                            className={`
-                            absolute top-0 right-0 z-20
-                            w-7 h-7 md:w-8 md:h-8 rounded-full
-                            flex items-center justify-center
-                            font-bold text-xs
-                            ${
-                              label === "P1"
-                                ? "bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.8)]"
-                                : "bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.8)]"
-                            }
-                          `}
-                          >
-                            {label}
-                          </div>
+                          <>
+                            {p1InGroup && (
+                              <div
+                                className={`
+                                  absolute top-0 right-0 z-20
+                                  w-7 h-7 md:w-8 md:h-8 rounded-full
+                                  flex items-center justify-center
+                                  font-bold text-xs
+                                  bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.8)]
+                                `}
+                              >
+                                P1
+                              </div>
+                            )}
+                            {p2InGroup && (
+                              <div
+                                className={`
+                                  absolute ${
+                                    p1InGroup ? "top-6 md:top-7" : "top-0"
+                                  } right-0 z-20
+                                  w-7 h-7 md:w-8 md:h-8 rounded-full
+                                  flex items-center justify-center
+                                  font-bold text-xs
+                                  bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.8)]
+                                `}
+                              >
+                                P2
+                              </div>
+                            )}
+                          </>
                         )}
 
                         {/* Deselect Overlay - shows on hover of selected character */}
@@ -351,8 +477,8 @@ export function CharacterSelect({
                               <div className="text-white font-bold text-2xl md:text-3xl mb-1">
                                 ✕
                               </div>
-                              <div className="text-white font-semibold text-xs">
-                                DESELECT
+                              <div className="text-white font-semibold text-xs uppercase">
+                                Deselect
                               </div>
                             </div>
                           </div>
@@ -369,7 +495,9 @@ export function CharacterSelect({
                           transition-all duration-300
                           ${
                             selected
-                              ? label === "P1"
+                              ? p1InGroup && p2InGroup
+                                ? "border-yellow-400 shadow-[0_0_30px_rgba(250,204,21,0.8)]"
+                                : p1InGroup
                                 ? "border-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.8)]"
                                 : "border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.8)]"
                               : "border-gray-700 hover:border-yellow-400 hover:shadow-[0_0_20px_rgba(250,204,21,0.5)]"
@@ -391,12 +519,30 @@ export function CharacterSelect({
 
                 {/* Start Button */}
                 <SelectionActions>
-                  <ActionButton
-                    onClick={handleProceedToStageSelect}
-                    disabled={!player1 || !player2}
-                  >
-                    {player1 && player2 ? "SELECT FIGHTERS" : "SELECT FIGHTERS"}
-                  </ActionButton>
+                  {selectionStep === "player1" ? (
+                    <ActionButton
+                      onClick={() => {
+                        if (player1) {
+                          setSelectionStep("player2");
+                        }
+                      }}
+                      disabled={!player1}
+                    >
+                      SELECT PLAYER 1
+                    </ActionButton>
+                  ) : (
+                    <ActionButton
+                      onClick={() => {
+                        if (player2) {
+                          setSelectionStep("complete");
+                          handleProceedToStageSelect();
+                        }
+                      }}
+                      disabled={!player2}
+                    >
+                      SELECT PLAYER 2
+                    </ActionButton>
+                  )}
                 </SelectionActions>
               </SelectionBottom>
             </SelectionLayout>

@@ -14,6 +14,11 @@ export interface Persona {
   avatar: string;
   accentColor: string;
   systemPrompt: string;
+  /**
+   * Optional: IDs of alternative costume personas linked to this primary persona.
+   * Order determines cycling order in character select (primary → alt1 → alt2 → …).
+   */
+  altCostumes?: string[];
   musicStyleDescription?: string; // Platform-agnostic music generation descriptors (no copyrighted artist names)
   vocalGender?: 'm' | 'f'; // Vocal gender for music generation APIs
 }

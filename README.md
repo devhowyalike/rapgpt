@@ -112,6 +112,27 @@ Personas are defined in `src/lib/shared/personas/`. Each persona has:
 - **Lady Muse**: Queen of the mic with poetic flow
 - **Kenny K**: Smooth West Coast storyteller
 
+### Alt Costumes
+
+Primary personas can declare alternative costumes that behave as full personas but are grouped under the primary for character selection.
+
+- Add `altCostumes?: string[]` on the primary persona (client file) with IDs of alt personas in cycling order.
+- Create each alt persona as its own client entry and system prompt file.
+- Register the alt in `src/lib/shared/personas/index.ts` so it has a `systemPrompt`.
+- The character select shows only primaries; repeated clicks on a primary tile cycle through its variants: primary → alt1 → alt2 → … → deselect.
+- If both players select variants from the same group, the tile displays both P1 and P2 badges.
+
+Example:
+
+```ts
+// src/lib/shared/personas/client.ts
+export const kennyK: ClientPersona = {
+  id: 'kennyK',
+  /* ... */
+  altCostumes: ['mrAkron'],
+};
+```
+
 ### Battle Flow
 
 1. Battle is initialized with two personas

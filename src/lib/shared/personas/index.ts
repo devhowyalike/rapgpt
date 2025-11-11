@@ -13,6 +13,7 @@ import { kennyKSystemPrompt } from './kennyK';
 import { ladyMuseSystemPrompt } from './ladyMuse';
 import { timDawgSystemPrompt } from './timDawg';
 import { dawnSystemPrompt } from './dawn';
+import { mrAkronSystemPrompt } from './mrAkron';
 
 // Map of persona IDs to their system prompts
 const SYSTEM_PROMPTS: Record<string, string> = {
@@ -20,6 +21,7 @@ const SYSTEM_PROMPTS: Record<string, string> = {
   ladyMuse: ladyMuseSystemPrompt,
   timDawg: timDawgSystemPrompt,
   dawn: dawnSystemPrompt,
+  mrAkron: mrAkronSystemPrompt,
 };
 
 // Assemble full Persona objects at runtime by combining client data + systemPrompts
@@ -27,6 +29,7 @@ const kennyK: Persona = { ...clientPersonas.kennyK, systemPrompt: kennyKSystemPr
 const ladyMuse: Persona = { ...clientPersonas.ladyMuse, systemPrompt: ladyMuseSystemPrompt };
 const timDawg: Persona = { ...clientPersonas.timDawg, systemPrompt: timDawgSystemPrompt };
 const dawn: Persona = { ...clientPersonas.dawn, systemPrompt: dawnSystemPrompt };
+const mrAkron: Persona = { ...clientPersonas.mrAkron, systemPrompt: mrAkronSystemPrompt };
 
 // Server-side: Full persona data with systemPrompts
 export const AVAILABLE_PERSONAS: Record<string, Persona> = {
@@ -34,6 +37,7 @@ export const AVAILABLE_PERSONAS: Record<string, Persona> = {
   ladyMuse,
   timDawg,
   dawn,
+  mrAkron,
 };
 
 export function getPersona(id: string): Persona | null {
