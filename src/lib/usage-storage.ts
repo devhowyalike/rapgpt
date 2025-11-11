@@ -49,6 +49,7 @@ export interface BattleTokenTotals {
   inputTokens: number;
   outputTokens: number;
   totalTokens: number;
+  cachedInputTokens: number;
 }
 
 /**
@@ -61,6 +62,7 @@ export async function getBattleTokenTotals(battleId: string): Promise<BattleToke
       inputTokens: sql<number>`coalesce(sum(${battleTokenUsage.inputTokens})::float8, 0)`,
       outputTokens: sql<number>`coalesce(sum(${battleTokenUsage.outputTokens})::float8, 0)`,
       totalTokens: sql<number>`coalesce(sum(${battleTokenUsage.totalTokens})::float8, 0)`,
+      cachedInputTokens: sql<number>`coalesce(sum(${battleTokenUsage.cachedInputTokens})::float8, 0)`,
     })
     .from(battleTokenUsage)
     .where(eq(battleTokenUsage.battleId, battleId));
@@ -69,6 +71,7 @@ export async function getBattleTokenTotals(battleId: string): Promise<BattleToke
     inputTokens: Number(result?.inputTokens ?? 0),
     outputTokens: Number(result?.outputTokens ?? 0),
     totalTokens: Number(result?.totalTokens ?? 0),
+    cachedInputTokens: Number(result?.cachedInputTokens ?? 0),
   };
 }
 
@@ -83,6 +86,7 @@ export async function getAllBattlesTokenTotals(): Promise<Record<string, BattleT
       inputTokens: sql<number>`coalesce(sum(${battleTokenUsage.inputTokens})::float8, 0)`,
       outputTokens: sql<number>`coalesce(sum(${battleTokenUsage.outputTokens})::float8, 0)`,
       totalTokens: sql<number>`coalesce(sum(${battleTokenUsage.totalTokens})::float8, 0)`,
+      cachedInputTokens: sql<number>`coalesce(sum(${battleTokenUsage.cachedInputTokens})::float8, 0)`,
     })
     .from(battleTokenUsage)
     .groupBy(battleTokenUsage.battleId);
@@ -93,6 +97,7 @@ export async function getAllBattlesTokenTotals(): Promise<Record<string, BattleT
       inputTokens: Number(r.inputTokens ?? 0),
       outputTokens: Number(r.outputTokens ?? 0),
       totalTokens: Number(r.totalTokens ?? 0),
+      cachedInputTokens: Number(r.cachedInputTokens ?? 0),
     };
   }
   return map;
