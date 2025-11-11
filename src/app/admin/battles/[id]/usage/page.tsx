@@ -73,125 +73,127 @@ export default async function AdminBattleUsagePage({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg overflow-hidden">
-            <div className="px-4 py-3 border-b border-purple-500/20">
-              <h2 className="text-white font-semibold">By Model</h2>
-            </div>
-            <Table>
-              <TableHeader>
-                <TableRow className="border-purple-500/20">
-                  <TableHead className="text-gray-300">Provider</TableHead>
-                  <TableHead className="text-gray-300">Model</TableHead>
-                  <TableHead className="text-gray-300 text-right">
-                    Input
-                  </TableHead>
-                  <TableHead className="text-gray-300 text-right">
-                    Output
-                  </TableHead>
-                  <TableHead className="text-gray-300 text-right pr-6">
-                    Total
-                  </TableHead>
+        <div className="mb-8 bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg overflow-hidden">
+          <div className="px-4 py-3 border-b border-purple-500/20">
+            <h2 className="text-white font-semibold">By Model</h2>
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow className="border-purple-500/20">
+                <TableHead className="text-gray-300">Provider</TableHead>
+                <TableHead className="text-gray-300">Model</TableHead>
+                <TableHead className="text-gray-300 text-right">
+                  Input
+                </TableHead>
+                <TableHead className="text-gray-300 text-right">
+                  Output
+                </TableHead>
+                <TableHead className="text-gray-300 text-right pr-6">
+                  Total
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {byModel.map((row) => (
+                <TableRow
+                  key={`${row.provider}-${row.model}`}
+                  className="border-purple-500/20"
+                >
+                  <TableCell className="text-gray-300">
+                    {row.provider}
+                  </TableCell>
+                  <TableCell className="text-gray-300">{row.model}</TableCell>
+                  <TableCell className="text-gray-300 text-right">
+                    {fmt(row.inputTokens)}
+                  </TableCell>
+                  <TableCell className="text-gray-300 text-right">
+                    {fmt(row.outputTokens)}
+                  </TableCell>
+                  <TableCell className="text-gray-300 text-right pr-6">
+                    {fmt(row.totalTokens)}
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {byModel.map((row) => (
-                  <TableRow
-                    key={`${row.provider}-${row.model}`}
-                    className="border-purple-500/20"
+              ))}
+              {byModel.length === 0 && (
+                <TableRow className="border-purple-500/20">
+                  <TableCell
+                    colSpan={5}
+                    className="text-center text-gray-400 py-6"
                   >
-                    <TableCell className="text-gray-300">
-                      {row.provider}
-                    </TableCell>
-                    <TableCell className="text-gray-300">{row.model}</TableCell>
-                    <TableCell className="text-gray-300 text-right">
-                      {fmt(row.inputTokens)}
-                    </TableCell>
-                    <TableCell className="text-gray-300 text-right">
-                      {fmt(row.outputTokens)}
-                    </TableCell>
-                    <TableCell className="text-gray-300 text-right pr-6">
-                      {fmt(row.totalTokens)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {byModel.length === 0 && (
-                  <TableRow className="border-purple-500/20">
-                    <TableCell
-                      colSpan={5}
-                      className="text-center text-gray-400 py-6"
-                    >
-                      No usage recorded yet.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-
-          <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg overflow-hidden">
-            <div className="px-4 py-3 border-b border-purple-500/20">
-              <h2 className="text-white font-semibold">Events</h2>
-            </div>
-            <Table>
-              <TableHeader>
-                <TableRow className="border-purple-500/20">
-                  <TableHead className="text-gray-300">Time</TableHead>
-                  <TableHead className="text-gray-300">Round</TableHead>
-                  <TableHead className="text-gray-300">Persona</TableHead>
-                  <TableHead className="text-gray-300">Provider</TableHead>
-                  <TableHead className="text-gray-300">Model</TableHead>
-                  <TableHead className="text-gray-300 text-right">
-                    Input
-                  </TableHead>
-                  <TableHead className="text-gray-300 text-right">
-                    Output
-                  </TableHead>
-                  <TableHead className="text-gray-300 text-right pr-6">
-                    Total
-                  </TableHead>
+                    No usage recorded yet.
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {events.map((e) => (
-                  <TableRow key={e.id} className="border-purple-500/20">
-                    <TableCell className="text-gray-300">
-                      {new Date(e.createdAt).toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-gray-300">
-                      {e.round ?? "-"}
-                    </TableCell>
-                    <TableCell className="text-gray-300">
-                      {e.personaId ?? "-"}
-                    </TableCell>
-                    <TableCell className="text-gray-300">
-                      {e.provider}
-                    </TableCell>
-                    <TableCell className="text-gray-300">{e.model}</TableCell>
-                    <TableCell className="text-gray-300 text-right">
-                      {fmt(e.inputTokens)}
-                    </TableCell>
-                    <TableCell className="text-gray-300 text-right">
-                      {fmt(e.outputTokens)}
-                    </TableCell>
-                    <TableCell className="text-gray-300 text-right pr-6">
-                      {fmt(e.totalTokens)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {events.length === 0 && (
-                  <TableRow className="border-purple-500/20">
-                    <TableCell
-                      colSpan={8}
-                      className="text-center text-gray-400 py-6"
-                    >
-                      No events recorded yet.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg overflow-hidden">
+          <div className="px-4 py-3 border-b border-purple-500/20">
+            <h2 className="text-white font-semibold">Events</h2>
           </div>
+          <Table>
+            <TableHeader>
+              <TableRow className="border-purple-500/20">
+                <TableHead className="text-gray-300">Time</TableHead>
+                <TableHead className="text-gray-300">Round</TableHead>
+                <TableHead className="text-gray-300">Persona</TableHead>
+                <TableHead className="text-gray-300">Provider</TableHead>
+                <TableHead className="text-gray-300">Model</TableHead>
+                <TableHead className="text-gray-300 text-right">
+                  Input
+                </TableHead>
+                <TableHead className="text-gray-300 text-right">
+                  Output
+                </TableHead>
+                <TableHead className="text-gray-300 text-right">
+                  Cached
+                </TableHead>
+                <TableHead className="text-gray-300 text-right pr-6">
+                  Total
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {events.map((e) => (
+                <TableRow key={e.id} className="border-purple-500/20">
+                  <TableCell className="text-gray-300">
+                    {new Date(e.createdAt).toLocaleString()}
+                  </TableCell>
+                  <TableCell className="text-gray-300">
+                    {e.round ?? "-"}
+                  </TableCell>
+                  <TableCell className="text-gray-300">
+                    {e.personaId ?? "-"}
+                  </TableCell>
+                  <TableCell className="text-gray-300">{e.provider}</TableCell>
+                  <TableCell className="text-gray-300">{e.model}</TableCell>
+                  <TableCell className="text-gray-300 text-right">
+                    {fmt(e.inputTokens)}
+                  </TableCell>
+                  <TableCell className="text-gray-300 text-right">
+                    {fmt(e.outputTokens)}
+                  </TableCell>
+                  <TableCell className="text-orange-400 text-right">
+                    {fmt(e.cachedInputTokens)}
+                  </TableCell>
+                  <TableCell className="text-gray-300 text-right pr-6">
+                    {fmt(e.totalTokens)}
+                  </TableCell>
+                </TableRow>
+              ))}
+              {events.length === 0 && (
+                <TableRow className="border-purple-500/20">
+                  <TableCell
+                    colSpan={9}
+                    className="text-center text-gray-400 py-6"
+                  >
+                    No events recorded yet.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>
