@@ -38,6 +38,10 @@
     --battle-header-height
   ); /* active battle, end of round - below site header + battle header */
   --mobile-battle-end-height: 0px; /* completed battle replay - stick at top */
+
+  /* Player colors for character select */
+  --player1-color: 59 130 246; /* blue-500 */
+  --player2-color: 239 68 68; /* red-500 */
 }
 
 /* Desktop header heights - applied at md breakpoint (768px+) */

@@ -155,7 +155,7 @@ export function LiveBattlesDisplay({
           <div className="flex items-center justify-center gap-4 md:gap-8 mb-6 flex-wrap">
             <div className="text-center">
               <div className="mb-2 flex justify-center">
-                <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-blue-500">
+                <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-[rgb(var(--player1-color))]">
                   <Image
                     src={battle.personas.player1.avatar}
                     alt={battle.personas.player1.name}
@@ -173,11 +173,11 @@ export function LiveBattlesDisplay({
               </div>
             </div>
 
-            <div className="text-4xl font-bold text-red-500">VS</div>
+            <div className="text-4xl font-bold text-[rgb(var(--player2-color))]">VS</div>
 
             <div className="text-center">
               <div className="mb-2 flex justify-center">
-                <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-red-500">
+                <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-[rgb(var(--player2-color))]">
                   <Image
                     src={battle.personas.player2.avatar}
                     alt={battle.personas.player2.name}

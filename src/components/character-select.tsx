@@ -293,9 +293,9 @@ export function CharacterSelect({
                     <div
                       className={`text-2xl md:text-3xl font-black transition-all duration-300 ${
                         selectionStep === "player1"
-                          ? "text-blue-500 drop-shadow-[0_0_20px_rgba(59,130,246,0.8)] opacity-100"
+                          ? "text-[rgb(var(--player1-color))] drop-shadow-[0_0_20px_rgba(var(--player1-color),0.8)] opacity-100"
                           : selectionStep === "player2"
-                          ? "text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] opacity-100"
+                          ? "text-[rgb(var(--player2-color))] drop-shadow-[0_0_20px_rgba(var(--player2-color),0.8)] opacity-100"
                           : "opacity-0"
                       }`}
                     >
@@ -311,7 +311,7 @@ export function CharacterSelect({
                     {/* VS text with fixed height to prevent layout shift */}
                     <div className="h-6 md:h-8 lg:h-10 flex items-center justify-center">
                       <div
-                        className={`text-lg md:text-xl lg:text-2xl font-black text-red-500 animate-pulse drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] transition-opacity duration-300 ${
+                        className={`text-lg md:text-xl lg:text-2xl font-black text-[rgb(var(--player2-color))] animate-pulse drop-shadow-[0_0_20px_rgba(var(--player2-color),0.8)] transition-opacity duration-300 ${
                           player1 && player2 ? "opacity-100" : "opacity-0"
                         }`}
                       >

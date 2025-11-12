@@ -91,8 +91,8 @@ export function PersonaGridItem({
           ${
             isActiveSelection
               ? isPlayer1 && showPlayer1Indicator
-                ? "border-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.8)]"
-                : "border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.8)]"
+                ? "border-[rgb(var(--player1-color))] shadow-[0_0_30px_rgba(var(--player1-color),0.8)]"
+                : "border-[rgb(var(--player2-color))] shadow-[0_0_30px_rgba(var(--player2-color),0.8)]"
               : "border-gray-700 hover:border-yellow-400 hover:shadow-[0_0_20px_rgba(250,204,21,0.5)]"
           }
         `}

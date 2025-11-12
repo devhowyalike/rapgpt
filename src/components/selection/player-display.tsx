@@ -22,17 +22,22 @@ export function PlayerDisplay({
   onClear,
   isActive = false,
 }: PlayerDisplayProps) {
-  const isLeft = side === "left";
-  const colorClass = isLeft ? "blue" : "red";
-  const borderColor = isLeft ? "border-blue-500" : "border-red-500";
-  const textColor = isLeft ? "text-blue-400" : "text-red-400";
-  const shadowColor = isLeft
-    ? "rgba(59, 130, 246, 0.6)"
-    : "rgba(239, 68, 68, 0.6)";
-  const glowColor = isLeft ? "bg-blue-500/20" : "bg-red-500/20";
-  const dropShadowColor = isLeft
-    ? "drop-shadow-[0_0_20px_rgba(59,130,246,0.8)]"
-    : "drop-shadow-[0_0_20px_rgba(239,68,68,0.8)]";
+  const isPlayer1 = side === "left";
+  const borderColor = isPlayer1
+    ? "border-[rgb(var(--player1-color))]"
+    : "border-[rgb(var(--player2-color))]";
+  const textColor = isPlayer1
+    ? "text-[rgb(var(--player1-color))]/90"
+    : "text-[rgb(var(--player2-color))]/90";
+  const shadowColor = isPlayer1
+    ? "rgba(var(--player1-color), 0.6)"
+    : "rgba(var(--player2-color), 0.6)";
+  const glowColor = isPlayer1
+    ? "bg-[rgb(var(--player1-color))]/20"
+    : "bg-[rgb(var(--player2-color))]/20";
+  const dropShadowColor = isPlayer1
+    ? "drop-shadow-[0_0_20px_rgba(var(--player1-color),0.8)]"
+    : "drop-shadow-[0_0_20px_rgba(var(--player2-color),0.8)]";
 
   return (
     <div
@@ -65,7 +70,7 @@ export function PlayerDisplay({
                   onClear();
                 }}
                 className="absolute -top-2 -right-2 md:-top-3 md:-right-3 w-6 h-6 md:w-7 md:h-7 rounded-full bg-gray-900 border border-gray-700 text-white text-xs md:text-sm font-bold shadow-lg group-hover:bg-gray-800 z-10 transition-all duration-200 group-hover:scale-110 flex items-center justify-center"
-                aria-label={`Edit ${isLeft ? "Player 1" : "Player 2"}`}
+                aria-label={`Edit ${isPlayer1 ? "Player 1" : "Player 2"}`}
                 title="Edit"
               >
                 ✎

@@ -17,8 +17,8 @@ export function SelectionIndicator({ player, variantIndex }: SelectionIndicatorP
         font-bold text-xs
         ${
           isPlayer1
-            ? "bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.8)]"
-            : "bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.8)]"
+            ? "bg-[rgb(var(--player1-color))] text-white shadow-[0_0_20px_rgba(var(--player1-color),0.8)]"
+            : "bg-[rgb(var(--player2-color))] text-white shadow-[0_0_20px_rgba(var(--player2-color),0.8)]"
         }
       `}
     >
