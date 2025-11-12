@@ -193,7 +193,33 @@ export function CharacterSelect({
     if (!currentId) return group[0] ?? null;
     const i = group.indexOf(currentId);
     if (i === -1) return group[0] ?? null;
-    return i < group.length - 1 ? group[i + 1] : null; // null => deselect
+    // Wrap around to the beginning instead of deselecting
+    return group[(i + 1) % group.length] ?? null;
+  };
+
+  const getHoverPreviewPersona = (primary: ClientPersona): ClientPersona => {
+    const group = personaGroups[primary.id] || [primary.id];
+    const p1InGroup = !!(player1 && group.includes(player1.id));
+    const p2InGroup = !!(player2 && group.includes(player2.id));
+
+    // Show the currently selected variant based on active selection step
+    if (selectionStep === "player1" && p1InGroup && player1) {
+      // Show current P1 selection
+      return player1;
+    } else if (selectionStep === "player2" && p2InGroup && player2) {
+      // Show current P2 selection
+      return player2;
+    } else if (selectionStep === "complete") {
+      // In complete step, show currently selected variant for whichever player has this character
+      if (p1InGroup && player1) {
+        return player1;
+      } else if (p2InGroup && player2) {
+        return player2;
+      }
+    }
+
+    // Default: show the primary persona (first costume in the group)
+    return primary;
   };
 
   const handlePersonaClick = (primary: ClientPersona) => {
@@ -217,9 +243,17 @@ export function CharacterSelect({
           const nextPersona = getClientPersona(nextId);
           if (nextPersona) {
             setPlayer1(nextPersona);
+            // Update hover preview to show the new selection
+            if (!isTouchDevice) {
+              setHoveredPersona(nextPersona);
+            }
           }
         } else {
           setPlayer1(null);
+          // Update hover preview to show deselection
+          if (!isTouchDevice) {
+            setHoveredPersona(primary);
+          }
         }
       } else {
         // Select P1
@@ -227,6 +261,10 @@ export function CharacterSelect({
         const nextPersona = nextId ? getClientPersona(nextId) : null;
         if (nextPersona) {
           setPlayer1(nextPersona);
+          // Update hover preview to show the new selection
+          if (!isTouchDevice) {
+            setHoveredPersona(nextPersona);
+          }
         }
       }
       return;
@@ -242,9 +280,17 @@ export function CharacterSelect({
           const nextPersona = getClientPersona(nextId);
           if (nextPersona) {
             setPlayer2(nextPersona);
+            // Update hover preview to show the new selection
+            if (!isTouchDevice) {
+              setHoveredPersona(nextPersona);
+            }
           }
         } else {
           setPlayer2(null);
+          // Update hover preview to show deselection
+          if (!isTouchDevice) {
+            setHoveredPersona(primary);
+          }
         }
       } else {
         // Select P2
@@ -252,6 +298,10 @@ export function CharacterSelect({
         const nextPersona = nextId ? getClientPersona(nextId) : null;
         if (nextPersona) {
           setPlayer2(nextPersona);
+          // Update hover preview to show the new selection
+          if (!isTouchDevice) {
+            setHoveredPersona(nextPersona);
+          }
         }
       }
       return;
@@ -282,10 +332,18 @@ export function CharacterSelect({
           if (nextPersona) {
             setPlayer1(nextPersona);
             setLastInteractedSlot("player1");
+            // Update hover preview to show the new selection
+            if (!isTouchDevice) {
+              setHoveredPersona(nextPersona);
+            }
           }
         } else {
           setPlayer1(null);
           setLastInteractedSlot("player1");
+          // Update hover preview to show deselection
+          if (!isTouchDevice) {
+            setHoveredPersona(primary);
+          }
         }
         return;
       }
@@ -298,10 +356,18 @@ export function CharacterSelect({
           if (nextPersona) {
             setPlayer2(nextPersona);
             setLastInteractedSlot("player2");
+            // Update hover preview to show the new selection
+            if (!isTouchDevice) {
+              setHoveredPersona(nextPersona);
+            }
           }
         } else {
           setPlayer2(null);
           setLastInteractedSlot("player2");
+          // Update hover preview to show deselection
+          if (!isTouchDevice) {
+            setHoveredPersona(primary);
+          }
         }
         return;
       }
@@ -323,12 +389,18 @@ export function CharacterSelect({
 
   const handleBackToCharacterSelect = () => {
     setShowStageSelect(false);
+    setSelectionStep("player2");
   };
 
-  // Show player1 if selected, otherwise show hoveredPersona as preview if no player1 selected
-  const displayPlayer1 = player1 || (!player1 && hoveredPersona);
-  // Show player2 if selected, otherwise show hoveredPersona as preview if player1 is selected but not player2
-  const displayPlayer2 = player2 || (player1 && !player2 && hoveredPersona);
+  // Base players without hover previews
+  const basePlayer1 = player1;
+  const basePlayer2 = player2;
+
+  // Compute hover previews based on active selection step
+  const previewedPlayer1 =
+    selectionStep === "player1" ? hoveredPersona || basePlayer1 : basePlayer1;
+  const previewedPlayer2 =
+    selectionStep === "player2" ? hoveredPersona || basePlayer2 : basePlayer2;
 
   // Show loading screen while hydrating from sessionStorage
   if (!isHydrated) {
@@ -377,116 +449,184 @@ export function CharacterSelect({
               <SelectionContainer>
                 {/* Player 1 */}
                 <PlayerDisplay
-                  player={displayPlayer1}
+                  player={previewedPlayer1}
                   side="left"
                   showBio={true}
                   placeholder="PLAYER 1"
+                  onActivate={() => setSelectionStep("player1")}
+                  onClear={
+                    player1 && selectionStep !== "player1"
+                      ? () => setSelectionStep("player1")
+                      : undefined
+                  }
+                  isActive={selectionStep === "player1"}
                 />
 
                 {/* Center - VS Text */}
-                <CenterDisplay title="CHARACTER" subtitle="SELECT">
-                  {/* VS text with fixed height to prevent layout shift */}
-                  <div className="h-6 md:h-8 lg:h-10 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-2">
+                  {/* Player Step Indicator */}
+                  <div className="h-8 flex items-center justify-center">
                     <div
-                      className={`text-lg md:text-xl lg:text-2xl font-black text-red-500 animate-pulse drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] transition-opacity duration-300 ${
-                        player1 && player2 ? "opacity-100" : "opacity-0"
+                      className={`text-2xl md:text-3xl font-black transition-all duration-300 ${
+                        selectionStep === "player1"
+                          ? "text-blue-500 drop-shadow-[0_0_20px_rgba(59,130,246,0.8)] opacity-100"
+                          : selectionStep === "player2"
+                          ? "text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] opacity-100"
+                          : "opacity-0"
                       }`}
                     >
-                      VS
+                      {selectionStep === "player1"
+                        ? "Player 1"
+                        : selectionStep === "player2"
+                        ? "Player 2"
+                        : ""}
                     </div>
                   </div>
-                </CenterDisplay>
+
+                  <CenterDisplay title="CHARACTER" subtitle="SELECT">
+                    {/* VS text with fixed height to prevent layout shift */}
+                    <div className="h-6 md:h-8 lg:h-10 flex items-center justify-center">
+                      <div
+                        className={`text-lg md:text-xl lg:text-2xl font-black text-red-500 animate-pulse drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] transition-opacity duration-300 ${
+                          player1 && player2 ? "opacity-100" : "opacity-0"
+                        }`}
+                      >
+                        VS
+                      </div>
+                    </div>
+                  </CenterDisplay>
+                </div>
 
                 {/* Player 2 */}
                 <PlayerDisplay
-                  player={displayPlayer2}
+                  player={previewedPlayer2}
                   side="right"
                   showBio={true}
                   placeholder="PLAYER 2"
+                  onActivate={() => setSelectionStep("player2")}
+                  onClear={
+                    player2 && selectionStep !== "player2"
+                      ? () => setSelectionStep("player2")
+                      : undefined
+                  }
+                  isActive={selectionStep === "player2"}
                 />
               </SelectionContainer>
 
               {/* Bottom Section - Character Grid */}
               <SelectionBottom>
-                {/* Character Selection Grid */}
-                <SelectionGrid gap="normal">
-                  {primaryPersonas.map((persona) => {
-                    const group = personaGroups[persona.id] || [persona.id];
-                    const p1InGroup = !!(player1 && group.includes(player1.id));
-                    const p2InGroup = !!(player2 && group.includes(player2.id));
-                    const selected = p1InGroup || p2InGroup;
+                <AnimatePresence initial={false} mode="wait">
+                  <motion.div
+                    key={selectionStep}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  >
+                    {/* Character Selection Grid */}
+                    <SelectionGrid gap="normal">
+                      {primaryPersonas.map((persona) => {
+                        const group = personaGroups[persona.id] || [persona.id];
+                        const p1InGroup = !!(
+                          player1 && group.includes(player1.id)
+                        );
+                        const p2InGroup = !!(
+                          player2 && group.includes(player2.id)
+                        );
+                        const p1VariantIndex =
+                          p1InGroup && player1
+                            ? Math.max(0, group.indexOf(player1.id))
+                            : -1;
+                        const p2VariantIndex =
+                          p2InGroup && player2
+                            ? Math.max(0, group.indexOf(player2.id))
+                            : -1;
+                        const selected = p1InGroup || p2InGroup;
 
-                    return (
-                      <button
-                        key={persona.id}
-                        onClick={() => handlePersonaClick(persona)}
-                        onMouseEnter={() =>
-                          !isTouchDevice && setHoveredPersona(persona)
-                        }
-                        onMouseLeave={() =>
-                          !isTouchDevice && setHoveredPersona(null)
-                        }
-                        onTouchStart={() =>
-                          isTouchDevice && setHoveredPersona(null)
-                        }
-                        className={`
+                        return (
+                          <button
+                            key={persona.id}
+                            onClick={() => handlePersonaClick(persona)}
+                            onMouseEnter={() =>
+                              !isTouchDevice &&
+                              setHoveredPersona(getHoverPreviewPersona(persona))
+                            }
+                            onMouseLeave={() =>
+                              !isTouchDevice && setHoveredPersona(null)
+                            }
+                            onTouchStart={() =>
+                              isTouchDevice && setHoveredPersona(null)
+                            }
+                            className={`
                         relative group
                         transition-all duration-300 transform
                         hover:scale-105 md:hover:scale-110 hover:z-20
-                        ${selected ? "scale-105 md:scale-110 z-10" : ""}
+                        ${
+                          selected &&
+                          ((p1InGroup && selectionStep === "player1") ||
+                            (p2InGroup && selectionStep === "player2"))
+                            ? "scale-105 md:scale-110 z-10"
+                            : ""
+                        }
                       `}
-                      >
-                        {/* Selection Indicators (support both P1 and P2) */}
-                        {selected && (
-                          <>
-                            {p1InGroup && (
-                              <div
-                                className={`
+                          >
+                            {/* Selection Indicators - only show for active selection step */}
+                            {selected && (
+                              <>
+                                {p1InGroup && selectionStep === "player1" && (
+                                  <div
+                                    className={`
                                   absolute top-0 right-0 z-20
                                   w-7 h-7 md:w-8 md:h-8 rounded-full
                                   flex items-center justify-center
                                   font-bold text-xs
                                   bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.8)]
                                 `}
-                              >
-                                P1
-                              </div>
-                            )}
-                            {p2InGroup && (
-                              <div
-                                className={`
-                                  absolute ${
-                                    p1InGroup ? "top-6 md:top-7" : "top-0"
-                                  } right-0 z-20
+                                  >
+                                    P1
+                                    {p1VariantIndex > 0 && (
+                                      <span className="absolute -bottom-1 -right-1 w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-white/90" />
+                                    )}
+                                  </div>
+                                )}
+                                {p2InGroup && selectionStep === "player2" && (
+                                  <div
+                                    className={`
+                                  absolute top-0 right-0 z-20
                                   w-7 h-7 md:w-8 md:h-8 rounded-full
                                   flex items-center justify-center
                                   font-bold text-xs
                                   bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.8)]
                                 `}
-                              >
-                                P2
-                              </div>
+                                  >
+                                    P2
+                                    {p2VariantIndex > 0 && (
+                                      <span className="absolute -bottom-1 -right-1 w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-white/90" />
+                                    )}
+                                  </div>
+                                )}
+                              </>
                             )}
-                          </>
-                        )}
 
-                        {/* Deselect Overlay - shows on hover of selected character */}
-                        {selected && (
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/70 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100 z-10 rounded-lg">
-                            <div className="text-center">
-                              <div className="text-white font-bold text-2xl md:text-3xl mb-1">
-                                ✕
-                              </div>
-                              <div className="text-white font-semibold text-xs uppercase">
-                                Deselect
-                              </div>
-                            </div>
-                          </div>
-                        )}
+                            {/* Deselect Overlay - shows on hover of selected character for active step */}
+                            {selected &&
+                              ((p1InGroup && selectionStep === "player1") ||
+                                (p2InGroup && selectionStep === "player2")) && (
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/70 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100 z-10 rounded-lg">
+                                  <div className="text-center">
+                                    <div className="text-white font-bold text-2xl md:text-3xl mb-1">
+                                      ✕
+                                    </div>
+                                    <div className="text-white font-semibold text-xs uppercase">
+                                      Deselect
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
 
-                        {/* Character Portrait */}
-                        <div
-                          className={`
+                            {/* Character Portrait */}
+                            <div
+                              className={`
                           w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28
                           rounded-lg
                           border-4
@@ -494,56 +634,58 @@ export function CharacterSelect({
                           bg-linear-to-br from-gray-800 to-gray-900
                           transition-all duration-300
                           ${
-                            selected
-                              ? p1InGroup && p2InGroup
-                                ? "border-yellow-400 shadow-[0_0_30px_rgba(250,204,21,0.8)]"
-                                : p1InGroup
+                            selected &&
+                            ((p1InGroup && selectionStep === "player1") ||
+                              (p2InGroup && selectionStep === "player2"))
+                              ? p1InGroup && selectionStep === "player1"
                                 ? "border-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.8)]"
                                 : "border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.8)]"
                               : "border-gray-700 hover:border-yellow-400 hover:shadow-[0_0_20px_rgba(250,204,21,0.5)]"
                           }
                         `}
-                        >
-                          <Image
-                            src={persona.avatar}
-                            alt={persona.name}
-                            width={112}
-                            height={112}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </button>
-                    );
-                  })}
-                </SelectionGrid>
+                            >
+                              <Image
+                                src={persona.avatar}
+                                alt={persona.name}
+                                width={112}
+                                height={112}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </SelectionGrid>
 
-                {/* Start Button */}
-                <SelectionActions>
-                  {selectionStep === "player1" ? (
-                    <ActionButton
-                      onClick={() => {
-                        if (player1) {
-                          setSelectionStep("player2");
-                        }
-                      }}
-                      disabled={!player1}
-                    >
-                      SELECT PLAYER 1
-                    </ActionButton>
-                  ) : (
-                    <ActionButton
-                      onClick={() => {
-                        if (player2) {
-                          setSelectionStep("complete");
-                          handleProceedToStageSelect();
-                        }
-                      }}
-                      disabled={!player2}
-                    >
-                      SELECT PLAYER 2
-                    </ActionButton>
-                  )}
-                </SelectionActions>
+                    {/* Start Button */}
+                    <SelectionActions>
+                      {selectionStep === "player1" ? (
+                        <ActionButton
+                          onClick={() => {
+                            if (player1) {
+                              setSelectionStep("player2");
+                            }
+                          }}
+                          disabled={!player1}
+                        >
+                          SELECT PLAYER 1
+                        </ActionButton>
+                      ) : (
+                        <ActionButton
+                          onClick={() => {
+                            if (player2) {
+                              setSelectionStep("complete");
+                              handleProceedToStageSelect();
+                            }
+                          }}
+                          disabled={!player2}
+                        >
+                          SELECT PLAYER 2
+                        </ActionButton>
+                      )}
+                    </SelectionActions>
+                  </motion.div>
+                </AnimatePresence>
               </SelectionBottom>
             </SelectionLayout>
           </motion.div>

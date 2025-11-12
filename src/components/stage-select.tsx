@@ -242,6 +242,43 @@ export function StageSelect({
       <div className="flex-1 flex flex-col md:flex-row md:items-center md:justify-center gap-2 md:gap-12 lg:gap-16 px-4 md:px-8 pb-2 md:pb-8">
         {/* Left Side - Stage Grid (Bottom on mobile, Left on desktop) */}
         <div className="flex flex-col items-center gap-2 md:gap-6 order-2 md:order-1 mt-4 md:mt-0">
+          {/* Quick change player buttons */}
+          <div className="flex items-center gap-2 md:gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  const stored = sessionStorage.getItem(sessionStorageKey);
+                  const selections = stored ? JSON.parse(stored) : {};
+                  selections.selectionStep = "player1";
+                  selections.showStageSelect = false;
+                  sessionStorage.setItem(sessionStorageKey, JSON.stringify(selections));
+                } catch {}
+                onBack();
+              }}
+              className="px-3 py-1 rounded-full text-xs md:text-sm font-semibold bg-gray-800 text-gray-200 border border-gray-700 hover:bg-gray-700"
+              title="Change Player 1"
+            >
+              Change P1
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  const stored = sessionStorage.getItem(sessionStorageKey);
+                  const selections = stored ? JSON.parse(stored) : {};
+                  selections.selectionStep = "player2";
+                  selections.showStageSelect = false;
+                  sessionStorage.setItem(sessionStorageKey, JSON.stringify(selections));
+                } catch {}
+                onBack();
+              }}
+              className="px-3 py-1 rounded-full text-xs md:text-sm font-semibold bg-gray-800 text-gray-200 border border-gray-700 hover:bg-gray-700"
+              title="Change Player 2"
+            >
+              Change P2
+            </button>
+          </div>
           {/* Stage Selection Grid */}
           <SelectionGrid gap="normal">
             {stages.map((stage) => renderStageButton(stage))}

@@ -8,6 +8,9 @@ interface PlayerDisplayProps {
   side: "left" | "right";
   showBio?: boolean;
   placeholder?: string;
+  onActivate?: () => void;
+  onClear?: () => void;
+  isActive?: boolean;
 }
 
 export function PlayerDisplay({
@@ -15,6 +18,9 @@ export function PlayerDisplay({
   side,
   showBio = false,
   placeholder = "PLAYER",
+  onActivate,
+  onClear,
+  isActive = false,
 }: PlayerDisplayProps) {
   const isLeft = side === "left";
   const colorClass = isLeft ? "blue" : "red";
@@ -29,7 +35,14 @@ export function PlayerDisplay({
     : "drop-shadow-[0_0_20px_rgba(239,68,68,0.8)]";
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-start h-[140px] md:h-[280px]">
+    <div
+      className={`flex-1 flex flex-col items-center justify-start h-[140px] md:h-[280px] ${
+        onActivate ? "cursor-pointer" : ""
+      }`}
+      onClick={onActivate}
+      role={onActivate ? "button" : undefined}
+      aria-pressed={onActivate ? (isActive ? "true" : "false") : undefined}
+    >
       {player ? (
         <>
           {/* Character Style */}
@@ -43,8 +56,27 @@ export function PlayerDisplay({
             <div
               className={`absolute inset-0 ${glowColor} blur-2xl rounded-full animate-pulse`}
             />
+            {/* Edit button - positioned outside overflow container */}
+            {onClear && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClear();
+                }}
+                className="absolute -top-2 -right-2 md:-top-3 md:-right-3 w-6 h-6 md:w-7 md:h-7 rounded-full bg-gray-900 border border-gray-700 text-white text-xs md:text-sm font-bold shadow-lg group-hover:bg-gray-800 z-10 transition-all duration-200 group-hover:scale-110 flex items-center justify-center"
+                aria-label={`Edit ${isLeft ? "Player 1" : "Player 2"}`}
+                title="Edit"
+              >
+                ✎
+              </button>
+            )}
             <div
-              className={`relative w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 ${borderColor} overflow-hidden bg-linear-to-br from-gray-800 to-gray-900 shadow-2xl`}
+              className={`relative w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 ${borderColor} overflow-hidden bg-linear-to-br from-gray-800 to-gray-900 shadow-2xl ${
+                isActive
+                  ? "ring-2 ring-yellow-400 ring-offset-2 ring-offset-black"
+                  : ""
+              }`}
               style={{
                 boxShadow: `0 0 40px ${shadowColor}`,
               }}
