@@ -117,7 +117,34 @@ export function PlayerDisplay({
           <p className="text-xs md:text-sm lg:text-base font-semibold mb-1 md:mb-2 opacity-0 shrink-0">
             Style: Placeholder
           </p>
-          <div className="opacity-40 mb-1 md:mb-2 shrink-0">
+          <div
+            className={`mb-1 md:mb-2 shrink-0 relative ${
+              isActive ? "opacity-70" : "opacity-40"
+            }`}
+          >
+            {/* Snake Ring Animation when active */}
+            {isActive && (
+              <div className="absolute inset-0 pointer-events-none">
+                <svg
+                  className="absolute inset-0 w-full h-full animate-[snake-ring_3s_linear_infinite]"
+                  viewBox="0 0 100 100"
+                >
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="48"
+                    fill="none"
+                    stroke={
+                      isPlayer1 ? "rgb(59, 130, 246)" : "rgb(239, 68, 68)"
+                    }
+                    strokeWidth="4"
+                    strokeDasharray="75 225"
+                    strokeLinecap="round"
+                    opacity="0.9"
+                  />
+                </svg>
+              </div>
+            )}
             <div className="w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 border-gray-700 border-dashed flex items-center justify-center text-3xl md:text-4xl lg:text-5xl text-gray-700">
               ?
             </div>
