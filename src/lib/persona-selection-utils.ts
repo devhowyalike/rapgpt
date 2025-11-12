@@ -7,7 +7,7 @@ import {
 const personaGroups = getPersonaGroups();
 
 /**
- * Get the next variant ID in a persona group, cycling back to the start
+ * Get the next variant ID in a persona group, returning null after the last variant (for deselection)
  */
 export function getNextVariantId(
   primaryId: string,
@@ -17,8 +17,9 @@ export function getNextVariantId(
   if (!currentId) return group[0] ?? null;
   const i = group.indexOf(currentId);
   if (i === -1) return group[0] ?? null;
-  // Wrap around to the beginning instead of deselecting
-  return group[(i + 1) % group.length] ?? null;
+  // Return null after cycling through all variants to allow deselection
+  const nextIndex = i + 1;
+  return nextIndex < group.length ? group[nextIndex] ?? null : null;
 }
 
 /**

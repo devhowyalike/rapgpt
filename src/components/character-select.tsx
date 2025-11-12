@@ -203,6 +203,20 @@ export function CharacterSelect({
 
   const handleBackToCharacterSelect = () => {
     setShowStageSelect(false);
+    // Check sessionStorage to see if a specific selection step was requested
+    try {
+      const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
+      if (stored) {
+        const selections: BattleSelections = JSON.parse(stored);
+        if (selections.selectionStep) {
+          setSelectionStep(selections.selectionStep);
+          return;
+        }
+      }
+    } catch (error) {
+      console.error("Failed to read selectionStep from sessionStorage:", error);
+    }
+    // Default to player2 if no specific step was requested
     setSelectionStep("player2");
   };
 
