@@ -37,6 +37,8 @@ interface BattleSelections {
   showStageSelect: boolean;
   autoStartOnAdvance: boolean;
   selectionStep?: "player1" | "player2" | "complete";
+  editPlayer?: boolean;
+  fromStage?: boolean;
 }
 
 interface CharacterSelectProps {
@@ -165,7 +167,13 @@ export function CharacterSelect({
     if (!isHydrated) return;
 
     try {
+      // Preserve transient flags (e.g., editPlayer/fromStage) by merging with existing
+      const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
+      const previous: Partial<BattleSelections> = stored
+        ? JSON.parse(stored)
+        : {};
       const selections: BattleSelections = {
+        ...previous,
         player1Id: player1?.id,
         player2Id: player2?.id,
         createAsLive,
@@ -413,6 +421,39 @@ export function CharacterSelect({
                         <ActionButton
                           onClick={() => {
                             if (player1) {
+                              // Check if we're editing from stage select
+                              try {
+                                const stored =
+                                  sessionStorage.getItem(SESSION_STORAGE_KEY);
+                                if (stored) {
+                                  const selections: BattleSelections =
+                                    JSON.parse(stored);
+                                  if (
+                                    selections.editPlayer &&
+                                    selections.fromStage
+                                  ) {
+                                    // Clear the edit flags and return to stage select
+                                    selections.editPlayer = false;
+                                    selections.fromStage = false;
+                                    selections.selectionStep = "complete";
+                                    selections.showStageSelect = true;
+                                    sessionStorage.setItem(
+                                      SESSION_STORAGE_KEY,
+                                      JSON.stringify(selections)
+                                    );
+                                    setSelectionStep("complete");
+                                    setShowStageSelect(true);
+                                    handleProceedToStageSelect();
+                                    return;
+                                  }
+                                }
+                              } catch (error) {
+                                console.error(
+                                  "Failed to check edit flags:",
+                                  error
+                                );
+                              }
+                              // Normal flow: proceed to player 2
                               setSelectionStep("player2");
                             }
                           }}
@@ -424,6 +465,38 @@ export function CharacterSelect({
                         <ActionButton
                           onClick={() => {
                             if (player2) {
+                              // Check if we're editing from stage select
+                              try {
+                                const stored =
+                                  sessionStorage.getItem(SESSION_STORAGE_KEY);
+                                if (stored) {
+                                  const selections: BattleSelections =
+                                    JSON.parse(stored);
+                                  if (
+                                    selections.editPlayer &&
+                                    selections.fromStage
+                                  ) {
+                                    // Clear the edit flags and return to stage select
+                                    selections.editPlayer = false;
+                                    selections.fromStage = false;
+                                    selections.selectionStep = "complete";
+                                    selections.showStageSelect = true;
+                                    sessionStorage.setItem(
+                                      SESSION_STORAGE_KEY,
+                                      JSON.stringify(selections)
+                                    );
+                                    setSelectionStep("complete");
+                                    setShowStageSelect(true);
+                                    handleProceedToStageSelect();
+                                    return;
+                                  }
+                                }
+                              } catch (error) {
+                                console.error(
+                                  "Failed to check edit flags:",
+                                  error
+                                );
+                              }
                               setSelectionStep("complete");
                               handleProceedToStageSelect();
                             }
