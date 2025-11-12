@@ -208,7 +208,12 @@ export function CharacterSelect({
       const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
       if (stored) {
         const selections: BattleSelections = JSON.parse(stored);
-        if (selections.selectionStep) {
+        // If selectionStep is "complete", set to "player2" to allow editing
+        // Otherwise use the stored step (e.g. "player1" or "player2")
+        if (
+          selections.selectionStep &&
+          selections.selectionStep !== "complete"
+        ) {
           setSelectionStep(selections.selectionStep);
           return;
         }
@@ -216,7 +221,7 @@ export function CharacterSelect({
     } catch (error) {
       console.error("Failed to read selectionStep from sessionStorage:", error);
     }
-    // Default to player2 if no specific step was requested
+    // Default to player2 if no specific step was requested or if it was "complete"
     setSelectionStep("player2");
   };
 
