@@ -87,7 +87,8 @@ export function BattleSplitView({
   enableStickyPersonas = true,
   isBattleEnd = false,
 }: BattleSplitViewProps) {
-  const leftVisible = mobileActiveSide === null || mobileActiveSide === "player1";
+  const leftVisible =
+    mobileActiveSide === null || mobileActiveSide === "player1";
   const rightVisible =
     mobileActiveSide === null || mobileActiveSide === "player2";
 
@@ -115,9 +116,7 @@ export function BattleSplitView({
               battle.currentTurn === "player1" ||
               streamingPosition === "player1"
             }
-            isRoundWinner={
-              showRoundWinner && roundScore?.winner === "player1"
-            }
+            isRoundWinner={showRoundWinner && roundScore?.winner === "player1"}
             isStreaming={streamingPosition === "player1"}
             streamingText={streamingText || undefined}
             mobileTopOffset={leftVisible ? mobileTopOffset : 0}
@@ -136,9 +135,7 @@ export function BattleSplitView({
               battle.currentTurn === "player2" ||
               streamingPosition === "player2"
             }
-            isRoundWinner={
-              showRoundWinner && roundScore?.winner === "player2"
-            }
+            isRoundWinner={showRoundWinner && roundScore?.winner === "player2"}
             isStreaming={streamingPosition === "player2"}
             streamingText={streamingText || undefined}
             mobileTopOffset={rightVisible ? mobileTopOffset : 0}
