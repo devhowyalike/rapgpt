@@ -5,6 +5,7 @@
 import type { Battle, Verse, Bar, RoundScore, PersonaPosition, Persona } from '@/lib/shared';
 import { ROUNDS_PER_BATTLE, BARS_PER_VERSE } from '@/lib/shared';
 import { calculateScore } from './scoring';
+import { getPositionScore } from './battle-position-utils';
 
 /**
  * Parse raw verse text into bars
@@ -253,8 +254,8 @@ export function getWinnerPosition(battle: Battle): PersonaPosition | null {
   let player2Wins = 0;
 
   battle.scores.forEach(roundScore => {
-    const player1Score = roundScore.positionScores.player1.totalScore;
-    const player2Score = roundScore.positionScores.player2.totalScore;
+    const player1Score = getPositionScore(roundScore, 'player1');
+    const player2Score = getPositionScore(roundScore, 'player2');
     
     if (player1Score > player2Score) {
       player1Wins++;
@@ -271,8 +272,8 @@ export function getWinnerPosition(battle: Battle): PersonaPosition | null {
   let player2Total = 0;
 
   battle.scores.forEach(roundScore => {
-    player1Total += roundScore.positionScores.player1.totalScore;
-    player2Total += roundScore.positionScores.player2.totalScore;
+    player1Total += getPositionScore(roundScore, 'player1');
+    player2Total += getPositionScore(roundScore, 'player2');
   });
 
   if (player1Total > player2Total) return 'player1';

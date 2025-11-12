@@ -91,6 +91,17 @@ export function getAllPositionInfo(battle: Battle) {
 }
 
 /**
+ * Safely get a position's total score from a round score
+ * Returns 0 if the position scores don't exist or are invalid
+ */
+export function getPositionScore(
+  roundScore: RoundScore,
+  position: PersonaPosition
+): number {
+  return roundScore.positionScores?.[position]?.totalScore ?? 0;
+}
+
+/**
  * Calculate total scores for both positions across all rounds
  */
 export function calculateTotalScores(scoresOrBattle: RoundScore[] | Battle) {
@@ -102,8 +113,8 @@ export function calculateTotalScores(scoresOrBattle: RoundScore[] | Battle) {
   let player2Total = 0;
 
   for (const roundScore of scores) {
-    player1Total += roundScore.positionScores.player1.totalScore;
-    player2Total += roundScore.positionScores.player2.totalScore;
+    player1Total += getPositionScore(roundScore, 'player1');
+    player2Total += getPositionScore(roundScore, 'player2');
   }
 
   return {
