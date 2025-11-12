@@ -464,6 +464,13 @@ export function CharacterSelect({
                         <ActionButton
                           onClick={() => {
                             if (player2) {
+                              // Check if player1 is still selected
+                              if (!player1) {
+                                // Player 1 was deselected, navigate back to player 1 selection
+                                setSelectionStep("player1");
+                                return;
+                              }
+
                               // Check if we're editing from stage select
                               try {
                                 const stored =
