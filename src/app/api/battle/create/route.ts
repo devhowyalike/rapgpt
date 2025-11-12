@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const { leftPersonaId, rightPersonaId, stageId, isFeatured, votingEnabled, commentsEnabled, autoStartOnAdvance } = validation.data;
+    const { player1PersonaId, player2PersonaId, stageId, isFeatured, votingEnabled, commentsEnabled, autoStartOnAdvance } = validation.data;
 
     // If creating a featured battle, verify user is admin
     if (isFeatured && user.role !== 'admin') {
@@ -56,10 +56,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Get personas
-    const leftPersona = getPersona(leftPersonaId);
-    const rightPersona = getPersona(rightPersonaId);
+    const player1Persona = getPersona(player1PersonaId);
+    const player2Persona = getPersona(player2PersonaId);
 
-    if (!leftPersona || !rightPersona) {
+    if (!player1Persona || !player2Persona) {
       return NextResponse.json(
         { error: 'Invalid persona ID(s)' },
         { status: 400 }
@@ -68,24 +68,24 @@ export async function POST(request: NextRequest) {
 
     // Generate battle ID and metadata
     const now = Date.now();
-    const battleId = `battle-${leftPersonaId}-vs-${rightPersonaId}-${now}`;
+    const battleId = `battle-${player1PersonaId}-vs-${player2PersonaId}-${now}`;
     const month = new Date().toLocaleDateString('en-US', { month: 'long' });
     const year = new Date().getFullYear();
 
     // Create new battle
     const battle: Battle = {
       id: battleId,
-      title: `${leftPersona.name} vs. ${rightPersona.name}`,
+      title: `${player1Persona.name} vs. ${player2Persona.name}`,
       month,
       year,
       status: 'paused',
       stageId,
       personas: {
-        left: leftPersona,
-        right: rightPersona,
+        player1: player1Persona,
+        player2: player2Persona,
       },
       currentRound: 1,
-      currentTurn: 'left',
+      currentTurn: 'player1',
       verses: [],
       scores: [],
       comments: [],

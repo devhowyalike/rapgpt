@@ -427,9 +427,9 @@ export function BattleSidebar({
                 }
 
                 const leftScore =
-                  roundScore.personaScores[battle.personas.left.id];
+                  roundScore.personaScores[battle.personas.player1.id];
                 const rightScore =
-                  roundScore.personaScores[battle.personas.right.id];
+                  roundScore.personaScores[battle.personas.player2.id];
 
                 // Calculate optimistic vote counts by checking both server state and local state
                 const getOptimisticVoteCount = (personaId: string): number => {
@@ -447,18 +447,18 @@ export function BattleSidebar({
                 // Create array of personas with their scores and sort by votes (highest first)
                 const sortedPersonas = [
                   {
-                    persona: battle.personas.left,
+                    persona: battle.personas.player1,
                     score: leftScore,
                     optimisticVotes: getOptimisticVoteCount(
-                      battle.personas.left.id
+                      battle.personas.player1.id
                     ),
                     hoverBorderColor: "hover:border-blue-500",
                   },
                   {
-                    persona: battle.personas.right,
+                    persona: battle.personas.player2,
                     score: rightScore,
                     optimisticVotes: getOptimisticVoteCount(
-                      battle.personas.right.id
+                      battle.personas.player2.id
                     ),
                     hoverBorderColor: "hover:border-purple-500",
                   },

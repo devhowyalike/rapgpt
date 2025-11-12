@@ -113,24 +113,24 @@ function PersonaScoreCard({
 
 interface ScoreDisplayProps {
   roundScore: RoundScore;
-  leftPersona: Persona;
-  rightPersona: Persona;
+  player1Persona: Persona;
+  player2Persona: Persona;
   className?: string;
   votingEnabled?: boolean;
 }
 
 export function ScoreDisplay({
   roundScore,
-  leftPersona,
-  rightPersona,
+  player1Persona,
+  player2Persona,
   className = "",
   votingEnabled = true,
 }: ScoreDisplayProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const expandedRef = useRef<HTMLDivElement | null>(null);
   const toggleRef = useRef<HTMLButtonElement | null>(null);
-  const leftScore = roundScore.personaScores[leftPersona.id];
-  const rightScore = roundScore.personaScores[rightPersona.id];
+  const player1Score = roundScore.personaScores[player1Persona.id];
+  const player2Score = roundScore.personaScores[player2Persona.id];
 
   // When expanding, scroll the expanded details block into view and focus the toggle,
   // mirroring the Battle Options behavior.
@@ -146,7 +146,7 @@ export function ScoreDisplay({
     return () => window.cancelAnimationFrame(id);
   }, [isExpanded]);
 
-  if (!leftScore || !rightScore) return null;
+  if (!player1Score || !player2Score) return null;
 
   return (
     <div className={className}>
@@ -168,22 +168,22 @@ export function ScoreDisplay({
 
       <div ref={expandedRef} className="grid grid-cols-2 gap-2 md:gap-4">
         <PersonaScoreCard
-          persona={leftPersona}
-          score={leftScore}
+          persona={player1Persona}
+          score={player1Score}
           isExpanded={isExpanded}
           animationDirection={-20}
           animationDelay={0.3}
           votingEnabled={votingEnabled}
-          isWinner={roundScore.winner === leftPersona.id}
+          isWinner={roundScore.winner === player1Persona.id}
         />
         <PersonaScoreCard
-          persona={rightPersona}
-          score={rightScore}
+          persona={player2Persona}
+          score={player2Score}
           isExpanded={isExpanded}
           animationDirection={20}
           animationDelay={0.4}
           votingEnabled={votingEnabled}
-          isWinner={roundScore.winner === rightPersona.id}
+          isWinner={roundScore.winner === player2Persona.id}
         />
       </div>
     </div>

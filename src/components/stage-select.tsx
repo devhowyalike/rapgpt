@@ -117,8 +117,8 @@ export function StageSelect({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          leftPersonaId: player1.id,
-          rightPersonaId: player2.id,
+          player1PersonaId: player1.id,
+          player2PersonaId: player2.id,
           stageId: selectedStage.id,
           isFeatured: false, // Only admins can create featured battles
           votingEnabled,

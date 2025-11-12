@@ -6,7 +6,6 @@
 
 import { useState, useEffect } from "react";
 import type { Battle } from "@/lib/shared";
-import { ScoreDisplay } from "./score-display";
 import { SongGenerator } from "./song-generator";
 import { SongPlayer } from "./song-player";
 import { motion } from "framer-motion";
@@ -22,6 +21,8 @@ import { useRoundData } from "@/lib/hooks/use-round-data";
 import { BattleHeader } from "./battle/battle-header";
 import { BattleSplitView } from "./battle/battle-split-view";
 import { BattleBottomControls } from "./battle/battle-bottom-controls";
+import { BattleScoreSection } from "./battle/battle-score-section";
+import { useIsMobile } from "@/lib/hooks/use-is-mobile";
 
 interface BattleReplayProps {
   battle: Battle;
@@ -48,7 +49,7 @@ export function BattleReplay({
   const router = useRouter();
   const [dbUserId, setDbUserId] = useState<string | null>(null);
   const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useIsMobile();
 
   // Fetch internal database user ID
   useEffect(() => {
@@ -104,15 +105,6 @@ export function BattleReplay({
   useExclusiveDrawer("replay-scores-song", isDrawerOpen, setIsDrawerOpen);
 
   // Track scroll position to collapse header on mobile
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   useEffect(() => {
     const scrollContainer = document.querySelector("[data-scroll-container]");
     if (!scrollContainer) return;
@@ -234,8 +226,8 @@ export function BattleReplay({
       >
         <BattleSplitView
           battle={battle}
-          leftVerse={roundVerses.left}
-          rightVerse={roundVerses.right}
+          leftVerse={roundVerses.player1}
+          rightVerse={roundVerses.player2}
           roundScore={roundScore}
           showRoundWinner={true}
           cardPadding="px-3 py-2 md:p-4"
@@ -276,12 +268,7 @@ export function BattleReplay({
                           />
                         </div>
 
-                        <ScoreDisplay
-                          roundScore={roundScore}
-                          leftPersona={battle.personas.left}
-                          rightPersona={battle.personas.right}
-                          votingEnabled={battle.votingEnabled ?? true}
-                        />
+                        <BattleScoreSection battle={battle} roundScore={roundScore} />
                       </div>
                     )}
                   </div>

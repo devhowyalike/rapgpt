@@ -36,11 +36,11 @@ export const battles = pgTable('battles', {
   stageId: text('stage_id').notNull().default('canada'), // Stage where battle takes place
   
   // Store personas as JSONB (they're static data, no need to normalize)
-  leftPersona: jsonb('left_persona').$type<Persona>().notNull(),
-  rightPersona: jsonb('right_persona').$type<Persona>().notNull(),
+  player1Persona: jsonb('player1_persona').$type<Persona>().notNull(),
+  player2Persona: jsonb('player2_persona').$type<Persona>().notNull(),
   
   currentRound: integer('current_round').notNull().default(1),
-  currentTurn: text('current_turn'), // 'left' | 'right' | null
+  currentTurn: text('current_turn'), // 'player1' | 'player2' | null
   
   // Store verses, scores, and comments as JSONB arrays
   verses: jsonb('verses').$type<Verse[]>().notNull().default(sql`'[]'::jsonb`),

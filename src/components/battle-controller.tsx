@@ -52,6 +52,7 @@ export function BattleController({
     setStreamingVerse,
     streamingVerse,
     streamingPersonaId,
+    streamingPosition,
     saveBattle,
     cancelBattle,
     resumeBattle,
@@ -235,10 +236,12 @@ export function BattleController({
     if (!nextPerformer || isGenerating) return;
 
     const personaId = latestBattle.personas[nextPerformer].id;
+    // Use nextPerformer directly as the position (it's already 'player1' or 'player2')
+    const position = nextPerformer;
     // Clear any pre-generating visual state as real generation begins
     setIsPreGenerating(false);
     setIsGenerating(true);
-    setStreamingVerse(null, personaId);
+    setStreamingVerse(null, personaId, position);
 
     try {
       const response = await fetch("/api/battle/generate-verse", {
@@ -276,7 +279,7 @@ export function BattleController({
 
       for (let i = 0; i < tokens.length; i++) {
         displayedVerse += tokens[i];
-        setStreamingVerse(displayedVerse, personaId);
+        setStreamingVerse(displayedVerse, personaId, position);
 
         // Only delay on actual words (not whitespace)
         if (tokens[i].trim()) {
@@ -285,17 +288,17 @@ export function BattleController({
       }
 
       // Ensure the full verse is displayed
-      setStreamingVerse(fullVerse, personaId);
+      setStreamingVerse(fullVerse, personaId, position);
 
       // Add completed verse to battle
       addVerse(personaId, fullVerse);
-      setStreamingVerse(null, null);
+      setStreamingVerse(null, null, null);
 
       // Save battle state
       await saveBattle();
     } catch (error) {
       console.error("Error generating verse:", error);
-      setStreamingVerse(null, null);
+      setStreamingVerse(null, null, null);
     } finally {
       setIsGenerating(false);
     }
@@ -447,6 +450,7 @@ export function BattleController({
               battle={battle}
               streamingPersonaId={streamingPersonaId}
               streamingText={streamingVerse}
+              streamingPosition={streamingPosition}
               isReadingPhase={isReadingPhase}
               isVotingPhase={isVotingPhase}
               votingCompletedRound={votingCompletedRound}

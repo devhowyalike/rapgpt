@@ -81,19 +81,19 @@ export function formatLyricsForSuno(battle: Battle): string {
     if (roundVerses.length > 0) {
       lyrics.push(`[Round ${round}]`);
       
-      // Add verses in order (left then right)
-      const leftVerse = roundVerses.find(v => v.personaId === battle.personas.left.id);
-      const rightVerse = roundVerses.find(v => v.personaId === battle.personas.right.id);
+      // Add verses in order (player1 then player2)
+      const player1Verse = roundVerses.find(v => v.personaId === battle.personas.player1.id);
+      const player2Verse = roundVerses.find(v => v.personaId === battle.personas.player2.id);
       
-      if (leftVerse) {
-        lyrics.push(`[${battle.personas.left.name}]`);
-        lyrics.push(leftVerse.fullText);
+      if (player1Verse) {
+        lyrics.push(`[${battle.personas.player1.name}]`);
+        lyrics.push(player1Verse.fullText);
         lyrics.push('');
       }
       
-      if (rightVerse) {
-        lyrics.push(`[${battle.personas.right.name}]`);
-        lyrics.push(rightVerse.fullText);
+      if (player2Verse) {
+        lyrics.push(`[${battle.personas.player2.name}]`);
+        lyrics.push(player2Verse.fullText);
         lyrics.push('');
       }
     }
@@ -115,21 +115,21 @@ export function formatLyricsForSuno(battle: Battle): string {
  * If mixed gender battle, prefer undefined to let the API handle variation
  */
 function determineVocalGender(
-  leftPersona: Persona,
-  rightPersona: Persona
+  player1Persona: Persona,
+  player2Persona: Persona
 ): 'm' | 'f' | undefined {
-  const leftGender = leftPersona.vocalGender;
-  const rightGender = rightPersona.vocalGender;
+  const player1Gender = player1Persona.vocalGender;
+  const player2Gender = player2Persona.vocalGender;
   
   // If both personas have the same gender preference, use it
-  if (leftGender && rightGender && leftGender === rightGender) {
-    return leftGender;
+  if (player1Gender && player2Gender && player1Gender === player2Gender) {
+    return player1Gender;
   }
   
   // Mixed gender battle - let API handle the variation naturally
   // or if one is defined and the other isn't, use the defined one
-  if (leftGender && !rightGender) return leftGender;
-  if (rightGender && !leftGender) return rightGender;
+  if (player1Gender && !player2Gender) return player1Gender;
+  if (player2Gender && !player1Gender) return player2Gender;
   
   // Let the API decide naturally for mixed gender battles
   return undefined;
@@ -140,8 +140,8 @@ function determineVocalGender(
  * Uses musicStyleDescription when available to avoid copyrighted artist names
  */
 export function buildSongPrompt(
-  leftPersona: Persona,
-  rightPersona: Persona,
+  player1Persona: Persona,
+  player2Persona: Persona,
   beatStyle: SongGenerationBeatStyle
 ): string {
   const beatPrompt = BEAT_STYLE_PROMPTS[beatStyle];
@@ -149,16 +149,16 @@ export function buildSongPrompt(
   // Use detailed music style descriptions if available, otherwise fall back to basic style field
   const styleDescriptions: string[] = [];
   
-  if (leftPersona.musicStyleDescription) {
-    styleDescriptions.push(leftPersona.musicStyleDescription);
-  } else if (leftPersona.style) {
-    styleDescriptions.push(leftPersona.style);
+  if (player1Persona.musicStyleDescription) {
+    styleDescriptions.push(player1Persona.musicStyleDescription);
+  } else if (player1Persona.style) {
+    styleDescriptions.push(player1Persona.style);
   }
   
-  if (rightPersona.musicStyleDescription) {
-    styleDescriptions.push(rightPersona.musicStyleDescription);
-  } else if (rightPersona.style) {
-    styleDescriptions.push(rightPersona.style);
+  if (player2Persona.musicStyleDescription) {
+    styleDescriptions.push(player2Persona.musicStyleDescription);
+  } else if (player2Persona.style) {
+    styleDescriptions.push(player2Persona.style);
   }
   
   // Create a combined prompt with descriptive characteristics
@@ -188,9 +188,9 @@ export async function generateSong(
   }
   
   const lyrics = formatLyricsForSuno(battle);
-  const style = buildSongPrompt(battle.personas.left, battle.personas.right, beatStyle);
+  const style = buildSongPrompt(battle.personas.player1, battle.personas.player2, beatStyle);
   const title = `${battle.title} - ${beatStyle.toUpperCase()} Battle`;
-  const vocalGender = determineVocalGender(battle.personas.left, battle.personas.right);
+  const vocalGender = determineVocalGender(battle.personas.player1, battle.personas.player2);
   
   const requestBody: SunoGenerateRequest = {
     prompt: lyrics,

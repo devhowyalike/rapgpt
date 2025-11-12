@@ -32,32 +32,54 @@ export function validateVerse(bars: Bar[]): boolean {
 }
 
 /**
+ * Helper: Get sorted verses for a specific round
+ * @returns Verses sorted by timestamp (chronological order)
+ */
+function getSortedRoundVerses(battle: Battle, round: number): Verse[] {
+  const roundVerses = battle.verses.filter(v => v.round === round);
+  return roundVerses.sort((a, b) => a.timestamp - b.timestamp);
+}
+
+/**
+ * Helper: Determine winner based on player1 and player2 scores
+ */
+function determineWinnerFromScores(
+  player1Score: number,
+  player2Score: number,
+  player1PersonaId: string,
+  player2PersonaId: string
+): string | null {
+  if (player1Score > player2Score) return player1PersonaId;
+  if (player2Score > player1Score) return player2PersonaId;
+  return null; // Tie
+}
+
+/**
  * Calculate scores for a completed round
+ * Uses verse order to determine position since player1 always performs first
  */
 export function calculateRoundScore(
   battle: Battle,
   round: number,
   verses: Verse[]
 ): RoundScore {
-  const roundVerses = verses.filter(v => v.round === round);
-  
-  const leftVerse = roundVerses.find(v => v.personaId === battle.personas.left.id);
-  const rightVerse = roundVerses.find(v => v.personaId === battle.personas.right.id);
+  const sortedVerses = getSortedRoundVerses(battle, round);
+  const [player1Verse, player2Verse] = sortedVerses;
 
   const personaScores: RoundScore['personaScores'] = {};
 
-  if (leftVerse) {
-    const automated = calculateScore(leftVerse.bars, battle.personas.right.name);
-    personaScores[battle.personas.left.id] = {
+  if (player1Verse) {
+    const automated = calculateScore(player1Verse.bars, battle.personas.player2.name);
+    personaScores[battle.personas.player1.id] = {
       automated,
       userVotes: 0,
       totalScore: automated.total,
     };
   }
 
-  if (rightVerse) {
-    const automated = calculateScore(rightVerse.bars, battle.personas.left.name);
-    personaScores[battle.personas.right.id] = {
+  if (player2Verse) {
+    const automated = calculateScore(player2Verse.bars, battle.personas.player1.name);
+    personaScores[battle.personas.player2.id] = {
       automated,
       userVotes: 0,
       totalScore: automated.total,
@@ -65,15 +87,15 @@ export function calculateRoundScore(
   }
 
   // Determine round winner (will be updated with user votes later)
-  const leftScore = personaScores[battle.personas.left.id]?.totalScore || 0;
-  const rightScore = personaScores[battle.personas.right.id]?.totalScore || 0;
+  const player1Score = personaScores[battle.personas.player1.id]?.totalScore || 0;
+  const player2Score = personaScores[battle.personas.player2.id]?.totalScore || 0;
   
-  let winner: string | null = null;
-  if (leftScore > rightScore) {
-    winner = battle.personas.left.id;
-  } else if (rightScore > leftScore) {
-    winner = battle.personas.right.id;
-  }
+  const winner = determineWinnerFromScores(
+    player1Score,
+    player2Score,
+    battle.personas.player1.id,
+    battle.personas.player2.id
+  );
 
   return {
     round,
@@ -84,13 +106,11 @@ export function calculateRoundScore(
 
 /**
  * Determine if a round is complete
+ * A round is complete when it has exactly 2 verses (one from each side)
  */
 export function isRoundComplete(battle: Battle, round: number): boolean {
   const roundVerses = battle.verses.filter(v => v.round === round);
-  return (
-    roundVerses.filter(v => v.personaId === battle.personas.left.id).length > 0 &&
-    roundVerses.filter(v => v.personaId === battle.personas.right.id).length > 0
-  );
+  return roundVerses.length >= 2;
 }
 
 /**
@@ -110,23 +130,21 @@ export function isBattleArchived(battle: Battle): boolean {
 
 /**
  * Get the next persona to perform
+ * Uses verse count to determine who's next since player1 always goes first
  */
 export function getNextPerformer(battle: Battle): PersonaPosition | null {
   if (isBattleComplete(battle)) return null;
 
   const currentRoundVerses = battle.verses.filter(v => v.round === battle.currentRound);
   
-  // If no verses in current round, left goes first
+  // If no verses in current round, player1 goes first
   if (currentRoundVerses.length === 0) {
-    return 'left';
+    return 'player1';
   }
 
-  // If left has performed but right hasn't, right goes next
-  const leftPerformed = currentRoundVerses.some(v => v.personaId === battle.personas.left.id);
-  const rightPerformed = currentRoundVerses.some(v => v.personaId === battle.personas.right.id);
-
-  if (leftPerformed && !rightPerformed) {
-    return 'right';
+  // If only one verse exists, player2 goes next
+  if (currentRoundVerses.length === 1) {
+    return 'player2';
   }
 
   // Round is complete, move to next round
@@ -185,12 +203,54 @@ export function addVerseToBattle(
 }
 
 /**
+ * Get the winner's position (player1 or player2) by analyzing scores
+ * This works even when both sides use the same persona
+ * Note: This is a pure function, not a React hook - it doesn't need to be one
+ * since it only performs calculations without any React-specific logic
+ */
+export function getWinnerPosition(battle: Battle): PersonaPosition | null {
+  if (!battle.winner) return null;
+
+  // Count wins per position by analyzing each round
+  let player1Wins = 0;
+  let player2Wins = 0;
+
+  battle.scores.forEach(roundScore => {
+    const player1Score = roundScore.personaScores[battle.personas.player1.id]?.totalScore || 0;
+    const player2Score = roundScore.personaScores[battle.personas.player2.id]?.totalScore || 0;
+    
+    if (player1Score > player2Score) {
+      player1Wins++;
+    } else if (player2Score > player1Score) {
+      player2Wins++;
+    }
+  });
+
+  if (player1Wins > player2Wins) return 'player1';
+  if (player2Wins > player1Wins) return 'player2';
+
+  // Tie-breaker: total score across all rounds
+  let player1Total = 0;
+  let player2Total = 0;
+
+  battle.scores.forEach(roundScore => {
+    player1Total += roundScore.personaScores[battle.personas.player1.id]?.totalScore || 0;
+    player2Total += roundScore.personaScores[battle.personas.player2.id]?.totalScore || 0;
+  });
+
+  if (player1Total > player2Total) return 'player1';
+  if (player2Total > player1Total) return 'player2';
+
+  return null; // Perfect tie
+}
+
+/**
  * Determine overall winner based on round victories
  */
 export function determineOverallWinner(battle: Battle): string | null {
   const wins: Record<string, number> = {
-    [battle.personas.left.id]: 0,
-    [battle.personas.right.id]: 0,
+    [battle.personas.player1.id]: 0,
+    [battle.personas.player2.id]: 0,
   };
 
   battle.scores.forEach(roundScore => {
@@ -199,23 +259,23 @@ export function determineOverallWinner(battle: Battle): string | null {
     }
   });
 
-  const leftWins = wins[battle.personas.left.id];
-  const rightWins = wins[battle.personas.right.id];
+  const player1Wins = wins[battle.personas.player1.id];
+  const player2Wins = wins[battle.personas.player2.id];
 
-  if (leftWins > rightWins) return battle.personas.left.id;
-  if (rightWins > leftWins) return battle.personas.right.id;
+  if (player1Wins > player2Wins) return battle.personas.player1.id;
+  if (player2Wins > player1Wins) return battle.personas.player2.id;
 
   // Tie-breaker: total score across all rounds
-  let leftTotal = 0;
-  let rightTotal = 0;
+  let player1Total = 0;
+  let player2Total = 0;
 
   battle.scores.forEach(roundScore => {
-    leftTotal += roundScore.personaScores[battle.personas.left.id]?.totalScore || 0;
-    rightTotal += roundScore.personaScores[battle.personas.right.id]?.totalScore || 0;
+    player1Total += roundScore.personaScores[battle.personas.player1.id]?.totalScore || 0;
+    player2Total += roundScore.personaScores[battle.personas.player2.id]?.totalScore || 0;
   });
 
-  if (leftTotal > rightTotal) return battle.personas.left.id;
-  if (rightTotal > leftTotal) return battle.personas.right.id;
+  if (player1Total > player2Total) return battle.personas.player1.id;
+  if (player2Total > player1Total) return battle.personas.player2.id;
 
   return null; // Perfect tie
 }
@@ -257,13 +317,14 @@ export function updateScoreWithVotes(
 
 /**
  * Get verses for a specific round
+ * Uses verse order to determine position since player1 always performs first
  */
-export function getRoundVerses(battle: Battle, round: number): { left?: Verse; right?: Verse } {
-  const roundVerses = battle.verses.filter(v => v.round === round);
+export function getRoundVerses(battle: Battle, round: number): { player1?: Verse; player2?: Verse } {
+  const [player1Verse, player2Verse] = getSortedRoundVerses(battle, round);
   
   return {
-    left: roundVerses.find(v => v.personaId === battle.personas.left.id),
-    right: roundVerses.find(v => v.personaId === battle.personas.right.id),
+    player1: player1Verse,
+    player2: player2Verse,
   };
 }
 
@@ -303,7 +364,7 @@ export function advanceToNextRound(battle: Battle): Battle {
     updatedBattle.winner = determineOverallWinner(updatedBattle);
     updatedBattle.currentTurn = null;
   } else {
-    updatedBattle.currentTurn = 'left';
+    updatedBattle.currentTurn = 'player1';
   }
   
   updatedBattle.updatedAt = Date.now();

@@ -35,6 +35,7 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
     setStreamingVerse,
     streamingVerse,
     streamingPersonaId,
+    streamingPosition,
     isVotingPhase,
     setIsVotingPhase,
     votingTimeRemaining,
@@ -93,11 +94,14 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
           break;
 
         case "verse:streaming":
-          setStreamingVerse(event.text, event.personaId);
+          // Determine position by checking which side is currently performing
+          // Use currentTurn since we know the verse being streamed is for the current turn
+          const streamPosition = battle?.currentTurn || null;
+          setStreamingVerse(event.text, event.personaId, streamPosition);
           break;
 
         case "verse:complete":
-          setStreamingVerse(null, null);
+          setStreamingVerse(null, null, null);
           if (battle) {
             addVerse(event.personaId, event.verseText);
           }
@@ -338,6 +342,7 @@ export function LiveBattleViewer({ initialBattle }: LiveBattleViewerProps) {
               battle={battle}
               streamingPersonaId={streamingPersonaId}
               streamingText={streamingVerse}
+              streamingPosition={streamingPosition}
               isReadingPhase={isReadingPhase}
               isVotingPhase={isVotingPhase}
               votingCompletedRound={votingCompletedRound}

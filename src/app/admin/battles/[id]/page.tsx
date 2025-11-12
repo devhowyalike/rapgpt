@@ -162,40 +162,40 @@ export default async function AdminBattleDetailsPage({
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-gray-700/50 rounded-lg">
                 <img
-                  src={battle.personas.left.avatar}
-                  alt={battle.personas.left.name}
+                  src={battle.personas.player1.avatar}
+                  alt={battle.personas.player1.name}
                   className="w-16 h-16 rounded-full border-2"
-                  style={{ borderColor: battle.personas.left.accentColor }}
+                  style={{ borderColor: battle.personas.player1.accentColor }}
                 />
                 <div>
                   <h3
                     className="text-xl font-bold"
-                    style={{ color: battle.personas.left.accentColor }}
+                    style={{ color: battle.personas.player1.accentColor }}
                   >
-                    {battle.personas.left.name}
+                    {battle.personas.player1.name}
                   </h3>
                   <p className="text-gray-400 text-sm">
-                    {battle.personas.left.style}
+                    {battle.personas.player1.style}
                   </p>
                 </div>
               </div>
               <div className="text-center text-gray-500 font-bold">VS</div>
               <div className="flex items-center gap-4 p-4 bg-gray-700/50 rounded-lg">
                 <img
-                  src={battle.personas.right.avatar}
-                  alt={battle.personas.right.name}
+                  src={battle.personas.player2.avatar}
+                  alt={battle.personas.player2.name}
                   className="w-16 h-16 rounded-full border-2"
-                  style={{ borderColor: battle.personas.right.accentColor }}
+                  style={{ borderColor: battle.personas.player2.accentColor }}
                 />
                 <div>
                   <h3
                     className="text-xl font-bold"
-                    style={{ color: battle.personas.right.accentColor }}
+                    style={{ color: battle.personas.player2.accentColor }}
                   >
-                    {battle.personas.right.name}
+                    {battle.personas.player2.name}
                   </h3>
                   <p className="text-gray-400 text-sm">
-                    {battle.personas.right.style}
+                    {battle.personas.player2.style}
                   </p>
                 </div>
               </div>

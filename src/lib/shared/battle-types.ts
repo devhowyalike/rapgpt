@@ -3,7 +3,7 @@
  */
 
 export type BattleStatus = 'upcoming' | 'paused' | 'completed';
-export type PersonaPosition = 'left' | 'right';
+export type PersonaPosition = 'player1' | 'player2';
 export type SongGenerationBeatStyle = 'g-funk' | 'boom-bap' | 'trap';
 
 export interface Persona {
@@ -83,11 +83,11 @@ export interface Battle {
   status: BattleStatus;
   stageId: string; // Stage where the battle takes place
   personas: {
-    left: Persona;
-    right: Persona;
+    player1: Persona;
+    player2: Persona;
   };
   currentRound: number;
-  currentTurn: 'left' | 'right' | null;
+  currentTurn: PersonaPosition | null;
   verses: Verse[];
   scores: RoundScore[];
   comments: Comment[];

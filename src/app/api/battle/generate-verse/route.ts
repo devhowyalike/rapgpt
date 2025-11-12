@@ -49,9 +49,9 @@ export async function POST(req: Request) {
     let userMessage = `Round ${battle.currentRound} of ${3}. `;
     
     // Get the opponent's persona
-    const opponentPersona = battle.personas.left.id === personaId 
-      ? battle.personas.right 
-      : battle.personas.left;
+    const opponentPersona = battle.personas.player1.id === personaId 
+      ? battle.personas.player2 
+      : battle.personas.player1;
     
     // If there are previous verses, show the full battle history
     if (battle.verses.length > 0) {

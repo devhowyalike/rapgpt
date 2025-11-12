@@ -3,7 +3,7 @@
  */
 
 import { create } from 'zustand';
-import type { Battle, Comment } from '@/lib/shared';
+import type { Battle, Comment, PersonaPosition } from '@/lib/shared';
 import { addVerseToBattle, advanceToNextRound } from './battle-engine';
 
 interface BattleStore {
@@ -12,6 +12,7 @@ interface BattleStore {
   error: string | null;
   streamingVerse: string | null;
   streamingPersonaId: string | null;
+  streamingPosition: PersonaPosition | null;
   votingTimeRemaining: number | null;
   isVotingPhase: boolean;
   votingCompletedRound: number | null;
@@ -21,7 +22,7 @@ interface BattleStore {
   setBattle: (battle: Battle) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  setStreamingVerse: (verse: string | null, personaId: string | null) => void;
+  setStreamingVerse: (verse: string | null, personaId: string | null, position?: PersonaPosition | null) => void;
   setVotingTimeRemaining: (time: number | null) => void;
   setIsVotingPhase: (isVoting: boolean) => void;
   setVotingCompletedRound: (round: number | null) => void;
@@ -46,6 +47,7 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
   error: null,
   streamingVerse: null,
   streamingPersonaId: null,
+  streamingPosition: null,
   votingTimeRemaining: null,
   isVotingPhase: false,
   votingCompletedRound: null,
@@ -55,8 +57,8 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
   setBattle: (battle) => set({ battle }),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
-  setStreamingVerse: (verse, personaId) => 
-    set({ streamingVerse: verse, streamingPersonaId: personaId }),
+  setStreamingVerse: (verse, personaId, position = null) => 
+    set({ streamingVerse: verse, streamingPersonaId: personaId, streamingPosition: position }),
   setVotingTimeRemaining: (time) => set({ votingTimeRemaining: time }),
   setIsVotingPhase: (isVoting) => set({ isVotingPhase: isVoting }),
   setVotingCompletedRound: (round) => set({ votingCompletedRound: round }),

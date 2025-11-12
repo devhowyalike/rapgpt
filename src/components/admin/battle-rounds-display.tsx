@@ -49,9 +49,9 @@ export function BattleRoundsDisplay({ battle }: BattleRoundsDisplayProps) {
   };
 
   const getPersona = (personaId: string): Persona => {
-    return personaId === battle.personas.left.id
-      ? battle.personas.left
-      : battle.personas.right;
+    return personaId === battle.personas.player1.id
+      ? battle.personas.player1
+      : battle.personas.player2;
   };
 
   if (versesByRound.size === 0) {

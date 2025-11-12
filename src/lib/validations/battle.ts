@@ -79,11 +79,11 @@ export const battleSchema = z.object({
   status: z.enum(['upcoming', 'paused', 'completed']),
   stageId: z.string(),
   personas: z.object({
-    left: personaSchema,
-    right: personaSchema,
+    player1: personaSchema,
+    player2: personaSchema,
   }),
   currentRound: z.number().int().min(1).max(3),
-  currentTurn: z.enum(['left', 'right']).nullable(),
+  currentTurn: z.enum(['player1', 'player2']).nullable(),
   verses: z.array(verseSchema),
   scores: z.array(roundScoreSchema),
   comments: z.array(commentSchema),
@@ -112,10 +112,10 @@ export const battleSchema = z.object({
 
 // API Request/Response schemas
 export const createBattleRequestSchema = z.object({
-  leftPersonaId: z.string().min(1),
-  rightPersonaId: z.string().min(1),
+  player1PersonaId: z.string().min(1),
+  player2PersonaId: z.string().min(1),
   stageId: z.string().min(1),
-}).refine(data => data.leftPersonaId !== data.rightPersonaId, {
+}).refine(data => data.player1PersonaId !== data.player2PersonaId, {
   message: 'Cannot battle the same persona',
 });
 

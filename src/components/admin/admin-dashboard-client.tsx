@@ -156,8 +156,8 @@ export function AdminDashboardClient({
           <div className="space-y-3 max-h-[600px] overflow-y-auto">
             {userBattles.map((battle) => {
               const personas = {
-                left: battle.leftPersona as any,
-                right: battle.rightPersona as any,
+                player1: battle.player1Persona as any,
+                player2: battle.player2Persona as any,
               };
 
               return (
@@ -188,7 +188,7 @@ export function AdminDashboardClient({
                         </Link>
                       </div>
                       <div className="text-gray-400 text-sm mt-1">
-                        {personas.left.name} vs. {personas.right.name}
+                        {personas.player1.name} vs. {personas.player2.name}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

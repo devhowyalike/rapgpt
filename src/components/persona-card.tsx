@@ -4,13 +4,13 @@
 
 "use client";
 
-import type { Persona } from "@/lib/shared";
+import type { Persona, PersonaPosition } from "@/lib/shared";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
 interface PersonaCardProps {
   persona: Persona;
-  position?: "left" | "right";
+  position?: PersonaPosition;
   isActive?: boolean;
   isRoundWinner?: boolean;
   className?: string;
@@ -34,7 +34,7 @@ export function PersonaCard({
       } ${className}`}
       initial={{
         opacity: 0,
-        x: position ? (position === "left" ? -50 : 50) : 0,
+        x: position ? (position === "player1" ? -50 : 50) : 0,
       }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5 }}
