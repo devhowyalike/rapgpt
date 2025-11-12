@@ -61,10 +61,10 @@ export const dawn: ClientPersona = {
 export const mrAkron: ClientPersona = {
   id: 'mrAkron',
   name: 'Mr. Akron',
-  bio: 'Enigmatic alter of Kenny K. Master of multi-syllables.',
+  bio: 'Ohio\'s own. Creator of Skribble Jam.',
   style: 'Boom Bap',
   // Using existing asset as placeholder; replace with /avatars/mr-kron.jpg when available
-  avatar: '/avatars/kenny-k.jpg',
+  avatar: '/avatars/mr-akron.jpg',
   accentColor: '#00d4ff',
   musicStyleDescription: 'cinematic west coast boom bap, dense internal rhymes, layered metaphors, comic book imagery, crate-digger flex',
   vocalGender: 'm',
