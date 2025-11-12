@@ -55,14 +55,21 @@ export interface AutomatedScore {
 
 export interface RoundScore {
   round: number;
-  personaScores: {
-    [personaId: string]: {
+  positionScores: {
+    player1: {
+      personaId: string;
+      automated: AutomatedScore;
+      userVotes: number;
+      totalScore: number;
+    };
+    player2: {
+      personaId: string;
       automated: AutomatedScore;
       userVotes: number;
       totalScore: number;
     };
   };
-  winner: string | null;
+  winner: PersonaPosition | null;
 }
 
 export interface Comment {

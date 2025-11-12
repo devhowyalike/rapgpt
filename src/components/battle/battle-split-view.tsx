@@ -116,7 +116,7 @@ export function BattleSplitView({
               streamingPosition === "player1"
             }
             isRoundWinner={
-              showRoundWinner && roundScore?.winner === battle.personas.player1.id
+              showRoundWinner && roundScore?.winner === "player1"
             }
             isStreaming={streamingPosition === "player1"}
             streamingText={streamingText || undefined}
@@ -137,7 +137,7 @@ export function BattleSplitView({
               streamingPosition === "player2"
             }
             isRoundWinner={
-              showRoundWinner && roundScore?.winner === battle.personas.player2.id
+              showRoundWinner && roundScore?.winner === "player2"
             }
             isStreaming={streamingPosition === "player2"}
             streamingText={streamingText || undefined}

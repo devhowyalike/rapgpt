@@ -20,6 +20,7 @@ import { BattleInfoPanel } from "@/components/battle-info-panel";
 import { BattleStatusButton } from "@/components/battle-status-button";
 import { BattleFeatureBadges } from "@/components/battle-feature-badges";
 import { getWinnerPosition } from "@/lib/battle-engine";
+import { calculateTotalScores } from "@/lib/battle-position-utils";
 
 interface MyBattleCardProps {
   battle: {
@@ -150,25 +151,12 @@ export function MyBattleCard({
     if (!isCompleted || !battle.scores) return null;
 
     const totalRounds = battle.scores.length;
-    let player1TotalScore = 0;
-    let player2TotalScore = 0;
-
-    const player1PersonaId = personas.player1.id;
-    const player2PersonaId = personas.player2.id;
-
-    for (const roundScore of battle.scores) {
-      if (roundScore.personaScores) {
-        player1TotalScore +=
-          roundScore.personaScores[player1PersonaId]?.totalScore || 0;
-        player2TotalScore +=
-          roundScore.personaScores[player2PersonaId]?.totalScore || 0;
-      }
-    }
+    const totalScores = calculateTotalScores(battle.scores);
 
     return {
       totalRounds,
-      player1TotalScore: Math.round(player1TotalScore),
-      player2TotalScore: Math.round(player2TotalScore),
+      player1TotalScore: totalScores.player1,
+      player2TotalScore: totalScores.player2,
       winner: battle.winner,
     };
   };
@@ -195,10 +183,10 @@ export function MyBattleCard({
       personas,
       scores: battle.scores || [],
     } as unknown as Battle;
-    
+
     const winnerPosition = getWinnerPosition(battleForWinner);
     const winnerName =
-      winnerPosition === 'player1'
+      winnerPosition === "player1"
         ? personas.player1.name
         : personas.player2.name;
 

@@ -5,6 +5,7 @@
 import { create } from 'zustand';
 import type { Battle, Comment, PersonaPosition } from '@/lib/shared';
 import { addVerseToBattle, advanceToNextRound } from './battle-engine';
+import { getPersonaPosition } from './battle-position-utils';
 
 interface BattleStore {
   battle: Battle | null;
@@ -116,13 +117,17 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
     const scoreIndex = battle.scores.findIndex(s => s.round === round);
     if (scoreIndex === -1) return;
 
+    // Determine which position the persona is in
+    const position = getPersonaPosition(battle, personaId);
+    if (!position) return; // Invalid persona ID
+
     const updatedScores = [...battle.scores];
     updatedScores[scoreIndex] = {
       ...updatedScores[scoreIndex],
-      personaScores: {
-        ...updatedScores[scoreIndex].personaScores,
-        [personaId]: {
-          ...updatedScores[scoreIndex].personaScores[personaId],
+      positionScores: {
+        ...updatedScores[scoreIndex].positionScores,
+        [position]: {
+          ...updatedScores[scoreIndex].positionScores[position],
           userVotes: votes,
         },
       },

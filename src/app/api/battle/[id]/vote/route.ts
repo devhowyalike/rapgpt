@@ -12,6 +12,7 @@ import { nanoid } from 'nanoid';
 import { getOrCreateUser } from '@/lib/auth/sync-user';
 import { broadcastEvent } from '@/lib/websocket/broadcast-helper';
 import type { VoteCastEvent } from '@/lib/websocket/types';
+import { getPersonaPosition } from '@/lib/battle-position-utils';
 
 export async function POST(
   request: NextRequest,
@@ -107,6 +108,16 @@ export async function POST(
     }
 
     const roundScore = battle.scores[roundScoreIndex];
+    
+    // Determine which position the persona is in
+    const position = getPersonaPosition(battle, personaId);
+    
+    if (!position) {
+      return new Response(JSON.stringify({ error: 'Invalid persona for this battle' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
     if (existingVote) {
       // User is changing their vote
@@ -115,8 +126,8 @@ export async function POST(
         await db.delete(votes).where(eq(votes.id, existingVote.id));
         
         // Decrement vote count
-        const currentVotes = roundScore.personaScores[personaId]?.userVotes || 0;
-        const updatedScore = updateScoreWithVotes(roundScore, personaId, Math.max(0, currentVotes - 1));
+        const currentVotes = roundScore.positionScores[position].userVotes;
+        const updatedScore = updateScoreWithVotes(roundScore, position, Math.max(0, currentVotes - 1));
         battle.scores[roundScoreIndex] = updatedScore;
       } else {
         // Voting for a different persona - update the vote
@@ -124,13 +135,22 @@ export async function POST(
           .set({ personaId, createdAt: new Date() })
           .where(eq(votes.id, existingVote.id));
         
+        // Determine old position
+        const oldPosition = getPersonaPosition(battle, existingVote.personaId);
+        if (!oldPosition) {
+          return new Response(JSON.stringify({ error: 'Invalid previous vote persona' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        
         // Decrement old persona's votes
-        const oldVotes = roundScore.personaScores[existingVote.personaId]?.userVotes || 0;
-        let updatedScore = updateScoreWithVotes(roundScore, existingVote.personaId, Math.max(0, oldVotes - 1));
+        const oldVotes = roundScore.positionScores[oldPosition].userVotes;
+        let updatedScore = updateScoreWithVotes(roundScore, oldPosition, Math.max(0, oldVotes - 1));
         
         // Increment new persona's votes
-        const newVotes = updatedScore.personaScores[personaId]?.userVotes || 0;
-        updatedScore = updateScoreWithVotes(updatedScore, personaId, newVotes + 1);
+        const newVotes = updatedScore.positionScores[position].userVotes;
+        updatedScore = updateScoreWithVotes(updatedScore, position, newVotes + 1);
         
         battle.scores[roundScoreIndex] = updatedScore;
       }
@@ -145,8 +165,8 @@ export async function POST(
       });
 
       // Increment vote count
-      const currentVotes = roundScore.personaScores[personaId]?.userVotes || 0;
-      const updatedScore = updateScoreWithVotes(roundScore, personaId, currentVotes + 1);
+      const currentVotes = roundScore.positionScores[position].userVotes;
+      const updatedScore = updateScoreWithVotes(roundScore, position, currentVotes + 1);
       battle.scores[roundScoreIndex] = updatedScore;
     }
 

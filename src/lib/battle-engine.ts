@@ -45,12 +45,10 @@ function getSortedRoundVerses(battle: Battle, round: number): Verse[] {
  */
 function determineWinnerFromScores(
   player1Score: number,
-  player2Score: number,
-  player1PersonaId: string,
-  player2PersonaId: string
-): string | null {
-  if (player1Score > player2Score) return player1PersonaId;
-  if (player2Score > player1Score) return player2PersonaId;
+  player2Score: number
+): PersonaPosition | null {
+  if (player1Score > player2Score) return 'player1';
+  if (player2Score > player1Score) return 'player2';
   return null; // Tie
 }
 
@@ -66,11 +64,54 @@ export function calculateRoundScore(
   const sortedVerses = getSortedRoundVerses(battle, round);
   const [player1Verse, player2Verse] = sortedVerses;
 
-  const personaScores: RoundScore['personaScores'] = {};
+  // Initialize with default empty scores
+  const positionScores: RoundScore['positionScores'] = {
+    player1: {
+      personaId: battle.personas.player1.id,
+      automated: {
+        rhymeScheme: 0,
+        wordplay: 0,
+        flow: 0,
+        relevance: 0,
+        originality: 0,
+        total: 0,
+        breakdown: {
+          rhymeScheme: '',
+          wordplay: '',
+          flow: '',
+          relevance: '',
+          originality: '',
+        },
+      },
+      userVotes: 0,
+      totalScore: 0,
+    },
+    player2: {
+      personaId: battle.personas.player2.id,
+      automated: {
+        rhymeScheme: 0,
+        wordplay: 0,
+        flow: 0,
+        relevance: 0,
+        originality: 0,
+        total: 0,
+        breakdown: {
+          rhymeScheme: '',
+          wordplay: '',
+          flow: '',
+          relevance: '',
+          originality: '',
+        },
+      },
+      userVotes: 0,
+      totalScore: 0,
+    },
+  };
 
   if (player1Verse) {
     const automated = calculateScore(player1Verse.bars, battle.personas.player2.name);
-    personaScores[battle.personas.player1.id] = {
+    positionScores.player1 = {
+      personaId: battle.personas.player1.id,
       automated,
       userVotes: 0,
       totalScore: automated.total,
@@ -79,7 +120,8 @@ export function calculateRoundScore(
 
   if (player2Verse) {
     const automated = calculateScore(player2Verse.bars, battle.personas.player1.name);
-    personaScores[battle.personas.player2.id] = {
+    positionScores.player2 = {
+      personaId: battle.personas.player2.id,
       automated,
       userVotes: 0,
       totalScore: automated.total,
@@ -87,19 +129,14 @@ export function calculateRoundScore(
   }
 
   // Determine round winner (will be updated with user votes later)
-  const player1Score = personaScores[battle.personas.player1.id]?.totalScore || 0;
-  const player2Score = personaScores[battle.personas.player2.id]?.totalScore || 0;
+  const player1Score = positionScores.player1.totalScore;
+  const player2Score = positionScores.player2.totalScore;
   
-  const winner = determineWinnerFromScores(
-    player1Score,
-    player2Score,
-    battle.personas.player1.id,
-    battle.personas.player2.id
-  );
+  const winner = determineWinnerFromScores(player1Score, player2Score);
 
   return {
     round,
-    personaScores,
+    positionScores,
     winner,
   };
 }
@@ -216,8 +253,8 @@ export function getWinnerPosition(battle: Battle): PersonaPosition | null {
   let player2Wins = 0;
 
   battle.scores.forEach(roundScore => {
-    const player1Score = roundScore.personaScores[battle.personas.player1.id]?.totalScore || 0;
-    const player2Score = roundScore.personaScores[battle.personas.player2.id]?.totalScore || 0;
+    const player1Score = roundScore.positionScores.player1.totalScore;
+    const player2Score = roundScore.positionScores.player2.totalScore;
     
     if (player1Score > player2Score) {
       player1Wins++;
@@ -234,8 +271,8 @@ export function getWinnerPosition(battle: Battle): PersonaPosition | null {
   let player2Total = 0;
 
   battle.scores.forEach(roundScore => {
-    player1Total += roundScore.personaScores[battle.personas.player1.id]?.totalScore || 0;
-    player2Total += roundScore.personaScores[battle.personas.player2.id]?.totalScore || 0;
+    player1Total += roundScore.positionScores.player1.totalScore;
+    player2Total += roundScore.positionScores.player2.totalScore;
   });
 
   if (player1Total > player2Total) return 'player1';
@@ -246,21 +283,19 @@ export function getWinnerPosition(battle: Battle): PersonaPosition | null {
 
 /**
  * Determine overall winner based on round victories
+ * Returns the persona ID of the winner (or null for a tie)
  */
 export function determineOverallWinner(battle: Battle): string | null {
-  const wins: Record<string, number> = {
-    [battle.personas.player1.id]: 0,
-    [battle.personas.player2.id]: 0,
-  };
+  let player1Wins = 0;
+  let player2Wins = 0;
 
   battle.scores.forEach(roundScore => {
-    if (roundScore.winner) {
-      wins[roundScore.winner] = (wins[roundScore.winner] || 0) + 1;
+    if (roundScore.winner === 'player1') {
+      player1Wins++;
+    } else if (roundScore.winner === 'player2') {
+      player2Wins++;
     }
   });
-
-  const player1Wins = wins[battle.personas.player1.id];
-  const player2Wins = wins[battle.personas.player2.id];
 
   if (player1Wins > player2Wins) return battle.personas.player1.id;
   if (player2Wins > player1Wins) return battle.personas.player2.id;
@@ -270,8 +305,8 @@ export function determineOverallWinner(battle: Battle): string | null {
   let player2Total = 0;
 
   battle.scores.forEach(roundScore => {
-    player1Total += roundScore.personaScores[battle.personas.player1.id]?.totalScore || 0;
-    player2Total += roundScore.personaScores[battle.personas.player2.id]?.totalScore || 0;
+    player1Total += roundScore.positionScores.player1.totalScore;
+    player2Total += roundScore.positionScores.player2.totalScore;
   });
 
   if (player1Total > player2Total) return battle.personas.player1.id;
@@ -285,29 +320,32 @@ export function determineOverallWinner(battle: Battle): string | null {
  */
 export function updateScoreWithVotes(
   roundScore: RoundScore,
-  personaId: string,
+  position: PersonaPosition,
   votes: number
 ): RoundScore {
-  const updated = { ...roundScore };
+  const updated = { 
+    ...roundScore,
+    positionScores: {
+      player1: { ...roundScore.positionScores.player1 },
+      player2: { ...roundScore.positionScores.player2 },
+    },
+  };
   
-  if (updated.personaScores[personaId]) {
-    updated.personaScores[personaId] = {
-      ...updated.personaScores[personaId],
-      userVotes: votes,
-      totalScore: updated.personaScores[personaId].automated.total + (votes * 0.5), // Each vote adds 0.5 points
-    };
-  }
+  // Update the score for the specified position
+  updated.positionScores[position] = {
+    ...updated.positionScores[position],
+    userVotes: votes,
+    totalScore: updated.positionScores[position].automated.total + (votes * 0.5), // Each vote adds 0.5 points
+  };
 
   // Recalculate winner
-  const scores = Object.entries(updated.personaScores).map(([id, score]) => ({
-    id,
-    score: score.totalScore,
-  }));
+  const player1Score = updated.positionScores.player1.totalScore;
+  const player2Score = updated.positionScores.player2.totalScore;
 
-  scores.sort((a, b) => b.score - a.score);
-
-  if (scores.length > 1 && scores[0].score > scores[1].score) {
-    updated.winner = scores[0].id;
+  if (player1Score > player2Score) {
+    updated.winner = 'player1';
+  } else if (player2Score > player1Score) {
+    updated.winner = 'player2';
   } else {
     updated.winner = null;
   }

@@ -12,7 +12,7 @@ import { APP_TITLE } from "@/lib/constants";
 
 interface PersonaScoreCardProps {
   persona: Persona;
-  score: RoundScore["personaScores"][string];
+  score: RoundScore["positionScores"]["player1"];
   isExpanded: boolean;
   animationDirection: number; // -20 for left, 20 for right
   animationDelay: number;
@@ -129,8 +129,8 @@ export function ScoreDisplay({
   const [isExpanded, setIsExpanded] = useState(false);
   const expandedRef = useRef<HTMLDivElement | null>(null);
   const toggleRef = useRef<HTMLButtonElement | null>(null);
-  const player1Score = roundScore.personaScores[player1Persona.id];
-  const player2Score = roundScore.personaScores[player2Persona.id];
+  const player1Score = roundScore.positionScores.player1;
+  const player2Score = roundScore.positionScores.player2;
 
   // When expanding, scroll the expanded details block into view and focus the toggle,
   // mirroring the Battle Options behavior.
@@ -174,7 +174,7 @@ export function ScoreDisplay({
           animationDirection={-20}
           animationDelay={0.3}
           votingEnabled={votingEnabled}
-          isWinner={roundScore.winner === player1Persona.id}
+          isWinner={roundScore.winner === 'player1'}
         />
         <PersonaScoreCard
           persona={player2Persona}
@@ -183,7 +183,7 @@ export function ScoreDisplay({
           animationDirection={20}
           animationDelay={0.4}
           votingEnabled={votingEnabled}
-          isWinner={roundScore.winner === player2Persona.id}
+          isWinner={roundScore.winner === 'player2'}
         />
       </div>
     </div>
