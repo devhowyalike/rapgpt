@@ -71,6 +71,43 @@ export function MyBattleCard({
   const [toggleError, setToggleError] = useState<string | null>(null);
   const [showCopiedDialog, setShowCopiedDialog] = useState(false);
 
+  // Handle missing persona data gracefully
+  if (!battle.player1Persona || !battle.player2Persona) {
+    console.error(`Battle ${battle.id} has missing persona data`);
+    return (
+      <div className="flex flex-col md:min-h-[320px] bg-gray-800/50 backdrop-blur-sm border border-red-500/20 rounded-lg p-6">
+        <div className="flex items-center gap-2 text-red-400">
+          <AlertTriangle size={20} />
+          <span className="font-semibold">Battle data incomplete</span>
+        </div>
+        <p className="text-gray-400 mt-2 text-sm">
+          This battle has missing persona data and cannot be displayed properly.
+        </p>
+        {showManagement && (
+          <button
+            onClick={() => setShowDeleteDialog(true)}
+            className="mt-4 flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-900/30 rounded-lg transition-colors"
+          >
+            <Trash2 size={16} />
+            Delete Battle
+          </button>
+        )}
+        {/* Delete Confirmation Dialog */}
+        <ConfirmationDialog
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          title="Delete Battle?"
+          description="Are you sure you want to delete this incomplete battle? This action cannot be undone."
+          confirmLabel="Delete Battle"
+          onConfirm={handleDelete}
+          isLoading={isDeleting}
+          variant="danger"
+          icon={AlertTriangle}
+        />
+      </div>
+    );
+  }
+
   const personas = {
     player1: battle.player1Persona as any,
     player2: battle.player2Persona as any,

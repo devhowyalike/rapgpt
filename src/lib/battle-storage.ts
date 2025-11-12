@@ -29,6 +29,12 @@ export async function getBattleById(id: string): Promise<Battle | null> {
     
     const { battle, creator } = result[0];
     
+    // Validate that battle has required persona data
+    if (!battle.player1Persona || !battle.player2Persona) {
+      console.error(`Battle ${id} has missing persona data`);
+      return null;
+    }
+    
     // Decrypt creator display name if available
     let creatorInfo = null;
     if (creator && creator.isProfilePublic) {

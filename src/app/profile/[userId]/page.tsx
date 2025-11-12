@@ -88,6 +88,17 @@ export default async function ProfilePage({
     userBattles = [];
   }
 
+  // Filter out battles with incomplete persona data
+  userBattles = userBattles.filter((battle) => {
+    if (!battle.player1Persona || !battle.player2Persona) {
+      console.error(
+        `Filtering out battle ${battle.id} due to missing persona data`
+      );
+      return false;
+    }
+    return true;
+  });
+
   // Get the current URL origin from headers
   const headersList = await headers();
   const host = headersList.get("host") || "";
