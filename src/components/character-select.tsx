@@ -374,14 +374,6 @@ export function CharacterSelect({
     }
   };
 
-  const isCardSelected = (primaryId: string) => {
-    const group = personaGroups[primaryId] || [primaryId];
-    return (
-      (player1 && group.includes(player1.id)) ||
-      (player2 && group.includes(player2.id))
-    );
-  };
-
   const handleProceedToStageSelect = () => {
     if (!player1 || !player2) return;
     setShowStageSelect(true);
@@ -392,15 +384,11 @@ export function CharacterSelect({
     setSelectionStep("player2");
   };
 
-  // Base players without hover previews
-  const basePlayer1 = player1;
-  const basePlayer2 = player2;
-
   // Compute hover previews based on active selection step
   const previewedPlayer1 =
-    selectionStep === "player1" ? hoveredPersona || basePlayer1 : basePlayer1;
+    selectionStep === "player1" ? hoveredPersona || player1 : player1;
   const previewedPlayer2 =
-    selectionStep === "player2" ? hoveredPersona || basePlayer2 : basePlayer2;
+    selectionStep === "player2" ? hoveredPersona || player2 : player2;
 
   // Show loading screen while hydrating from sessionStorage
   if (!isHydrated) {
