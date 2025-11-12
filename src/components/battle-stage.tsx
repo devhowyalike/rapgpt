@@ -245,8 +245,7 @@ export function BattleStage({
       <div className="flex-1">
         <BattleSplitView
           battle={battle}
-          leftVerse={currentRoundVerses.player1}
-          rightVerse={currentRoundVerses.player2}
+          verses={currentRoundVerses}
           roundScore={currentRoundScore}
           showRoundWinner={shouldShowRoundWinner}
           mobileActiveSide={mobileActiveSide}

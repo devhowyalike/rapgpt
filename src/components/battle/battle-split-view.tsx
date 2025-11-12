@@ -14,8 +14,10 @@ interface BattleSplitViewProps {
   /**
    * Verses to display for each persona
    */
-  leftVerse: any;
-  rightVerse: any;
+  verses: {
+    player1: any;
+    player2: any;
+  };
   /**
    * Round score for winner badges
    */
@@ -71,8 +73,7 @@ interface BattleSplitViewProps {
 
 export function BattleSplitView({
   battle,
-  leftVerse,
-  rightVerse,
+  verses,
   roundScore,
   showRoundWinner = false,
   mobileActiveSide = null,
@@ -110,7 +111,7 @@ export function BattleSplitView({
           {/* Player 1 (Left Side) */}
           <PersonaSection
             persona={battle.personas.player1}
-            verse={leftVerse}
+            verse={verses.player1}
             position="player1"
             isActive={
               battle.currentTurn === "player1" ||
@@ -129,7 +130,7 @@ export function BattleSplitView({
           {/* Player 2 (Right Side) */}
           <PersonaSection
             persona={battle.personas.player2}
-            verse={rightVerse}
+            verse={verses.player2}
             position="player2"
             isActive={
               battle.currentTurn === "player2" ||

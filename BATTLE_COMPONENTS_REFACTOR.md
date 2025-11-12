@@ -28,7 +28,7 @@ Refactored `battle-stage.tsx` and `battle-replay.tsx` to eliminate code duplicat
 - Shared split-screen layout with center divider and 2-column grid
 - Renders left/right PersonaSections
 - Handles mobile visibility logic
-- Props: `battle`, `leftVerse`, `rightVerse`, `roundScore`, `showRoundWinner`, `mobileActiveSide`, `streamingPersonaId`, `streamingText`, `mobileTopOffset`, `cardPadding`, `className`, `contentClassName`, `style`
+- Props: `battle`, `verses`, `roundScore`, `showRoundWinner`, `mobileActiveSide`, `streamingPersonaId`, `streamingText`, `streamingPosition`, `mobileTopOffset`, `cardPadding`, `className`, `contentClassName`, `style`
 
 #### 4. **BattleBottomControls** (`src/components/battle/battle-bottom-controls.tsx`)
 - Fixed bottom bar wrapper for control buttons/tabs
@@ -111,13 +111,13 @@ src/
 ```tsx
 <BattleSplitView
   battle={battle}
-  leftVerse={roundVerses.left}
-  rightVerse={roundVerses.right}
+  verses={roundVerses} // { player1: Verse | null, player2: Verse | null }
   roundScore={roundScore}
   showRoundWinner={true}
-  mobileActiveSide="left" // or null for both sides
+  mobileActiveSide="player1" // or null for both sides
   streamingPersonaId={streamingId}
   streamingText={text}
+  streamingPosition="player1"
   cardPadding="p-6"
 />
 ```

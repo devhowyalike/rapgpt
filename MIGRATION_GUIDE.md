@@ -70,10 +70,10 @@ import { useRoundData } from "@/lib/hooks/use-round-data";
     <div className="grid md:grid-cols-2 divide-y md:divide-y-0 divide-gray-800 h-full">
       <div className="flex flex-col md:min-h-0">
         <div className="p-3 md:p-4 border-b border-gray-800">
-          <PersonaCard persona={battle.personas.left} ... />
+          <PersonaCard persona={battle.personas.player1} ... />
         </div>
         <div className="flex-1 stage-spotlight">
-          <VerseDisplay verse={leftVerse} ... />
+          <VerseDisplay verse={verses.player1} ... />
         </div>
       </div>
       {/* Right side - similar structure */}
@@ -86,13 +86,13 @@ import { useRoundData } from "@/lib/hooks/use-round-data";
 ```tsx
 <BattleSplitView
   battle={battle}
-  leftVerse={verses.left}
-  rightVerse={verses.right}
+  verses={verses} // { player1: Verse | null, player2: Verse | null }
   roundScore={score}
   showRoundWinner={true}
   mobileActiveSide={activeSide}
   streamingPersonaId={streamingId}
   streamingText={text}
+  streamingPosition="player1"
 />
 ```
 
@@ -102,7 +102,7 @@ import { useRoundData } from "@/lib/hooks/use-round-data";
 ```tsx
 const verses = getRoundVerses(battle, selectedRound);
 const score = battle.scores.find(s => s.round === selectedRound);
-const bothComplete = verses.left && verses.right;
+const bothComplete = verses.player1 && verses.player2;
 ```
 
 **After:**
@@ -132,8 +132,7 @@ export function MyBattleView({ battle }: { battle: Battle }) {
 
       <BattleSplitView
         battle={battle}
-        leftVerse={verses.left}
-        rightVerse={verses.right}
+        verses={verses}
         roundScore={score}
       />
     </div>
@@ -154,11 +153,11 @@ export function MyBattleView({ battle }: { battle: Battle }) {
 ### Scenario 3: Controlling Mobile Visibility
 
 ```tsx
-// Show only left side on mobile
-<BattleSplitView mobileActiveSide="left" {...props} />
+// Show only player1 side on mobile
+<BattleSplitView mobileActiveSide="player1" {...props} />
 
-// Show only right side on mobile
-<BattleSplitView mobileActiveSide="right" {...props} />
+// Show only player2 side on mobile
+<BattleSplitView mobileActiveSide="player2" {...props} />
 
 // Show both sides (default)
 <BattleSplitView mobileActiveSide={null} {...props} />
@@ -169,10 +168,10 @@ export function MyBattleView({ battle }: { battle: Battle }) {
 ```tsx
 <BattleSplitView
   battle={battle}
-  leftVerse={verses.left}
-  rightVerse={verses.right}
-  streamingPersonaId={currentStreamingId} // Which persona is streaming
-  streamingText={partialText}             // Partial verse text
+  verses={verses}
+  streamingPersonaId={currentStreamingId}     // Which persona is streaming
+  streamingText={partialText}                 // Partial verse text
+  streamingPosition="player1"                 // Which position is streaming
   {...otherProps}
 />
 ```
@@ -193,13 +192,13 @@ export function MyBattleView({ battle }: { battle: Battle }) {
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `battle` | `Battle` | required | Full battle data |
-| `leftVerse` | `Verse \| null` | required | Left persona verse |
-| `rightVerse` | `Verse \| null` | required | Right persona verse |
+| `verses` | `{ player1: Verse \| null, player2: Verse \| null }` | required | Verses for both personas |
 | `roundScore` | `RoundScore` | `undefined` | Round scoring data |
 | `showRoundWinner` | `boolean` | `false` | Show winner badge |
 | `mobileActiveSide` | `PersonaPosition \| null` | `null` | Mobile visibility control |
 | `streamingPersonaId` | `string \| null` | `undefined` | Streaming persona ID |
 | `streamingText` | `string \| null` | `undefined` | Streaming text content |
+| `streamingPosition` | `PersonaPosition \| null` | `undefined` | Which position is streaming |
 | `mobileTopOffset` | `number` | `0` | Top margin offset |
 | `cardPadding` | `string` | `"p-3 md:p-4"` | Card container padding |
 | `className` | `string` | `""` | Container classes |
@@ -210,7 +209,7 @@ export function MyBattleView({ battle }: { battle: Battle }) {
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `verses` | `{ left: Verse \| null, right: Verse \| null }` | Round verses |
+| `verses` | `{ player1: Verse \| null, player2: Verse \| null }` | Round verses |
 | `score` | `RoundScore \| undefined` | Round score |
 | `isComplete` | `boolean` | Both verses + score exist |
 | `hasVerses` | `boolean` | At least one verse exists |
@@ -236,9 +235,8 @@ If you see prop type errors:
 ```tsx
 // Ensure all required props are provided
 <BattleSplitView
-  battle={battle}         // ✅ Required
-  leftVerse={verses.left} // ✅ Required
-  rightVerse={verses.right} // ✅ Required
+  battle={battle}    // ✅ Required
+  verses={verses}    // ✅ Required
   // All other props are optional
 />
 ```
@@ -250,7 +248,7 @@ If mobile visibility isn't working:
 ```tsx
 // Check mobileActiveSide prop
 <BattleSplitView
-  mobileActiveSide={selectedSide} // Should be "left", "right", or null
+  mobileActiveSide={selectedSide} // Should be "player1", "player2", or null
   {...props}
 />
 ```
@@ -293,13 +291,12 @@ test("renders both personas", () => {
   const { getByText } = render(
     <BattleSplitView
       battle={mockBattle}
-      leftVerse={mockLeftVerse}
-      rightVerse={mockRightVerse}
+      verses={{ player1: mockPlayer1Verse, player2: mockPlayer2Verse }}
     />
   );
   
-  expect(getByText("Left Persona")).toBeInTheDocument();
-  expect(getByText("Right Persona")).toBeInTheDocument();
+  expect(getByText("Player 1 Persona")).toBeInTheDocument();
+  expect(getByText("Player 2 Persona")).toBeInTheDocument();
 });
 ```
 

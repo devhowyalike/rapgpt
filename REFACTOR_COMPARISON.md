@@ -100,43 +100,43 @@ NET GAIN: Better code organization, zero duplication
   <div className="relative max-w-7xl mx-auto h-full">
     <div className="hidden md:block pointer-events-none absolute inset-y-0 left-1/2 w-px bg-gray-800" />
     <div className="grid md:grid-cols-2 divide-y md:divide-y-0 divide-gray-800 h-full">
-      {/* Left Persona */}
-      <div className={`${mobileActiveSide && mobileActiveSide !== "left" ? "hidden md:flex" : "flex"} flex-col md:min-h-0`}>
+      {/* Player 1 Persona */}
+      <div className={`${mobileActiveSide && mobileActiveSide !== "player1" ? "hidden md:flex" : "flex"} flex-col md:min-h-0`}>
         <div className="p-3 md:p-4 border-b border-gray-800" style={isMobile ? { marginTop: personaTopMargin } : undefined}>
           <PersonaCard
-            persona={battle.personas.left}
-            position="left"
-            isActive={battle.currentTurn === "left" || streamingPersonaId === battle.personas.left.id}
-            isRoundWinner={shouldShowRoundWinner && currentRoundScore?.winner === battle.personas.left.id}
+            persona={battle.personas.player1}
+            position="player1"
+            isActive={battle.currentTurn === "player1" || streamingPersonaId === battle.personas.player1.id}
+            isRoundWinner={shouldShowRoundWinner && currentRoundScore?.winner === battle.personas.player1.id}
           />
         </div>
         <div className="flex-1 stage-spotlight">
           <VerseDisplay
-            verse={currentRoundVerses.left}
-            persona={battle.personas.left}
-            position="left"
-            isStreaming={streamingPersonaId === battle.personas.left.id}
+            verse={currentRoundVerses.player1}
+            persona={battle.personas.player1}
+            position="player1"
+            isStreaming={streamingPersonaId === battle.personas.player1.id}
             streamingText={streamingText || undefined}
           />
         </div>
       </div>
 
-      {/* Right Persona */}
-      <div className={`${mobileActiveSide && mobileActiveSide !== "right" ? "hidden md:flex" : "flex"} flex-col md:min-h-0`}>
+      {/* Player 2 Persona */}
+      <div className={`${mobileActiveSide && mobileActiveSide !== "player2" ? "hidden md:flex" : "flex"} flex-col md:min-h-0`}>
         <div className="p-3 md:p-4 border-b border-gray-800" style={isMobile ? { marginTop: personaTopMargin } : undefined}>
           <PersonaCard
-            persona={battle.personas.right}
-            position="right"
-            isActive={battle.currentTurn === "right" || streamingPersonaId === battle.personas.right.id}
-            isRoundWinner={shouldShowRoundWinner && currentRoundScore?.winner === battle.personas.right.id}
+            persona={battle.personas.player2}
+            position="player2"
+            isActive={battle.currentTurn === "player2" || streamingPersonaId === battle.personas.player2.id}
+            isRoundWinner={shouldShowRoundWinner && currentRoundScore?.winner === battle.personas.player2.id}
           />
         </div>
         <div className="flex-1 stage-spotlight">
           <VerseDisplay
-            verse={currentRoundVerses.right}
-            persona={battle.personas.right}
-            position="right"
-            isStreaming={streamingPersonaId === battle.personas.right.id}
+            verse={currentRoundVerses.player2}
+            persona={battle.personas.player2}
+            position="player2"
+            isStreaming={streamingPersonaId === battle.personas.player2.id}
             streamingText={streamingText || undefined}
           />
         </div>
@@ -150,13 +150,13 @@ NET GAIN: Better code organization, zero duplication
 ```tsx
 <BattleSplitView
   battle={battle}
-  leftVerse={currentRoundVerses.left}
-  rightVerse={currentRoundVerses.right}
+  verses={currentRoundVerses} // { player1: Verse | null, player2: Verse | null }
   roundScore={currentRoundScore}
   showRoundWinner={shouldShowRoundWinner}
   mobileActiveSide={mobileActiveSide}
   streamingPersonaId={streamingPersonaId}
   streamingText={streamingText}
+  streamingPosition={streamingPosition}
   mobileTopOffset={isMobile ? personaTopMargin : 0}
 />
 ```
@@ -172,7 +172,7 @@ NET GAIN: Better code organization, zero duplication
 const roundVerses = getRoundVerses(battle, selectedRound);
 const roundScore = battle.scores.find((s) => s.round === selectedRound);
 // Later in code: checking if both verses complete
-const bothVersesComplete = roundVerses.left && roundVerses.right;
+const bothVersesComplete = roundVerses.player1 && roundVerses.player2;
 ```
 
 #### After
@@ -225,8 +225,8 @@ const { verses, score, hasBothVerses } = useRoundData(battle, selectedRound);
 ### Before
 ```tsx
 // Easy to have prop mismatches between files
-<PersonaCard persona={battle.personas.left} position="left" ... />
-<VerseDisplay verse={currentRoundVerses.left} ... />
+<PersonaCard persona={battle.personas.player1} position="player1" ... />
+<VerseDisplay verse={currentRoundVerses.player1} ... />
 // Different padding in each file: "p-3 md:p-4" vs "p-6"
 ```
 
@@ -236,7 +236,7 @@ const { verses, score, hasBothVerses } = useRoundData(battle, selectedRound);
 interface PersonaSectionProps {
   persona: Persona;
   verse: Verse | null;
-  position: PersonaPosition; // ✅ Type-safe
+  position: PersonaPosition; // ✅ Type-safe ("player1" | "player2")
   cardPadding?: string; // ✅ Explicit & configurable
   // ...
 }

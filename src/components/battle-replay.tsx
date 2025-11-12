@@ -226,8 +226,7 @@ export function BattleReplay({
       >
         <BattleSplitView
           battle={battle}
-          leftVerse={roundVerses.player1}
-          rightVerse={roundVerses.player2}
+          verses={roundVerses}
           roundScore={roundScore}
           showRoundWinner={true}
           cardPadding="px-3 py-2 md:p-4"
