@@ -3,7 +3,7 @@
  */
 
 export type BattleStatus = 'upcoming' | 'paused' | 'completed';
-export type PersonaPosition = 'left' | 'right';
+export type PersonaPosition = 'player1' | 'player2';
 export type SongGenerationBeatStyle = 'g-funk' | 'boom-bap' | 'trap';
 
 export interface Persona {
@@ -14,6 +14,11 @@ export interface Persona {
   avatar: string;
   accentColor: string;
   systemPrompt: string;
+  /**
+   * Optional: IDs of alternative costume personas linked to this primary persona.
+   * Order determines cycling order in character select (primary → alt1 → alt2 → …).
+   */
+  altCostumes?: string[];
   musicStyleDescription?: string; // Platform-agnostic music generation descriptors (no copyrighted artist names)
   vocalGender?: 'm' | 'f'; // Vocal gender for music generation APIs
 }
@@ -50,14 +55,21 @@ export interface AutomatedScore {
 
 export interface RoundScore {
   round: number;
-  personaScores: {
-    [personaId: string]: {
+  positionScores: {
+    player1: {
+      personaId: string;
+      automated: AutomatedScore;
+      userVotes: number;
+      totalScore: number;
+    };
+    player2: {
+      personaId: string;
       automated: AutomatedScore;
       userVotes: number;
       totalScore: number;
     };
   };
-  winner: string | null;
+  winner: PersonaPosition | null;
 }
 
 export interface Comment {
@@ -78,11 +90,11 @@ export interface Battle {
   status: BattleStatus;
   stageId: string; // Stage where the battle takes place
   personas: {
-    left: Persona;
-    right: Persona;
+    player1: Persona;
+    player2: Persona;
   };
   currentRound: number;
-  currentTurn: 'left' | 'right' | null;
+  currentTurn: PersonaPosition | null;
   verses: Verse[];
   scores: RoundScore[];
   comments: Comment[];

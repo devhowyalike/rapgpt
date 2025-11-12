@@ -35,6 +35,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
     setStreamingVerse,
     streamingVerse,
     streamingPersonaId,
+    streamingPosition,
     saveBattle,
   } = useBattleStore();
 
@@ -62,11 +63,14 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
           break;
 
         case "verse:streaming":
-          setStreamingVerse(event.text, event.personaId);
+          // Determine position by checking which side is currently performing
+          // Use currentTurn since we know the verse being streamed is for the current turn
+          const streamPosition = battle?.currentTurn || null;
+          setStreamingVerse(event.text, event.personaId, streamPosition);
           break;
 
         case "verse:complete":
-          setStreamingVerse(null, null);
+          setStreamingVerse(null, null, null);
           if (battle) {
             addVerse(event.personaId, event.verseText);
             // Persist updated battle after adding the verse
@@ -145,9 +149,11 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
     if (!nextPerformer || isGenerating) return;
 
     const personaId = latestBattle.personas[nextPerformer].id;
+    // Use nextPerformer directly as the position (it's already 'player1' or 'player2')
+    const position = nextPerformer;
     setIsGenerating(true);
     // Indicate performer is about to stream; rely on WebSocket for actual text
-    setStreamingVerse(null, personaId);
+    setStreamingVerse(null, personaId, position);
 
     try {
       const response = await fetch("/api/battle/generate-verse", {
@@ -166,7 +172,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
       await response.text();
     } catch (error) {
       console.error("Error generating verse:", error);
-      setStreamingVerse(null, null);
+      setStreamingVerse(null, null, null);
     } finally {
       setIsGenerating(false);
     }
@@ -416,6 +422,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
             battle={battle}
             streamingPersonaId={streamingPersonaId}
             streamingText={streamingVerse}
+            streamingPosition={streamingPosition}
             isReadingPhase={false}
             isVotingPhase={false}
             votingCompletedRound={null}

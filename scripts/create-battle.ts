@@ -117,11 +117,11 @@ async function main() {
     status: 'paused',
     stageId: selectedStageId,
     personas: {
-      left: PERSONAS[persona1Id],
-      right: PERSONAS[persona2Id]
+      player1: PERSONAS[persona1Id],
+      player2: PERSONAS[persona2Id]
     },
     currentRound: 1,
-    currentTurn: 'left',
+    currentTurn: 'player1',
     verses: [],
     scores: [],
     comments: [],
@@ -142,8 +142,8 @@ async function main() {
   console.log(`📁 File: ${filePath}`);
   console.log(`🆔 Battle ID: ${battleId}`);
   console.log(`\n🎤 Battle: ${battle.title}`);
-  console.log(`   Left: ${battle.personas.left.name} (${battle.personas.left.style})`);
-  console.log(`   Right: ${battle.personas.right.name} (${battle.personas.right.style})`);
+  console.log(`   Player 1: ${battle.personas.player1.name} (${battle.personas.player1.style})`);
+  console.log(`   Player 2: ${battle.personas.player2.name} (${battle.personas.player2.style})`);
   console.log(`\n🚀 Start your dev server to see the battle!`);
   console.log(`   pnpm dev`);
   console.log(`\n🔗 URL: http://localhost:3000/battle/${battleId}\n`);

@@ -4,10 +4,9 @@
 
 "use client";
 
-import type { Battle } from "@/lib/shared";
+import type { Battle, PersonaPosition } from "@/lib/shared";
 import { RoundTracker } from "./round-tracker";
-import { ScoreDisplay } from "./score-display";
-import { getBattleProgress } from "@/lib/battle-engine";
+import { getBattleProgress, getWinnerPosition } from "@/lib/battle-engine";
 import { motion } from "framer-motion";
 import { BattleBell } from "./battle-bell";
 import { VictoryConfetti } from "./victory-confetti";
@@ -16,12 +15,15 @@ import { getStage, DEFAULT_STAGE } from "@/lib/shared/stages";
 import { useRoundData } from "@/lib/hooks/use-round-data";
 import { BattleHeader } from "./battle/battle-header";
 import { BattleSplitView } from "./battle/battle-split-view";
+import { BattleScoreSection } from "./battle/battle-score-section";
 import { useScoreRevealDelay } from "@/lib/hooks/use-score-reveal-delay";
+import { useIsMobile } from "@/lib/hooks/use-is-mobile";
 
 interface BattleStageProps {
   battle: Battle;
   streamingPersonaId?: string | null;
   streamingText?: string | null;
+  streamingPosition?: PersonaPosition | null;
   isReadingPhase?: boolean;
   isVotingPhase?: boolean;
   votingCompletedRound?: number | null;
@@ -37,6 +39,7 @@ export function BattleStage({
   battle,
   streamingPersonaId,
   streamingText,
+  streamingPosition,
   isReadingPhase = false,
   isVotingPhase = false,
   votingCompletedRound = null,
@@ -81,17 +84,9 @@ export function BattleStage({
       (battle.votingEnabled === false && !isReadingPhase && !isVotingPhase));
 
   // Mobile-only offset so the first persona does not render under the sticky trophy/header
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useIsMobile();
   const trophyRef = useRef<HTMLDivElement | null>(null);
   const [personaTopMargin, setPersonaTopMargin] = useState(0);
-
-  // Track viewport size for mobile logic
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   // Compute combined offset: site header height (CSS var) + BattleHeader height
   useLayoutEffect(() => {
@@ -136,32 +131,30 @@ export function BattleStage({
 
   // Determine which persona to show on mobile
   // Keep showing only the second rapper until user reveals scores
-  let mobileActiveSide: "left" | "right" | null = null;
+  let mobileActiveSide: PersonaPosition | null = null;
 
-  if (streamingPersonaId === battle.personas.left.id) {
-    mobileActiveSide = "left";
-  } else if (streamingPersonaId === battle.personas.right.id) {
-    mobileActiveSide = "right";
-  } else if (currentRoundVerses.left && !currentRoundVerses.right) {
-    mobileActiveSide = "left";
-  } else if (currentRoundVerses.right && !currentRoundVerses.left) {
-    mobileActiveSide = "right";
-  } else if (!currentRoundVerses.left && !currentRoundVerses.right) {
+  if (streamingPosition) {
+    mobileActiveSide = streamingPosition;
+  } else if (currentRoundVerses.player1 && !currentRoundVerses.player2) {
+    mobileActiveSide = "player1";
+  } else if (currentRoundVerses.player2 && !currentRoundVerses.player1) {
+    mobileActiveSide = "player2";
+  } else if (!currentRoundVerses.player1 && !currentRoundVerses.player2) {
     // New round just started; show the current turn on mobile immediately
     mobileActiveSide = battle.currentTurn ?? null;
   } else if (bothVersesComplete && !scoresAvailable) {
     // Both verses complete but scores not revealed - keep showing the last performer
     // Determine who performed second
-    const leftVerseId = currentRoundVerses.left?.id;
-    const rightVerseId = currentRoundVerses.right?.id;
-    if (leftVerseId && rightVerseId) {
-      const leftVerseIndex = battle.verses.findIndex(
-        (v) => v.id === leftVerseId
+    const player1VerseId = currentRoundVerses.player1?.id;
+    const player2VerseId = currentRoundVerses.player2?.id;
+    if (player1VerseId && player2VerseId) {
+      const player1VerseIndex = battle.verses.findIndex(
+        (v) => v.id === player1VerseId
       );
-      const rightVerseIndex = battle.verses.findIndex(
-        (v) => v.id === rightVerseId
+      const player2VerseIndex = battle.verses.findIndex(
+        (v) => v.id === player2VerseId
       );
-      mobileActiveSide = rightVerseIndex > leftVerseIndex ? "right" : "left";
+      mobileActiveSide = player2VerseIndex > player1VerseIndex ? "player2" : "player1";
     }
   } else if (bothVersesComplete && scoresAvailable) {
     // Scores revealed - show both personas for comparison
@@ -239,9 +232,9 @@ export function BattleStage({
             <VictoryConfetti trigger={true} />
             <div className="text-xl md:text-2xl lg:text-3xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue) relative z-10">
               🏆 WINNER:{" "}
-              {battle.personas.left.id === battle.winner
-                ? battle.personas.left.name
-                : battle.personas.right.name}{" "}
+              {getWinnerPosition(battle) === 'player1'
+                ? battle.personas.player1.name
+                : battle.personas.player2.name}{" "}
               🏆
             </div>
           </motion.div>
@@ -252,13 +245,13 @@ export function BattleStage({
       <div className="flex-1">
         <BattleSplitView
           battle={battle}
-          leftVerse={currentRoundVerses.left}
-          rightVerse={currentRoundVerses.right}
+          verses={currentRoundVerses}
           roundScore={currentRoundScore}
           showRoundWinner={shouldShowRoundWinner}
           mobileActiveSide={mobileActiveSide}
           streamingPersonaId={streamingPersonaId}
           streamingText={streamingText}
+          streamingPosition={streamingPosition}
           mobileTopOffset={isMobile ? personaTopMargin : 0}
           enableStickyPersonas={enableStickyPersonas}
           isBattleEnd={false}
@@ -283,12 +276,7 @@ export function BattleStage({
             >
               ROUND {currentRoundScore.round} SCORES
             </motion.h3>
-            <ScoreDisplay
-              roundScore={currentRoundScore}
-              leftPersona={battle.personas.left}
-              rightPersona={battle.personas.right}
-              votingEnabled={battle.votingEnabled ?? true}
-            />
+            <BattleScoreSection battle={battle} roundScore={currentRoundScore} />
           </div>
         </motion.div>
       )}

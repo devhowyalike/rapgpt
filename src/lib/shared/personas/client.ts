@@ -20,6 +20,7 @@ export const kennyK: ClientPersona = {
   style: 'Boom Bap',
   avatar: '/avatars/kenny-k.jpg',
   accentColor: '#00d4ff',
+  altCostumes: ['mrAkron'],
   musicStyleDescription: 'underground hip-hop, jazzy samples, intricate wordplay, abstract lyrics, boom bap drums, laid-back flow with complex rhyme schemes, rare funk samples',
   vocalGender: 'm',
 };
@@ -57,11 +58,24 @@ export const dawn: ClientPersona = {
   vocalGender: 'f',
 };
 
+export const mrAkron: ClientPersona = {
+  id: 'mrAkron',
+  name: 'Mr. Akron',
+  bio: 'Ohio\'s own. Creator of Skribble Jam.',
+  style: 'Boom Bap',
+  // Using existing asset as placeholder; replace with /avatars/mr-kron.jpg when available
+  avatar: '/avatars/mr-akron.jpg',
+  accentColor: '#00d4ff',
+  musicStyleDescription: 'cinematic west coast boom bap, dense internal rhymes, layered metaphors, comic book imagery, crate-digger flex',
+  vocalGender: 'm',
+};
+
 export const CLIENT_PERSONAS: Record<string, ClientPersona> = {
   kennyK,
   ladyMuse,
   timDawg,
   dawn,
+  mrAkron,
 };
 
 export function getClientPersona(id: string): ClientPersona | null {
@@ -70,5 +84,44 @@ export function getClientPersona(id: string): ClientPersona | null {
 
 export function getAllClientPersonas(): ClientPersona[] {
   return Object.values(CLIENT_PERSONAS);
+}
+
+/**
+ * Returns only primary personas (those not listed as an alt in any primary's altCostumes).
+ */
+export function getPrimaryClientPersonas(): ClientPersona[] {
+  const all = Object.values(CLIENT_PERSONAS);
+  const altIds = new Set<string>();
+  for (const p of all) {
+    if (p.altCostumes?.length) {
+      for (const altId of p.altCostumes) altIds.add(altId);
+    }
+  }
+  return all.filter(p => !altIds.has(p.id));
+}
+
+/**
+ * Returns a map of primary persona id → ordered group [primaryId, ...altIds]
+ */
+export function getPersonaGroups(): Record<string, string[]> {
+  const groups: Record<string, string[]> = {};
+  const primaries = getPrimaryClientPersonas();
+  for (const primary of primaries) {
+    groups[primary.id] = [primary.id, ...(primary.altCostumes ?? [])];
+  }
+  return groups;
+}
+
+/**
+ * Given any persona id, finds its primary and the full ordered group.
+ */
+export function getGroupForPersona(personaId: string): { primaryId: string; members: string[] } | null {
+  const groups = getPersonaGroups();
+  for (const [primaryId, members] of Object.entries(groups)) {
+    if (members.includes(personaId)) {
+      return { primaryId, members };
+    }
+  }
+  return null;
 }
 

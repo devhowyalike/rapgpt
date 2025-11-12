@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import {
-  getAllClientPersonas,
+  getPrimaryClientPersonas,
+  getClientPersona,
   type ClientPersona,
 } from "@/lib/shared/personas/client";
 import { useAuth } from "@clerk/nextjs";
@@ -15,10 +16,16 @@ import { SelectionBottom } from "./selection/selection-bottom";
 import { SelectionGrid } from "./selection/selection-grid";
 import { SelectionActions } from "./selection/selection-actions";
 import { ActionButton } from "./selection/action-button";
-import { BattleOptions } from "./battle-options";
 import { SessionRestoreLoading } from "./session-restore-loading";
-import Image from "next/image";
+import { PersonaGridItem } from "./selection/persona-grid-item";
+import { VsGlow } from "./selection/vs-glow";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePersonaSelection } from "@/hooks/use-persona-selection";
+import {
+  getHoverPreviewPersona,
+  isInGroup,
+  getVariantIndex,
+} from "@/lib/persona-selection-utils";
 
 const SESSION_STORAGE_KEY = "rapgpt_battle_selections";
 
@@ -30,6 +37,9 @@ interface BattleSelections {
   commentsEnabled: boolean;
   showStageSelect: boolean;
   autoStartOnAdvance: boolean;
+  selectionStep?: "player1" | "player2" | "complete";
+  editPlayer?: boolean;
+  fromStage?: boolean;
 }
 
 interface CharacterSelectProps {
@@ -44,8 +54,17 @@ interface CharacterSelectProps {
 export function CharacterSelect({
   minLoadingDelay = 500,
 }: CharacterSelectProps = {}) {
-  const [player1, setPlayer1] = useState<ClientPersona | null>(null);
-  const [player2, setPlayer2] = useState<ClientPersona | null>(null);
+  // Use custom hook for persona selection logic
+  const {
+    player1,
+    player2,
+    selectionStep,
+    setPlayer1,
+    setPlayer2,
+    setSelectionStep,
+    handlePersonaClick: handlePersonaClickFromHook,
+  } = usePersonaSelection();
+
   const [hoveredPersona, setHoveredPersona] = useState<ClientPersona | null>(
     null
   );
@@ -95,7 +114,8 @@ export function CharacterSelect({
     checkAdminStatus();
   }, [userId, isLoaded]);
 
-  const personas = getAllClientPersonas();
+  // Only show primary personas in the grid
+  const primaryPersonas = getPrimaryClientPersonas();
 
   // Load from sessionStorage on mount
   useEffect(() => {
@@ -109,11 +129,11 @@ export function CharacterSelect({
 
           // Restore player selections
           if (selections.player1Id) {
-            const persona = personas.find((p) => p.id === selections.player1Id);
+            const persona = getClientPersona(selections.player1Id);
             if (persona) setPlayer1(persona);
           }
           if (selections.player2Id) {
-            const persona = personas.find((p) => p.id === selections.player2Id);
+            const persona = getClientPersona(selections.player2Id);
             if (persona) setPlayer2(persona);
           }
 
@@ -123,6 +143,7 @@ export function CharacterSelect({
           setCommentsEnabled(selections.commentsEnabled);
           setShowStageSelect(selections.showStageSelect);
           setAutoStartOnAdvance(selections.autoStartOnAdvance ?? true);
+          setSelectionStep(selections.selectionStep ?? "player1");
 
           // Add a minimum delay so the loading screen is visible to users
           // This provides visual feedback that the session is being restored
@@ -140,14 +161,20 @@ export function CharacterSelect({
     };
 
     loadSelections();
-  }, [isHydrated, personas, minLoadingDelay]);
+  }, [isHydrated, minLoadingDelay]);
 
   // Save to sessionStorage whenever selections change
   useEffect(() => {
     if (!isHydrated) return;
 
     try {
+      // Preserve transient flags (e.g., editPlayer/fromStage) by merging with existing
+      const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
+      const previous: Partial<BattleSelections> = stored
+        ? JSON.parse(stored)
+        : {};
       const selections: BattleSelections = {
+        ...previous,
         player1Id: player1?.id,
         player2Id: player2?.id,
         createAsLive,
@@ -155,6 +182,7 @@ export function CharacterSelect({
         commentsEnabled,
         showStageSelect,
         autoStartOnAdvance,
+        selectionStep,
       };
       sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(selections));
     } catch (error) {
@@ -168,43 +196,13 @@ export function CharacterSelect({
     commentsEnabled,
     showStageSelect,
     autoStartOnAdvance,
+    selectionStep,
     isHydrated,
   ]);
 
-  const handlePersonaClick = (persona: ClientPersona) => {
-    // Clear hover preview on touch devices after click
-    if (isTouchDevice) {
-      setHoveredPersona(null);
-    }
-
-    // Check if clicking a selected character (deselect)
-    if (player1?.id === persona.id) {
-      setPlayer1(null);
-      return;
-    }
-
-    if (player2?.id === persona.id) {
-      setPlayer2(null);
-      return;
-    }
-
-    // Select logic - assign to first empty slot
-    if (!player1) {
-      setPlayer1(persona);
-    } else if (!player2) {
-      setPlayer2(persona);
-    }
-    // If both slots full and clicking an unselected character, do nothing
-  };
-
-  const isSelected = (persona: ClientPersona) => {
-    return player1?.id === persona.id || player2?.id === persona.id;
-  };
-
-  const getSelectionLabel = (persona: ClientPersona) => {
-    if (player1?.id === persona.id) return "P1";
-    if (player2?.id === persona.id) return "P2";
-    return null;
+  // Wrapper to pass additional touch device state to the hook's handler
+  const handlePersonaClick = (primary: ClientPersona) => {
+    handlePersonaClickFromHook(primary, isTouchDevice, setHoveredPersona);
   };
 
   const handleProceedToStageSelect = () => {
@@ -214,12 +212,33 @@ export function CharacterSelect({
 
   const handleBackToCharacterSelect = () => {
     setShowStageSelect(false);
+    // Check sessionStorage to see if a specific selection step was requested
+    try {
+      const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
+      if (stored) {
+        const selections: BattleSelections = JSON.parse(stored);
+        // If selectionStep is "complete", set to "player2" to allow editing
+        // Otherwise use the stored step (e.g. "player1" or "player2")
+        if (
+          selections.selectionStep &&
+          selections.selectionStep !== "complete"
+        ) {
+          setSelectionStep(selections.selectionStep);
+          return;
+        }
+      }
+    } catch (error) {
+      console.error("Failed to read selectionStep from sessionStorage:", error);
+    }
+    // Default to player2 if no specific step was requested or if it was "complete"
+    setSelectionStep("player2");
   };
 
-  // Show player1 if selected, otherwise show hoveredPersona as preview if no player1 selected
-  const displayPlayer1 = player1 || (!player1 && hoveredPersona);
-  // Show player2 if selected, otherwise show hoveredPersona as preview if player1 is selected but not player2
-  const displayPlayer2 = player2 || (player1 && !player2 && hoveredPersona);
+  // Compute hover previews based on active selection step
+  const previewedPlayer1 =
+    selectionStep === "player1" ? hoveredPersona || player1 : player1;
+  const previewedPlayer2 =
+    selectionStep === "player2" ? hoveredPersona || player2 : player2;
 
   // Show loading screen while hydrating from sessionStorage
   if (!isHydrated) {
@@ -268,136 +287,227 @@ export function CharacterSelect({
               <SelectionContainer>
                 {/* Player 1 */}
                 <PlayerDisplay
-                  player={displayPlayer1}
+                  player={previewedPlayer1}
                   side="left"
                   showBio={true}
                   placeholder="PLAYER 1"
+                  onActivate={() => setSelectionStep("player1")}
+                  onClear={
+                    player1 && selectionStep !== "player1"
+                      ? () => setSelectionStep("player1")
+                      : undefined
+                  }
+                  isActive={selectionStep === "player1"}
                 />
 
                 {/* Center - VS Text */}
-                <CenterDisplay title="CHARACTER" subtitle="SELECT">
-                  {/* VS text with fixed height to prevent layout shift */}
-                  <div className="h-6 md:h-8 lg:h-10 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-2">
+                  {/* Player Step Indicator */}
+                  <div className="h-8 flex items-center justify-center">
                     <div
-                      className={`text-lg md:text-xl lg:text-2xl font-black text-red-500 animate-pulse drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] transition-opacity duration-300 ${
-                        player1 && player2 ? "opacity-100" : "opacity-0"
+                      className={`text-2xl md:text-3xl font-black transition-all duration-300 ${
+                        selectionStep === "player1"
+                          ? "text-[rgb(var(--player1-color))] drop-shadow-[0_0_20px_rgba(var(--player1-color),0.8)] opacity-100"
+                          : selectionStep === "player2"
+                          ? "text-[rgb(var(--player2-color))] drop-shadow-[0_0_20px_rgba(var(--player2-color),0.8)] opacity-100"
+                          : "opacity-0"
                       }`}
                     >
-                      VS
+                      {selectionStep === "player1"
+                        ? "Player 1"
+                        : selectionStep === "player2"
+                        ? "Player 2"
+                        : ""}
                     </div>
                   </div>
-                </CenterDisplay>
+
+                  <CenterDisplay title="CHARACTER" subtitle="SELECT">
+                    {/* VS text with fixed height to prevent layout shift */}
+                    <div className="h-6 md:h-8 lg:h-10 flex items-center justify-center">
+                      <VsGlow
+                        visible={Boolean(player1 && player2)}
+                        color="player2"
+                        size="md"
+                      />
+                    </div>
+                  </CenterDisplay>
+                </div>
 
                 {/* Player 2 */}
                 <PlayerDisplay
-                  player={displayPlayer2}
+                  player={previewedPlayer2}
                   side="right"
                   showBio={true}
                   placeholder="PLAYER 2"
+                  onActivate={() => setSelectionStep("player2")}
+                  onClear={
+                    player2 && selectionStep !== "player2"
+                      ? () => setSelectionStep("player2")
+                      : undefined
+                  }
+                  isActive={selectionStep === "player2"}
                 />
               </SelectionContainer>
 
               {/* Bottom Section - Character Grid */}
               <SelectionBottom>
-                {/* Character Selection Grid */}
-                <SelectionGrid gap="normal">
-                  {personas.map((persona) => {
-                    const selected = isSelected(persona);
-                    const label = getSelectionLabel(persona);
-
-                    return (
-                      <button
-                        key={persona.id}
-                        onClick={() => handlePersonaClick(persona)}
-                        onMouseEnter={() =>
-                          !isTouchDevice && setHoveredPersona(persona)
-                        }
-                        onMouseLeave={() =>
-                          !isTouchDevice && setHoveredPersona(null)
-                        }
-                        onTouchStart={() =>
-                          isTouchDevice && setHoveredPersona(null)
-                        }
-                        className={`
-                        relative group
-                        transition-all duration-300 transform
-                        hover:scale-105 md:hover:scale-110 hover:z-20
-                        ${selected ? "scale-105 md:scale-110 z-10" : ""}
-                      `}
-                      >
-                        {/* Selection Indicator */}
-                        {selected && (
-                          <div
-                            className={`
-                            absolute top-0 right-0 z-20
-                            w-7 h-7 md:w-8 md:h-8 rounded-full
-                            flex items-center justify-center
-                            font-bold text-xs
-                            ${
-                              label === "P1"
-                                ? "bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.8)]"
-                                : "bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.8)]"
-                            }
-                          `}
-                          >
-                            {label}
-                          </div>
-                        )}
-
-                        {/* Deselect Overlay - shows on hover of selected character */}
-                        {selected && (
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/70 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100 z-10 rounded-lg">
-                            <div className="text-center">
-                              <div className="text-white font-bold text-2xl md:text-3xl mb-1">
-                                ✕
-                              </div>
-                              <div className="text-white font-semibold text-xs">
-                                DESELECT
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Character Portrait */}
-                        <div
-                          className={`
-                          w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28
-                          rounded-lg
-                          border-4
-                          overflow-hidden
-                          bg-linear-to-br from-gray-800 to-gray-900
-                          transition-all duration-300
-                          ${
-                            selected
-                              ? label === "P1"
-                                ? "border-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.8)]"
-                                : "border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.8)]"
-                              : "border-gray-700 hover:border-yellow-400 hover:shadow-[0_0_20px_rgba(250,204,21,0.5)]"
-                          }
-                        `}
-                        >
-                          <Image
-                            src={persona.avatar}
-                            alt={persona.name}
-                            width={112}
-                            height={112}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </button>
-                    );
-                  })}
-                </SelectionGrid>
-
-                {/* Start Button */}
-                <SelectionActions>
-                  <ActionButton
-                    onClick={handleProceedToStageSelect}
-                    disabled={!player1 || !player2}
+                <AnimatePresence initial={false} mode="wait">
+                  <motion.div
+                    key={selectionStep}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
                   >
-                    {player1 && player2 ? "SELECT FIGHTERS" : "SELECT FIGHTERS"}
-                  </ActionButton>
-                </SelectionActions>
+                    {/* Character Selection Grid */}
+                    <SelectionGrid gap="normal">
+                      {primaryPersonas.map((persona) => {
+                        const p1InGroup = isInGroup(
+                          player1?.id ?? null,
+                          persona.id
+                        );
+                        const p2InGroup = isInGroup(
+                          player2?.id ?? null,
+                          persona.id
+                        );
+                        const p1VariantIndex =
+                          p1InGroup && player1
+                            ? getVariantIndex(player1.id, persona.id)
+                            : -1;
+                        const p2VariantIndex =
+                          p2InGroup && player2
+                            ? getVariantIndex(player2.id, persona.id)
+                            : -1;
+                        const selected = p1InGroup || p2InGroup;
+                        const showPlayer1Indicator =
+                          p1InGroup && selectionStep === "player1";
+                        const showPlayer2Indicator =
+                          p2InGroup && selectionStep === "player2";
+
+                        return (
+                          <PersonaGridItem
+                            key={persona.id}
+                            persona={persona}
+                            isSelected={selected}
+                            isPlayer1={p1InGroup}
+                            isPlayer2={p2InGroup}
+                            showPlayer1Indicator={showPlayer1Indicator}
+                            showPlayer2Indicator={showPlayer2Indicator}
+                            player1VariantIndex={p1VariantIndex}
+                            player2VariantIndex={p2VariantIndex}
+                            isTouchDevice={isTouchDevice}
+                            onClick={() => handlePersonaClick(persona)}
+                            onMouseEnter={() =>
+                              setHoveredPersona(
+                                getHoverPreviewPersona(
+                                  persona,
+                                  selectionStep,
+                                  player1,
+                                  player2
+                                )
+                              )
+                            }
+                            onMouseLeave={() => setHoveredPersona(null)}
+                            onTouchStart={() => setHoveredPersona(null)}
+                          />
+                        );
+                      })}
+                    </SelectionGrid>
+
+                    {/* Start Button */}
+                    <SelectionActions>
+                      {selectionStep === "player1" ? (
+                        <ActionButton
+                          onClick={() => {
+                            if (player1) {
+                              // Check if we're editing from stage select
+                              try {
+                                const stored =
+                                  sessionStorage.getItem(SESSION_STORAGE_KEY);
+                                if (stored) {
+                                  const selections: BattleSelections =
+                                    JSON.parse(stored);
+                                  if (
+                                    selections.editPlayer &&
+                                    selections.fromStage
+                                  ) {
+                                    // Clear the edit flags and return to stage select
+                                    selections.editPlayer = false;
+                                    selections.fromStage = false;
+                                    selections.selectionStep = "complete";
+                                    selections.showStageSelect = true;
+                                    sessionStorage.setItem(
+                                      SESSION_STORAGE_KEY,
+                                      JSON.stringify(selections)
+                                    );
+                                    setSelectionStep("complete");
+                                    setShowStageSelect(true);
+                                    handleProceedToStageSelect();
+                                    return;
+                                  }
+                                }
+                              } catch (error) {
+                                console.error(
+                                  "Failed to check edit flags:",
+                                  error
+                                );
+                              }
+                              // Normal flow: proceed to player 2
+                              setSelectionStep("player2");
+                            }
+                          }}
+                          disabled={!player1}
+                        >
+                          SELECT PLAYER 1
+                        </ActionButton>
+                      ) : (
+                        <ActionButton
+                          onClick={() => {
+                            if (player2) {
+                              // Check if we're editing from stage select
+                              try {
+                                const stored =
+                                  sessionStorage.getItem(SESSION_STORAGE_KEY);
+                                if (stored) {
+                                  const selections: BattleSelections =
+                                    JSON.parse(stored);
+                                  if (
+                                    selections.editPlayer &&
+                                    selections.fromStage
+                                  ) {
+                                    // Clear the edit flags and return to stage select
+                                    selections.editPlayer = false;
+                                    selections.fromStage = false;
+                                    selections.selectionStep = "complete";
+                                    selections.showStageSelect = true;
+                                    sessionStorage.setItem(
+                                      SESSION_STORAGE_KEY,
+                                      JSON.stringify(selections)
+                                    );
+                                    setSelectionStep("complete");
+                                    setShowStageSelect(true);
+                                    handleProceedToStageSelect();
+                                    return;
+                                  }
+                                }
+                              } catch (error) {
+                                console.error(
+                                  "Failed to check edit flags:",
+                                  error
+                                );
+                              }
+                              setSelectionStep("complete");
+                              handleProceedToStageSelect();
+                            }
+                          }}
+                          disabled={!player2}
+                        >
+                          SELECT PLAYER 2
+                        </ActionButton>
+                      )}
+                    </SelectionActions>
+                  </motion.div>
+                </AnimatePresence>
               </SelectionBottom>
             </SelectionLayout>
           </motion.div>

@@ -4,13 +4,13 @@
 
 "use client";
 
-import type { Persona } from "@/lib/shared";
+import type { Persona, PersonaPosition } from "@/lib/shared";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
 interface PersonaCardProps {
   persona: Persona;
-  position?: "left" | "right";
+  position?: PersonaPosition;
   isActive?: boolean;
   isRoundWinner?: boolean;
   className?: string;
@@ -27,6 +27,14 @@ export function PersonaCard({
   selected,
   label,
 }: PersonaCardProps) {
+  // Use position-based colors for battle display, fallback to persona color for other uses
+  const isPlayer1 = position === "player1";
+  const playerColor = position
+    ? isPlayer1
+      ? "rgb(var(--player1-color))"
+      : "rgb(var(--player2-color))"
+    : persona.accentColor;
+
   return (
     <motion.div
       className={`flex flex-row items-center gap-4 w-full ${
@@ -34,7 +42,7 @@ export function PersonaCard({
       } ${className}`}
       initial={{
         opacity: 0,
-        x: position ? (position === "left" ? -50 : 50) : 0,
+        x: position ? (position === "player1" ? -50 : 50) : 0,
       }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5 }}
@@ -45,13 +53,13 @@ export function PersonaCard({
           className="relative rounded-full"
           animate={{
             scale: isActive ? 1.05 : 1,
-            boxShadow: isActive ? `0 0 30px ${persona.accentColor}` : "none",
+            boxShadow: isActive ? `0 0 30px ${playerColor}` : "none",
           }}
           transition={{ duration: 0.3 }}
         >
           <div
             className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-4 bg-gray-800"
-            style={{ borderColor: persona.accentColor }}
+            style={{ borderColor: playerColor }}
           >
             <Image
               src={persona.avatar}
@@ -66,7 +74,7 @@ export function PersonaCard({
           {isActive && (
             <motion.div
               className="absolute -inset-2 rounded-full pointer-events-none"
-              style={{ border: `2px solid ${persona.accentColor}` }}
+              style={{ border: `2px solid ${playerColor}` }}
               animate={{
                 scale: [1, 1.08, 1],
                 opacity: [0.5, 0.8, 0.5],
@@ -91,7 +99,7 @@ export function PersonaCard({
         <div className="flex items-center gap-2">
           <h3
             className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
-            style={{ color: persona.accentColor }}
+            style={{ color: playerColor }}
           >
             {persona.name}
           </h3>

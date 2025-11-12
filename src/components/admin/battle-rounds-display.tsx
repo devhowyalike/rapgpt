@@ -3,6 +3,7 @@
 import * as React from "react";
 import { ChevronDown, ChevronRight, Crown } from "lucide-react";
 import type { Battle, Verse, Persona } from "@/lib/shared";
+import { getWinnerPersonaId } from "@/lib/battle-position-utils";
 
 interface BattleRoundsDisplayProps {
   battle: Battle;
@@ -45,13 +46,14 @@ export function BattleRoundsDisplay({ battle }: BattleRoundsDisplayProps) {
 
   const getRoundWinner = (round: number): string | null => {
     const roundScore = battle.scores.find((s) => s.round === round);
-    return roundScore?.winner || null;
+    if (!roundScore) return null;
+    return getWinnerPersonaId(battle, roundScore);
   };
 
   const getPersona = (personaId: string): Persona => {
-    return personaId === battle.personas.left.id
-      ? battle.personas.left
-      : battle.personas.right;
+    return personaId === battle.personas.player1.id
+      ? battle.personas.player1
+      : battle.personas.player2;
   };
 
   if (versesByRound.size === 0) {

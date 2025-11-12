@@ -170,9 +170,9 @@ export function BattlesTable({
       switch (sortField) {
         case "matchup":
           aValue =
-            `${a.personas.left.name} vs. ${a.personas.right.name}`.toLowerCase();
+            `${a.personas.player1.name} vs. ${a.personas.player2.name}`.toLowerCase();
           bValue =
-            `${b.personas.left.name} vs. ${b.personas.right.name}`.toLowerCase();
+            `${b.personas.player1.name} vs. ${b.personas.player2.name}`.toLowerCase();
           break;
         case "status":
           aValue = a.status;
@@ -325,16 +325,16 @@ export function BattlesTable({
                     <div className="flex items-center gap-1 text-sm">
                       <span
                         className="font-medium truncate max-w-[80px]"
-                        style={{ color: battle.personas.left.accentColor }}
+                        style={{ color: battle.personas.player1.accentColor }}
                       >
-                        {battle.personas.left.name}
+                        {battle.personas.player1.name}
                       </span>
                       <span className="text-gray-500">vs</span>
                       <span
                         className="font-medium truncate max-w-[80px]"
-                        style={{ color: battle.personas.right.accentColor }}
+                        style={{ color: battle.personas.player2.accentColor }}
                       >
-                        {battle.personas.right.name}
+                        {battle.personas.player2.name}
                       </span>
                     </div>
                   </div>

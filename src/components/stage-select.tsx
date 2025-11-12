@@ -9,7 +9,8 @@ import { SelectionLayout } from "./selection/selection-layout";
 import { SelectionBottom } from "./selection/selection-bottom";
 import { SelectionGrid } from "./selection/selection-grid";
 import { ActionButton } from "./selection/action-button";
-import { BackLink } from "./selection/back-link";
+import { PlayerChangeButton } from "./selection/player-change-button";
+import { VsGlow } from "./selection/vs-glow";
 import Image from "next/image";
 
 interface StageSelectProps {
@@ -117,8 +118,8 @@ export function StageSelect({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          leftPersonaId: player1.id,
-          rightPersonaId: player2.id,
+          player1PersonaId: player1.id,
+          player2PersonaId: player2.id,
           stageId: selectedStage.id,
           isFeatured: false, // Only admins can create featured battles
           votingEnabled,
@@ -352,10 +353,23 @@ export function StageSelect({
               : "SELECT STAGE"}
           </ActionButton>
 
-          <div className="flex justify-center">
-            <BackLink onClick={onBack} disabled={isCreating}>
-              ← Back to Character Select
-            </BackLink>
+          {/* Change Player Buttons - moved here under primary action */}
+          <div className="flex justify-center gap-3 md:gap-6 pt-1 md:pt-2">
+            <PlayerChangeButton
+              player={player1}
+              playerNumber={1}
+              sessionStorageKey={sessionStorageKey}
+              onBack={onBack}
+            />
+            <div className="flex items-center justify-center">
+              <VsGlow visible={true} color="player2" size="md" />
+            </div>
+            <PlayerChangeButton
+              player={player2}
+              playerNumber={2}
+              sessionStorageKey={sessionStorageKey}
+              onBack={onBack}
+            />
           </div>
         </div>
       </SelectionBottom>

@@ -15,9 +15,12 @@ import {
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { getStage, DEFAULT_STAGE } from "@/lib/shared/stages";
+import type { Battle } from "@/lib/shared";
 import { BattleInfoPanel } from "@/components/battle-info-panel";
 import { BattleStatusButton } from "@/components/battle-status-button";
 import { BattleFeatureBadges } from "@/components/battle-feature-badges";
+import { getWinnerPosition } from "@/lib/battle-engine";
+import { calculateTotalScores } from "@/lib/battle-position-utils";
 
 interface MyBattleCardProps {
   battle: {
@@ -25,8 +28,8 @@ interface MyBattleCardProps {
     title: string;
     status: string;
     createdAt: Date;
-    leftPersona: any;
-    rightPersona: any;
+    player1Persona: any;
+    player2Persona: any;
     currentRound?: number;
     verses?: any[];
     winner?: string | null;
@@ -69,8 +72,8 @@ export function MyBattleCard({
   const [showCopiedDialog, setShowCopiedDialog] = useState(false);
 
   const personas = {
-    left: battle.leftPersona as any,
-    right: battle.rightPersona as any,
+    player1: battle.player1Persona as any,
+    player2: battle.player2Persona as any,
   };
 
   const battleUrl = `${shareUrl}/battle/${battle.id}`;
@@ -148,25 +151,12 @@ export function MyBattleCard({
     if (!isCompleted || !battle.scores) return null;
 
     const totalRounds = battle.scores.length;
-    let leftTotalScore = 0;
-    let rightTotalScore = 0;
-
-    const leftPersonaId = personas.left.id;
-    const rightPersonaId = personas.right.id;
-
-    for (const roundScore of battle.scores) {
-      if (roundScore.personaScores) {
-        leftTotalScore +=
-          roundScore.personaScores[leftPersonaId]?.totalScore || 0;
-        rightTotalScore +=
-          roundScore.personaScores[rightPersonaId]?.totalScore || 0;
-      }
-    }
+    const totalScores = calculateTotalScores(battle.scores);
 
     return {
       totalRounds,
-      leftTotalScore: Math.round(leftTotalScore),
-      rightTotalScore: Math.round(rightTotalScore),
+      player1TotalScore: totalScores.player1,
+      player2TotalScore: totalScores.player2,
       winner: battle.winner,
     };
   };
@@ -187,10 +177,18 @@ export function MyBattleCard({
       return formattedTitle;
     }
 
+    // Create a Battle-like object with proper structure for getWinnerPosition
+    const battleForWinner = {
+      ...battle,
+      personas,
+      scores: battle.scores || [],
+    } as unknown as Battle;
+
+    const winnerPosition = getWinnerPosition(battleForWinner);
     const winnerName =
-      finalStats.winner === personas.left.id
-        ? personas.left.name
-        : personas.right.name;
+      winnerPosition === "player1"
+        ? personas.player1.name
+        : personas.player2.name;
 
     // Replace the winner's name with their name + crown
     return formattedTitle.replace(winnerName, `${winnerName} 👑`);
@@ -206,12 +204,12 @@ export function MyBattleCard({
   const battleResultsProps = finalStats
     ? {
         winner: finalStats.winner,
-        leftPersonaId: personas.left.id,
-        leftPersonaName: personas.left.name,
-        rightPersonaId: personas.right.id,
-        rightPersonaName: personas.right.name,
-        leftTotalScore: finalStats.leftTotalScore,
-        rightTotalScore: finalStats.rightTotalScore,
+        player1PersonaId: personas.player1.id,
+        player1PersonaName: personas.player1.name,
+        player2PersonaId: personas.player2.id,
+        player2PersonaName: personas.player2.name,
+        player1TotalScore: finalStats.player1TotalScore,
+        player2TotalScore: finalStats.player2TotalScore,
         totalRounds: finalStats.totalRounds,
       }
     : null;

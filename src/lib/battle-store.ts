@@ -3,8 +3,9 @@
  */
 
 import { create } from 'zustand';
-import type { Battle, Comment } from '@/lib/shared';
+import type { Battle, Comment, PersonaPosition } from '@/lib/shared';
 import { addVerseToBattle, advanceToNextRound } from './battle-engine';
+import { getPersonaPosition } from './battle-position-utils';
 
 interface BattleStore {
   battle: Battle | null;
@@ -12,6 +13,7 @@ interface BattleStore {
   error: string | null;
   streamingVerse: string | null;
   streamingPersonaId: string | null;
+  streamingPosition: PersonaPosition | null;
   votingTimeRemaining: number | null;
   isVotingPhase: boolean;
   votingCompletedRound: number | null;
@@ -21,7 +23,7 @@ interface BattleStore {
   setBattle: (battle: Battle) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  setStreamingVerse: (verse: string | null, personaId: string | null) => void;
+  setStreamingVerse: (verse: string | null, personaId: string | null, position?: PersonaPosition | null) => void;
   setVotingTimeRemaining: (time: number | null) => void;
   setIsVotingPhase: (isVoting: boolean) => void;
   setVotingCompletedRound: (round: number | null) => void;
@@ -46,6 +48,7 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
   error: null,
   streamingVerse: null,
   streamingPersonaId: null,
+  streamingPosition: null,
   votingTimeRemaining: null,
   isVotingPhase: false,
   votingCompletedRound: null,
@@ -55,8 +58,8 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
   setBattle: (battle) => set({ battle }),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
-  setStreamingVerse: (verse, personaId) => 
-    set({ streamingVerse: verse, streamingPersonaId: personaId }),
+  setStreamingVerse: (verse, personaId, position = null) => 
+    set({ streamingVerse: verse, streamingPersonaId: personaId, streamingPosition: position }),
   setVotingTimeRemaining: (time) => set({ votingTimeRemaining: time }),
   setIsVotingPhase: (isVoting) => set({ isVotingPhase: isVoting }),
   setVotingCompletedRound: (round) => set({ votingCompletedRound: round }),
@@ -114,13 +117,17 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
     const scoreIndex = battle.scores.findIndex(s => s.round === round);
     if (scoreIndex === -1) return;
 
+    // Determine which position the persona is in
+    const position = getPersonaPosition(battle, personaId);
+    if (!position) return; // Invalid persona ID
+
     const updatedScores = [...battle.scores];
     updatedScores[scoreIndex] = {
       ...updatedScores[scoreIndex],
-      personaScores: {
-        ...updatedScores[scoreIndex].personaScores,
-        [personaId]: {
-          ...updatedScores[scoreIndex].personaScores[personaId],
+      positionScores: {
+        ...updatedScores[scoreIndex].positionScores,
+        [position]: {
+          ...updatedScores[scoreIndex].positionScores[position],
           userVotes: votes,
         },
       },

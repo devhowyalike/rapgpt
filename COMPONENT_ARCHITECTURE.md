@@ -121,7 +121,7 @@ Input: (battle: Battle, round: number)
   │
   ├─> getRoundVerses(battle, round)
   │     │
-  │     └─> { left: Verse | null, right: Verse | null }
+  │     └─> { player1: Verse | null, player2: Verse | null }
   │
   ├─> battle.scores.find(s => s.round === round)
   │     │
@@ -133,7 +133,7 @@ Input: (battle: Battle, round: number)
         └─> isComplete: boolean
 
 Output: RoundData {
-  verses: { left, right },
+  verses: { player1, player2 },
   score: RoundScore | undefined,
   hasVerses: boolean,
   hasBothVerses: boolean,
@@ -147,13 +147,13 @@ Output: RoundData {
 battle-stage.tsx                    battle-replay.tsx
       │                                   │
       ├─ battle: Battle                   ├─ battle: Battle
-      ├─ leftVerse: Verse | null          ├─ leftVerse: Verse | null
-      ├─ rightVerse: Verse | null         ├─ rightVerse: Verse | null
+      ├─ verses: { player1, player2 }     ├─ verses: { player1, player2 }
       ├─ roundScore?: RoundScore          ├─ roundScore?: RoundScore
       ├─ showRoundWinner: boolean         ├─ showRoundWinner: boolean
       ├─ mobileActiveSide: Position       ├─ mobileActiveSide: null
       ├─ streamingPersonaId?: string      ├─ (no streaming)
       ├─ streamingText?: string           ├─ (no streaming)
+      ├─ streamingPosition?: Position     ├─ (no streaming)
       ├─ mobileTopOffset: number          └─ cardPadding: "p-6"
       └─ cardPadding: "p-3 md:p-4"
              │
@@ -197,19 +197,22 @@ interface BattleHeaderProps {
 ### BattleSplitView
 ```typescript
 interface BattleSplitViewProps {
-  battle: Battle;                    // Full battle data
-  leftVerse: Verse | null;          // Left verse content
-  rightVerse: Verse | null;         // Right verse content
-  roundScore?: RoundScore;          // Score data
-  showRoundWinner?: boolean;        // Display winner badge
+  battle: Battle;                     // Full battle data
+  verses: {                           // Verses for both personas
+    player1: Verse | null;
+    player2: Verse | null;
+  };
+  roundScore?: RoundScore;            // Score data
+  showRoundWinner?: boolean;          // Display winner badge
   mobileActiveSide?: Position | null; // Mobile visibility
   streamingPersonaId?: string | null; // Live streaming
-  streamingText?: string | null;    // Streaming content
-  mobileTopOffset?: number;         // Layout offset
-  cardPadding?: string;             // Custom spacing
-  className?: string;               // Container styles
-  contentClassName?: string;        // Content wrapper styles
-  style?: React.CSSProperties;      // Inline styles
+  streamingText?: string | null;      // Streaming content
+  streamingPosition?: Position | null; // Which position is streaming
+  mobileTopOffset?: number;           // Layout offset
+  cardPadding?: string;               // Custom spacing
+  className?: string;                 // Container styles
+  contentClassName?: string;          // Content wrapper styles
+  style?: React.CSSProperties;        // Inline styles
 }
 ```
 
@@ -237,7 +240,7 @@ function useRoundData(
 ): RoundData
 
 interface RoundData {
-  verses: { left: Verse | null; right: Verse | null };
+  verses: { player1: Verse | null; player2: Verse | null };
   score: RoundScore | undefined;
   isComplete: boolean;
   hasVerses: boolean;
@@ -265,11 +268,11 @@ interface RoundData {
 // Both components use BattleSplitView but with different configs
 <BattleSplitView
   battle={battle}
-  leftVerse={verses.left}
-  rightVerse={verses.right}
+  verses={verses} // { player1: Verse | null, player2: Verse | null }
   // Stage: Live streaming, mobile switching
-  mobileActiveSide="left"
+  mobileActiveSide="player1"
   streamingPersonaId={id}
+  streamingPosition="player1"
   
   // Replay: Static, always show both
   mobileActiveSide={null}

@@ -14,8 +14,10 @@ interface BattleSplitViewProps {
   /**
    * Verses to display for each persona
    */
-  leftVerse: any;
-  rightVerse: any;
+  verses: {
+    player1: any;
+    player2: any;
+  };
   /**
    * Round score for winner badges
    */
@@ -34,6 +36,7 @@ interface BattleSplitViewProps {
    */
   streamingPersonaId?: string | null;
   streamingText?: string | null;
+  streamingPosition?: PersonaPosition | null;
   /**
    * Mobile top offset for first persona (to avoid sticky header overlap)
    */
@@ -70,13 +73,13 @@ interface BattleSplitViewProps {
 
 export function BattleSplitView({
   battle,
-  leftVerse,
-  rightVerse,
+  verses,
   roundScore,
   showRoundWinner = false,
   mobileActiveSide = null,
   streamingPersonaId,
   streamingText,
+  streamingPosition,
   mobileTopOffset = 0,
   cardPadding = "p-3 md:p-4",
   className,
@@ -85,9 +88,10 @@ export function BattleSplitView({
   enableStickyPersonas = true,
   isBattleEnd = false,
 }: BattleSplitViewProps) {
-  const leftVisible = mobileActiveSide === null || mobileActiveSide === "left";
+  const leftVisible =
+    mobileActiveSide === null || mobileActiveSide === "player1";
   const rightVisible =
-    mobileActiveSide === null || mobileActiveSide === "right";
+    mobileActiveSide === null || mobileActiveSide === "player2";
 
   return (
     <>
@@ -104,19 +108,17 @@ export function BattleSplitView({
         <div
           className={cn("grid md:grid-cols-2 md:min-h-full", contentClassName)}
         >
-          {/* Left Persona */}
+          {/* Player 1 (Left Side) */}
           <PersonaSection
-            persona={battle.personas.left}
-            verse={leftVerse}
-            position="left"
+            persona={battle.personas.player1}
+            verse={verses.player1}
+            position="player1"
             isActive={
-              battle.currentTurn === "left" ||
-              streamingPersonaId === battle.personas.left.id
+              battle.currentTurn === "player1" ||
+              streamingPosition === "player1"
             }
-            isRoundWinner={
-              showRoundWinner && roundScore?.winner === battle.personas.left.id
-            }
-            isStreaming={streamingPersonaId === battle.personas.left.id}
+            isRoundWinner={showRoundWinner && roundScore?.winner === "player1"}
+            isStreaming={streamingPosition === "player1"}
             streamingText={streamingText || undefined}
             mobileTopOffset={leftVisible ? mobileTopOffset : 0}
             visible={leftVisible}
@@ -125,19 +127,17 @@ export function BattleSplitView({
             isBattleEnd={isBattleEnd}
           />
 
-          {/* Right Persona */}
+          {/* Player 2 (Right Side) */}
           <PersonaSection
-            persona={battle.personas.right}
-            verse={rightVerse}
-            position="right"
+            persona={battle.personas.player2}
+            verse={verses.player2}
+            position="player2"
             isActive={
-              battle.currentTurn === "right" ||
-              streamingPersonaId === battle.personas.right.id
+              battle.currentTurn === "player2" ||
+              streamingPosition === "player2"
             }
-            isRoundWinner={
-              showRoundWinner && roundScore?.winner === battle.personas.right.id
-            }
-            isStreaming={streamingPersonaId === battle.personas.right.id}
+            isRoundWinner={showRoundWinner && roundScore?.winner === "player2"}
+            isStreaming={streamingPosition === "player2"}
             streamingText={streamingText || undefined}
             mobileTopOffset={rightVisible ? mobileTopOffset : 0}
             visible={rightVisible}

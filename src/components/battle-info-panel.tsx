@@ -10,7 +10,7 @@ import {
 import type { Stage } from "@/lib/shared/stages";
 import { ROUNDS_PER_BATTLE, getDisplayRound } from "@/lib/shared";
 import type { Battle } from "@/lib/shared";
-import { BattleResultsStats } from "@/components/battle-results-stats";
+import { BattleResultsStats, type BattleResultsStatsProps } from "@/components/battle-results-stats";
 
 interface BattleInfoPanelProps {
   type: "progress" | "results";
@@ -20,16 +20,7 @@ interface BattleInfoPanelProps {
   currentRound?: number;
   versesCount?: number;
   // Results-specific props
-  resultsStats?: {
-    winner: string | null | undefined;
-    leftPersonaId: string;
-    leftPersonaName: string;
-    rightPersonaId: string;
-    rightPersonaName: string;
-    leftTotalScore: number;
-    rightTotalScore: number;
-    totalRounds: number;
-  } | null;
+  resultsStats?: BattleResultsStatsProps | null;
 }
 
 export function BattleInfoPanel({

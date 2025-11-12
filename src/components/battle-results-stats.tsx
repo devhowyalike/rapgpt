@@ -1,29 +1,40 @@
 import { Crown } from "lucide-react";
 
-interface BattleResultsStatsProps {
+export interface BattleResultsStatsProps {
   winner: string | null | undefined;
-  leftPersonaId: string;
-  leftPersonaName: string;
-  rightPersonaId: string;
-  rightPersonaName: string;
-  leftTotalScore: number;
-  rightTotalScore: number;
+  player1PersonaId: string;
+  player1PersonaName: string;
+  player2PersonaId: string;
+  player2PersonaName: string;
+  player1TotalScore: number;
+  player2TotalScore: number;
   totalRounds: number;
 }
 
 export function BattleResultsStats({
   winner,
-  leftPersonaId,
-  leftPersonaName,
-  rightPersonaId,
-  rightPersonaName,
-  leftTotalScore,
-  rightTotalScore,
+  player1PersonaId,
+  player1PersonaName,
+  player2PersonaId,
+  player2PersonaName,
+  player1TotalScore,
+  player2TotalScore,
   totalRounds,
 }: BattleResultsStatsProps) {
   const getWinnerName = () => {
-    if (winner === leftPersonaId) return leftPersonaName;
-    if (winner === rightPersonaId) return rightPersonaName;
+    // If no winner, it's a tie
+    if (!winner || winner === "tie") return "Tie";
+    
+    // If both personas have the same ID, determine winner by score
+    if (player1PersonaId === player2PersonaId) {
+      if (player1TotalScore > player2TotalScore) return player1PersonaName;
+      if (player2TotalScore > player1TotalScore) return player2PersonaName;
+      return "Tie";
+    }
+    
+    // Normal case: different personas, match by ID
+    if (winner === player1PersonaId) return player1PersonaName;
+    if (winner === player2PersonaId) return player2PersonaName;
     if (winner) return winner;
     return "Tie";
   };
@@ -40,7 +51,7 @@ export function BattleResultsStats({
         </span>
       </li>
       <li>
-        • Final Score: {leftTotalScore} - {rightTotalScore}
+        • Final Score: {player1TotalScore} - {player2TotalScore}
       </li>
       <li>• {totalRounds} rounds completed</li>
     </ul>

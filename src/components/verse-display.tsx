@@ -5,13 +5,13 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import type { Verse, Persona } from "@/lib/shared";
+import type { Verse, Persona, PersonaPosition } from "@/lib/shared";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface VerseDisplayProps {
   verse?: Verse;
   persona: Persona;
-  position: "left" | "right";
+  position: PersonaPosition;
   isStreaming?: boolean;
   streamingText?: string;
 }
@@ -89,7 +89,7 @@ export function VerseDisplay({
             {streamingBars.map((line, index) => (
               <motion.div
                 key={`streaming-${index}`}
-                initial={{ opacity: 0, x: position === "left" ? -20 : 20 }}
+                initial={{ opacity: 0, x: position === "player1" ? -20 : 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05, duration: 0.2 }}
                 className="flex"

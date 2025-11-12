@@ -9,8 +9,8 @@ import { getRoundVerses } from "@/lib/battle-engine";
 
 interface RoundData {
   verses: {
-    left: Verse | null;
-    right: Verse | null;
+    player1: Verse | null;
+    player2: Verse | null;
   };
   score: RoundScore | undefined;
   isComplete: boolean;
@@ -28,14 +28,14 @@ export function useRoundData(battle: Battle, round: number): RoundData {
   return useMemo(() => {
     const verses = getRoundVerses(battle, round);
     const score = battle.scores.find((s) => s.round === round);
-    const hasVerses = !!(verses.left || verses.right);
-    const hasBothVerses = !!(verses.left && verses.right);
+    const hasVerses = !!(verses.player1 || verses.player2);
+    const hasBothVerses = !!(verses.player1 && verses.player2);
     const isComplete = hasBothVerses && !!score;
 
     return {
       verses: {
-        left: verses.left ?? null,
-        right: verses.right ?? null,
+        player1: verses.player1 ?? null,
+        player2: verses.player2 ?? null,
       },
       score,
       isComplete,

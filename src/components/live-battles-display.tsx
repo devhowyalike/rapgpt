@@ -155,10 +155,10 @@ export function LiveBattlesDisplay({
           <div className="flex items-center justify-center gap-4 md:gap-8 mb-6 flex-wrap">
             <div className="text-center">
               <div className="mb-2 flex justify-center">
-                <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-blue-500">
+                <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-[rgb(var(--player1-color))]">
                   <Image
-                    src={battle.personas.left.avatar}
-                    alt={battle.personas.left.name}
+                    src={battle.personas.player1.avatar}
+                    alt={battle.personas.player1.name}
                     width={80}
                     height={80}
                     className="w-full h-full object-cover"
@@ -166,21 +166,21 @@ export function LiveBattlesDisplay({
                 </div>
               </div>
               <div className="text-lg font-bold text-white">
-                {battle.personas.left.name}
+                {battle.personas.player1.name}
               </div>
               <div className="text-sm text-gray-400">
-                {battle.personas.left.style}
+                {battle.personas.player1.style}
               </div>
             </div>
 
-            <div className="text-4xl font-bold text-red-500">VS</div>
+            <div className="text-4xl font-bold text-[rgb(var(--player2-color))]">VS</div>
 
             <div className="text-center">
               <div className="mb-2 flex justify-center">
-                <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-red-500">
+                <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-[rgb(var(--player2-color))]">
                   <Image
-                    src={battle.personas.right.avatar}
-                    alt={battle.personas.right.name}
+                    src={battle.personas.player2.avatar}
+                    alt={battle.personas.player2.name}
                     width={80}
                     height={80}
                     className="w-full h-full object-cover"
@@ -188,10 +188,10 @@ export function LiveBattlesDisplay({
                 </div>
               </div>
               <div className="text-lg font-bold text-white">
-                {battle.personas.right.name}
+                {battle.personas.player2.name}
               </div>
               <div className="text-sm text-gray-400">
-                {battle.personas.right.style}
+                {battle.personas.player2.style}
               </div>
             </div>
           </div>

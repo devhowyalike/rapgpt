@@ -426,15 +426,14 @@ export function BattleSidebar({
                   return null;
                 }
 
-                const leftScore =
-                  roundScore.personaScores[battle.personas.left.id];
-                const rightScore =
-                  roundScore.personaScores[battle.personas.right.id];
-
                 // Calculate optimistic vote counts by checking both server state and local state
-                const getOptimisticVoteCount = (personaId: string): number => {
+                const getOptimisticVoteCount = (
+                  position: "player1" | "player2"
+                ): number => {
                   const serverVotes =
-                    roundScore.personaScores[personaId]?.userVotes || 0;
+                    roundScore.positionScores[position].userVotes;
+                  const personaId =
+                    roundScore.positionScores[position].personaId;
                   // Count local votes for this persona in this round that aren't yet reflected in server state
                   const localVoteKey = `${battle.id}-${roundScore.round}-${personaId}`;
                   const hasLocalVote = userVotes.has(localVoteKey);
@@ -447,19 +446,17 @@ export function BattleSidebar({
                 // Create array of personas with their scores and sort by votes (highest first)
                 const sortedPersonas = [
                   {
-                    persona: battle.personas.left,
-                    score: leftScore,
-                    optimisticVotes: getOptimisticVoteCount(
-                      battle.personas.left.id
-                    ),
+                    persona: battle.personas.player1,
+                    position: "player1" as const,
+                    score: roundScore.positionScores.player1,
+                    optimisticVotes: getOptimisticVoteCount("player1"),
                     hoverBorderColor: "hover:border-blue-500",
                   },
                   {
-                    persona: battle.personas.right,
-                    score: rightScore,
-                    optimisticVotes: getOptimisticVoteCount(
-                      battle.personas.right.id
-                    ),
+                    persona: battle.personas.player2,
+                    position: "player2" as const,
+                    score: roundScore.positionScores.player2,
+                    optimisticVotes: getOptimisticVoteCount("player2"),
                     hoverBorderColor: "hover:border-purple-500",
                   },
                 ].sort((a, b) => b.optimisticVotes - a.optimisticVotes);
@@ -479,6 +476,7 @@ export function BattleSidebar({
                       {sortedPersonas.map(
                         ({
                           persona,
+                          position,
                           score,
                           optimisticVotes,
                           hoverBorderColor,
@@ -492,7 +490,11 @@ export function BattleSidebar({
                               key={persona.id}
                               layout
                               transition={{
-                                layout: { type: "spring", stiffness: 350, damping: 25 }
+                                layout: {
+                                  type: "spring",
+                                  stiffness: 350,
+                                  damping: 25,
+                                },
                               }}
                             >
                               <button
@@ -531,7 +533,7 @@ export function BattleSidebar({
                                       {optimisticVotes}{" "}
                                       {optimisticVotes === 1 ? "vote" : "votes"}
                                     </span>
-                                    {roundScore.winner === persona.id && (
+                                    {roundScore.winner === position && (
                                       <span>🏆</span>
                                     )}
                                   </div>
