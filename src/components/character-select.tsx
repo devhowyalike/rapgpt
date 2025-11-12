@@ -18,6 +18,7 @@ import { SelectionActions } from "./selection/selection-actions";
 import { ActionButton } from "./selection/action-button";
 import { SessionRestoreLoading } from "./session-restore-loading";
 import { PersonaGridItem } from "./selection/persona-grid-item";
+import { VsGlow } from "./selection/vs-glow";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePersonaSelection } from "@/hooks/use-persona-selection";
 import {
@@ -323,13 +324,11 @@ export function CharacterSelect({
                   <CenterDisplay title="CHARACTER" subtitle="SELECT">
                     {/* VS text with fixed height to prevent layout shift */}
                     <div className="h-6 md:h-8 lg:h-10 flex items-center justify-center">
-                      <div
-                        className={`text-lg md:text-xl lg:text-2xl font-black text-[rgb(var(--player2-color))] animate-pulse drop-shadow-[0_0_20px_rgba(var(--player2-color),0.8)] transition-opacity duration-300 ${
-                          player1 && player2 ? "opacity-100" : "opacity-0"
-                        }`}
-                      >
-                        VS
-                      </div>
+                      <VsGlow
+                        visible={Boolean(player1 && player2)}
+                        color="player2"
+                        size="md"
+                      />
                     </div>
                   </CenterDisplay>
                 </div>

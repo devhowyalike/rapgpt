@@ -10,6 +10,7 @@ import { SelectionBottom } from "./selection/selection-bottom";
 import { SelectionGrid } from "./selection/selection-grid";
 import { ActionButton } from "./selection/action-button";
 import { PlayerChangeButton } from "./selection/player-change-button";
+import { VsGlow } from "./selection/vs-glow";
 import Image from "next/image";
 
 interface StageSelectProps {
@@ -360,6 +361,9 @@ export function StageSelect({
               sessionStorageKey={sessionStorageKey}
               onBack={onBack}
             />
+            <div className="flex items-center justify-center">
+              <VsGlow visible={true} color="player2" size="md" />
+            </div>
             <PlayerChangeButton
               player={player2}
               playerNumber={2}
