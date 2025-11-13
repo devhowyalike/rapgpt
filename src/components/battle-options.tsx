@@ -198,17 +198,17 @@ export function BattleOptions({
                 badge="(Coming Soon)"
               /> */}
 
-              {/* Go Live Toggle - Coming Soon */}
+              {/* Go Live Toggle - Admin only */}
               <OptionRow
                 icon={Radio}
                 iconColor="text-purple-400"
                 iconBgColor="bg-purple-900/50 border border-purple-500/50"
                 title="Go Live"
                 description="Stream your battle & engage with your audience in real-time"
-                checked={false}
-                onCheckedChange={() => {}}
-                disabled={true}
-                badge="(Coming Soon)"
+                checked={createAsLive}
+                onCheckedChange={onCreateAsLiveChange}
+                disabled={!isAdmin}
+                badge={!isAdmin ? "(Coming Soon)" : undefined}
               />
             </div>
           </CollapsibleContent>
