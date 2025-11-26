@@ -2,9 +2,10 @@ import { getLiveBattles } from "@/lib/battle-storage";
 import { SiteHeader } from "@/components/site-header";
 import { LiveBattlesDisplay } from "@/components/live-battles-display";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
-import { APP_TITLE, MADE_BY, TAGLINE, TAGLINE_2, YEAR } from "@/lib/constants";
+import { APP_TITLE, MADE_BY, TAGLINE, YEAR } from "@/lib/constants";
 import { auth } from "@clerk/nextjs/server";
 import { Calendar } from "lucide-react";
+import { FeatureCard } from "@/components/feature-card";
 
 // Revalidate every 10 seconds to show live battles
 export const revalidate = 10;
@@ -60,47 +61,41 @@ export default async function Home() {
 
       {/* Reverted Original Content */}
       <div className="min-h-[50vh] bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center justify-center p-6 pt-0">
-        <div className="max-w-5xl mx-auto text-center space-y-8 w-full">
+        <div className="max-w-6xl mx-auto text-center space-y-8 w-full">
           {/* Live Battles if active */}
           <LiveBattlesDisplay initialBattles={liveBattles} />
 
           {/* Original Features Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-            <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-6">
-              <div className="text-4xl mb-3">🎤</div>
-              <h3 className="text-xl font-bold text-white mb-2">3 Rounds</h3>
-              <p className="text-gray-400 text-sm">
-                8 bars per verse, alternating turns, pure&nbsp;skill
-              </p>
-            </div>
+          <div className="flex flex-wrap justify-center gap-6 mt-6">
+            <FeatureCard
+              icon="⚔️"
+              title="Choose MC's"
+              description="Select your fighters, each with distinct flows and styles."
+            />
 
-            <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-6">
-              <div className="text-4xl mb-3">🏆</div>
-              <h3 className="text-xl font-bold text-white mb-2">You Decide</h3>
-              <p className="text-gray-400 text-sm">
-                Automated scoring powers every battle. Vote in live events to
-                crown the&nbsp;winner!
-              </p>
-            </div>
+            <FeatureCard
+              icon="🎤"
+              title="3 Rounds"
+              description="8 bars per verse, alternating turns."
+            />
 
-            <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-6">
-              <div className="text-4xl mb-3">💬</div>
-              <h3 className="text-xl font-bold text-white mb-2">Live Chat</h3>
-              <p className="text-gray-400 text-sm">
-                Join live battles to chat and react in real-time
-              </p>
-            </div>
+            <FeatureCard
+              icon="🏆"
+              title="You Decide"
+              description={<>Vote in live events to crown the&nbsp;winner!</>}
+            />
 
-            <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-6">
-              <div className="text-4xl mb-3">🎵</div>
-              <h3 className="text-xl font-bold text-white mb-2">
-                Make it a Song
-              </h3>
-              <p className="text-gray-400 text-sm">
-                Choose your style of beat and {APP_TITLE} will create a unique
-                song from your battle.
-              </p>
-            </div>
+            <FeatureCard
+              icon="💬"
+              title="Live Chat"
+              description="Join live battles to chat and react in real-time."
+            />
+
+            <FeatureCard
+              icon="🎵"
+              title="Make it a Song"
+              description="Select your style of beat and listen to your battle as a song."
+            />
           </div>
 
           {/* Live Battles or Coming Soon */}
