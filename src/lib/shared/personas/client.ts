@@ -39,17 +39,6 @@ export const ladyMuse: ClientPersona = {
   isHoopla: true,
 };
 
-export const raygun: ClientPersona = {
-  id: 'raygun',
-  name: 'Raygun',
-  bio: 'Australian cultural ambassador',
-  style: 'Olympic',
-  avatar: '/avatars/raygun.webp',
-  accentColor: '#00d4ff',
-  musicStyleDescription: 'alternative hip-hop, experimental beats, eclectic samples, playful delivery, genre-blending production, unconventional flow patterns, edgy electronic elements',
-  vocalGender: 'f',
-};
-
 export const timDog: ClientPersona = {
   id: 'timDog',
   name: 'Tim Dog',
@@ -108,15 +97,26 @@ export const shockG: ClientPersona = {
   vocalGender: 'm',
 };
 
+export const raygun: ClientPersona = {
+  id: 'raygun',
+  name: 'Raygun',
+  bio: 'Australian cultural ambassador',
+  style: 'Olympian',
+  avatar: '/avatars/raygun.webp',
+  accentColor: '#00d4ff',
+  musicStyleDescription: 'alternative hip-hop, experimental beats, eclectic samples, playful delivery, genre-blending production, unconventional flow patterns, edgy electronic elements',
+  vocalGender: 'f',
+};
+
 export const CLIENT_PERSONAS: Record<string, ClientPersona> = {
   kennyK,
   ladyMuse,
-  raygun,
+  humptyHump,
+  shockG,
   timDog,
   dawn,
   mrAkron,
-  humptyHump,
-  shockG,
+  raygun,
 };
 
 export function getClientPersona(id: string): ClientPersona | null {
