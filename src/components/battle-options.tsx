@@ -130,8 +130,9 @@ export function BattleOptions({
   }, [isOpen]);
 
   // Don't render if no options are available
-  // Note: Voting is currently disabled, so we only check for comments
-  if (!isCommentsGloballyEnabled) {
+  // Note: Voting is currently disabled in JSX.
+  // We render if comments are enabled OR if the user is an admin (to access Go Live).
+  if (!isCommentsGloballyEnabled && !isAdmin) {
     return null;
   }
 
