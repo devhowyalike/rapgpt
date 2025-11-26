@@ -3,6 +3,7 @@
  * This keeps the client bundle small and fast
  */
 
+import { HOOPLA_MODE } from '../../constants';
 import type { Persona } from '../battle-types';
 
 /**
@@ -23,6 +24,7 @@ export const kennyK: ClientPersona = {
   altCostumes: ['mrAkron'],
   musicStyleDescription: 'underground hip-hop, jazzy samples, intricate wordplay, abstract lyrics, boom bap drums, laid-back flow with complex rhyme schemes, rare funk samples',
   vocalGender: 'm',
+  isHoopla: true,
 };
 
 export const ladyMuse: ClientPersona = {
@@ -34,6 +36,7 @@ export const ladyMuse: ClientPersona = {
   accentColor: '#00d4ff',
   musicStyleDescription: 'alternative hip-hop, experimental beats, eclectic samples, playful delivery, genre-blending production, unconventional flow patterns, edgy electronic elements',
   vocalGender: 'f',
+  isHoopla: true,
 };
 
 export const timDog: ClientPersona = {
@@ -68,6 +71,7 @@ export const mrAkron: ClientPersona = {
   accentColor: '#00d4ff',
   musicStyleDescription: 'cinematic west coast boom bap, dense internal rhymes, layered metaphors, comic book imagery, crate-digger flex',
   vocalGender: 'm',
+  isHoopla: true,
 };
 
 export const CLIENT_PERSONAS: Record<string, ClientPersona> = {
@@ -83,14 +87,16 @@ export function getClientPersona(id: string): ClientPersona | null {
 }
 
 export function getAllClientPersonas(): ClientPersona[] {
-  return Object.values(CLIENT_PERSONAS);
+  const personas = Object.values(CLIENT_PERSONAS);
+  if (HOOPLA_MODE) return personas;
+  return personas.filter(p => !p.isHoopla);
 }
 
 /**
  * Returns only primary personas (those not listed as an alt in any primary's altCostumes).
  */
 export function getPrimaryClientPersonas(): ClientPersona[] {
-  const all = Object.values(CLIENT_PERSONAS);
+  const all = getAllClientPersonas();
   const altIds = new Set<string>();
   for (const p of all) {
     if (p.altCostumes?.length) {

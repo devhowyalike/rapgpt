@@ -1,3 +1,5 @@
+import { HOOPLA_MODE } from '../constants';
+
 /**
  * Stage configuration for battle locations
  */
@@ -8,6 +10,7 @@ export interface Stage {
   country: string;
   flag: string;
   backgroundImage: string;
+  isHoopla?: boolean;
 }
 
 export const canada: Stage = {
@@ -16,6 +19,7 @@ export const canada: Stage = {
   country: 'Canada',
   flag: '🇨🇦',
   backgroundImage: '/stages/futur2.jpg',
+  isHoopla: true,
 };
 
 export const bronx: Stage = {
@@ -36,7 +40,9 @@ export function getStage(id: string): Stage | null {
 }
 
 export function getAllStages(): Stage[] {
-  return Object.values(AVAILABLE_STAGES);
+  const stages = Object.values(AVAILABLE_STAGES);
+  if (HOOPLA_MODE) return stages;
+  return stages.filter(s => !s.isHoopla);
 }
 
 // Default stage

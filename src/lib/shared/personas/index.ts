@@ -7,6 +7,7 @@
  * - Persona objects are assembled at runtime by combining client data + systemPrompts
  */
 
+import { HOOPLA_MODE } from '../../constants';
 import type { Persona } from '../battle-types';
 import * as clientPersonas from './client';
 import { kennyKSystemPrompt } from './kennyK';
@@ -45,7 +46,9 @@ export function getPersona(id: string): Persona | null {
 }
 
 export function getAllPersonas(): Persona[] {
-  return Object.values(AVAILABLE_PERSONAS);
+  const personas = Object.values(AVAILABLE_PERSONAS);
+  if (HOOPLA_MODE) return personas;
+  return personas.filter(p => !p.isHoopla);
 }
 
 export { kennyK, ladyMuse, timDog, dawn };
