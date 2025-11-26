@@ -130,7 +130,9 @@ export function BattleOptions({
   }, [isOpen]);
 
   // Don't render if no options are available
-  if (!isVotingGloballyEnabled && !isCommentsGloballyEnabled) {
+  // Note: Voting is currently disabled in JSX.
+  // We render if comments are enabled OR if the user is an admin (to access Go Live).
+  if (!isCommentsGloballyEnabled && !isAdmin) {
     return null;
   }
 
@@ -159,7 +161,7 @@ export function BattleOptions({
           <CollapsibleContent>
             <div className="px-6 pb-6 pt-2 space-y-4">
               {/* Voting Toggle - Only show if globally enabled */}
-              {isVotingGloballyEnabled && (
+              {/* {isVotingGloballyEnabled && (
                 <OptionRow
                   icon={ThumbsUp}
                   iconColor="text-blue-400"
@@ -169,7 +171,7 @@ export function BattleOptions({
                   checked={votingEnabled}
                   onCheckedChange={onVotingEnabledChange}
                 />
-              )}
+              )} */}
 
               {/* Comments Toggle - Only show if globally enabled */}
               {isCommentsGloballyEnabled && (
@@ -198,17 +200,17 @@ export function BattleOptions({
                 badge="(Coming Soon)"
               /> */}
 
-              {/* Go Live Toggle - Coming Soon */}
+              {/* Go Live Toggle - Admin only */}
               <OptionRow
                 icon={Radio}
                 iconColor="text-purple-400"
                 iconBgColor="bg-purple-900/50 border border-purple-500/50"
                 title="Go Live"
-                description="Stream your battle & engage with your audience in real-time"
-                checked={false}
-                onCheckedChange={() => {}}
-                disabled={true}
-                badge="(Coming Soon)"
+                description="Stream your battle, vote & engage with your audience in real-time"
+                checked={createAsLive}
+                onCheckedChange={onCreateAsLiveChange}
+                disabled={!isAdmin}
+                badge={!isAdmin ? "(Coming Soon)" : undefined}
               />
             </div>
           </CollapsibleContent>

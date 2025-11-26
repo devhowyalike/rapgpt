@@ -2,9 +2,10 @@ import { getLiveBattles } from "@/lib/battle-storage";
 import { SiteHeader } from "@/components/site-header";
 import { LiveBattlesDisplay } from "@/components/live-battles-display";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
-import { APP_TITLE, TAGLINE } from "@/lib/constants";
+import { APP_TITLE, MADE_BY, TAGLINE, YEAR } from "@/lib/constants";
 import { auth } from "@clerk/nextjs/server";
 import { Calendar } from "lucide-react";
+import { FeatureCard } from "@/components/feature-card";
 
 // Revalidate every 10 seconds to show live battles
 export const revalidate = 10;
@@ -13,72 +14,91 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const liveBattles = await getLiveBattles();
   const { sessionClaims } = await auth();
-  const isAdmin = sessionClaims?.metadata?.role === "admin";
   const isAuthenticated = !!sessionClaims;
 
   return (
     <>
       <SiteHeader />
-      <div style={{ height: "var(--header-height)" }} />
-      <div className="min-h-[calc(100dvh-var(--header-height))] bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center justify-center p-6">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          {/* Logo */}
-          <h1 className="text-6xl md:text-8xl font-bold tracking-wider">
-            <span className="bg-linear-to-r from-yellow-400 via-red-500 to-purple-600 text-transparent bg-clip-text">
-              {APP_TITLE}
+
+      {/* New Hero Section (Preserved) */}
+      <section className="relative pt-20 pb-6 md:pt-32 md:pb-8 overflow-hidden bg-black text-white selection:bg-yellow-500/30">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl z-0 pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10 text-center">
+          <div className="inline-block mb-6 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm animate-slide-up">
+            <span className="text-sm font-medium text-yellow-400 tracking-wide uppercase">
+              AI Powered Freestyle Battles
             </span>
-          </h1>
-
-          {/* Tagline */}
-          <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto">
-            Live AI Keystyle Rap Battles
-          </p>
-
-          {/* Create Your Own Battles Promotional Card */}
-          <div className="mt-8 bg-linear-to-r from-yellow-500/10 via-red-500/10 to-purple-600/10 border-2 border-yellow-500/30 rounded-lg p-8">
-            <div className="text-5xl mb-4">🤖 🐄 🎤</div>
-            <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-yellow-400 via-red-500 to-purple-600 mb-4">
-              e-Beef is Served
-            </h2>
-            <p className="text-gray-300 text-lg mb-6 max-w-2xl mx-auto">
-              Choose your favorite rappers, message board personalities, video
-              game characters, and R&B royalty to face off in epic real-time AI
-              rap battles.
-            </p>
-            <CreateBattleCTA isAuthenticated={isAuthenticated} />
           </div>
 
-          {/* Features */}
-          <div className="grid md:grid-cols-3 gap-6 mt-12">
-            <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-6">
-              <div className="text-4xl mb-3">🎤</div>
-              <h3 className="text-xl font-bold text-white mb-2">3 Rounds</h3>
-              <p className="text-gray-400 text-sm">
-                8 bars per verse, alternating turns, pure&nbsp;skill
-              </p>
+          <div className="relative w-fit mx-auto mb-6">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 animate-slide-up [animation-delay:100ms]">
+              <span className="text-[250px] md:text-[450px] opacity-15 rotate-12 block select-none pointer-events-none grayscale-0">
+                🎤
+              </span>
             </div>
+            <h1 className="text-7xl md:text-9xl font-bold tracking-tighter font-(family-name:--font-bebas-neue) animate-slide-up [animation-delay:100ms] relative z-10">
+              <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text">
+                {APP_TITLE}
+              </span>
+            </h1>
+          </div>
 
-            <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-6">
-              <div className="text-4xl mb-3">🏆</div>
-              <h3 className="text-xl font-bold text-white mb-2">You Decide</h3>
-              <p className="text-gray-400 text-sm">
-                Automated scoring powers every battle. Vote in live events to
-                crown the&nbsp;winner!
-              </p>
-            </div>
+          <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up [animation-delay:200ms]">
+            {TAGLINE}&trade;
+          </p>
 
-            <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-6">
-              <div className="text-4xl mb-3">💬</div>
-              <h3 className="text-xl font-bold text-white mb-2">Live Chat</h3>
-              <p className="text-gray-400 text-sm">
-                Join live battles to chat and react in real-time
-              </p>
-            </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up [animation-delay:300ms]">
+            <CreateBattleCTA isAuthenticated={isAuthenticated} />
+          </div>
+        </div>
+      </section>
+
+      {/* Reverted Original Content */}
+      <div className="min-h-[50vh] bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center justify-center p-6 pt-0">
+        <div className="max-w-6xl mx-auto text-center space-y-8 w-full">
+          {/* Live Battles if active */}
+          <LiveBattlesDisplay initialBattles={liveBattles} />
+
+          {/* Original Features Grid */}
+          <div className="flex flex-wrap justify-center gap-6 mt-6">
+            <FeatureCard
+              icon="⚔️"
+              title="Choose MC's"
+              description="Select your fighters, each with distinct flows and styles."
+            />
+
+            <FeatureCard
+              icon="🎤"
+              title="3 Rounds"
+              description="8 bars per verse, alternating turns."
+            />
+
+            <FeatureCard
+              icon="🏆"
+              title="You Decide"
+              description={<>Vote in live events to crown the&nbsp;winner!</>}
+            />
+
+            <FeatureCard
+              icon="💬"
+              title="Live Chat"
+              description="Join live battles to chat and react in real-time."
+            />
+
+            <FeatureCard
+              icon="🎵"
+              title="Make it a Song"
+              description="Select your style of beat and listen to your battle as a song."
+            />
           </div>
 
           {/* Live Battles or Coming Soon */}
-          <LiveBattlesDisplay initialBattles={liveBattles} />
-
           {liveBattles.length === 0 && (
             <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-8 mt-12">
               {/* Calendar Display */}
@@ -102,7 +122,9 @@ export default async function Home() {
 
           {/* Tagline at bottom */}
           <div className="mt-12">
-            <p className="text-gray-500 text-lg">{TAGLINE}&trade;</p>
+            <p className="text-gray-500 text-lg">
+              {MADE_BY}, {YEAR}
+            </p>
           </div>
         </div>
       </div>
