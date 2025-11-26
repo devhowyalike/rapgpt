@@ -18,7 +18,7 @@ export const canada: Stage = {
   name: "Futur's Den",
   country: 'Canada',
   flag: '🇨🇦',
-  backgroundImage: '/stages/futur2.jpg',
+  backgroundImage: '/stages/futur.webp',
   isHoopla: true,
 };
 
@@ -27,12 +27,39 @@ export const bronx: Stage = {
   name: '1520 Sedgwick Avenue',
   country: 'Bronx, NY',
   flag: '🇺🇸',
-  backgroundImage: '/stages/sedgwick.jpg',
+  backgroundImage: '/stages/sedgwick.webp',
+};
+
+export const bkBathroom: Stage = {
+  id: 'bkBathroom',
+  name: 'Burger King Bathroom',
+  country: 'USA',
+  flag: '🍔',
+  backgroundImage: '/stages/bk-bathroom.webp',
+};
+
+export const oakland: Stage = {
+  id: 'oaklandCol',
+  name: 'Oakland Coliseum',
+  country: 'Oakland, CA',
+  flag: '🇺🇸',
+  backgroundImage: '/stages/coliseum.webp',
+};
+
+export const outback: Stage = {
+  id: 'outback',
+  name: 'The Outback',
+  country: 'Australia',
+  flag: '🇦🇺',
+  backgroundImage: '/stages/outback.webp',
 };
 
 export const AVAILABLE_STAGES: Record<string, Stage> = {
   canada,
   bronx,
+  bkBathroom,
+  oakland,
+  outback,
 };
 
 export function getStage(id: string): Stage | null {

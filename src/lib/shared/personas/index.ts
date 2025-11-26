@@ -12,33 +12,45 @@ import type { Persona } from '../battle-types';
 import * as clientPersonas from './client';
 import { kennyKSystemPrompt } from './kennyK';
 import { ladyMuseSystemPrompt } from './ladyMuse';
+import { raygunSystemPrompt } from './raygun';
 import { timDogSystemPrompt } from './timDog';
 import { dawnSystemPrompt } from './dawn';
 import { mrAkronSystemPrompt } from './mrAkron';
+import { humptyHumpSystemPrompt } from './humptyHump';
+import { shockGSystemPrompt } from './shockG';
 
 // Map of persona IDs to their system prompts
 const SYSTEM_PROMPTS: Record<string, string> = {
   kennyK: kennyKSystemPrompt,
   ladyMuse: ladyMuseSystemPrompt,
+  raygun: raygunSystemPrompt,
   timDog: timDogSystemPrompt,
   dawn: dawnSystemPrompt,
   mrAkron: mrAkronSystemPrompt,
+  humptyHump: humptyHumpSystemPrompt,
+  shockG: shockGSystemPrompt,
 };
 
 // Assemble full Persona objects at runtime by combining client data + systemPrompts
 const kennyK: Persona = { ...clientPersonas.kennyK, systemPrompt: kennyKSystemPrompt };
 const ladyMuse: Persona = { ...clientPersonas.ladyMuse, systemPrompt: ladyMuseSystemPrompt };
+const raygun: Persona = { ...clientPersonas.raygun, systemPrompt: raygunSystemPrompt };
 const timDog: Persona = { ...clientPersonas.timDog, systemPrompt: timDogSystemPrompt };
 const dawn: Persona = { ...clientPersonas.dawn, systemPrompt: dawnSystemPrompt };
 const mrAkron: Persona = { ...clientPersonas.mrAkron, systemPrompt: mrAkronSystemPrompt };
+const humptyHump: Persona = { ...clientPersonas.humptyHump, systemPrompt: humptyHumpSystemPrompt };
+const shockG: Persona = { ...clientPersonas.shockG, systemPrompt: shockGSystemPrompt };
 
 // Server-side: Full persona data with systemPrompts
 export const AVAILABLE_PERSONAS: Record<string, Persona> = {
   kennyK,
   ladyMuse,
+  raygun,
   timDog,
   dawn,
   mrAkron,
+  humptyHump,
+  shockG,
 };
 
 export function getPersona(id: string): Persona | null {
@@ -51,7 +63,7 @@ export function getAllPersonas(): Persona[] {
   return personas.filter(p => !p.isHoopla);
 }
 
-export { kennyK, ladyMuse, timDog, dawn };
+export { kennyK, ladyMuse, raygun, timDog, dawn, humptyHump, shockG };
 
 // Re-export client-side utilities for convenience
 export { 

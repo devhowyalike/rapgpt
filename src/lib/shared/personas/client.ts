@@ -39,10 +39,21 @@ export const ladyMuse: ClientPersona = {
   isHoopla: true,
 };
 
+export const raygun: ClientPersona = {
+  id: 'raygun',
+  name: 'Raygun',
+  bio: 'Australian cultural ambassador',
+  style: 'Olympic',
+  avatar: '/avatars/raygun.jpg',
+  accentColor: '#00d4ff',
+  musicStyleDescription: 'alternative hip-hop, experimental beats, eclectic samples, playful delivery, genre-blending production, unconventional flow patterns, edgy electronic elements',
+  vocalGender: 'f',
+};
+
 export const timDog: ClientPersona = {
   id: 'timDog',
   name: 'Tim Dog',
-  bio: 'Bronx all day, every day.',
+  bio: 'Bronx all day, every day',
   style: 'Boom Bap',
   avatar: '/avatars/tim-dog.jpg',
   accentColor: '#00d4ff',
@@ -53,7 +64,7 @@ export const timDog: ClientPersona = {
 export const dawn: ClientPersona = {
   id: 'dawn',
   name: 'Dawn from En Vogue',
-  bio: 'Lucy Pearl from Oakland, CA.',
+  bio: 'Lucy Pearl from Oakland, CA',
   style: 'R&B',
   avatar: '/avatars/dawn-en-vogue.jpg',
   accentColor: '#00d4ff',
@@ -64,7 +75,7 @@ export const dawn: ClientPersona = {
 export const mrAkron: ClientPersona = {
   id: 'mrAkron',
   name: 'Mr. Akron',
-  bio: 'Ohio\'s own. Creator of Skribble Jam.',
+  bio: 'Ohio\'s own. Creator of Skribble Jam',
   style: 'Boom Bap',
   // Using existing asset as placeholder; replace with /avatars/mr-kron.jpg when available
   avatar: '/avatars/mr-akron.jpg',
@@ -74,12 +85,38 @@ export const mrAkron: ClientPersona = {
   isHoopla: true,
 };
 
+export const humptyHump: ClientPersona = {
+  id: 'humptyHump',
+  name: 'Humpty Hump',
+  bio: 'Creator of the Humpty Dance',
+  style: 'Big Nose Funk',
+  avatar: '/avatars/humpty-hump.jpg',
+  accentColor: '#00d4ff',
+  altCostumes: ['shockG'],
+  musicStyleDescription: 'funky basslines, playful rhythms, humorous lyrics, party vibes, early 90s hip-hop, p-funk influence',
+  vocalGender: 'm',
+};
+
+export const shockG: ClientPersona = {
+  id: 'shockG',
+  name: 'Shock G',
+  bio: 'The one who put the satin in your panties',
+  style: 'D-Flow',
+  avatar: '/avatars/shock-g.jpg',
+  accentColor: '#00d4ff',
+  musicStyleDescription: 'smooth funk, jazz-influenced hip-hop, melodic flows, complex production, laid-back vibe',
+  vocalGender: 'm',
+};
+
 export const CLIENT_PERSONAS: Record<string, ClientPersona> = {
   kennyK,
   ladyMuse,
+  raygun,
   timDog,
   dawn,
   mrAkron,
+  humptyHump,
+  shockG,
 };
 
 export function getClientPersona(id: string): ClientPersona | null {

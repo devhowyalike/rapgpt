@@ -55,7 +55,7 @@ export function PlayerDisplay({
           <p
             className={`${textColor} text-xs md:text-sm lg:text-base font-semibold mb-1 md:mb-2 shrink-0`}
           >
-            Style: {player.style}
+            {player.style}
           </p>
           {/* Large Character Portrait */}
           <div className="relative mb-1 md:mb-2 group shrink-0">
@@ -116,7 +116,7 @@ export function PlayerDisplay({
         <>
           {/* Spacer to match style text height */}
           <p className="text-xs md:text-sm lg:text-base font-semibold mb-1 md:mb-2 opacity-0 shrink-0">
-            Style: Placeholder
+            Placeholder
           </p>
           <div
             className={`mb-1 md:mb-2 shrink-0 relative ${
