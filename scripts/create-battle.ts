@@ -13,14 +13,14 @@ import { writeFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { createInterface } from 'readline';
-import { AVAILABLE_PERSONAS } from '../src/lib/shared';
+import { getAllPersonas } from '../src/lib/shared';
 import { getAllStages } from '../src/lib/shared/stages';
 import type { Persona, Battle, Stage } from '../src/lib/shared';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Available personas - imported from shared package
-const PERSONAS: Record<string, Persona> = AVAILABLE_PERSONAS;
+const PERSONAS: Record<string, Persona> = getAllPersonas().reduce((acc, p) => ({ ...acc, [p.id]: p }), {});
 
 // Available stages
 const STAGES = getAllStages();

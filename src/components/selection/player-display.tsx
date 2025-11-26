@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { Pencil } from "lucide-react";
 import type { ClientPersona } from "@/lib/shared/personas/client";
 
 interface PlayerDisplayProps {
@@ -54,7 +55,7 @@ export function PlayerDisplay({
           <p
             className={`${textColor} text-xs md:text-sm lg:text-base font-semibold mb-1 md:mb-2 shrink-0`}
           >
-            Style: {player.style}
+            {player.style}
           </p>
           {/* Large Character Portrait */}
           <div className="relative mb-1 md:mb-2 group shrink-0">
@@ -73,15 +74,34 @@ export function PlayerDisplay({
                 aria-label={`Edit ${isPlayer1 ? "Player 1" : "Player 2"}`}
                 title="Edit"
               >
-                ✎
+                <Pencil className="w-3 h-3 md:w-4 md:h-4" />
               </button>
             )}
+            {/* Snake Ring Animation - Visible when active */}
+            {isActive && (
+              <div className="absolute inset-0 pointer-events-none z-20">
+                <svg
+                  className="absolute inset-0 w-full h-full animate-[snake-ring_3s_linear_infinite]"
+                  viewBox="0 0 100 100"
+                >
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="48"
+                    fill="none"
+                    stroke={`rgb(var(--player${isPlayer1 ? "1" : "2"}-color))`}
+                    strokeWidth="4"
+                    strokeDasharray="75 225"
+                    strokeLinecap="round"
+                    opacity="0.9"
+                  />
+                </svg>
+              </div>
+            )}
             <div
-              className={`relative w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 ${borderColor} overflow-hidden bg-linear-to-br from-gray-800 to-gray-900 shadow-2xl ${
-                isActive
-                  ? "ring-2 ring-yellow-400 ring-offset-2 ring-offset-black"
-                  : ""
-              }`}
+              className={`relative w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 ${
+                isActive ? "border-transparent" : borderColor
+              } overflow-hidden bg-linear-to-br from-gray-800 to-gray-900 shadow-2xl`}
               style={{
                 boxShadow: `0 0 40px ${shadowColor}`,
               }}
@@ -115,16 +135,16 @@ export function PlayerDisplay({
         <>
           {/* Spacer to match style text height */}
           <p className="text-xs md:text-sm lg:text-base font-semibold mb-1 md:mb-2 opacity-0 shrink-0">
-            Style: Placeholder
+            Placeholder
           </p>
           <div
             className={`mb-1 md:mb-2 shrink-0 relative ${
-              isActive ? "opacity-70" : "opacity-40"
+              isActive ? "opacity-100" : "opacity-40"
             }`}
           >
             {/* Snake Ring Animation when active */}
             {isActive && (
-              <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute inset-0 pointer-events-none z-20">
                 <svg
                   className="absolute inset-0 w-full h-full animate-[snake-ring_3s_linear_infinite]"
                   viewBox="0 0 100 100"
@@ -134,9 +154,7 @@ export function PlayerDisplay({
                     cy="50"
                     r="48"
                     fill="none"
-                    stroke={
-                      isPlayer1 ? "rgb(59, 130, 246)" : "rgb(239, 68, 68)"
-                    }
+                    stroke={`rgb(var(--player${isPlayer1 ? "1" : "2"}-color))`}
                     strokeWidth="4"
                     strokeDasharray="75 225"
                     strokeLinecap="round"

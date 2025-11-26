@@ -21,6 +21,7 @@ export interface Persona {
   altCostumes?: string[];
   musicStyleDescription?: string; // Platform-agnostic music generation descriptors (no copyrighted artist names)
   vocalGender?: 'm' | 'f'; // Vocal gender for music generation APIs
+  isHoopla?: boolean;
 }
 
 export interface Bar {
