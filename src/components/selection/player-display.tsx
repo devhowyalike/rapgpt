@@ -139,12 +139,12 @@ export function PlayerDisplay({
           </p>
           <div
             className={`mb-1 md:mb-2 shrink-0 relative ${
-              isActive ? "opacity-70" : "opacity-40"
+              isActive ? "opacity-100" : "opacity-40"
             }`}
           >
             {/* Snake Ring Animation when active */}
             {isActive && (
-              <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute inset-0 pointer-events-none z-20">
                 <svg
                   className="absolute inset-0 w-full h-full animate-[snake-ring_3s_linear_infinite]"
                   viewBox="0 0 100 100"
