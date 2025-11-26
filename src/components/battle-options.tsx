@@ -130,7 +130,8 @@ export function BattleOptions({
   }, [isOpen]);
 
   // Don't render if no options are available
-  if (!isVotingGloballyEnabled && !isCommentsGloballyEnabled) {
+  // Note: Voting is currently disabled, so we only check for comments
+  if (!isCommentsGloballyEnabled) {
     return null;
   }
 
@@ -159,7 +160,7 @@ export function BattleOptions({
           <CollapsibleContent>
             <div className="px-6 pb-6 pt-2 space-y-4">
               {/* Voting Toggle - Only show if globally enabled */}
-              {isVotingGloballyEnabled && (
+              {/* {isVotingGloballyEnabled && (
                 <OptionRow
                   icon={ThumbsUp}
                   iconColor="text-blue-400"
@@ -169,7 +170,7 @@ export function BattleOptions({
                   checked={votingEnabled}
                   onCheckedChange={onVotingEnabledChange}
                 />
-              )}
+              )} */}
 
               {/* Comments Toggle - Only show if globally enabled */}
               {isCommentsGloballyEnabled && (
@@ -204,7 +205,7 @@ export function BattleOptions({
                 iconColor="text-purple-400"
                 iconBgColor="bg-purple-900/50 border border-purple-500/50"
                 title="Go Live"
-                description="Stream your battle & engage with your audience in real-time"
+                description="Stream your battle, vote & engage with your audience in real-time"
                 checked={createAsLive}
                 onCheckedChange={onCreateAsLiveChange}
                 disabled={!isAdmin}
