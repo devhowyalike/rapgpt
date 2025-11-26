@@ -26,8 +26,8 @@ export function LiveBattlesDisplay({
 
   useEffect(() => {
     // Skip websocket connection if disabled
-    if (process.env.NEXT_PUBLIC_DISABLE_WEBSOCKETS === 'true') {
-      console.log('[Homepage WS] WebSockets are disabled');
+    if (process.env.NEXT_PUBLIC_DISABLE_WEBSOCKETS === "true") {
+      console.log("[Homepage WS] WebSockets are disabled");
       return;
     }
 
@@ -130,7 +130,7 @@ export function LiveBattlesDisplay({
   }
 
   return (
-    <div className="space-y-6 mt-12">
+    <div className="space-y-6">
       {liveBattles.map((battle) => (
         <div
           key={battle.id}
@@ -140,9 +140,7 @@ export function LiveBattlesDisplay({
           <div className="flex items-center justify-center gap-2 mb-4">
             <div className="flex items-center gap-2 px-4 py-2 bg-red-600/20 rounded-full">
               <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-red-500 font-bold text-lg">
-                🔴 LIVE NOW
-              </span>
+              <span className="text-red-500 font-bold text-lg">LIVE NOW</span>
             </div>
           </div>
 
@@ -173,7 +171,9 @@ export function LiveBattlesDisplay({
               </div>
             </div>
 
-            <div className="text-4xl font-bold text-[rgb(var(--player2-color))]">VS</div>
+            <div className="text-4xl font-bold text-[rgb(var(--player2-color))]">
+              VS
+            </div>
 
             <div className="text-center">
               <div className="mb-2 flex justify-center">

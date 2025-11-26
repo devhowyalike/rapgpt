@@ -20,7 +20,7 @@ export default async function Home() {
       <SiteHeader />
 
       {/* New Hero Section (Preserved) */}
-      <section className="relative pt-20 pb-10 md:pt-32 md:pb-16 overflow-hidden bg-black text-white selection:bg-yellow-500/30">
+      <section className="relative pt-20 pb-6 md:pt-32 md:pb-8 overflow-hidden bg-black text-white selection:bg-yellow-500/30">
         {/* Background Effects */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl z-0 pointer-events-none">
@@ -61,6 +61,9 @@ export default async function Home() {
       {/* Reverted Original Content */}
       <div className="min-h-[50vh] bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center justify-center p-6 pt-0">
         <div className="max-w-5xl mx-auto text-center space-y-8 w-full">
+          {/* Live Battles if active */}
+          <LiveBattlesDisplay initialBattles={liveBattles} />
+
           {/* Original Features Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
             <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-6">
@@ -101,8 +104,6 @@ export default async function Home() {
           </div>
 
           {/* Live Battles or Coming Soon */}
-          <LiveBattlesDisplay initialBattles={liveBattles} />
-
           {liveBattles.length === 0 && (
             <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-8 mt-12">
               {/* Calendar Display */}
