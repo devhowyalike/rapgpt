@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { Pencil } from "lucide-react";
 import type { ClientPersona } from "@/lib/shared/personas/client";
 
 interface PlayerDisplayProps {
@@ -73,7 +74,7 @@ export function PlayerDisplay({
                 aria-label={`Edit ${isPlayer1 ? "Player 1" : "Player 2"}`}
                 title="Edit"
               >
-                ✎
+                <Pencil className="w-3 h-3 md:w-4 md:h-4" />
               </button>
             )}
             <div
