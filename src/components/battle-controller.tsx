@@ -15,7 +15,7 @@ import { useBattleStore } from "@/lib/battle-store";
 import { getNextPerformer, isRoundComplete } from "@/lib/battle-engine";
 import { RotateCcw, AlertTriangle } from "lucide-react";
 import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
 import { useBattleFeatures } from "@/lib/hooks/use-battle-features";
@@ -94,6 +94,7 @@ export function BattleController({
 
   // Check if user is admin
   const { sessionClaims, isLoaded } = useAuth();
+  const { user } = useUser();
   const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
 
   // Feature flags for voting and commenting
@@ -117,8 +118,6 @@ export function BattleController({
       if (battle) {
         setIsLeaving(true);
         await cancelBattle();
-        // Redirect to the battle page itself
-        window.location.href = `/battle/${battle.id}`;
       }
     },
   });
@@ -337,8 +336,27 @@ export function BattleController({
     setCancelError(null);
     try {
       await cancelBattle();
-      // Redirect to the battle page itself
-      window.location.href = `/battle/${battle.id}`;
+
+      // Redirect to profile page if user is logged in, otherwise home
+      let dbUserId = user?.publicMetadata?.dbUserId as string | undefined;
+
+      // Fallback: Fetch user ID from API if not in metadata but user is logged in
+      if (!dbUserId && user) {
+        try {
+          const response = await fetch("/api/user/me");
+          if (response.ok) {
+            const data = await response.json();
+            if (data.user?.id) {
+              dbUserId = data.user.id;
+            }
+          }
+        } catch (e) {
+          console.error("Failed to fetch user profile for redirect", e);
+        }
+      }
+
+      const targetUrl = dbUserId ? `/profile/${dbUserId}` : "/";
+      window.location.href = targetUrl;
     } catch (error) {
       console.error("Error canceling battle:", error);
       setCancelError("Failed to cancel battle. Please try again.");
