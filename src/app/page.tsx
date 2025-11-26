@@ -70,7 +70,7 @@ export default async function Home() {
             <FeatureCard
               icon="⚔️"
               title="Choose MC's"
-              description="Select your fighters, each with distinct flows and styles."
+              description="Each with distinct flows and styles."
             />
 
             <FeatureCard
@@ -82,19 +82,19 @@ export default async function Home() {
             <FeatureCard
               icon="🏆"
               title="You Decide"
-              description={<>Vote in live events to crown the&nbsp;winner!</>}
+              description={<>Vote and crown the&nbsp;winner!</>}
             />
 
             <FeatureCard
               icon="💬"
               title="Live Chat"
-              description="Join live battles to chat and react in real-time."
+              description="Chat and react in real-time."
             />
 
             <FeatureCard
               icon="🎵"
               title="Make it a Song"
-              description="Select your style of beat and listen to your battle as a song."
+              description="Select a style and listen to your battle as a song."
             />
           </div>
 
