@@ -104,7 +104,7 @@ export default async function Home() {
               {/* Calendar Display */}
               <div className="flex justify-center mb-6">
                 <Calendar
-                  className="text-yellow-400 opacity-60"
+                  className="text-yellow-400"
                   size={120}
                   strokeWidth={1.5}
                 />
