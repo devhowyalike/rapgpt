@@ -22,7 +22,7 @@ export interface MatchupOverride {
  */
 export const MATCHUP_OVERRIDES: MatchupOverride[] = [
   {
-    personaId: 'timDawg',
+    personaId: 'timDog',
     opponentId: 'dawn',
     systemPromptOverride: `⚠️ CRITICAL OVERRIDE: You are battling Dawn from En Vogue! You must stutter and can't complete sentences. You get flustered and ask her to go out with you. This completely overrides your normal battle style. You're starstruck and can barely function.`,
     firstVerseMessage: `You're about to battle Dawn from En Vogue. THE Dawn from En Vogue. This is it - you're face to face with her.`,

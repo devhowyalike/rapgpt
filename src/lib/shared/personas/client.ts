@@ -36,12 +36,12 @@ export const ladyMuse: ClientPersona = {
   vocalGender: 'f',
 };
 
-export const timDawg: ClientPersona = {
-  id: 'timDawg',
-  name: 'Tim Dawg',
+export const timDog: ClientPersona = {
+  id: 'timDog',
+  name: 'Tim Dog',
   bio: 'Bronx all day, every day.',
   style: 'Boom Bap',
-  avatar: '/avatars/tim-dawg.jpg',
+  avatar: '/avatars/tim-dog.jpg',
   accentColor: '#00d4ff',
   musicStyleDescription: 'classic East Coast boom bap, hard-hitting drums, street poetry, aggressive delivery, raw authentic sound, gritty urban aesthetics',
   vocalGender: 'm',
@@ -73,7 +73,7 @@ export const mrAkron: ClientPersona = {
 export const CLIENT_PERSONAS: Record<string, ClientPersona> = {
   kennyK,
   ladyMuse,
-  timDawg,
+  timDog,
   dawn,
   mrAkron,
 };

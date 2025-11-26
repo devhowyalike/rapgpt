@@ -11,7 +11,7 @@ import type { Persona } from '../battle-types';
 import * as clientPersonas from './client';
 import { kennyKSystemPrompt } from './kennyK';
 import { ladyMuseSystemPrompt } from './ladyMuse';
-import { timDawgSystemPrompt } from './timDawg';
+import { timDogSystemPrompt } from './timDog';
 import { dawnSystemPrompt } from './dawn';
 import { mrAkronSystemPrompt } from './mrAkron';
 
@@ -19,7 +19,7 @@ import { mrAkronSystemPrompt } from './mrAkron';
 const SYSTEM_PROMPTS: Record<string, string> = {
   kennyK: kennyKSystemPrompt,
   ladyMuse: ladyMuseSystemPrompt,
-  timDawg: timDawgSystemPrompt,
+  timDog: timDogSystemPrompt,
   dawn: dawnSystemPrompt,
   mrAkron: mrAkronSystemPrompt,
 };
@@ -27,7 +27,7 @@ const SYSTEM_PROMPTS: Record<string, string> = {
 // Assemble full Persona objects at runtime by combining client data + systemPrompts
 const kennyK: Persona = { ...clientPersonas.kennyK, systemPrompt: kennyKSystemPrompt };
 const ladyMuse: Persona = { ...clientPersonas.ladyMuse, systemPrompt: ladyMuseSystemPrompt };
-const timDawg: Persona = { ...clientPersonas.timDawg, systemPrompt: timDawgSystemPrompt };
+const timDog: Persona = { ...clientPersonas.timDog, systemPrompt: timDogSystemPrompt };
 const dawn: Persona = { ...clientPersonas.dawn, systemPrompt: dawnSystemPrompt };
 const mrAkron: Persona = { ...clientPersonas.mrAkron, systemPrompt: mrAkronSystemPrompt };
 
@@ -35,7 +35,7 @@ const mrAkron: Persona = { ...clientPersonas.mrAkron, systemPrompt: mrAkronSyste
 export const AVAILABLE_PERSONAS: Record<string, Persona> = {
   kennyK,
   ladyMuse,
-  timDawg,
+  timDog,
   dawn,
   mrAkron,
 };
@@ -48,7 +48,7 @@ export function getAllPersonas(): Persona[] {
   return Object.values(AVAILABLE_PERSONAS);
 }
 
-export { kennyK, ladyMuse, timDawg, dawn };
+export { kennyK, ladyMuse, timDog, dawn };
 
 // Re-export client-side utilities for convenience
 export { 
