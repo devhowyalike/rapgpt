@@ -97,6 +97,9 @@ function getViewerCount(battleId: string): number {
 }
 
 function broadcastViewerCount(battleId: string) {
+  // If room doesn't exist (e.g. last user left), nothing to broadcast to
+  if (!battleRooms.has(battleId)) return;
+
   const count = getViewerCount(battleId);
   broadcast(battleId, {
     type: 'viewers:count',
@@ -205,7 +208,9 @@ app.prepare().then(() => {
           case 'join': {
             // Leave previous room if any
             if (connection.battleId) {
-              leaveBattleRoom(connection.battleId, connection);
+              const oldBattleId = connection.battleId;
+              leaveBattleRoom(oldBattleId, connection);
+              broadcastViewerCount(oldBattleId);
             }
 
             // Join new room
@@ -272,7 +277,7 @@ app.prepare().then(() => {
         broadcastViewerCount(connection.battleId);
 
         // Notify if admin disconnected
-        if (connection.isAdmin) {
+        if (connection.isAdmin && battleRooms.has(connection.battleId)) {
           broadcast(connection.battleId, {
             type: 'admin:disconnected',
             battleId: connection.battleId,
