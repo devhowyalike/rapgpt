@@ -94,7 +94,7 @@ export default async function Home() {
             <FeatureCard
               icon="🎵"
               title="Make it a Song"
-              description="Select a style and listen to your battle as a song."
+              description="Select a style and stream it."
             />
           </div>
 
@@ -123,7 +123,7 @@ export default async function Home() {
           {/* Tagline at bottom */}
           <div className="mt-12">
             <p className="text-gray-500 text-lg">
-              {MADE_BY}, {YEAR}
+              &copy;{YEAR}, {MADE_BY}
             </p>
           </div>
         </div>
