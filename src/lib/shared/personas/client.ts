@@ -108,6 +108,17 @@ export const raygun: ClientPersona = {
   vocalGender: 'f',
 };
 
+export const parappa: ClientPersona = {
+  id: 'parappa',
+  name: 'Parappa the Rapper',
+  bio: 'I gotta believe!',
+  style: '△○✕□',
+  avatar: '/avatars/parappa.webp',
+  accentColor: '#ff8800',
+  musicStyleDescription: 'upbeat, call-and-response, simple catchy rhythms, positive vibes, 90s game soundtrack style, funky and lighthearted',
+  vocalGender: 'm',
+};
+
 export const CLIENT_PERSONAS: Record<string, ClientPersona> = {
   kennyK,
   ladyMuse,
@@ -117,6 +128,7 @@ export const CLIENT_PERSONAS: Record<string, ClientPersona> = {
   dawn,
   mrAkron,
   raygun,
+  parappa,
 };
 
 export function getClientPersona(id: string): ClientPersona | null {

@@ -55,11 +55,11 @@ export const outback: Stage = {
 };
 
 export const AVAILABLE_STAGES: Record<string, Stage> = {
-  canada,
-  bronx,
-  bkBathroom,
-  oakland,
-  outback,
+  [canada.id]: canada,
+  [bronx.id]: bronx,
+  [bkBathroom.id]: bkBathroom,
+  [oakland.id]: oakland,
+  [outback.id]: outback,
 };
 
 export function getStage(id: string): Stage | null {
