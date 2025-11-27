@@ -3,12 +3,30 @@
 import { getAllClientPersonas } from "@/lib/shared/personas/client";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { VictoryConfetti } from "@/components/victory-confetti";
 
 export function PersonaGallery() {
   const personas = getAllClientPersonas();
+  const [confettiKey, setConfettiKey] = useState(0);
+  const [clickOrigin, setClickOrigin] = useState<
+    { x: number; y: number } | undefined
+  >(undefined);
+
+  const handlePersonaClick = (e: React.MouseEvent) => {
+    setClickOrigin({ x: e.clientX, y: e.clientY });
+    setConfettiKey((prev) => prev + 1);
+  };
 
   return (
     <section className="pt-16 pb-4 px-4 md:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+      {confettiKey > 0 && (
+        <VictoryConfetti
+          key={confettiKey}
+          trigger={true}
+          origin={clickOrigin}
+        />
+      )}
       <div className="text-center mb-12">
         <h2 className="text-4xl md:text-5xl font-bold font-(family-name:--font-bebas-neue) mb-4 text-white">
           Choose Your MC
@@ -23,6 +41,7 @@ export function PersonaGallery() {
         {personas.map((persona, index) => (
           <motion.div
             key={persona.id}
+            onClick={handlePersonaClick}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
