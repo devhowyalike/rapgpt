@@ -46,7 +46,7 @@ export function PersonaGallery() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
             viewport={{ once: true }}
-            className="group relative bg-gray-900/40 border border-gray-800 rounded-xl overflow-hidden hover:border-purple-500/50 transition-colors duration-300 h-full w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(25%-18px)]"
+            className="group relative bg-gray-900/40 border border-gray-800 rounded-xl overflow-hidden hover:border-purple-500/50 transition-colors duration-300 flex flex-col w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(25%-18px)]"
           >
             {/* Background Glow */}
             <div
@@ -58,7 +58,7 @@ export function PersonaGallery() {
               }}
             />
 
-            <div className="p-6 flex flex-col items-center text-center relative z-10 h-full">
+            <div className="p-6 flex flex-col items-center text-center relative z-10 grow">
               {/* Avatar */}
               <div
                 className="relative w-24 h-24 mb-4 rounded-full border-2 border-gray-700 group-hover:scale-105 transition-transform duration-300 overflow-hidden shrink-0"
