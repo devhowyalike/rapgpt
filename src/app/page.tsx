@@ -100,7 +100,7 @@ export default async function Home() {
           </div>
 
           {/* Persona Gallery */}
-          <PersonaGallery />
+          <PersonaGallery hideAltPersonas={true} />
 
           {/* Bottom CTA */}
           <div className="flex justify-center pb-4 pt-4">

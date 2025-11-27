@@ -1,13 +1,24 @@
 "use client";
 
-import { getAllClientPersonas } from "@/lib/shared/personas/client";
+import {
+  getAllClientPersonas,
+  getPrimaryClientPersonas,
+} from "@/lib/shared/personas/client";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { VictoryConfetti } from "@/components/victory-confetti";
 
-export function PersonaGallery() {
-  const personas = getAllClientPersonas();
+interface PersonaGalleryProps {
+  hideAltPersonas?: boolean;
+}
+
+export function PersonaGallery({
+  hideAltPersonas = true,
+}: PersonaGalleryProps) {
+  const personas = hideAltPersonas
+    ? getPrimaryClientPersonas()
+    : getAllClientPersonas();
   const [confettiKey, setConfettiKey] = useState(0);
   const [clickOrigin, setClickOrigin] = useState<
     { x: number; y: number } | undefined
