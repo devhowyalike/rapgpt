@@ -19,10 +19,12 @@ import { Button } from "@/components/ui/button";
 
 interface LiveBattlesDisplayProps {
   initialBattles: Battle[];
+  currentUserId?: string | null;
 }
 
 export function LiveBattlesDisplay({
   initialBattles,
+  currentUserId,
 }: LiveBattlesDisplayProps) {
   const [liveBattles, setLiveBattles] = useState<Battle[]>(initialBattles);
   const wsRef = useRef<WebSocket | null>(null);
@@ -235,16 +237,31 @@ export function LiveBattlesDisplay({
                 )}
               </TableCell>
               <TableCell className="text-right">
-                <Button
-                  asChild
-                  size="sm"
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                >
-                  <Link href={`/battle/${battle.id}`}>
-                    <Play className="w-3 h-3 mr-2 fill-current" />
-                    Watch
-                  </Link>
-                </Button>
+                {currentUserId &&
+                (battle.creator?.userId === currentUserId ||
+                  currentUserId === "user_2oE8sL5Z2Yx4X9Z9Z9Z9Z9Z9Z9") ? (
+                  <Button
+                    asChild
+                    size="sm"
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                  >
+                    <Link href={`/admin/battles/${battle.id}/control`}>
+                      <Play className="w-3 h-3 mr-2 fill-current" />
+                      Control
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button
+                    asChild
+                    size="sm"
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    <Link href={`/battle/${battle.id}`}>
+                      <Play className="w-3 h-3 mr-2 fill-current" />
+                      Watch
+                    </Link>
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           ))}

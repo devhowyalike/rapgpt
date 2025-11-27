@@ -14,15 +14,25 @@ import { nanoid } from "nanoid";
  * Gets or creates a user in the database from Clerk
  * Returns the user from the database or creates one if it doesn't exist
  */
-export async function getOrCreateUser(clerkUserId: string) {
-  // First check if user exists in database
-  const existingUser = await db.query.users.findFirst({
+export async function getUserByClerkId(clerkUserId: string) {
+  const user = await db.query.users.findFirst({
     where: eq(users.clerkId, clerkUserId),
   });
+  return user || null;
+}
+
+/**
+ * Gets or creates a user in the database from Clerk
+ * Returns the user from the database or creates one if it doesn't exist
+ */
+export async function getOrCreateUser(clerkUserId: string) {
+  // First check if user exists in database
+  const existingUser = await getUserByClerkId(clerkUserId);
 
   if (existingUser) {
     return existingUser;
   }
+
 
   // User doesn't exist, fetch from Clerk and create
   const clerkUser = await currentUser();

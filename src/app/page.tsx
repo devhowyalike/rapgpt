@@ -6,6 +6,7 @@ import { MakeSongHighlight } from "@/components/make-song-highlight";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { APP_TITLE, MADE_BY, TAGLINE, YEAR } from "@/lib/constants";
 import { auth } from "@clerk/nextjs/server";
+import { getUserByClerkId } from "@/lib/auth/sync-user";
 import { Calendar } from "lucide-react";
 import { FeatureCard } from "@/components/feature-card";
 
@@ -15,8 +16,16 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const liveBattles = await getLiveBattles();
-  const { sessionClaims } = await auth();
+  const { sessionClaims, userId: clerkUserId } = await auth();
   const isAuthenticated = !!sessionClaims;
+
+  let currentUserId = null;
+  if (clerkUserId) {
+    const user = await getUserByClerkId(clerkUserId);
+    if (user) {
+      currentUserId = user.id;
+    }
+  }
 
   return (
     <>
@@ -98,7 +107,10 @@ export default async function Home() {
           </div>
 
           {/* Live Battles if active */}
-          <LiveBattlesDisplay initialBattles={liveBattles} />
+          <LiveBattlesDisplay
+            initialBattles={liveBattles}
+            currentUserId={currentUserId}
+          />
         </div>
       </div>
 
