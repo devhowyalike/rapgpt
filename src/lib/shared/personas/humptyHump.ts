@@ -27,5 +27,3 @@ BATTLE STRATEGY:
 - Distract the opponent with absurdity
 - Focus on having fun and moving the crowd
 - Use humor to undermine the opponent's seriousness`;
-
-
