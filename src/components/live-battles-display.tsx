@@ -3,10 +3,19 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, Radio, Users } from "lucide-react";
+import { Users, MessageSquare, Play } from "lucide-react";
 import type { Battle } from "@/lib/shared";
 import { ROUNDS_PER_BATTLE, getDisplayRound } from "@/lib/shared";
 import type { WebSocketEvent } from "@/lib/websocket/types";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
 interface LiveBattlesDisplayProps {
   initialBattles: Battle[];
@@ -49,7 +58,7 @@ export function LiveBattlesDisplay({
       ws.onmessage = (event) => {
         try {
           const wsEvent: WebSocketEvent = JSON.parse(event.data);
-          console.log("[Homepage WS] Received event:", wsEvent.type);
+          // console.log("[Homepage WS] Received event:", wsEvent.type);
 
           switch (wsEvent.type) {
             case "battle:live_started": {
@@ -124,102 +133,123 @@ export function LiveBattlesDisplay({
   }
 
   return (
-    <div className="space-y-6">
-      {liveBattles.map((battle) => (
-        <div
-          key={battle.id}
-          className="bg-linear-to-br from-red-900/30 via-gray-900/50 to-gray-900/50 border-2 border-red-500/50 rounded-lg p-8 shadow-2xl hover:border-red-400/70 transition-all"
-        >
-          {/* Live Indicator */}
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="flex items-center gap-2 px-4 py-2 bg-red-600/20 rounded-full">
-              <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-red-500 font-bold text-lg">LIVE NOW</span>
-            </div>
-          </div>
-
-          {/* Battle Title */}
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-6 text-transparent bg-clip-text bg-linear-to-r from-red-400 via-yellow-400 to-purple-500">
-            {battle.title}
-          </h2>
-
-          {/* Matchup */}
-          <div className="flex items-center justify-center gap-4 md:gap-8 mb-6 flex-wrap">
-            <div className="text-center">
-              <div className="mb-2 flex justify-center">
-                <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-[rgb(var(--player1-color))]">
-                  <Image
-                    src={battle.personas.player1.avatar}
-                    alt={battle.personas.player1.name}
-                    width={80}
-                    height={80}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-              <div className="text-lg font-bold text-white">
-                {battle.personas.player1.name}
-              </div>
-              <div className="text-sm text-gray-400">
-                {battle.personas.player1.style}
-              </div>
-            </div>
-
-            <div className="text-4xl font-bold text-[rgb(var(--player2-color))]">
-              VS
-            </div>
-
-            <div className="text-center">
-              <div className="mb-2 flex justify-center">
-                <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-[rgb(var(--player2-color))]">
-                  <Image
-                    src={battle.personas.player2.avatar}
-                    alt={battle.personas.player2.name}
-                    width={80}
-                    height={80}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-              <div className="text-lg font-bold text-white">
-                {battle.personas.player2.name}
-              </div>
-              <div className="text-sm text-gray-400">
-                {battle.personas.player2.style}
-              </div>
-            </div>
-          </div>
-
-          {/* Battle Stats */}
-          <div className="flex items-center justify-center gap-6 mb-6 flex-wrap text-sm text-gray-300">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              <span>
-                Round {getDisplayRound(battle)}/{ROUNDS_PER_BATTLE}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              <span>{battle.verses.length} verses</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Radio className="w-4 h-4" />
-              <span>{battle.comments.length} comments</span>
-            </div>
-          </div>
-
-          {/* Watch Button */}
-          <div className="flex justify-center">
-            <Link
-              href={`/battle/${battle.id}`}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-lg text-white font-bold text-lg transition-all transform hover:scale-105 shadow-lg"
-            >
-              <Radio className="w-5 h-5" />
-              Watch Live
-            </Link>
-          </div>
+    <div className="w-full bg-gray-900/50 border border-white/10 rounded-xl overflow-hidden backdrop-blur-md">
+      <div className="p-6 border-b border-white/10 flex items-center gap-3">
+        <div className="relative flex h-3 w-3">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
         </div>
-      ))}
+        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          Live Battles
+          <span className="text-sm font-normal text-gray-400 ml-2">
+            ({liveBattles.length} active)
+          </span>
+        </h2>
+      </div>
+
+      <Table>
+        <TableHeader className="bg-white/5">
+          <TableRow className="border-white/10 hover:bg-transparent">
+            <TableHead className="text-gray-400 w-[40%]">Matchup</TableHead>
+            <TableHead className="text-gray-400 text-center">Round</TableHead>
+            <TableHead className="text-gray-400 text-center">Stats</TableHead>
+            <TableHead className="text-gray-400 text-center">Creator</TableHead>
+            <TableHead className="text-gray-400 text-right"></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {liveBattles.map((battle) => (
+            <TableRow
+              key={battle.id}
+              className="border-white/10 hover:bg-white/5 transition-colors"
+            >
+              <TableCell>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-[rgb(var(--player1-color))]">
+                      <Image
+                        src={battle.personas.player1.avatar}
+                        alt={battle.personas.player1.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <span className="font-bold text-white truncate max-w-[100px] sm:max-w-[150px]">
+                      {battle.personas.player1.name}
+                    </span>
+                  </div>
+                  <span className="text-gray-500 font-bold text-sm">VS</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-white truncate max-w-[100px] sm:max-w-[150px] text-right">
+                      {battle.personas.player2.name}
+                    </span>
+                    <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-[rgb(var(--player2-color))]">
+                      <Image
+                        src={battle.personas.player2.avatar}
+                        alt={battle.personas.player2.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell className="text-center">
+                <span className="inline-flex items-center rounded-full border border-white/10 bg-black/20 px-2.5 py-0.5 text-xs font-semibold text-white transition-colors focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                  {getDisplayRound(battle)} / {ROUNDS_PER_BATTLE}
+                </span>
+              </TableCell>
+              <TableCell>
+                <div className="flex flex-col items-center gap-1 text-xs text-gray-400">
+                  <div className="flex items-center gap-1">
+                    <Users className="w-3 h-3" />
+                    <span>{battle.verses.length} verses</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <MessageSquare className="w-3 h-3" />
+                    <span>{battle.comments.length} comments</span>
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell className="text-center">
+                {battle.creator ? (
+                  <div className="flex flex-col items-center gap-1">
+                    {battle.creator.imageUrl && (
+                      <div className="relative w-6 h-6 rounded-full overflow-hidden border border-white/10">
+                        <Image
+                          src={battle.creator.imageUrl}
+                          alt={battle.creator.displayName}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
+                    <span className="text-xs text-gray-400 max-w-[100px] truncate">
+                      {battle.creator.displayName}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-xs text-gray-500 italic">
+                    Anonymous
+                  </span>
+                )}
+              </TableCell>
+              <TableCell className="text-right">
+                <Button
+                  asChild
+                  size="sm"
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  <Link href={`/battle/${battle.id}`}>
+                    <Play className="w-3 h-3 mr-2 fill-current" />
+                    Watch
+                  </Link>
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }

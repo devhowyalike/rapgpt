@@ -64,9 +64,6 @@ export default async function Home() {
       {/* Reverted Original Content - Split for Full Width Highlight */}
       <div className="bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center justify-center p-6 pt-0 pb-12">
         <div className="max-w-6xl mx-auto text-center space-y-8 w-full">
-          {/* Live Battles if active */}
-          <LiveBattlesDisplay initialBattles={liveBattles} />
-
           {/* Original Features Grid */}
           <div className="flex flex-wrap justify-center gap-6 mt-6">
             <FeatureCard
@@ -99,6 +96,9 @@ export default async function Home() {
               description="Select a style and stream it."
             />
           </div>
+
+          {/* Live Battles if active */}
+          <LiveBattlesDisplay initialBattles={liveBattles} />
         </div>
       </div>
 
