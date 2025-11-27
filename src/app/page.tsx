@@ -103,7 +103,7 @@ export default async function Home() {
           <PersonaGallery />
 
           {/* Bottom CTA */}
-          <div className="flex justify-center pb-12 pt-4">
+          <div className="flex justify-center pb-4 pt-4">
             <CreateBattleCTA
               isAuthenticated={isAuthenticated}
               title="Select Your Fighter"
@@ -112,7 +112,7 @@ export default async function Home() {
 
           {/* Live Battles or Coming Soon */}
           {liveBattles.length === 0 && (
-            <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-8 mt-12">
+            <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-8 mt-8">
               {/* Calendar Display */}
               <div className="flex justify-center mb-6">
                 <Calendar
