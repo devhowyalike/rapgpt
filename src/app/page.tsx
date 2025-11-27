@@ -2,6 +2,7 @@ import { getLiveBattles } from "@/lib/battle-storage";
 import { SiteHeader } from "@/components/site-header";
 import { LiveBattlesDisplay } from "@/components/live-battles-display";
 import { PersonaGallery } from "@/components/persona-gallery";
+import { MakeSongHighlight } from "@/components/make-song-highlight";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { APP_TITLE, MADE_BY, TAGLINE, YEAR } from "@/lib/constants";
 import { auth } from "@clerk/nextjs/server";
@@ -60,8 +61,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Reverted Original Content */}
-      <div className="min-h-[50vh] bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center justify-center p-6 pt-0">
+      {/* Reverted Original Content - Split for Full Width Highlight */}
+      <div className="bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center justify-center p-6 pt-0 pb-12">
         <div className="max-w-6xl mx-auto text-center space-y-8 w-full">
           {/* Live Battles if active */}
           <LiveBattlesDisplay initialBattles={liveBattles} />
@@ -98,10 +99,22 @@ export default async function Home() {
               description="Select a style and stream it."
             />
           </div>
+        </div>
+      </div>
 
+      {/* Make Song Highlight */}
+      <MakeSongHighlight isAuthenticated={isAuthenticated} />
+
+      <div className="bg-stage-dark flex flex-col items-center justify-center p-6 pt-12 pb-0">
+        <div className="max-w-6xl mx-auto text-center space-y-8 w-full">
           {/* Persona Gallery */}
           <PersonaGallery hideAltPersonas={true} />
+        </div>
+      </div>
 
+      {/* Bottom Section */}
+      <div className="bg-stage-dark flex flex-col items-center justify-center p-6 pt-12 pb-12">
+        <div className="max-w-6xl mx-auto text-center space-y-8 w-full">
           {/* Bottom CTA */}
           <div className="flex justify-center pb-4 pt-4">
             <CreateBattleCTA
