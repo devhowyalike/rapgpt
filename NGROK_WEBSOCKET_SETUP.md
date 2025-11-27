@@ -141,12 +141,4 @@ pnpm run ngrok
 
 If you're experiencing persistent issues and you're on the free plan, consider upgrading or testing locally without ngrok.
 
-## Environment Variables
-
-Make sure these are NOT set (they would disable WebSockets):
-```bash
-# In .env.local - make sure this is NOT present or is set to false
-# NEXT_PUBLIC_DISABLE_WEBSOCKETS=true  # ❌ Don't set this!
-NEXT_PUBLIC_DISABLE_WEBSOCKETS=false   # ✅ Or just don't set it at all
-```
 

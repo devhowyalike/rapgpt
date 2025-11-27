@@ -25,12 +25,6 @@ export function LiveBattlesDisplay({
   }, []);
 
   useEffect(() => {
-    // Skip websocket connection if disabled
-    if (process.env.NEXT_PUBLIC_DISABLE_WEBSOCKETS === "true") {
-      console.log("[Homepage WS] WebSockets are disabled");
-      return;
-    }
-
     // Connect to WebSocket for global homepage updates
     const connectWebSocket = () => {
       if (wsRef.current?.readyState === WebSocket.OPEN) return;

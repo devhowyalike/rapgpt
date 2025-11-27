@@ -25,12 +25,6 @@ const MAX_RECONNECT_ATTEMPTS = 5;
 const INITIAL_RECONNECT_DELAY = 1000;
 const MAX_RECONNECT_DELAY = 30000;
 
-// Check if websockets are disabled via environment variable
-const isWebSocketEnabled = () => {
-  if (typeof window === 'undefined') return false;
-  return process.env.NEXT_PUBLIC_DISABLE_WEBSOCKETS !== 'true';
-};
-
 export function useWebSocket({
   battleId,
   isAdmin = false,
@@ -64,13 +58,6 @@ export function useWebSocket({
   }, []);
 
   const connect = useCallback(() => {
-    // Don't connect if websockets are globally disabled
-    if (!isWebSocketEnabled()) {
-      console.log('[WS Client] WebSockets are disabled via environment variable');
-      setStatus('disconnected');
-      return;
-    }
-    
     if (!enabled || !isMountedRef.current) return;
 
     // Clean up existing connection
