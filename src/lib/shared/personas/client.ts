@@ -119,6 +119,17 @@ export const parappa: ClientPersona = {
   vocalGender: 'm',
 };
 
+export const tyler: ClientPersona = {
+  id: 'tyler',
+  name: 'Tyler, The Creator',
+  bio: '@#$%! #$@&! %$#@!!!',
+  style: 'GOLF le FLEUR*',
+  avatar: '/avatars/tyler.webp',
+  accentColor: '#f4d4d4', // IGOR pinkish
+  musicStyleDescription: 'experimental hip-hop, neo-soul chords, gritty synths, deep vocals, aggressive to melodic transitions, genre-bending production, odd future aesthetic',
+  vocalGender: 'm',
+};
+
 export const CLIENT_PERSONAS: Record<string, ClientPersona> = {
   kennyK,
   ladyMuse,
@@ -129,6 +140,7 @@ export const CLIENT_PERSONAS: Record<string, ClientPersona> = {
   mrAkron,
   raygun,
   parappa,
+  tyler,
 };
 
 export function getClientPersona(id: string): ClientPersona | null {
