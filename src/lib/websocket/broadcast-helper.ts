@@ -6,7 +6,8 @@
 import type { WebSocketEvent } from './types';
 import { isWebSocketAvailable, broadcast as directBroadcast } from './server';
 
-const BROADCAST_URL = process.env.BROADCAST_INTERNAL_URL || 'http://localhost:3000/__internal/ws-broadcast';
+const PORT = process.env.PORT || '3000';
+const BROADCAST_URL = process.env.BROADCAST_INTERNAL_URL || `http://127.0.0.1:${PORT}/__internal/ws-broadcast`;
 
 /**
  * Broadcast a WebSocket event to all clients in a battle room
