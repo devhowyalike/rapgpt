@@ -65,7 +65,7 @@ export default async function AdminDashboardPage() {
     });
 
     return (
-      <div className="min-h-[100dvh] bg-linear-to-br from-gray-900 via-purple-900 to-black">
+      <div className="min-h-dvh bg-linear-to-br from-gray-900 via-purple-900 to-black">
         <SiteHeader />
         <div className="max-w-7xl mx-auto px-4 py-24">
           <div className="mb-8 flex items-start justify-between">

@@ -18,6 +18,8 @@ import { dawnSystemPrompt } from './dawn';
 import { mrAkronSystemPrompt } from './mrAkron';
 import { humptyHumpSystemPrompt } from './humptyHump';
 import { shockGSystemPrompt } from './shockG';
+import { parappaSystemPrompt } from './parappa';
+import { tylerSystemPrompt } from './tyler';
 
 // Map of persona IDs to their system prompts
 const SYSTEM_PROMPTS: Record<string, string> = {
@@ -29,6 +31,8 @@ const SYSTEM_PROMPTS: Record<string, string> = {
   mrAkron: mrAkronSystemPrompt,
   humptyHump: humptyHumpSystemPrompt,
   shockG: shockGSystemPrompt,
+  parappa: parappaSystemPrompt,
+  tyler: tylerSystemPrompt,
 };
 
 // Assemble full Persona objects at runtime by combining client data + systemPrompts
@@ -40,6 +44,8 @@ const dawn: Persona = { ...clientPersonas.dawn, systemPrompt: dawnSystemPrompt }
 const mrAkron: Persona = { ...clientPersonas.mrAkron, systemPrompt: mrAkronSystemPrompt };
 const humptyHump: Persona = { ...clientPersonas.humptyHump, systemPrompt: humptyHumpSystemPrompt };
 const shockG: Persona = { ...clientPersonas.shockG, systemPrompt: shockGSystemPrompt };
+const parappa: Persona = { ...clientPersonas.parappa, systemPrompt: parappaSystemPrompt };
+const tyler: Persona = { ...clientPersonas.tyler, systemPrompt: tylerSystemPrompt };
 
 // Server-side: Full persona data with systemPrompts
 export const AVAILABLE_PERSONAS: Record<string, Persona> = {
@@ -51,6 +57,8 @@ export const AVAILABLE_PERSONAS: Record<string, Persona> = {
   mrAkron,
   humptyHump,
   shockG,
+  parappa,
+  tyler,
 };
 
 export function getPersona(id: string): Persona | null {
@@ -63,7 +71,7 @@ export function getAllPersonas(): Persona[] {
   return personas.filter(p => !p.isHoopla);
 }
 
-export { kennyK, ladyMuse, raygun, timDog, dawn, humptyHump, shockG };
+export { kennyK, ladyMuse, raygun, timDog, dawn, humptyHump, shockG, parappa, tyler };
 
 // Re-export client-side utilities for convenience
 export { 
