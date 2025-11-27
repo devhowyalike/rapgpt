@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-interface VictoryConfettiProps {
+export interface VictoryConfettiProps {
   trigger: boolean;
+  origin?: { x: number; y: number };
 }
 
 type Particle = {
@@ -38,7 +39,7 @@ const CONFETTI_COLORS = [
   "#ea580c",
 ];
 
-export function VictoryConfetti({ trigger }: VictoryConfettiProps) {
+export function VictoryConfetti({ trigger, origin }: VictoryConfettiProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -104,9 +105,10 @@ export function VictoryConfetti({ trigger }: VictoryConfettiProps) {
       for (let i = 0; i < count; i++) {
         const w = width();
         const h = height();
-        // Start from upper-center of screen for explosion effect
-        const startX = w / 2;
-        const startY = h * 0.3; // 30% from top instead of center
+        // Start from origin if provided, else upper-center
+        const startX = origin ? origin.x : w / 2;
+        const startY = origin ? origin.y : h * 0.3;
+
         // Random angle in ALL directions (360 degrees)
         const angle = Math.random() * Math.PI * 2;
         // Higher speed for more dramatic explosion

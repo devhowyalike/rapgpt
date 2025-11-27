@@ -126,7 +126,19 @@ export const tyler: ClientPersona = {
   style: 'GOLF le FLEUR*',
   avatar: '/avatars/tyler.webp',
   accentColor: '#f4d4d4', // IGOR pinkish
+  altCostumes: ['igor'],
   musicStyleDescription: 'experimental hip-hop, neo-soul chords, gritty synths, deep vocals, aggressive to melodic transitions, genre-bending production, odd future aesthetic',
+  vocalGender: 'm',
+};
+
+export const igor: ClientPersona = {
+  id: 'igor',
+  name: 'IGOR',
+  bio: 'Don\'t leave, it\'s my fault',
+  style: 'Earfquake',
+  avatar: '/avatars/igor.webp',
+  accentColor: '#ffb6c1',
+  musicStyleDescription: 'lo-fi soul, distorted synths, pitched vocals, heartbreak ballads, aggressive bass, experimental pop-rap fusion',
   vocalGender: 'm',
 };
 
@@ -141,6 +153,7 @@ export const CLIENT_PERSONAS: Record<string, ClientPersona> = {
   raygun,
   parappa,
   tyler,
+  igor,
 };
 
 export function getClientPersona(id: string): ClientPersona | null {
