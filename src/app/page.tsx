@@ -113,10 +113,10 @@ export default async function Home() {
       </div>
 
       {/* Bottom Section */}
-      <div className="bg-stage-dark flex flex-col items-center justify-center p-6 pt-12 pb-12">
+      <div className="bg-stage-dark flex flex-col items-center justify-center p-6 pt-8 pb-12">
         <div className="max-w-6xl mx-auto text-center space-y-8 w-full">
           {/* Bottom CTA */}
-          <div className="flex justify-center pb-4 pt-4">
+          <div className="flex justify-center pb-4 pt-2">
             <CreateBattleCTA
               isAuthenticated={isAuthenticated}
               title="Select Your Fighter"

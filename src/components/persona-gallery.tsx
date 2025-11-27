@@ -108,11 +108,17 @@ export function PersonaGallery({
       </div>
 
       {/* "And More" Text - Positioned below cards */}
-      <div className="flex justify-center sm:hidden pt-2 z-30 relative">
-        <span className="text-white/80 font-bold text-xl font-(family-name:--font-bebas-neue) tracking-wider">
-          AND MORE!
+      <motion.div
+        className="flex justify-center pt-8 z-30 relative"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: personas.length * 0.1 }}
+        viewport={{ once: true }}
+      >
+        <span className="text-white/80 font-bold text-xl font-(family-name:--font-bebas-neue) tracking-wider text-uppercase">
+          And More!
         </span>
-      </div>
+      </motion.div>
     </section>
   );
 }
