@@ -30,7 +30,7 @@ export function PersonaGallery({
   };
 
   return (
-    <section className="pt-8 pb-0 px-4 md:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+    <section className="pt-0 pb-0 px-4 md:px-6 lg:px-8 max-w-7xl mx-auto w-full">
       {confettiKey > 0 && (
         <VictoryConfetti
           key={confettiKey}

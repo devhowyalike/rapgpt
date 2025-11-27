@@ -12,7 +12,7 @@ interface MakeSongHighlightProps {
 
 export function MakeSongHighlight({ isAuthenticated }: MakeSongHighlightProps) {
   return (
-    <section className="-mt-px -mb-px py-8 px-4 relative overflow-hidden bg-linear-to-b from-stage-dark via-purple-950/20 to-stage-dark border-none">
+    <section className="-mt-px -mb-px pt-2 pb-4 px-4 relative overflow-hidden bg-linear-to-b from-stage-dark via-purple-950/20 to-stage-dark border-none">
       {/* Background Glows */}
       <div className="absolute top-20 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
