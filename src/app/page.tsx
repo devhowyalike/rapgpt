@@ -1,6 +1,7 @@
 import { getLiveBattles } from "@/lib/battle-storage";
 import { SiteHeader } from "@/components/site-header";
 import { LiveBattlesDisplay } from "@/components/live-battles-display";
+import { PersonaGallery } from "@/components/persona-gallery";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { APP_TITLE, MADE_BY, TAGLINE, YEAR } from "@/lib/constants";
 import { auth } from "@clerk/nextjs/server";
@@ -95,6 +96,17 @@ export default async function Home() {
               icon="🎵"
               title="Make it a Song"
               description="Select a style and stream it."
+            />
+          </div>
+
+          {/* Persona Gallery */}
+          <PersonaGallery />
+
+          {/* Bottom CTA */}
+          <div className="flex justify-center pb-12 pt-4">
+            <CreateBattleCTA
+              isAuthenticated={isAuthenticated}
+              title="Select Your Fighter"
             />
           </div>
 
