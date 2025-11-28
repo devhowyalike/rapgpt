@@ -290,7 +290,7 @@ export function CharacterSelect({
 
               <div className="container mx-auto px-4 relative z-10 flex flex-col flex-1">
                 {/* Header Section */}
-                <div className="text-center mb-8 animate-slide-up">
+                <div className="text-center mb-3 lg:mb-8 animate-slide-up">
                   <h1 className="text-5xl md:text-7xl font-bold tracking-wide font-(family-name:--font-bebas-neue)">
                     {selectionStep === "player1" ? (
                       <>
