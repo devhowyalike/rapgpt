@@ -320,28 +320,29 @@ export function StageSelect({
                 <div className="flex items-center gap-2">
                   <button
                     onClick={onBack}
-                    className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-400 hover:text-white hover:opacity-80 transition-all cursor-pointer group"
+                    title="Edit Characters"
                   >
-                    ← Back
+                    <span>← Edit Characters</span>
+                    <div className="flex -space-x-2">
+                      <div className="w-10 h-10 rounded-full border-2 border-black overflow-hidden relative transition-transform group-hover:scale-110 group-hover:z-20">
+                        <Image
+                          src={player1.avatar}
+                          alt={player1.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="w-10 h-10 rounded-full border-2 border-black overflow-hidden relative z-10 transition-transform group-hover:scale-110 group-hover:z-30">
+                        <Image
+                          src={player2.avatar}
+                          alt={player2.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    </div>
                   </button>
-                  <div className="flex -space-x-2">
-                    <div className="w-10 h-10 rounded-full border-2 border-black overflow-hidden relative">
-                      <Image
-                        src={player1.avatar}
-                        alt={player1.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="w-10 h-10 rounded-full border-2 border-black overflow-hidden relative z-10">
-                      <Image
-                        src={player2.avatar}
-                        alt={player2.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  </div>
                 </div>
 
                 <button
