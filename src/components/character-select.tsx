@@ -304,9 +304,9 @@ export function CharacterSelect({
                 </div>
 
                 {/* Main Selection Area */}
-                <div className="flex flex-col lg:flex-row items-center justify-center max-w-6xl mx-auto w-full gap-8 lg:gap-12 flex-1">
+                <div className="flex flex-col lg:flex-row items-center justify-center max-w-6xl mx-auto w-full gap-2 lg:gap-12 flex-1">
                   {/* Players Preview Area */}
-                  <div className="w-full lg:w-auto shrink-0 flex flex-row justify-center gap-4 md:gap-12 lg:gap-16 items-center lg:sticky lg:top-24 order-1 lg:order-2 mb-8 lg:mb-0">
+                  <div className="w-full lg:w-auto shrink-0 flex flex-row justify-center gap-4 md:gap-12 lg:gap-16 items-center lg:sticky lg:top-24 order-1 lg:order-2 mb-2 lg:mb-0">
                     {/* Player 1 Preview */}
                     <div className="w-[140px] md:w-[200px]">
                       <PlayerDisplay

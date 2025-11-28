@@ -48,7 +48,7 @@ export function PlayerDisplay({
 
   const content = (
     <div
-      className={`flex-1 flex flex-col items-center justify-center h-[160px] md:h-[320px] group/player ${
+      className={`flex-1 flex flex-col items-center justify-center h-[220px] md:h-[320px] group/player ${
         onActivate ? "cursor-pointer" : ""
       }`}
       onClick={onActivate}
@@ -131,8 +131,8 @@ export function PlayerDisplay({
           </div>
           {/* Character Bio - always reserve space to prevent layout shift */}
           {showBio && (
-            <div className="text-center max-w-xs flex flex-col md:h-16 shrink-0 text-pretty">
-              <p className="text-gray-300 text-xs md:text-sm lg:text-base hidden md:block line-clamp-3">
+            <div className="text-center max-w-xs flex flex-col h-12 md:h-16 shrink-0 text-pretty">
+              <p className="text-gray-300 text-xs md:text-sm lg:text-base line-clamp-3">
                 {player.bio}
               </p>
             </div>
@@ -178,7 +178,7 @@ export function PlayerDisplay({
             {placeholder}
           </div>
           {/* Spacer to match bio height */}
-          {showBio && <div className="text-center max-w-xs md:h-16 shrink-0" />}
+          {showBio && <div className="text-center max-w-xs h-12 md:h-16 shrink-0" />}
         </>
       )}
     </div>

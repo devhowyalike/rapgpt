@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { getAllStages, type Stage } from "@/lib/shared/stages";
 import { useRouter } from "next/navigation";
-import { BattleOptions } from "./battle-options";
 import type { ClientPersona } from "@/lib/shared/personas/client";
 import Image from "next/image";
 import { SiteHeader } from "@/components/site-header";
@@ -270,14 +269,14 @@ export function StageSelect({
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent" />
 
-                    <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+                    <div className="absolute bottom-0 left-0 right-0 px-6 pt-6 pb-2 md:px-8 md:pt-8 md:pb-4">
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 mb-4">
                         <span className="text-lg">{displayStage.flag}</span>
                         <span className="text-sm font-medium text-gray-200">
                           {displayStage.country}
                         </span>
                       </div>
-                      <h2 className="text-4xl md:text-6xl font-bold font-(family-name:--font-bebas-neue) tracking-wide text-white mb-2">
+                      <h2 className="text-4xl md:text-6xl font-bold font-(family-name:--font-bebas-neue) tracking-wide text-white">
                         {displayStage.name}
                       </h2>
                     </div>
@@ -299,60 +298,43 @@ export function StageSelect({
         <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-linear-to-t from-black via-black/90 to-transparent pt-12">
           <div className="container mx-auto max-w-4xl">
             <div className="flex flex-col gap-4 items-center">
-              {/* Battle Options (Collapsed or simplified) */}
-              <div className="w-full bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-4">
-                <BattleOptions
-                  votingEnabled={votingEnabled}
-                  onVotingEnabledChange={onVotingEnabledChange}
-                  commentsEnabled={commentsEnabled}
-                  onCommentsEnabledChange={onCommentsEnabledChange}
-                  createAsLive={createAsLive}
-                  onCreateAsLiveChange={onCreateAsLiveChange}
-                  autoStartOnAdvance={autoStartOnAdvance}
-                  onAutoStartOnAdvanceChange={onAutoStartOnAdvanceChange}
-                  isAdmin={isAdmin}
-                  isVotingGloballyEnabled={isVotingGloballyEnabled}
-                  isCommentsGloballyEnabled={isCommentsGloballyEnabled}
-                />
-              </div>
-
-              <div className="flex items-center justify-between w-full gap-4">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={onBack}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-400 hover:text-white hover:opacity-80 transition-all cursor-pointer group"
-                    title="Edit Characters"
-                  >
-                    <span>← Edit Characters</span>
-                    <div className="flex -space-x-2">
-                      <div className="w-10 h-10 rounded-full border-2 border-black overflow-hidden relative transition-transform group-hover:scale-110 group-hover:z-20">
-                        <Image
-                          src={player1.avatar}
-                          alt={player1.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="w-10 h-10 rounded-full border-2 border-black overflow-hidden relative z-10 transition-transform group-hover:scale-110 group-hover:z-30">
-                        <Image
-                          src={player2.avatar}
-                          alt={player2.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
+              {/* Edit Characters & Start Battle */}
+              <div className="flex flex-col gap-6 items-center w-full">
+                <button
+                  onClick={onBack}
+                  className="flex items-center gap-3 px-6 py-2 rounded-full bg-black/40 border border-white/10 hover:bg-white/10 transition-all group backdrop-blur-md"
+                >
+                  <span className="text-sm font-medium text-gray-300 group-hover:text-white uppercase tracking-wider">
+                    ← Edit Characters
+                  </span>
+                  <div className="flex -space-x-2 pl-2 border-l border-white/10">
+                    <div className="w-8 h-8 rounded-full border-2 border-black overflow-hidden relative z-20">
+                      <Image
+                        src={player1.avatar}
+                        alt={player1.name}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
-                  </button>
-                </div>
+                    <div className="w-8 h-8 rounded-full border-2 border-black overflow-hidden relative z-10">
+                      <Image
+                        src={player2.avatar}
+                        alt={player2.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  </div>
+                </button>
 
                 <button
                   onClick={handleStartBattle}
                   disabled={!selectedStage || isCreating}
                   className={cn(
-                    "w-full sm:w-auto px-8 md:px-12 py-3 md:py-4 rounded-lg font-black text-lg md:text-xl tracking-wider transition-all duration-300 transform",
+                    "w-full sm:w-auto px-16 py-4 rounded-xl font-black text-xl tracking-widest transition-all duration-300 transform shadow-2xl",
                     !selectedStage || isCreating
                       ? "bg-gray-800 text-gray-600 cursor-not-allowed"
-                      : "bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.8)] text-white shadow-lg shadow-yellow-500/20"
+                      : "bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.6)] text-white shadow-orange-500/20"
                   )}
                 >
                   {isCreating
