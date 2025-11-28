@@ -27,5 +27,3 @@ BATTLE STRATEGY:
 - Use superior knowledge of hip-hop history and funk
 - Maintain a cool composure, never getting rattled
 - Contrast your smoothness with the opponent's aggression`;
-
-
