@@ -165,7 +165,7 @@ export function StageSelect({
   return (
     <>
       <SiteHeader />
-      <div className="min-h-screen bg-black text-white selection:bg-yellow-500/30 pt-20 pb-32 relative overflow-hidden flex flex-col">
+      <div className="min-h-screen bg-black text-white selection:bg-yellow-500/30 pt-20 relative overflow-hidden flex flex-col">
         {/* Background Effects */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl z-0 pointer-events-none">
@@ -176,11 +176,6 @@ export function StageSelect({
         <div className="container mx-auto px-4 relative z-10 flex flex-col flex-1">
           {/* Header Section */}
           <div className="text-center mb-8 md:mb-12 animate-slide-up">
-            <div className="inline-block mb-4 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm">
-              <span className="text-sm font-medium text-yellow-400 tracking-wide uppercase">
-                Choose Your Arena
-              </span>
-            </div>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tighter font-(family-name:--font-bebas-neue)">
               <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text pr-2">
                 SELECT STAGE
@@ -349,7 +344,7 @@ export function StageSelect({
         </div>
 
         {/* Spacer for bottom bar */}
-        <div className="h-32" />
+        <div className="h-48" />
       </div>
     </>
   );
