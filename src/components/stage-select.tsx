@@ -175,7 +175,7 @@ export function StageSelect({
 
         <div className="container mx-auto px-4 relative z-10 flex flex-col flex-1">
           {/* Header Section */}
-          <div className="text-center mb-8 md:mb-12 animate-slide-up">
+          <div className="text-center mb-2 md:mb-4 animate-slide-up">
             <h1 className="text-5xl md:text-7xl font-bold tracking-wide font-(family-name:--font-bebas-neue)">
               <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text pr-2">
                 SELECT STAGE

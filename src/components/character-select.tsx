@@ -292,14 +292,34 @@ export function CharacterSelect({
                 {/* Header Section */}
                 <div className="text-center mb-8 animate-slide-up">
                   <h1 className="text-5xl md:text-7xl font-bold tracking-wide font-(family-name:--font-bebas-neue)">
-                    <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text pr-2 text-uppercase">
-                      Select Characters
-                    </span>
+                    {selectionStep === "player1" ? (
+                      <>
+                        <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text pr-2 text-uppercase">
+                          SELECT{" "}
+                        </span>
+                        <span className="text-[rgb(var(--player1-color))] drop-shadow-[0_0_20px_rgba(var(--player1-color),0.6)]">
+                          PLAYER 1
+                        </span>
+                      </>
+                    ) : selectionStep === "player2" ? (
+                      <>
+                        <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text pr-2 text-uppercase">
+                          SELECT{" "}
+                        </span>
+                        <span className="text-[rgb(var(--player2-color))] drop-shadow-[0_0_20px_rgba(var(--player2-color),0.6)]">
+                          PLAYER 2
+                        </span>
+                      </>
+                    ) : (
+                      <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text pr-2 text-uppercase">
+                        Select Characters
+                      </span>
+                    )}
                   </h1>
                 </div>
 
                 {/* Main Selection Area */}
-                <div className="flex flex-col items-center justify-center max-w-6xl mx-auto w-full gap-2 lg:gap-8 flex-1">
+                <div className="flex flex-col items-center justify-center max-w-4xl mx-auto w-full gap-2 lg:gap-8 flex-1">
                   {/* Players Preview Area */}
                   <div className="w-full shrink-0 flex flex-row justify-center gap-4 md:gap-12 lg:gap-16 items-center order-1 mb-2 lg:mb-0">
                     {/* Player 1 Preview */}
