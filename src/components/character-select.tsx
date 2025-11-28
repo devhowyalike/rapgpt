@@ -272,7 +272,7 @@ export function CharacterSelect({
           </motion.div>
         ) : (
           <motion.div
-            key="character-select"
+            key={selectionStep}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

@@ -2,6 +2,12 @@
 
 import Image from "next/image";
 import { Pencil } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { ClientPersona } from "@/lib/shared/personas/client";
 
 interface PlayerDisplayProps {
@@ -40,9 +46,9 @@ export function PlayerDisplay({
     ? "drop-shadow-[0_0_20px_rgba(var(--player1-color),0.8)]"
     : "drop-shadow-[0_0_20px_rgba(var(--player2-color),0.8)]";
 
-  return (
+  const content = (
     <div
-      className={`flex-1 flex flex-col items-center justify-center h-[160px] md:h-[320px] ${
+      className={`flex-1 flex flex-col items-center justify-center h-[160px] md:h-[320px] group/player ${
         onActivate ? "cursor-pointer" : ""
       }`}
       onClick={onActivate}
@@ -64,18 +70,19 @@ export function PlayerDisplay({
             />
             {/* Edit button - positioned outside overflow container */}
             {onClear && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClear();
-                }}
-                className="absolute -top-2 -right-2 md:-top-3 md:-right-3 w-6 h-6 md:w-7 md:h-7 rounded-full bg-gray-900 border border-gray-700 text-white text-xs md:text-sm font-bold shadow-lg group-hover:bg-gray-800 z-10 transition-all duration-200 group-hover:scale-110 flex items-center justify-center"
-                aria-label={`Edit ${isPlayer1 ? "Player 1" : "Player 2"}`}
-                title="Edit"
-              >
-                <Pencil className="w-3 h-3 md:w-4 md:h-4" />
-              </button>
+              <div className="absolute -top-2 -right-2 md:-top-3 md:-right-3 z-10 flex flex-col items-center justify-center">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClear();
+                  }}
+                  className="peer w-6 h-6 md:w-7 md:h-7 rounded-full bg-gray-900 border border-gray-700 text-white text-xs md:text-sm font-bold shadow-lg group-hover/player:bg-gray-800 transition-all duration-200 group-hover/player:scale-110 flex items-center justify-center"
+                  aria-label={`Edit ${isPlayer1 ? "Player 1" : "Player 2"}`}
+                >
+                  <Pencil className="w-3 h-3 md:w-4 md:h-4" />
+                </button>
+              </div>
             )}
             {/* Snake Ring Animation - Visible when active */}
             {isActive && (
@@ -176,4 +183,23 @@ export function PlayerDisplay({
       )}
     </div>
   );
+
+  if (onClear) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>{content}</TooltipTrigger>
+          <TooltipContent
+            side="top"
+            sideOffset={20}
+            className="bg-black border-gray-800 text-white"
+          >
+            <p>Edit</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  return content;
 }
