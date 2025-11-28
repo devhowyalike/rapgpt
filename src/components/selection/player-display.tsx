@@ -178,7 +178,9 @@ export function PlayerDisplay({
             {placeholder}
           </div>
           {/* Spacer to match bio height */}
-          {showBio && <div className="text-center max-w-xs h-12 md:h-16 shrink-0" />}
+          {showBio && (
+            <div className="text-center max-w-xs h-12 md:h-16 shrink-0" />
+          )}
         </>
       )}
     </div>

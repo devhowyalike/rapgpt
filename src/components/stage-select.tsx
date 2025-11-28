@@ -183,10 +183,49 @@ export function StageSelect({
             </h1>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start justify-center max-w-6xl mx-auto w-full flex-1">
-            {/* Left Column: Stage Grid */}
-            <div className="w-full lg:w-1/2 order-2 lg:order-1">
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 md:gap-4">
+          <div className="flex flex-col items-center justify-center max-w-6xl mx-auto w-full gap-8 flex-1">
+            {/* Preview Area */}
+            <div className="w-full max-w-4xl lg:max-w-2xl order-1">
+              <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 bg-black/50 shadow-2xl group">
+                {displayStage ? (
+                  <>
+                    <Image
+                      src={displayStage.backgroundImage}
+                      alt={displayStage.name}
+                      fill
+                      className="object-cover transition-transform duration-700 hover:scale-105"
+                      priority
+                    />
+                    <div className="absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent" />
+
+                    <div className="absolute bottom-0 left-0 right-0 px-6 pt-6 pb-2 md:px-8 md:pt-8 md:pb-4">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 mb-4">
+                        <span className="text-base md:text-lg">
+                          {displayStage.flag}
+                        </span>
+                        <span className="text-xs md:text-sm font-medium text-gray-200">
+                          {displayStage.country}
+                        </span>
+                      </div>
+                      <h2 className="text-2xl md:text-4xl font-bold font-(family-name:--font-bebas-neue) tracking-wide text-white">
+                        {displayStage.name}
+                      </h2>
+                    </div>
+                  </>
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-white/20">
+                    <span className="text-6xl mb-4">🏟️</span>
+                    <span className="text-xl font-medium uppercase tracking-widest">
+                      Select a Stage
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Stage Grid */}
+            <div className="w-full order-2">
+              <div className="flex flex-wrap justify-center gap-3 md:gap-4">
                 {stages.map((stage) => {
                   const isSelected = selectedStage?.id === stage.id;
                   return (
@@ -203,7 +242,7 @@ export function StageSelect({
                       onMouseEnter={() => setHoveredStage(stage)}
                       onMouseLeave={() => setHoveredStage(null)}
                       className={cn(
-                        "relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 group",
+                        "relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 group w-[calc(33.333%-0.5rem)] sm:w-[calc(20%-0.6rem)] md:w-[calc(20%-0.8rem)] lg:w-[calc(12.5%-0.875rem)]",
                         isSelected
                           ? "border-yellow-500 shadow-[0_0_20px_rgba(234,179,8,0.4)] scale-105 z-10"
                           : "border-white/10 hover:border-white/30 hover:scale-105 hover:z-10"
@@ -213,13 +252,13 @@ export function StageSelect({
                         src={stage.backgroundImage}
                         alt={stage.name}
                         fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        className="object-cover transition-transform duration-500 group-hover:scale-110 pointer-events-none"
                       />
                       {/* Overlay Gradient */}
-                      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity pointer-events-none" />
 
                       {/* Name Label */}
-                      <div className="absolute bottom-0 left-0 right-0 p-2 text-xs font-bold text-center truncate text-white/90">
+                      <div className="absolute bottom-0 left-0 right-0 p-2 text-xs font-bold text-center truncate text-white/90 pointer-events-none">
                         {stage.name}
                       </div>
 
@@ -238,52 +277,15 @@ export function StageSelect({
                 {/* Random Button */}
                 <button
                   onClick={handleRandomStage}
-                  className="relative aspect-square rounded-xl overflow-hidden border-2 border-purple-500/50 hover:border-purple-500 bg-purple-900/20 hover:bg-purple-900/40 transition-all duration-300 group flex flex-col items-center justify-center gap-2"
+                  className="relative aspect-square rounded-xl overflow-hidden border-2 border-purple-500/50 hover:border-purple-500 bg-purple-900/20 hover:bg-purple-900/40 transition-all duration-300 group flex flex-col items-center justify-center gap-2 w-[calc(33.333%-0.5rem)] sm:w-[calc(20%-0.6rem)] md:w-[calc(20%-0.8rem)] lg:w-[calc(12.5%-0.875rem)]"
                 >
-                  <span className="text-2xl md:text-3xl group-hover:animate-bounce">
+                  <span className="text-2xl md:text-3xl group-hover:animate-bounce pointer-events-none">
                     🎲
                   </span>
-                  <span className="text-xs font-bold text-purple-200">
+                  <span className="text-xs font-bold text-purple-200 pointer-events-none">
                     RANDOM
                   </span>
                 </button>
-              </div>
-            </div>
-
-            {/* Right Column: Large Preview */}
-            <div className="w-full lg:w-1/2 order-1 lg:order-2 sticky top-24">
-              <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 bg-black/50 shadow-2xl group">
-                {displayStage ? (
-                  <>
-                    <Image
-                      src={displayStage.backgroundImage}
-                      alt={displayStage.name}
-                      fill
-                      className="object-cover transition-transform duration-700 hover:scale-105"
-                      priority
-                    />
-                    <div className="absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent" />
-
-                    <div className="absolute bottom-0 left-0 right-0 px-6 pt-6 pb-2 md:px-8 md:pt-8 md:pb-4">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 mb-4">
-                        <span className="text-lg">{displayStage.flag}</span>
-                        <span className="text-sm font-medium text-gray-200">
-                          {displayStage.country}
-                        </span>
-                      </div>
-                      <h2 className="text-4xl md:text-6xl font-bold font-(family-name:--font-bebas-neue) tracking-wide text-white">
-                        {displayStage.name}
-                      </h2>
-                    </div>
-                  </>
-                ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-white/20">
-                    <span className="text-6xl mb-4">🏟️</span>
-                    <span className="text-xl font-medium uppercase tracking-widest">
-                      Select a Stage
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
           </div>

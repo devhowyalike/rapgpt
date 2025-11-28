@@ -41,9 +41,9 @@ export function PersonaGridItem({
   return (
     <button
       onClick={onClick}
-      onMouseEnter={() => !isTouchDevice && onMouseEnter()}
-      onMouseLeave={() => !isTouchDevice && onMouseLeave()}
-      onTouchStart={() => isTouchDevice && onTouchStart()}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onTouchStart={onTouchStart}
       className={`
         relative group
         transition-all duration-300 transform
