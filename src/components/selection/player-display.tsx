@@ -2,12 +2,6 @@
 
 import Image from "next/image";
 import { Pencil } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import type { ClientPersona } from "@/lib/shared/personas/client";
 
 interface PlayerDisplayProps {
@@ -48,13 +42,33 @@ export function PlayerDisplay({
 
   const content = (
     <div
-      className={`flex-1 flex flex-col items-center justify-center h-[220px] md:h-[320px] group/player ${
+      className={`relative flex-1 flex flex-col items-center justify-center h-[220px] md:h-[320px] group/player ${
         onActivate ? "cursor-pointer" : ""
       }`}
       onClick={onActivate}
       role={onActivate ? "button" : undefined}
       aria-pressed={onActivate ? (isActive ? "true" : "false") : undefined}
     >
+      {player && onClear && (
+        <div className="absolute top-0 right-0 z-10 flex flex-col items-center justify-center">
+          {/* Tooltip label */}
+          <div className="mb-1 opacity-0 group-hover/player:opacity-100 transition-opacity duration-200 bg-black border border-gray-800 text-white text-xs px-2 py-1 rounded shadow-sm pointer-events-none whitespace-nowrap font-semibold">
+            Edit
+          </div>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClear();
+            }}
+            className="peer w-6 h-6 md:w-7 md:h-7 rounded-full bg-gray-900 border border-gray-700 text-white text-xs md:text-sm font-bold shadow-lg group-hover/player:bg-gray-800 transition-all duration-200 group-hover/player:scale-110 flex items-center justify-center"
+            aria-label={`Edit ${isPlayer1 ? "Player 1" : "Player 2"}`}
+          >
+            <Pencil className="w-3 h-3 md:w-4 md:h-4" />
+          </button>
+        </div>
+      )}
       {player ? (
         <>
           {/* Character Style */}
@@ -68,22 +82,6 @@ export function PlayerDisplay({
             <div
               className={`absolute inset-0 ${glowColor} blur-2xl rounded-full animate-pulse`}
             />
-            {/* Edit button - positioned outside overflow container */}
-            {onClear && (
-              <div className="absolute -top-2 -right-2 md:-top-3 md:-right-3 z-10 flex flex-col items-center justify-center">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onClear();
-                  }}
-                  className="peer w-6 h-6 md:w-7 md:h-7 rounded-full bg-gray-900 border border-gray-700 text-white text-xs md:text-sm font-bold shadow-lg group-hover/player:bg-gray-800 transition-all duration-200 group-hover/player:scale-110 flex items-center justify-center"
-                  aria-label={`Edit ${isPlayer1 ? "Player 1" : "Player 2"}`}
-                >
-                  <Pencil className="w-3 h-3 md:w-4 md:h-4" />
-                </button>
-              </div>
-            )}
             {/* Snake Ring Animation - Visible when active */}
             {isActive && (
               <div className="absolute inset-0 pointer-events-none z-20">
@@ -185,23 +183,6 @@ export function PlayerDisplay({
       )}
     </div>
   );
-
-  if (onClear) {
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>{content}</TooltipTrigger>
-          <TooltipContent
-            side="top"
-            sideOffset={20}
-            className="bg-black border-gray-800 text-white"
-          >
-            <p>Edit</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  }
 
   return content;
 }
