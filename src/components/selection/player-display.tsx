@@ -42,7 +42,7 @@ export function PlayerDisplay({
 
   const content = (
     <div
-      className={`relative flex-1 flex flex-col items-center justify-center h-[220px] md:h-[320px] group/player ${
+      className={`relative flex-1 flex flex-col items-center justify-start group/player ${
         onActivate ? "cursor-pointer" : ""
       }`}
       onClick={onActivate}
