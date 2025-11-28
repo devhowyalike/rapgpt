@@ -9,6 +9,7 @@ import { auth } from "@clerk/nextjs/server";
 import { getUserByClerkId } from "@/lib/auth/sync-user";
 import { Calendar } from "lucide-react";
 import { FeatureCard } from "@/components/feature-card";
+import { RapGPTLogo } from "@/components/rapgpt-logo";
 
 // Revalidate every 10 seconds to show live battles
 export const revalidate = 10;
@@ -53,11 +54,10 @@ export default async function Home() {
                 🎤
               </span>
             </div>
-            <h1 className="text-7xl md:text-9xl font-bold tracking-tighter font-(family-name:--font-bebas-neue) animate-slide-up [animation-delay:100ms] relative z-10">
-              <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text">
-                {APP_TITLE}
-              </span>
-            </h1>
+            <RapGPTLogo
+              size="xl"
+              className="animate-slide-up [animation-delay:100ms] relative z-10"
+            />
           </div>
 
           <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up [animation-delay:200ms]">
