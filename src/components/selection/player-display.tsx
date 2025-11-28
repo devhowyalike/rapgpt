@@ -42,7 +42,7 @@ export function PlayerDisplay({
 
   return (
     <div
-      className={`flex-1 flex flex-col items-center justify-start h-[140px] md:h-[280px] ${
+      className={`flex-1 flex flex-col items-center justify-start min-h-[140px] md:min-h-[280px] ${
         onActivate ? "cursor-pointer" : ""
       }`}
       onClick={onActivate}
@@ -118,7 +118,7 @@ export function PlayerDisplay({
           </div>
           {/* Character Name */}
           <div
-            className={`text-center text-sm md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-tight md:tracking-wider ${dropShadowColor} text-balance uppercase leading-tight shrink-0 h-8 md:h-16 flex items-center justify-center`}
+            className={`text-center text-sm md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-tight md:tracking-wider ${dropShadowColor} text-balance uppercase leading-tight shrink-0 min-h-8 md:min-h-16 flex items-center justify-center`}
           >
             {player.name}
           </div>
@@ -167,7 +167,7 @@ export function PlayerDisplay({
               ?
             </div>
           </div>
-          <div className="text-center text-sm md:text-xl lg:text-2xl font-black text-gray-700 tracking-tight md:tracking-wider mb-1 opacity-40 leading-tight shrink-0 h-8 md:h-16 flex items-center justify-center">
+          <div className="text-center text-sm md:text-xl lg:text-2xl font-black text-gray-700 tracking-tight md:tracking-wider mb-1 opacity-40 leading-tight shrink-0 min-h-8 md:min-h-16 flex items-center justify-center">
             {placeholder}
           </div>
           {/* Spacer to match bio height */}

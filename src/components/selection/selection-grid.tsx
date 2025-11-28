@@ -21,7 +21,7 @@ export function SelectionGrid({
       className={`max-w-5xl mx-auto px-2 md:px-4 lg:px-8 mb-3 ${paddingClasses}`}
     >
       <div
-        className={`flex justify-center items-center ${gapClasses} flex-wrap`}
+        className={`grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 justify-items-center items-center ${gapClasses}`}
       >
         {children}
       </div>
