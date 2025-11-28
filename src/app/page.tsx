@@ -6,8 +6,10 @@ import { MakeSongHighlight } from "@/components/make-song-highlight";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { APP_TITLE, MADE_BY, TAGLINE, YEAR } from "@/lib/constants";
 import { auth } from "@clerk/nextjs/server";
+import { getUserByClerkId } from "@/lib/auth/sync-user";
 import { Calendar } from "lucide-react";
 import { FeatureCard } from "@/components/feature-card";
+import { RapGPTLogo } from "@/components/rapgpt-logo";
 
 // Revalidate every 10 seconds to show live battles
 export const revalidate = 10;
@@ -15,8 +17,16 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const liveBattles = await getLiveBattles();
-  const { sessionClaims } = await auth();
+  const { sessionClaims, userId: clerkUserId } = await auth();
   const isAuthenticated = !!sessionClaims;
+
+  let currentUserId = null;
+  if (clerkUserId) {
+    const user = await getUserByClerkId(clerkUserId);
+    if (user) {
+      currentUserId = user.id;
+    }
+  }
 
   return (
     <>
@@ -44,11 +54,10 @@ export default async function Home() {
                 🎤
               </span>
             </div>
-            <h1 className="text-7xl md:text-9xl font-bold tracking-tighter font-(family-name:--font-bebas-neue) animate-slide-up [animation-delay:100ms] relative z-10">
-              <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text">
-                {APP_TITLE}
-              </span>
-            </h1>
+            <RapGPTLogo
+              size="xl"
+              className="animate-slide-up [animation-delay:100ms] relative z-10"
+            />
           </div>
 
           <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up [animation-delay:200ms]">
@@ -64,9 +73,6 @@ export default async function Home() {
       {/* Reverted Original Content - Split for Full Width Highlight */}
       <div className="bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center justify-center p-6 pt-0 pb-12">
         <div className="max-w-6xl mx-auto text-center space-y-8 w-full">
-          {/* Live Battles if active */}
-          <LiveBattlesDisplay initialBattles={liveBattles} />
-
           {/* Original Features Grid */}
           <div className="flex flex-wrap justify-center gap-6 mt-6">
             <FeatureCard
@@ -99,6 +105,12 @@ export default async function Home() {
               description="Select a style and stream it."
             />
           </div>
+
+          {/* Live Battles if active */}
+          <LiveBattlesDisplay
+            initialBattles={liveBattles}
+            currentUserId={currentUserId}
+          />
         </div>
       </div>
 

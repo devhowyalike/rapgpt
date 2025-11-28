@@ -40,15 +40,35 @@ export function PlayerDisplay({
     ? "drop-shadow-[0_0_20px_rgba(var(--player1-color),0.8)]"
     : "drop-shadow-[0_0_20px_rgba(var(--player2-color),0.8)]";
 
-  return (
+  const content = (
     <div
-      className={`flex-1 flex flex-col items-center justify-start h-[140px] md:h-[280px] ${
+      className={`relative flex-1 flex flex-col items-center justify-start group/player ${
         onActivate ? "cursor-pointer" : ""
       }`}
       onClick={onActivate}
       role={onActivate ? "button" : undefined}
       aria-pressed={onActivate ? (isActive ? "true" : "false") : undefined}
     >
+      {player && onClear && (
+        <div className="absolute top-0 right-0 z-10 flex flex-col items-center justify-center">
+          {/* Tooltip label */}
+          <div className="mb-1 opacity-0 group-hover/player:opacity-100 transition-opacity duration-200 bg-black border border-gray-800 text-white text-xs px-2 py-1 rounded shadow-sm pointer-events-none whitespace-nowrap font-semibold">
+            Edit
+          </div>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClear();
+            }}
+            className="peer w-6 h-6 md:w-7 md:h-7 rounded-full bg-gray-900 border border-gray-700 text-white text-xs md:text-sm font-bold shadow-lg group-hover/player:bg-gray-800 transition-all duration-200 group-hover/player:scale-110 flex items-center justify-center"
+            aria-label={`Edit ${isPlayer1 ? "Player 1" : "Player 2"}`}
+          >
+            <Pencil className="w-3 h-3 md:w-4 md:h-4" />
+          </button>
+        </div>
+      )}
       {player ? (
         <>
           {/* Character Style */}
@@ -62,21 +82,6 @@ export function PlayerDisplay({
             <div
               className={`absolute inset-0 ${glowColor} blur-2xl rounded-full animate-pulse`}
             />
-            {/* Edit button - positioned outside overflow container */}
-            {onClear && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClear();
-                }}
-                className="absolute -top-2 -right-2 md:-top-3 md:-right-3 w-6 h-6 md:w-7 md:h-7 rounded-full bg-gray-900 border border-gray-700 text-white text-xs md:text-sm font-bold shadow-lg group-hover:bg-gray-800 z-10 transition-all duration-200 group-hover:scale-110 flex items-center justify-center"
-                aria-label={`Edit ${isPlayer1 ? "Player 1" : "Player 2"}`}
-                title="Edit"
-              >
-                <Pencil className="w-3 h-3 md:w-4 md:h-4" />
-              </button>
-            )}
             {/* Snake Ring Animation - Visible when active */}
             {isActive && (
               <div className="absolute inset-0 pointer-events-none z-20">
@@ -118,14 +123,14 @@ export function PlayerDisplay({
           </div>
           {/* Character Name */}
           <div
-            className={`text-center text-sm md:text-2xl lg:text-3xl font-black text-white mb-1 tracking-tight md:tracking-wider ${dropShadowColor} text-balance uppercase leading-tight shrink-0 h-8 md:h-16 flex items-center justify-center`}
+            className={`text-center text-sm md:text-2xl font-black text-white mb-1 tracking-tight md:tracking-wider ${dropShadowColor} text-balance uppercase leading-tight shrink-0 h-10 md:h-20 flex items-center justify-center`}
           >
             {player.name}
           </div>
           {/* Character Bio - always reserve space to prevent layout shift */}
           {showBio && (
-            <div className="text-center max-w-xs flex flex-col md:h-16 shrink-0">
-              <p className="text-gray-300 text-xs md:text-sm lg:text-base hidden md:block line-clamp-3">
+            <div className="text-center max-w-xs flex flex-col h-12 md:h-16 shrink-0 text-pretty">
+              <p className="text-gray-300 text-xs md:text-sm lg:text-base line-clamp-3">
                 {player.bio}
               </p>
             </div>
@@ -167,13 +172,17 @@ export function PlayerDisplay({
               ?
             </div>
           </div>
-          <div className="text-center text-sm md:text-xl lg:text-2xl font-black text-gray-700 tracking-tight md:tracking-wider mb-1 opacity-40 leading-tight shrink-0 h-8 md:h-16 flex items-center justify-center">
+          <div className="text-center text-sm md:text-xl lg:text-2xl font-black text-gray-700 tracking-tight md:tracking-wider mb-1 opacity-40 leading-tight shrink-0 h-10 md:h-20 flex items-center justify-center">
             {placeholder}
           </div>
           {/* Spacer to match bio height */}
-          {showBio && <div className="text-center max-w-xs md:h-16 shrink-0" />}
+          {showBio && (
+            <div className="text-center max-w-xs h-12 md:h-16 shrink-0" />
+          )}
         </>
       )}
     </div>
   );
+
+  return content;
 }

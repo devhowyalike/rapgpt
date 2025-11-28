@@ -3,15 +3,10 @@
 import { useState, useEffect } from "react";
 import { getAllStages, type Stage } from "@/lib/shared/stages";
 import { useRouter } from "next/navigation";
-import { BattleOptions } from "./battle-options";
 import type { ClientPersona } from "@/lib/shared/personas/client";
-import { SelectionLayout } from "./selection/selection-layout";
-import { SelectionBottom } from "./selection/selection-bottom";
-import { SelectionGrid } from "./selection/selection-grid";
-import { ActionButton } from "./selection/action-button";
-import { PlayerChangeButton } from "./selection/player-change-button";
-import { VsGlow } from "./selection/vs-glow";
 import Image from "next/image";
+import { SiteHeader } from "@/components/site-header";
+import { cn } from "@/lib/utils";
 
 interface StageSelectProps {
   player1: ClientPersona;
@@ -167,212 +162,192 @@ export function StageSelect({
 
   const displayStage = hoveredStage || selectedStage;
 
-  const renderStageButton = (stage: Stage) => {
-    const selected = selectedStage?.id === stage.id;
-
-    return (
-      <button
-        key={stage.id}
-        onClick={() => {
-          if (selected) {
-            setSelectedStage(null);
-            setHoveredStage(null); // Clear hover state when deselecting
-          } else {
-            setSelectedStage(stage);
-          }
-        }}
-        onMouseEnter={() => setHoveredStage(stage)}
-        onMouseLeave={() => setHoveredStage(null)}
-        className={`
-          relative group
-          transition-all duration-300 transform
-          hover:scale-105 md:hover:scale-110 hover:z-20
-          ${selected ? "scale-105 md:scale-110 z-10" : ""}
-        `}
-      >
-        {/* Selection Indicator */}
-        {selected && (
-          <div className="absolute top-0 right-0 z-20 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center font-bold text-xs bg-yellow-500 text-black shadow-[0_0_20px_rgba(234,179,8,0.8)]">
-            ✓
-          </div>
-        )}
-
-        {/* Stage Thumbnail */}
-        <div
-          className={`
-            w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28
-            rounded-lg
-            border-4
-            overflow-hidden
-            bg-gray-900
-            transition-all duration-300
-            ${
-              selected
-                ? "border-yellow-500 shadow-[0_0_30px_rgba(234,179,8,0.8)]"
-                : "border-gray-700 hover:border-yellow-400 hover:shadow-[0_0_20px_rgba(250,204,21,0.5)]"
-            }
-          `}
-        >
-          <Image
-            src={stage.backgroundImage}
-            alt={stage.name}
-            width={112}
-            height={112}
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        {/* Deselect Overlay - shows on hover of selected stage */}
-        {selected && (
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/70 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100 z-10 rounded-lg">
-            <div className="text-center">
-              <div className="text-white font-bold text-2xl md:text-3xl mb-1">
-                ✕
-              </div>
-              <div className="text-white font-semibold text-xs">DESELECT</div>
-            </div>
-          </div>
-        )}
-      </button>
-    );
-  };
-
   return (
-    <SelectionLayout title="Stage Select">
-      {/* Mobile: Stacked Layout, Desktop: Side-by-side Layout */}
-      <div className="flex-1 flex flex-col md:flex-row md:items-center md:justify-center gap-2 md:gap-12 lg:gap-16 px-4 md:px-8 pb-2 md:pb-8">
-        {/* Left Side - Stage Grid (Bottom on mobile, Left on desktop) */}
-        <div className="flex flex-col items-center gap-2 md:gap-6 order-2 md:order-1 mt-4 md:mt-0">
-          {/* Stage Selection Grid */}
-          <SelectionGrid gap="normal">
-            {stages.map((stage) => renderStageButton(stage))}
-
-            {/* Random Stage Option */}
-            <button
-              onClick={handleRandomStage}
-              className={`
-                relative group
-                transition-all duration-300 transform
-                hover:scale-105 md:hover:scale-110 hover:z-20
-              `}
-            >
-              {/* Random Stage Card */}
-              <div className="w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-lg border-4 border-purple-500 overflow-hidden bg-linear-to-br from-purple-900 via-pink-900 to-purple-900 transition-all duration-300 hover:border-purple-400 hover:shadow-[0_0_30px_rgba(168,85,247,0.8)] flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-3xl md:text-4xl mb-0.5 animate-pulse">
-                    🎲
-                  </div>
-                  <div className="text-white font-black text-[10px] md:text-xs tracking-wider">
-                    RANDOM
-                  </div>
-                </div>
-              </div>
-            </button>
-          </SelectionGrid>
+    <>
+      <SiteHeader />
+      <div className="min-h-screen bg-black text-white selection:bg-yellow-500/30 pt-20 relative overflow-hidden flex flex-col">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl z-0 pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
         </div>
 
-        {/* Right Side - Stage Preview (Top on mobile, Right on desktop) */}
-        <div className="flex flex-col items-center gap-2 md:gap-6 order-1 md:order-2">
-          <div className="shrink-0 w-[240px] md:w-[384px] lg:w-[512px]">
-            {/* Fixed height container to prevent layout shifts */}
-            <div className="relative mb-2 md:mb-4 group">
-              {displayStage && (
-                <div className="absolute inset-0 bg-yellow-500/20 blur-3xl rounded-lg" />
-              )}
-              <div
-                className={`relative aspect-video rounded-lg border-4 overflow-hidden bg-gray-900 shadow-2xl transition-all duration-300 ${
-                  displayStage
-                    ? "border-yellow-400"
-                    : "border-dashed border-gray-700"
-                }`}
-              >
+        <div className="container mx-auto px-4 relative z-10 flex flex-col flex-1">
+          {/* Header Section */}
+          <div className="text-center mb-2 md:mb-4 animate-slide-up">
+            <h1 className="text-5xl md:text-7xl font-bold tracking-wide font-(family-name:--font-bebas-neue)">
+              <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text pr-2">
+                SELECT STAGE
+              </span>
+            </h1>
+          </div>
+
+          <div className="flex flex-col items-center justify-center max-w-6xl mx-auto w-full gap-8 flex-1">
+            {/* Preview Area */}
+            <div className="w-full max-w-4xl lg:max-w-2xl order-1">
+              <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 bg-black/50 shadow-2xl group">
                 {displayStage ? (
-                  <Image
-                    src={displayStage.backgroundImage}
-                    alt={displayStage.name}
-                    fill
-                    sizes="(max-width: 768px) 240px, (max-width: 1024px) 384px, 512px"
-                    className="object-cover"
-                    priority
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-gray-700 text-4xl opacity-40">
-                    ?
-                  </div>
-                )}
-              </div>
-            </div>
-            {/* Fixed height for text content */}
-            <div className="text-center">
-              <div className="text-xl md:text-3xl font-black mb-1 min-h-8 md:min-h-10 flex items-center justify-center">
-                {displayStage ? (
-                  <span className="text-yellow-400">{displayStage.name}</span>
-                ) : (
-                  <span className="text-gray-700 opacity-40">
-                    SELECT A STAGE
-                  </span>
-                )}
-              </div>
-              <div className="text-sm md:text-lg text-gray-300 min-h-6 md:min-h-7">
-                {displayStage && (
                   <>
-                    {displayStage.flag} {displayStage.country}
+                    <Image
+                      src={displayStage.backgroundImage}
+                      alt={displayStage.name}
+                      fill
+                      className="object-cover transition-transform duration-700 hover:scale-105"
+                      priority
+                    />
+                    <div className="absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent" />
+
+                    <div className="absolute bottom-0 left-0 right-0 px-6 pt-6 pb-2 md:px-8 md:pt-8 md:pb-4">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 mb-4">
+                        <span className="text-base md:text-lg">
+                          {displayStage.flag}
+                        </span>
+                        <span className="text-xs md:text-sm font-medium text-gray-200">
+                          {displayStage.country}
+                        </span>
+                      </div>
+                      <h2 className="text-2xl md:text-4xl font-bold font-(family-name:--font-bebas-neue) tracking-wide text-white">
+                        {displayStage.name}
+                      </h2>
+                    </div>
                   </>
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-white/20">
+                    <span className="text-6xl mb-4">🏟️</span>
+                    <span className="text-xl font-medium uppercase tracking-widest">
+                      Select a Stage
+                    </span>
+                  </div>
                 )}
+              </div>
+            </div>
+
+            {/* Stage Grid */}
+            <div className="w-full order-2">
+              <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+                {stages.map((stage) => {
+                  const isSelected = selectedStage?.id === stage.id;
+                  return (
+                    <button
+                      key={stage.id}
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedStage(null);
+                          setHoveredStage(null);
+                        } else {
+                          setSelectedStage(stage);
+                        }
+                      }}
+                      onMouseEnter={() => setHoveredStage(stage)}
+                      onMouseLeave={() => setHoveredStage(null)}
+                      className={cn(
+                        "relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 group w-[calc(33.333%-0.5rem)] sm:w-[calc(20%-0.6rem)] md:w-[calc(20%-0.8rem)] lg:w-[calc(12.5%-0.875rem)]",
+                        isSelected
+                          ? "border-yellow-500 shadow-[0_0_20px_rgba(234,179,8,0.4)] scale-105 z-10"
+                          : "border-white/10 hover:border-white/30 hover:scale-105 hover:z-10"
+                      )}
+                    >
+                      <Image
+                        src={stage.backgroundImage}
+                        alt={stage.name}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110 pointer-events-none"
+                      />
+                      {/* Overlay Gradient */}
+                      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity pointer-events-none" />
+
+                      {/* Name Label */}
+                      <div className="absolute bottom-0 left-0 right-0 p-2 text-xs font-bold text-center truncate text-white/90 pointer-events-none">
+                        {stage.name}
+                      </div>
+
+                      {/* Selection Indicator */}
+                      {isSelected && (
+                        <div className="absolute inset-0 bg-yellow-500/20 flex items-center justify-center backdrop-blur-[1px]">
+                          <div className="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center text-black font-bold shadow-lg">
+                            ✓
+                          </div>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+
+                {/* Random Button */}
+                <button
+                  onClick={handleRandomStage}
+                  className="relative aspect-square rounded-xl overflow-hidden border-2 border-purple-500/50 hover:border-purple-500 bg-purple-900/20 hover:bg-purple-900/40 transition-all duration-300 group flex flex-col items-center justify-center gap-2 w-[calc(33.333%-0.5rem)] sm:w-[calc(20%-0.6rem)] md:w-[calc(20%-0.8rem)] lg:w-[calc(12.5%-0.875rem)]"
+                >
+                  <span className="text-2xl md:text-3xl group-hover:animate-bounce pointer-events-none">
+                    🎲
+                  </span>
+                  <span className="text-xs font-bold text-purple-200 pointer-events-none">
+                    RANDOM
+                  </span>
+                </button>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Bottom Section - Battle Options & Actions */}
-      <SelectionBottom>
-        <div className="max-w-7xl w-full mx-auto px-2 md:px-4 lg:px-8 space-y-2 md:space-y-4">
-          <BattleOptions
-            votingEnabled={votingEnabled}
-            onVotingEnabledChange={onVotingEnabledChange}
-            commentsEnabled={commentsEnabled}
-            onCommentsEnabledChange={onCommentsEnabledChange}
-            createAsLive={createAsLive}
-            onCreateAsLiveChange={onCreateAsLiveChange}
-            autoStartOnAdvance={autoStartOnAdvance}
-            onAutoStartOnAdvanceChange={onAutoStartOnAdvanceChange}
-            isAdmin={isAdmin}
-            isVotingGloballyEnabled={isVotingGloballyEnabled}
-            isCommentsGloballyEnabled={isCommentsGloballyEnabled}
-          />
+        {/* Bottom Actions Bar - Floating */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-linear-to-t from-black via-black/90 to-transparent pt-12">
+          <div className="container mx-auto max-w-4xl">
+            <div className="flex flex-col gap-4 items-center">
+              {/* Edit Characters & Start Battle */}
+              <div className="flex flex-col gap-6 items-center w-full">
+                <button
+                  onClick={onBack}
+                  className="flex items-center gap-3 px-6 py-2 rounded-full bg-black/40 border border-white/10 hover:bg-white/10 transition-all group backdrop-blur-md"
+                >
+                  <span className="text-sm font-medium text-gray-300 group-hover:text-white uppercase tracking-wider">
+                    ← Edit Characters
+                  </span>
+                  <div className="flex -space-x-2 pl-2 border-l border-white/10">
+                    <div className="w-8 h-8 rounded-full border-2 border-black overflow-hidden relative z-20">
+                      <Image
+                        src={player1.avatar}
+                        alt={player1.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="w-8 h-8 rounded-full border-2 border-black overflow-hidden relative z-10">
+                      <Image
+                        src={player2.avatar}
+                        alt={player2.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  </div>
+                </button>
 
-          <ActionButton
-            onClick={handleStartBattle}
-            disabled={!selectedStage || isCreating}
-          >
-            {isCreating
-              ? "CREATING BATTLE..."
-              : selectedStage
-              ? "FIGHT!"
-              : "SELECT STAGE"}
-          </ActionButton>
-
-          {/* Change Player Buttons - moved here under primary action */}
-          <div className="flex justify-center gap-3 md:gap-6 pt-1 md:pt-2">
-            <PlayerChangeButton
-              player={player1}
-              playerNumber={1}
-              sessionStorageKey={sessionStorageKey}
-              onBack={onBack}
-            />
-            <div className="flex items-center justify-center">
-              <VsGlow visible={true} color="player2" size="md" />
+                <button
+                  onClick={handleStartBattle}
+                  disabled={!selectedStage || isCreating}
+                  className={cn(
+                    "w-full sm:w-auto px-16 py-4 rounded-xl font-black text-xl tracking-widest transition-all duration-300 transform shadow-2xl",
+                    !selectedStage || isCreating
+                      ? "bg-gray-800 text-gray-600 cursor-not-allowed"
+                      : "bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.6)] text-white shadow-orange-500/20"
+                  )}
+                >
+                  {isCreating
+                    ? "CREATING BATTLE..."
+                    : selectedStage
+                    ? "START BATTLE"
+                    : "SELECT STAGE"}
+                </button>
+              </div>
             </div>
-            <PlayerChangeButton
-              player={player2}
-              playerNumber={2}
-              sessionStorageKey={sessionStorageKey}
-              onBack={onBack}
-            />
           </div>
         </div>
-      </SelectionBottom>
-    </SelectionLayout>
+
+        {/* Spacer for bottom bar */}
+        <div className="h-48" />
+      </div>
+    </>
   );
 }
