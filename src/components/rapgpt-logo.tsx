@@ -11,18 +11,18 @@ interface RapGPTLogoProps {
 
 export function RapGPTLogo({ size = "sm", animated = false }: RapGPTLogoProps) {
   const sizeClasses = {
-    sm: "text-xl md:text-2xl",
-    md: "text-2xl md:text-4xl",
-    lg: "text-2xl md:text-4xl lg:text-6xl",
+    sm: "text-3xl md:text-4xl",
+    md: "text-4xl md:text-6xl",
+    lg: "text-6xl md:text-8xl",
   };
 
   const content = (
-    <span className="bg-linear-to-r from-yellow-400 via-red-500 to-purple-600 text-transparent bg-clip-text">
+    <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text">
       {APP_TITLE}
     </span>
   );
 
-  const className = `${sizeClasses[size]} font-bold tracking-wider leading-none`;
+  const className = `${sizeClasses[size]} font-bold tracking-tighter leading-none font-(family-name:--font-bebas-neue)`;
 
   if (animated) {
     return (
