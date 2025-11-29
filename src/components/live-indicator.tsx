@@ -13,6 +13,10 @@ interface LiveIndicatorProps {
   viewerCount?: number;
   connectionStatus?: ConnectionStatus;
   className?: string;
+  /** Whether the badge is clickable (for admins/owners to end live) */
+  canClick?: boolean;
+  /** Callback when the LIVE badge is clicked */
+  onClick?: () => void;
 }
 
 export function LiveIndicator({
@@ -20,34 +24,56 @@ export function LiveIndicator({
   viewerCount = 0,
   connectionStatus = "disconnected",
   className = "",
+  canClick = false,
+  onClick,
 }: LiveIndicatorProps) {
   if (!isLive) return null;
 
   const isConnected = connectionStatus === "connected";
 
+  const LiveBadge = (
+    <motion.div
+      className="w-2 h-2 rounded-full bg-white"
+      animate={{
+        scale: [1, 1.3, 1],
+        opacity: [1, 0.7, 1],
+      }}
+      transition={{
+        duration: 1.5,
+        repeat: Number.POSITIVE_INFINITY,
+        ease: "easeInOut",
+      }}
+    />
+  );
+
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      {/* LIVE Badge */}
-      <motion.div
-        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-600 text-white font-bold text-sm"
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.3 }}
-      >
+      {/* LIVE Badge - clickable for admins/owners */}
+      {canClick && onClick ? (
+        <motion.button
+          onClick={onClick}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold text-sm cursor-pointer transition-colors"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          title="Click to end live broadcast"
+        >
+          {LiveBadge}
+          <span>LIVE</span>
+        </motion.button>
+      ) : (
         <motion.div
-          className="w-2 h-2 rounded-full bg-white"
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [1, 0.7, 1],
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-          }}
-        />
-        <span>LIVE</span>
-      </motion.div>
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-600 text-white font-bold text-sm"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          {LiveBadge}
+          <span>LIVE</span>
+        </motion.div>
+      )}
 
       {/* Viewer Count */}
       {isConnected && viewerCount > 0 && (

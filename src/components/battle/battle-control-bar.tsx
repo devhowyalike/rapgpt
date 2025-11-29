@@ -4,7 +4,7 @@
 
 "use client";
 
-import { Play, ArrowRight, Pause, Settings, CheckCircle } from "lucide-react";
+import { Play, ArrowRight, Pause, Settings, CheckCircle, Radio } from "lucide-react";
 import Link from "next/link";
 import type { Battle } from "@/lib/shared";
 import { getAdvanceRoundButtonText } from "@/lib/shared";
@@ -25,6 +25,10 @@ interface BattleControlBarProps {
   showVoting: boolean;
   nextPerformerName?: string;
   isAdmin?: boolean;
+  // Live mode props
+  canManageLive?: boolean;
+  isStartingLive?: boolean;
+  onGoLive?: () => void;
   onGenerateVerse: () => void;
   onAdvanceRound: () => void;
   onBeginVoting: () => void;
@@ -45,6 +49,9 @@ export function BattleControlBar({
   showVoting,
   nextPerformerName,
   isAdmin = false,
+  canManageLive = false,
+  isStartingLive = false,
+  onGoLive,
   onGenerateVerse,
   onAdvanceRound,
   onBeginVoting,
@@ -152,6 +159,24 @@ export function BattleControlBar({
           )}
         </button>
 
+        {/* Go Live Button - for owners/admins */}
+        {canManageLive && onGoLive && (
+          <button
+            onClick={onGoLive}
+            disabled={isStartingLive || isGenerating}
+            className="px-3 sm:px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
+          >
+            {isStartingLive ? (
+              <LoadingSpinner size="sm" />
+            ) : (
+              <Radio className="w-5 h-5" />
+            )}
+            <span className="hidden sm:inline">
+              {isStartingLive ? "Starting..." : "Go Live"}
+            </span>
+          </button>
+        )}
+
         {/* Pause Battle Button */}
         <button
           onClick={onCancelBattle}
@@ -159,7 +184,7 @@ export function BattleControlBar({
           className="px-3 sm:px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
         >
           <Pause className="w-5 h-5" />
-          <span className="hidden sm:inline">Pause Battle</span>
+          <span className="hidden sm:inline">Pause</span>
         </button>
 
         {/* Admin Control Panel Link */}

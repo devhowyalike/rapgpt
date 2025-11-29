@@ -1,6 +1,5 @@
 import { getBattleById } from "@/lib/battle-storage";
 import { BattleController } from "@/components/battle-controller";
-import { LiveBattleViewer } from "@/components/live-battle-viewer";
 import { notFound } from "next/navigation";
 
 // Revalidate every 10 seconds for active battles
@@ -19,10 +18,6 @@ export default async function BattlePage({
     notFound();
   }
 
-  // If battle is live, show the live viewer instead of the controller
-  if (battle.isLive) {
-    return <LiveBattleViewer initialBattle={battle} />;
-  }
-
+  // Unified BattleController handles both regular and live battles
   return <BattleController initialBattle={battle} />;
 }

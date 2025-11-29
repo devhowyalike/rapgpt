@@ -1,10 +1,11 @@
 /**
- * Battle controller component - manages battle progression
+ * Unified battle controller component - manages battle progression and live mode
+ * Handles both regular battles and live battles with WebSocket support
  */
 
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { Battle } from "@/lib/shared";
 import { BattleStage } from "./battle-stage";
 import { BattleReplay } from "./battle-replay";
@@ -13,7 +14,7 @@ import { SiteHeader } from "./site-header";
 import { BattleLoading } from "./battle-loading";
 import { useBattleStore } from "@/lib/battle-store";
 import { getNextPerformer, isRoundComplete } from "@/lib/battle-engine";
-import { RotateCcw, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -30,6 +31,9 @@ import {
   BattleControlBar,
 } from "@/components/battle";
 import { useScoreRevealDelay } from "@/lib/hooks/use-score-reveal-delay";
+import { useLiveBattleState } from "@/lib/hooks/use-live-battle-state";
+import { BattleControlPanel } from "./admin/battle-control-panel";
+import { useAutoPlay } from "@/lib/hooks/use-auto-play";
 
 interface BattleControllerProps {
   initialBattle: Battle;
@@ -55,22 +59,18 @@ export function BattleController({
     streamingPosition,
     saveBattle,
     cancelBattle,
-    resumeBattle,
-    votingTimeRemaining,
-    setVotingTimeRemaining,
     isVotingPhase,
     setIsVotingPhase,
     votingCompletedRound,
-    completeVotingPhase,
-    readingTimeRemaining,
     setReadingTimeRemaining,
     isReadingPhase,
     setIsReadingPhase,
   } = useBattleStore();
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
-  const [isResuming, setIsResuming] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showEndLiveDialog, setShowEndLiveDialog] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [isLeaving, setIsLeaving] = useState(false);
   const [isPreGenerating, setIsPreGenerating] = useState(false);
@@ -92,29 +92,103 @@ export function BattleController({
     setShowMobileDrawer
   );
 
-  // Check if user is admin
-  const { sessionClaims, isLoaded } = useAuth();
+  // Check if user is admin or owner
+  const { sessionClaims, isLoaded, userId: clerkUserId } = useAuth();
   const { user } = useUser();
   const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
 
+  // Track user's database ID for ownership check
+  const [currentUserDbId, setCurrentUserDbId] = useState<string | null>(null);
+
+  // Fetch user's database ID on mount (needed for ownership check)
+  useEffect(() => {
+    // First try from public metadata
+    const metadataDbId = user?.publicMetadata?.dbUserId as string | undefined;
+    if (metadataDbId) {
+      setCurrentUserDbId(metadataDbId);
+      return;
+    }
+
+    // If not in metadata and user is logged in, fetch from API
+    if (user && !currentUserDbId) {
+      fetch("/api/user/me")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.user?.id) {
+            setCurrentUserDbId(data.user.id);
+          }
+        })
+        .catch((e) => console.error("Failed to fetch user profile:", e));
+    }
+  }, [user, currentUserDbId]);
+
+  // Check if user is the battle owner - compare with battle.creator?.userId
+  const isOwner = !!(
+    currentUserDbId && battle?.creator?.userId === currentUserDbId
+  );
+
+  // User can manage battle if they are admin or owner
+  const canManageBattle = isAdmin || isOwner;
+
   // Feature flags for voting and commenting
   const { showVoting, showCommenting } = useBattleFeatures(battle);
+
+  // Live battle state management
+  const {
+    wsStatus,
+    viewerCount,
+    reconnect,
+    isLive,
+    isStartingLive,
+    isStoppingLive,
+    startLive,
+    stopLive,
+    votingTimeRemaining,
+    readingTimeRemaining,
+    beginVotingPhase,
+    completeVotingPhase: liveCompleteVotingPhase,
+    updateBattleConfig,
+  } = useLiveBattleState({
+    initialBattle,
+    canManage: canManageBattle,
+    onMobileTabChange: setMobileActiveTab,
+    onMobileDrawerOpen: () => setShowMobileDrawer(true),
+    onMobileDrawerClose: () => setShowMobileDrawer(false),
+  });
+
+  // Handle live toggle
+  const handleLiveToggle = useCallback(async () => {
+    try {
+      if (isLive) {
+        await stopLive();
+      } else {
+        await startLive();
+      }
+    } catch (error) {
+      console.error("Error toggling live mode:", error);
+      alert("Failed to toggle live mode. Please try again.");
+    }
+  }, [isLive, startLive, stopLive]);
 
   // Automatically switch to voting tab when voting begins (for mobile)
   useEffect(() => {
     if (isVotingPhase) {
       setMobileActiveTab("voting");
-      // Open drawer - CSS (md:hidden) ensures it only shows on mobile
       setShowMobileDrawer(true);
     }
-  }, [isVotingPhase]);
+  }, [isVotingPhase, setMobileActiveTab, setShowMobileDrawer]);
 
-  // Navigation guard - prevent leaving page during paused battle
+  // Navigation guard - prevent leaving page during active battle
   const { NavigationDialog } = useNavigationGuard({
-    when: battle?.status === "paused",
-    title: "Pause Battle?",
-    message: "Leave now? We'll pause your match.",
+    when: battle?.status === "paused" || isLive,
+    title: isLive ? "End Live Battle?" : "Pause Battle?",
+    message: isLive
+      ? "This battle is currently live. Leaving will end the broadcast for all viewers."
+      : "Leave now? We'll pause your match.",
     onConfirm: async () => {
+      if (isLive) {
+        await stopLive();
+      }
       if (battle) {
         setIsLeaving(true);
         await cancelBattle();
@@ -122,19 +196,14 @@ export function BattleController({
     },
   });
 
+  // Reading phase timer effect - starts when round is complete (non-live mode)
   useEffect(() => {
-    setBattle(initialBattle);
-  }, [initialBattle, setBattle]);
-
-  // Reading phase timer effect - starts when round is complete
-  useEffect(() => {
-    if (!battle) return;
+    if (!battle || isLive) return; // Skip for live battles - handled by live state hook
 
     const roundComplete = isRoundComplete(battle, battle.currentRound);
     const nextPerformer = getNextPerformer(battle);
 
     // Start reading phase when round is complete and we're not already in reading/voting phase
-    // Only start reading phase if voting is enabled
     if (
       roundComplete &&
       !nextPerformer &&
@@ -153,38 +222,7 @@ export function BattleController({
     setIsReadingPhase,
     votingCompletedRound,
     showVoting,
-  ]);
-
-  // Voting countdown timer effect
-  useEffect(() => {
-    if (
-      !isVotingPhase ||
-      votingTimeRemaining === null ||
-      votingTimeRemaining <= 0
-    ) {
-      return;
-    }
-
-    const timer = setInterval(() => {
-      const next = (votingTimeRemaining ?? 0) - 1;
-      setVotingTimeRemaining(next);
-      if (next <= 0 && battle) {
-        completeVotingPhase(battle.currentRound);
-
-        // On mobile, close the drawer and scroll to scores when voting ends
-        if (typeof window !== "undefined" && window.innerWidth < 768) {
-          setShowMobileDrawer(false);
-        }
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [
-    votingTimeRemaining,
-    isVotingPhase,
-    setVotingTimeRemaining,
-    setIsVotingPhase,
-    battle,
+    isLive,
   ]);
 
   // Score reveal delay (shared logic) to drive "Calculating Score..." on the button
@@ -194,18 +232,26 @@ export function BattleController({
     currentRoundScore && !isReadingPhase && !isVotingPhase
       ? currentRoundScore.round
       : null;
-  const { revealedRound: revealedByDelay, isDelaying: isCalculatingScores } =
-    useScoreRevealDelay(scoresAvailableRound, scoreDelaySeconds);
+  const { isDelaying: isCalculatingScores } = useScoreRevealDelay(
+    scoresAvailableRound,
+    scoreDelaySeconds
+  );
 
-  // Battle action handlers - MUST be before any conditional returns (Rules of Hooks)
+  // Battle action handlers
   const handleVote = useBattleVote({
     battleId: battle?.id || "",
-    onSuccess: (updatedBattle) => setBattle(updatedBattle),
+    onSuccess: (updatedBattle) => {
+      // For live mode, don't update locally - wait for WebSocket
+      if (!isLive) {
+        setBattle(updatedBattle);
+      }
+    },
   });
 
   const handleCommentSubmit = useBattleComment({
     battle,
     onSuccess: (comment) => {
+      // Optimistically update for both live and non-live
       if (battle) {
         setBattle({
           ...battle,
@@ -217,27 +263,20 @@ export function BattleController({
 
   // Handler to manually start voting phase
   const handleBeginVoting = () => {
-    if (!showVoting) return; // Don't start voting if it's disabled
-    setIsReadingPhase(false);
-    setReadingTimeRemaining(null);
-    setIsVotingPhase(true);
-    setVotingTimeRemaining(10); // 10 seconds for voting
+    if (!showVoting) return;
+    beginVotingPhase(10);
   };
 
-  if (!battle || isLeaving) {
-    return <BattleLoading />;
-  }
-
-  const handleGenerateVerse = async () => {
+  // Generate verse - handles both local and live modes
+  const handleGenerateVerse = useCallback(async () => {
     const { battle: latestBattle } = useBattleStore.getState();
     if (!latestBattle) return;
     const nextPerformer = getNextPerformer(latestBattle);
     if (!nextPerformer || isGenerating) return;
 
     const personaId = latestBattle.personas[nextPerformer].id;
-    // Use nextPerformer directly as the position (it's already 'player1' or 'player2')
     const position = nextPerformer;
-    // Clear any pre-generating visual state as real generation begins
+
     setIsPreGenerating(false);
     setIsGenerating(true);
     setStreamingVerse(null, personaId, position);
@@ -249,85 +288,109 @@ export function BattleController({
         body: JSON.stringify({
           battle: latestBattle,
           personaId,
+          isLive: isLive, // Pass live flag to enable WebSocket broadcasting
         }),
       });
 
       if (!response.ok) throw new Error("Failed to generate verse");
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let fullVerse = "";
-      let displayedVerse = "";
+      if (isLive) {
+        // For live mode, just wait for server to finish - WebSocket handles UI updates
+        await response.text();
+      } else {
+        // For non-live mode, handle local streaming display
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let fullVerse = "";
+        let displayedVerse = "";
 
-      // First, buffer all incoming chunks
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          fullVerse += chunk;
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            fullVerse += decoder.decode(value);
+          }
         }
-      }
 
-      // Now display the verse word by word at a controlled speed
-      const WORD_DELAY = 100; // Delay in milliseconds between words (100ms = 10 words per second)
+        // Display word by word
+        const WORD_DELAY = 100;
+        const tokens = fullVerse.split(/(\s+)/);
 
-      // Split text while preserving whitespace and newlines
-      const tokens = fullVerse.split(/(\s+)/);
-
-      for (let i = 0; i < tokens.length; i++) {
-        displayedVerse += tokens[i];
-        setStreamingVerse(displayedVerse, personaId, position);
-
-        // Only delay on actual words (not whitespace)
-        if (tokens[i].trim()) {
-          await new Promise((resolve) => setTimeout(resolve, WORD_DELAY));
+        for (let i = 0; i < tokens.length; i++) {
+          displayedVerse += tokens[i];
+          setStreamingVerse(displayedVerse, personaId, position);
+          if (tokens[i].trim()) {
+            await new Promise((resolve) => setTimeout(resolve, WORD_DELAY));
+          }
         }
+
+        setStreamingVerse(fullVerse, personaId, position);
+        addVerse(personaId, fullVerse);
+        setStreamingVerse(null, null, null);
+        await saveBattle();
       }
-
-      // Ensure the full verse is displayed
-      setStreamingVerse(fullVerse, personaId, position);
-
-      // Add completed verse to battle
-      addVerse(personaId, fullVerse);
-      setStreamingVerse(null, null, null);
-
-      // Save battle state
-      await saveBattle();
     } catch (error) {
       console.error("Error generating verse:", error);
       setStreamingVerse(null, null, null);
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [isGenerating, setStreamingVerse, addVerse, saveBattle, isLive]);
 
-  const handleAdvanceRound = async () => {
-    // Reset both reading and voting phases when advancing
+  const handleAdvanceRound = useCallback(async () => {
     setIsReadingPhase(false);
     setReadingTimeRemaining(null);
     setIsVotingPhase(false);
-    setVotingTimeRemaining(null);
-    // If auto-start is enabled, set a pre-generating visual state immediately to avoid flicker
+
     const willAutoStart =
       (useBattleStore.getState().battle?.autoStartOnAdvance ?? true) !== false;
     if (willAutoStart) {
       setIsPreGenerating(true);
     }
+
     advanceRound();
     await saveBattle();
-    // Auto-start first verse on round advance if enabled (default true)
+
     const { battle: latestBattle } = useBattleStore.getState();
     if (latestBattle?.autoStartOnAdvance !== false) {
-      // Trigger generation for the first artist in the new round
       await handleGenerateVerse();
     }
-  };
+  }, [
+    advanceRound,
+    saveBattle,
+    handleGenerateVerse,
+    setIsReadingPhase,
+    setReadingTimeRemaining,
+    setIsVotingPhase,
+  ]);
+
+  // Auto-play mode for live battles
+  useAutoPlay({
+    battle,
+    enabled: isLive && battle?.adminControlMode === "auto",
+    onGenerateVerse: handleGenerateVerse,
+    onAdvanceRound: handleAdvanceRound,
+    isGenerating,
+  });
 
   const handleCancelBattle = () => {
     setShowCancelDialog(true);
     setCancelError(null);
+  };
+
+  // Handler to show end live confirmation dialog
+  const handleEndLiveClick = () => {
+    setShowEndLiveDialog(true);
+  };
+
+  // Confirm ending live broadcast
+  const confirmEndLive = async () => {
+    try {
+      await stopLive();
+      setShowEndLiveDialog(false);
+    } catch (error) {
+      console.error("Error ending live:", error);
+    }
   };
 
   const confirmCancelBattle = async () => {
@@ -335,27 +398,14 @@ export function BattleController({
     setIsLeaving(true);
     setCancelError(null);
     try {
+      if (isLive) {
+        await stopLive();
+      }
       await cancelBattle();
 
-      // Redirect to profile page if user is logged in, otherwise home
-      let dbUserId = user?.publicMetadata?.dbUserId as string | undefined;
+      const redirectUserId = currentUserDbId;
 
-      // Fallback: Fetch user ID from API if not in metadata but user is logged in
-      if (!dbUserId && user) {
-        try {
-          const response = await fetch("/api/user/me");
-          if (response.ok) {
-            const data = await response.json();
-            if (data.user?.id) {
-              dbUserId = data.user.id;
-            }
-          }
-        } catch (e) {
-          console.error("Failed to fetch user profile for redirect", e);
-        }
-      }
-
-      const targetUrl = dbUserId ? `/profile/${dbUserId}` : "/";
+      const targetUrl = redirectUserId ? `/profile/${redirectUserId}` : "/";
       window.location.href = targetUrl;
     } catch (error) {
       console.error("Error canceling battle:", error);
@@ -365,18 +415,60 @@ export function BattleController({
     }
   };
 
-  const handleResumeBattle = async () => {
-    setIsResuming(true);
+  // Toggle auto-play mode for live battles
+  const handleToggleAutoPlay = async (enabled: boolean) => {
+    if (!battle) return;
+
     try {
-      await resumeBattle();
-      // The battle state will update automatically via the store
+      const response = await fetch(
+        `/api/battle/${battle.id}/live/control-mode`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mode: enabled ? "auto" : "manual",
+          }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to update control mode");
+      const { battle: updatedBattle } = await response.json();
+      setBattle(updatedBattle);
     } catch (error) {
-      console.error("Error resuming battle:", error);
-      alert("Failed to resume battle. Please try again.");
-    } finally {
-      setIsResuming(false);
+      console.error("Error updating control mode:", error);
     }
   };
+
+  // Update auto-play config
+  const handleUpdateAutoPlayConfig = async (
+    config: Battle["autoPlayConfig"]
+  ) => {
+    if (!battle) return;
+
+    try {
+      const response = await fetch(
+        `/api/battle/${battle.id}/live/control-mode`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mode: battle.adminControlMode || "manual",
+            config,
+          }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to update auto-play config");
+      const { battle: updatedBattle } = await response.json();
+      setBattle(updatedBattle);
+    } catch (error) {
+      console.error("Error updating auto-play config:", error);
+    }
+  };
+
+  if (!battle || isLeaving) {
+    return <BattleLoading />;
+  }
 
   const nextPerformer = getNextPerformer(battle);
   const roundComplete = isRoundComplete(battle, battle.currentRound);
@@ -389,7 +481,7 @@ export function BattleController({
     !isReadingPhase &&
     !isVotingPhase;
 
-  // If battle is completed, use full replay mode
+  // Completed battle - show replay mode
   if (battle.status === "completed") {
     const { contentPaddingOverride, fabBottomOffset } = useMobileFooterControls(
       {
@@ -398,13 +490,13 @@ export function BattleController({
         showVoting,
       }
     );
+
     return (
       <>
         <SiteHeader />
         <div style={{ height: "var(--header-height)" }} />
         <div className="px-0 md:px-6">
           <div className="max-w-7xl mx-auto flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row">
-            {/* Main Stage */}
             <div className="flex-1 flex flex-col min-h-0">
               <BattleReplay
                 battle={battle}
@@ -412,7 +504,6 @@ export function BattleController({
               />
             </div>
 
-            {/* Sidebar - Desktop and Mobile */}
             <SidebarContainer
               battle={battle}
               onVote={handleVote}
@@ -424,12 +515,11 @@ export function BattleController({
               showMobileDrawer={showMobileDrawer}
               onMobileDrawerChange={setShowMobileDrawer}
               mobileActiveTab={mobileActiveTab}
-              excludeBottomControls={battle.status === "completed"}
+              excludeBottomControls={true}
             />
           </div>
         </div>
 
-        {/* Mobile Floating Action Buttons */}
         <MobileActionButtons
           showCommenting={showCommenting}
           showVoting={showVoting}
@@ -443,14 +533,13 @@ export function BattleController({
     );
   }
 
-  // Live battle mode
+  // Active battle mode (paused or live)
   const { contentPaddingOverride } = useMobileFooterControls({
     hasBottomControls: false,
     showCommenting,
     showVoting,
   });
 
-  // Custom offset for FABs to sit above the battle control bar
   const liveBattleFabOffset =
     showCommenting || showVoting
       ? "calc(var(--battle-control-bar-height) + var(--fab-gutter))"
@@ -460,9 +549,14 @@ export function BattleController({
     <>
       <SiteHeader />
       <div style={{ height: "var(--header-height)" }} />
+
       <div className="px-0 md:px-6">
-        <div className="max-w-7xl mx-auto flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row">
-          {/* Main Stage */}
+        <div
+          className={`max-w-7xl mx-auto flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row ${
+            isLive && canManageBattle ? "lg:max-w-none" : ""
+          }`}
+        >
+          {/* Main Battle Stage */}
           <div className="flex-1 flex flex-col min-h-0">
             <BattleStage
               battle={battle}
@@ -474,10 +568,14 @@ export function BattleController({
               votingCompletedRound={votingCompletedRound}
               scoreDelaySeconds={scoreDelaySeconds}
               mobileBottomPadding={contentPaddingOverride}
+              liveConnectionStatus={wsStatus}
+              liveViewerCount={viewerCount}
+              canManageLive={canManageBattle}
+              onDisconnect={handleEndLiveClick}
             />
 
-            {/* Control Bar - Always visible during paused battles */}
-            {battle.status === "paused" && (
+            {/* Battle Control Bar - for non-live battles during paused status */}
+            {battle.status === "paused" && !isLive && (
               <BattleControlBar
                 battle={battle}
                 isGenerating={isGenerating}
@@ -496,6 +594,9 @@ export function BattleController({
                     : undefined
                 }
                 isAdmin={isAdmin}
+                canManageLive={canManageBattle}
+                isStartingLive={isStartingLive}
+                onGoLive={handleLiveToggle}
                 onGenerateVerse={handleGenerateVerse}
                 onAdvanceRound={handleAdvanceRound}
                 onBeginVoting={handleBeginVoting}
@@ -504,7 +605,7 @@ export function BattleController({
             )}
           </div>
 
-          {/* Sidebar - Desktop and Mobile */}
+          {/* Sidebar for comments/voting */}
           <SidebarContainer
             battle={battle}
             onVote={handleVote}
@@ -518,6 +619,25 @@ export function BattleController({
             onMobileDrawerChange={setShowMobileDrawer}
             mobileActiveTab={mobileActiveTab}
           />
+
+          {/* Admin Control Panel - shown when live and user can manage */}
+          {isLive && canManageBattle && (
+            <div className="hidden lg:block w-[400px] shrink-0">
+              <BattleControlPanel
+                battle={battle}
+                connectionStatus={wsStatus}
+                viewerCount={viewerCount}
+                onStartLive={startLive}
+                onStopLive={stopLive}
+                onGenerateVerse={handleGenerateVerse}
+                onAdvanceRound={handleAdvanceRound}
+                onToggleAutoPlay={handleToggleAutoPlay}
+                onUpdateAutoPlayConfig={handleUpdateAutoPlayConfig}
+                onUpdateBattleConfig={updateBattleConfig}
+                isGenerating={isGenerating}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -532,19 +652,37 @@ export function BattleController({
         bottomOffset={liveBattleFabOffset}
       />
 
-      {/* Pause Battle Dialog */}
+      {/* Pause/End Battle Dialog */}
       <ConfirmationDialog
         open={showCancelDialog}
         onOpenChange={setShowCancelDialog}
-        title="Pause Battle?"
-        description="Pause the battle? You can resume later."
-        confirmLabel="Pause Battle"
-        cancelLabel="Keep Playing"
+        title={isLive ? "End Live Battle?" : "Pause Battle?"}
+        description={
+          isLive
+            ? "This will end the live broadcast for all viewers."
+            : "Pause the battle? You can resume later."
+        }
+        confirmLabel={isLive ? "End Live" : "Pause Battle"}
+        cancelLabel="Keep Going"
         onConfirm={confirmCancelBattle}
         isLoading={isCanceling}
         variant="warning"
         icon={AlertTriangle}
         errorMessage={cancelError || undefined}
+      />
+
+      {/* End Live Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showEndLiveDialog}
+        onOpenChange={setShowEndLiveDialog}
+        title="End Live Broadcast?"
+        description="This will end the live broadcast for all viewers. The battle will continue but won't be streamed."
+        confirmLabel="End Live"
+        cancelLabel="Keep Broadcasting"
+        onConfirm={confirmEndLive}
+        isLoading={isStoppingLive}
+        variant="warning"
+        icon={AlertTriangle}
       />
 
       {/* Navigation Guard Dialog */}

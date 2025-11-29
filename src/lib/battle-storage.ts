@@ -29,21 +29,29 @@ export async function getBattleById(id: string): Promise<Battle | null> {
     
     const { battle, creator } = result[0];
     
-    // Decrypt creator display name if available
+    // Build creator info - always include userId for ownership checks
+    // Display name and image only shown if profile is public
     let creatorInfo = null;
-    if (creator && creator.isProfilePublic) {
+    if (creator) {
       try {
-        const displayName = creator.encryptedDisplayName 
-          ? decrypt(creator.encryptedDisplayName)
-          : (creator.encryptedName ? decrypt(creator.encryptedName) : 'Anonymous');
-        
+        // Always include userId for ownership verification
         creatorInfo = {
-          userId: creator.id, // Use internal user ID for profile links
-          displayName,
-          imageUrl: creator.imageUrl,
+          userId: creator.id,
+          displayName: 'Anonymous',
+          imageUrl: null as string | null,
         };
+        
+        // Only populate display details if profile is public
+        if (creator.isProfilePublic) {
+          creatorInfo.displayName = creator.encryptedDisplayName 
+            ? decrypt(creator.encryptedDisplayName)
+            : (creator.encryptedName ? decrypt(creator.encryptedName) : 'Anonymous');
+          creatorInfo.imageUrl = creator.imageUrl;
+        }
       } catch (error) {
         console.error('Error decrypting creator info:', error);
+        // Still keep the userId for ownership checks
+        creatorInfo = { userId: creator.id, displayName: 'Anonymous', imageUrl: null };
       }
     }
     

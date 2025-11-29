@@ -18,6 +18,8 @@ import { BattleSplitView } from "./battle/battle-split-view";
 import { BattleScoreSection } from "./battle/battle-score-section";
 import { useScoreRevealDelay } from "@/lib/hooks/use-score-reveal-delay";
 import { useIsMobile } from "@/lib/hooks/use-is-mobile";
+import { LiveStatusBadge } from "./live-status-badge";
+import type { ConnectionStatus } from "@/lib/websocket/types";
 
 interface BattleStageProps {
   battle: Battle;
@@ -33,6 +35,14 @@ interface BattleStageProps {
    * Default: 5 seconds. Set to 0 to reveal immediately.
    */
   scoreDelaySeconds?: number;
+  /** WebSocket connection status when live */
+  liveConnectionStatus?: ConnectionStatus;
+  /** Number of viewers when live */
+  liveViewerCount?: number;
+  /** Whether user can manage live mode (for clickable badge) */
+  canManageLive?: boolean;
+  /** Callback when live badge is clicked to disconnect */
+  onDisconnect?: () => void;
 }
 
 export function BattleStage({
@@ -45,6 +55,10 @@ export function BattleStage({
   votingCompletedRound = null,
   mobileBottomPadding,
   scoreDelaySeconds = 5,
+  liveConnectionStatus = "disconnected",
+  liveViewerCount = 0,
+  canManageLive = false,
+  onDisconnect,
 }: BattleStageProps) {
   const progress = getBattleProgress(battle);
   const {
@@ -154,7 +168,8 @@ export function BattleStage({
       const player2VerseIndex = battle.verses.findIndex(
         (v) => v.id === player2VerseId
       );
-      mobileActiveSide = player2VerseIndex > player1VerseIndex ? "player2" : "player1";
+      mobileActiveSide =
+        player2VerseIndex > player1VerseIndex ? "player2" : "player1";
     }
   } else if (bothVersesComplete && scoresAvailable) {
     // Scores revealed - show both personas for comparison
@@ -213,7 +228,16 @@ export function BattleStage({
             completedRounds={progress.completedRounds}
           />
 
-          <div className="md:flex-1 md:flex md:justify-end">
+          <div className="md:flex-1 md:flex md:justify-end md:items-center md:gap-3">
+            {battle.isLive && (
+              <LiveStatusBadge
+                isLive={true}
+                viewerCount={liveViewerCount}
+                connectionStatus={liveConnectionStatus}
+                canToggle={canManageLive}
+                onToggle={onDisconnect}
+              />
+            )}
             <RoundTracker
               currentRound={battle.currentRound}
               completedRounds={progress.completedRounds}
@@ -232,7 +256,7 @@ export function BattleStage({
             <VictoryConfetti trigger={true} />
             <div className="text-xl md:text-2xl lg:text-3xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue) relative z-10">
               🏆 WINNER:{" "}
-              {getWinnerPosition(battle) === 'player1'
+              {getWinnerPosition(battle) === "player1"
                 ? battle.personas.player1.name
                 : battle.personas.player2.name}{" "}
               🏆
@@ -276,7 +300,10 @@ export function BattleStage({
             >
               ROUND {currentRoundScore.round} SCORES
             </motion.h3>
-            <BattleScoreSection battle={battle} roundScore={currentRoundScore} />
+            <BattleScoreSection
+              battle={battle}
+              roundScore={currentRoundScore}
+            />
           </div>
         </motion.div>
       )}

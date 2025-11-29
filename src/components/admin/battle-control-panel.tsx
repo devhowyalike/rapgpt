@@ -7,7 +7,6 @@
 import { useState } from "react";
 import {
   Play,
-  Pause,
   StopCircle,
   ArrowRight,
   Settings,
@@ -15,6 +14,8 @@ import {
   Radio,
   Users,
   Clock,
+  MessageSquare,
+  Vote,
 } from "lucide-react";
 import type { Battle } from "@/lib/shared";
 import { getAdvanceRoundButtonText } from "@/lib/shared";
@@ -32,6 +33,7 @@ interface BattleControlPanelProps {
   onAdvanceRound: () => Promise<void>;
   onToggleAutoPlay: (enabled: boolean) => void;
   onUpdateAutoPlayConfig: (config: Battle["autoPlayConfig"]) => void;
+  onUpdateBattleConfig?: (config: { commentsEnabled?: boolean; votingEnabled?: boolean }) => Promise<void>;
   isGenerating?: boolean;
 }
 
@@ -45,9 +47,11 @@ export function BattleControlPanel({
   onAdvanceRound,
   onToggleAutoPlay,
   onUpdateAutoPlayConfig,
+  onUpdateBattleConfig,
   isGenerating = false,
 }: BattleControlPanelProps) {
   const [showAutoPlaySettings, setShowAutoPlaySettings] = useState(false);
+  const [showBattleConfig, setShowBattleConfig] = useState(false);
   const [autoPlayConfig, setAutoPlayConfig] = useState<
     Battle["autoPlayConfig"]
   >(
@@ -60,10 +64,25 @@ export function BattleControlPanel({
   );
   const [isStarting, setIsStarting] = useState(false);
   const [isStopping, setIsStopping] = useState(false);
+  const [isUpdatingConfig, setIsUpdatingConfig] = useState(false);
 
   const isLive = battle.isLive;
   const isAutoPlay = battle.adminControlMode === "auto";
   const isManual = battle.adminControlMode === "manual";
+
+  // Handle battle config changes (comments/voting)
+  const handleBattleConfigChange = async (config: {
+    commentsEnabled?: boolean;
+    votingEnabled?: boolean;
+  }) => {
+    if (!onUpdateBattleConfig) return;
+    setIsUpdatingConfig(true);
+    try {
+      await onUpdateBattleConfig(config);
+    } finally {
+      setIsUpdatingConfig(false);
+    }
+  };
 
   const handleStartLive = async () => {
     setIsStarting(true);
@@ -272,6 +291,71 @@ export function BattleControlPanel({
                 />
                 Auto-advance rounds
               </label>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Battle Config - Comments & Voting */}
+      {isLive && (
+        <div className="p-4 border-b border-gray-800">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-gray-300">
+              Battle Features
+            </span>
+            <button
+              onClick={() => setShowBattleConfig(!showBattleConfig)}
+              className="p-1 hover:bg-gray-800 rounded transition-colors"
+            >
+              <Settings className="w-4 h-4 text-gray-400" />
+            </button>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() =>
+                handleBattleConfigChange({
+                  commentsEnabled: !battle.commentsEnabled,
+                })
+              }
+              disabled={isUpdatingConfig}
+              className={`flex-1 px-3 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 ${
+                battle.commentsEnabled !== false
+                  ? "bg-green-600 text-white"
+                  : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span className="text-xs">Comments</span>
+            </button>
+            <button
+              onClick={() =>
+                handleBattleConfigChange({
+                  votingEnabled: !battle.votingEnabled,
+                })
+              }
+              disabled={isUpdatingConfig}
+              className={`flex-1 px-3 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 ${
+                battle.votingEnabled !== false
+                  ? "bg-green-600 text-white"
+                  : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+              }`}
+            >
+              <Vote className="w-3.5 h-3.5" />
+              <span className="text-xs">Voting</span>
+            </button>
+          </div>
+
+          {showBattleConfig && (
+            <div className="mt-3 p-3 bg-gray-800 rounded-lg text-xs text-gray-400">
+              <p>
+                <strong className="text-gray-300">Comments:</strong> Allow
+                viewers to post comments during the live battle.
+              </p>
+              <p className="mt-2">
+                <strong className="text-gray-300">Voting:</strong> Enable
+                audience voting on verses after each round.
+              </p>
             </div>
           )}
         </div>
