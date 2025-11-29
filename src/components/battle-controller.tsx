@@ -32,8 +32,6 @@ import {
 } from "@/components/battle";
 import { useScoreRevealDelay } from "@/lib/hooks/use-score-reveal-delay";
 import { useLiveBattleState } from "@/lib/hooks/use-live-battle-state";
-import { BattleControlPanel } from "./admin/battle-control-panel";
-import { useAutoPlay } from "@/lib/hooks/use-auto-play";
 
 interface BattleControllerProps {
   initialBattle: Battle;
@@ -137,17 +135,13 @@ export function BattleController({
   const {
     wsStatus,
     viewerCount,
-    reconnect,
     isLive,
     isStartingLive,
     isStoppingLive,
     startLive,
     stopLive,
     votingTimeRemaining,
-    readingTimeRemaining,
     beginVotingPhase,
-    completeVotingPhase: liveCompleteVotingPhase,
-    updateBattleConfig,
   } = useLiveBattleState({
     initialBattle,
     canManage: canManageBattle,
@@ -155,20 +149,6 @@ export function BattleController({
     onMobileDrawerOpen: () => setShowMobileDrawer(true),
     onMobileDrawerClose: () => setShowMobileDrawer(false),
   });
-
-  // Handle live toggle
-  const handleLiveToggle = useCallback(async () => {
-    try {
-      if (isLive) {
-        await stopLive();
-      } else {
-        await startLive();
-      }
-    } catch (error) {
-      console.error("Error toggling live mode:", error);
-      alert("Failed to toggle live mode. Please try again.");
-    }
-  }, [isLive, startLive, stopLive]);
 
   // Automatically switch to voting tab when voting begins (for mobile)
   useEffect(() => {
@@ -267,6 +247,28 @@ export function BattleController({
     beginVotingPhase(10);
   };
 
+  // Handler to toggle voting on/off
+  const handleToggleVoting = useCallback(
+    async (enabled: boolean) => {
+      if (!battle) return;
+      const updatedBattle = { ...battle, votingEnabled: enabled };
+      setBattle(updatedBattle);
+      await saveBattle();
+    },
+    [battle, setBattle, saveBattle]
+  );
+
+  // Handler to toggle commenting on/off
+  const handleToggleCommenting = useCallback(
+    async (enabled: boolean) => {
+      if (!battle) return;
+      const updatedBattle = { ...battle, commentsEnabled: enabled };
+      setBattle(updatedBattle);
+      await saveBattle();
+    },
+    [battle, setBattle, saveBattle]
+  );
+
   // Generate verse - handles both local and live modes
   const handleGenerateVerse = useCallback(async () => {
     const { battle: latestBattle } = useBattleStore.getState();
@@ -364,15 +366,6 @@ export function BattleController({
     setIsVotingPhase,
   ]);
 
-  // Auto-play mode for live battles
-  useAutoPlay({
-    battle,
-    enabled: isLive && battle?.adminControlMode === "auto",
-    onGenerateVerse: handleGenerateVerse,
-    onAdvanceRound: handleAdvanceRound,
-    isGenerating,
-  });
-
   const handleCancelBattle = () => {
     setShowCancelDialog(true);
     setCancelError(null);
@@ -412,57 +405,6 @@ export function BattleController({
       setCancelError("Failed to cancel battle. Please try again.");
       setIsCanceling(false);
       setIsLeaving(false);
-    }
-  };
-
-  // Toggle auto-play mode for live battles
-  const handleToggleAutoPlay = async (enabled: boolean) => {
-    if (!battle) return;
-
-    try {
-      const response = await fetch(
-        `/api/battle/${battle.id}/live/control-mode`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            mode: enabled ? "auto" : "manual",
-          }),
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to update control mode");
-      const { battle: updatedBattle } = await response.json();
-      setBattle(updatedBattle);
-    } catch (error) {
-      console.error("Error updating control mode:", error);
-    }
-  };
-
-  // Update auto-play config
-  const handleUpdateAutoPlayConfig = async (
-    config: Battle["autoPlayConfig"]
-  ) => {
-    if (!battle) return;
-
-    try {
-      const response = await fetch(
-        `/api/battle/${battle.id}/live/control-mode`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            mode: battle.adminControlMode || "manual",
-            config,
-          }),
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to update auto-play config");
-      const { battle: updatedBattle } = await response.json();
-      setBattle(updatedBattle);
-    } catch (error) {
-      console.error("Error updating auto-play config:", error);
     }
   };
 
@@ -551,11 +493,7 @@ export function BattleController({
       <div style={{ height: "var(--header-height)" }} />
 
       <div className="px-0 md:px-6">
-        <div
-          className={`max-w-7xl mx-auto flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row ${
-            isLive && canManageBattle ? "lg:max-w-none" : ""
-          }`}
-        >
+        <div className="max-w-7xl mx-auto flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row">
           {/* Main Battle Stage */}
           <div className="flex-1 flex flex-col min-h-0">
             <BattleStage
@@ -574,8 +512,8 @@ export function BattleController({
               onDisconnect={handleEndLiveClick}
             />
 
-            {/* Battle Control Bar - for non-live battles during paused status */}
-            {battle.status === "paused" && !isLive && (
+            {/* Battle Control Bar - always visible during active battles */}
+            {battle.status === "paused" && (
               <BattleControlBar
                 battle={battle}
                 isGenerating={isGenerating}
@@ -588,19 +526,25 @@ export function BattleController({
                 isPreGenerating={isPreGenerating}
                 votingTimeRemaining={votingTimeRemaining}
                 showVoting={showVoting}
+                showCommenting={showCommenting}
                 nextPerformerName={
                   nextPerformer
                     ? battle.personas[nextPerformer].name
                     : undefined
                 }
                 isAdmin={isAdmin}
+                isLive={isLive}
                 canManageLive={canManageBattle}
                 isStartingLive={isStartingLive}
-                onGoLive={handleLiveToggle}
+                isStoppingLive={isStoppingLive}
+                onGoLive={startLive}
+                onEndLive={handleEndLiveClick}
                 onGenerateVerse={handleGenerateVerse}
                 onAdvanceRound={handleAdvanceRound}
                 onBeginVoting={handleBeginVoting}
                 onCancelBattle={handleCancelBattle}
+                onToggleVoting={handleToggleVoting}
+                onToggleCommenting={handleToggleCommenting}
               />
             )}
           </div>
@@ -619,25 +563,6 @@ export function BattleController({
             onMobileDrawerChange={setShowMobileDrawer}
             mobileActiveTab={mobileActiveTab}
           />
-
-          {/* Admin Control Panel - shown when live and user can manage */}
-          {isLive && canManageBattle && (
-            <div className="hidden lg:block w-[400px] shrink-0">
-              <BattleControlPanel
-                battle={battle}
-                connectionStatus={wsStatus}
-                viewerCount={viewerCount}
-                onStartLive={startLive}
-                onStopLive={stopLive}
-                onGenerateVerse={handleGenerateVerse}
-                onAdvanceRound={handleAdvanceRound}
-                onToggleAutoPlay={handleToggleAutoPlay}
-                onUpdateAutoPlayConfig={handleUpdateAutoPlayConfig}
-                onUpdateBattleConfig={updateBattleConfig}
-                isGenerating={isGenerating}
-              />
-            </div>
-          )}
         </div>
       </div>
 

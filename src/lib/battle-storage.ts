@@ -128,6 +128,9 @@ export async function saveBattle(
       winner: battle.winner,
       createdAt: new Date(battle.createdAt),
       updatedAt: new Date(Date.now()),
+      // Battle feature flags
+      votingEnabled: battle.votingEnabled ?? true,
+      commentsEnabled: battle.commentsEnabled ?? true,
       // Live battle fields
       isLive: battle.isLive || false,
       liveStartedAt: battle.liveStartedAt ? new Date(battle.liveStartedAt) : null,

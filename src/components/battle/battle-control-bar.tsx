@@ -4,12 +4,13 @@
 
 "use client";
 
-import { Play, ArrowRight, Pause, Settings, CheckCircle, Radio } from "lucide-react";
+import { Play, ArrowRight, Pause, Settings, CheckCircle, Radio, StopCircle } from "lucide-react";
 import Link from "next/link";
 import type { Battle } from "@/lib/shared";
 import { getAdvanceRoundButtonText } from "@/lib/shared";
 import { ScoreCalcAnimation } from "@/components/score-calc-animation";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { BattleOptionsDropdown } from "./battle-options-dropdown";
 
 interface BattleControlBarProps {
   battle: Battle;
@@ -23,16 +24,23 @@ interface BattleControlBarProps {
   isPreGenerating?: boolean;
   votingTimeRemaining: number | null;
   showVoting: boolean;
+  showCommenting: boolean;
   nextPerformerName?: string;
   isAdmin?: boolean;
   // Live mode props
+  isLive?: boolean;
   canManageLive?: boolean;
   isStartingLive?: boolean;
+  isStoppingLive?: boolean;
   onGoLive?: () => void;
+  onEndLive?: () => void;
   onGenerateVerse: () => void;
   onAdvanceRound: () => void;
   onBeginVoting: () => void;
   onCancelBattle: () => void;
+  // Battle options
+  onToggleVoting?: (enabled: boolean) => void;
+  onToggleCommenting?: (enabled: boolean) => void;
 }
 
 export function BattleControlBar({
@@ -47,19 +55,33 @@ export function BattleControlBar({
   isPreGenerating = false,
   votingTimeRemaining,
   showVoting,
+  showCommenting,
   nextPerformerName,
   isAdmin = false,
+  isLive = false,
   canManageLive = false,
   isStartingLive = false,
+  isStoppingLive = false,
   onGoLive,
+  onEndLive,
   onGenerateVerse,
   onAdvanceRound,
   onBeginVoting,
   onCancelBattle,
+  onToggleVoting,
+  onToggleCommenting,
 }: BattleControlBarProps) {
   return (
     <div className="p-4 bg-gray-900 border-t border-gray-800">
       <div className="max-w-4xl mx-auto flex flex-row gap-3">
+        {/* Battle Options Dropdown */}
+        <BattleOptionsDropdown
+          showCommenting={showCommenting}
+          showVoting={showVoting}
+          onToggleCommenting={onToggleCommenting}
+          onToggleVoting={onToggleVoting}
+        />
+
         {/* Primary Action Button - Changes based on state */}
         <button
           onClick={
@@ -159,20 +181,32 @@ export function BattleControlBar({
           )}
         </button>
 
-        {/* Go Live Button - for owners/admins */}
-        {canManageLive && onGoLive && (
+        {/* Live Toggle Button - for owners/admins */}
+        {canManageLive && (isLive ? onEndLive : onGoLive) && (
           <button
-            onClick={onGoLive}
-            disabled={isStartingLive || isGenerating}
-            className="px-3 sm:px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
+            onClick={isLive ? onEndLive : onGoLive}
+            disabled={isStartingLive || isStoppingLive || isGenerating}
+            className={`px-3 sm:px-6 py-3 ${
+              isLive
+                ? "bg-gray-700 hover:bg-gray-600"
+                : "bg-red-600 hover:bg-red-700"
+            } disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all`}
           >
-            {isStartingLive ? (
+            {isStartingLive || isStoppingLive ? (
               <LoadingSpinner size="sm" />
+            ) : isLive ? (
+              <StopCircle className="w-5 h-5" />
             ) : (
               <Radio className="w-5 h-5" />
             )}
             <span className="hidden sm:inline">
-              {isStartingLive ? "Starting..." : "Go Live"}
+              {isStartingLive
+                ? "Starting..."
+                : isStoppingLive
+                ? "Stopping..."
+                : isLive
+                ? "End Live"
+                : "Go Live"}
             </span>
           </button>
         )}

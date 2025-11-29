@@ -14,7 +14,6 @@ import { useWebSocket } from "@/lib/websocket/client";
 import type { WebSocketEvent } from "@/lib/websocket/types";
 import { useBattleStore } from "@/lib/battle-store";
 import { getNextPerformer } from "@/lib/battle-engine";
-import { useAutoPlay } from "@/lib/hooks/use-auto-play";
 import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
 
 interface AdminBattleControlProps {
@@ -196,15 +195,6 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
     }
   }, [battle, advanceRound, saveBattle, handleGenerateVerse]);
 
-  // Auto-play mode
-  useAutoPlay({
-    battle,
-    enabled: battle?.adminControlMode === "auto",
-    onGenerateVerse: handleGenerateVerse,
-    onAdvanceRound: handleAdvanceRound,
-    isGenerating,
-  });
-
   // Navigation guard - warn admin before leaving live battle
   const { NavigationDialog } = useNavigationGuard({
     when: battle?.isLive ?? false,
@@ -264,62 +254,6 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
     } catch (error) {
       console.error("Error stopping live mode:", error);
       alert("Failed to stop live mode");
-    }
-  };
-
-  const handleToggleAutoPlay = async (enabled: boolean) => {
-    if (!battle) return;
-
-    try {
-      const response = await fetch(
-        `/api/battle/${battle.id}/live/control-mode`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            mode: enabled ? "auto" : "manual",
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update control mode");
-      }
-
-      const { battle: updatedBattle } = await response.json();
-      setBattle(updatedBattle);
-    } catch (error) {
-      console.error("Error updating control mode:", error);
-      alert("Failed to update control mode");
-    }
-  };
-
-  const handleUpdateAutoPlayConfig = async (
-    config: Battle["autoPlayConfig"]
-  ) => {
-    if (!battle) return;
-
-    try {
-      const response = await fetch(
-        `/api/battle/${battle.id}/live/control-mode`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            mode: battle.adminControlMode || "manual",
-            config,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update auto-play config");
-      }
-
-      const { battle: updatedBattle } = await response.json();
-      setBattle(updatedBattle);
-    } catch (error) {
-      console.error("Error updating auto-play config:", error);
     }
   };
 
@@ -452,8 +386,6 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
             onStopLive={handleStopLive}
             onGenerateVerse={handleGenerateVerse}
             onAdvanceRound={handleAdvanceRound}
-            onToggleAutoPlay={handleToggleAutoPlay}
-            onUpdateAutoPlayConfig={handleUpdateAutoPlayConfig}
             isGenerating={isGenerating}
           />
         </div>
