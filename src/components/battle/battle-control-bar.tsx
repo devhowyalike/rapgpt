@@ -4,7 +4,15 @@
 
 "use client";
 
-import { Play, ArrowRight, Pause, Settings, CheckCircle, Radio, StopCircle } from "lucide-react";
+import {
+  Play,
+  ArrowRight,
+  Pause,
+  Settings,
+  CheckCircle,
+  Radio,
+  StopCircle,
+} from "lucide-react";
 import Link from "next/link";
 import type { Battle } from "@/lib/shared";
 import { getAdvanceRoundButtonText } from "@/lib/shared";
