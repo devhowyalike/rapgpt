@@ -20,7 +20,7 @@ export function AdminControls({
     <>
       {liveBattles.length > 0 && (
         <Link
-          href={`/admin/battles/${liveBattles[0].id}/control`}
+          href={`/battle/${liveBattles[0].id}`}
           className="hidden md:flex items-center gap-2 text-sm font-bold bg-red-600/20 border border-red-500/50 text-red-400 hover:bg-red-600/30 hover:text-red-300 transition-colors px-3 py-2 rounded-lg animate-pulse"
           prefetch={false}
         >

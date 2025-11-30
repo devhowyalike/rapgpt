@@ -4,8 +4,7 @@
 
 "use client";
 
-import { MessageSquare, Pause, Settings, Shield, Vote } from "lucide-react";
-import Link from "next/link";
+import { MessageSquare, Pause, Settings, Vote } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +23,6 @@ interface BattleOptionsDropdownProps {
   // New props for moving actions into menu
   onPauseBattle?: () => void;
   isPausing?: boolean;
-  adminUrl?: string;
   customTrigger?: React.ReactNode;
   isLive?: boolean;
 }
@@ -36,7 +34,6 @@ export function BattleOptionsDropdown({
   onToggleVoting,
   onPauseBattle,
   isPausing,
-  adminUrl,
   customTrigger,
   isLive = false,
 }: BattleOptionsDropdownProps) {
@@ -83,19 +80,7 @@ export function BattleOptionsDropdown({
           />
         </div>
 
-        {(onPauseBattle || adminUrl) && <DropdownMenuSeparator />}
-
-        {adminUrl && (
-          <DropdownMenuItem asChild>
-            <Link
-              href={adminUrl}
-              className="flex items-center gap-2 py-2 cursor-pointer"
-            >
-              <Shield className="w-4 h-4 text-purple-400" />
-              <span>Live Controls</span>
-            </Link>
-          </DropdownMenuItem>
-        )}
+        {onPauseBattle && <DropdownMenuSeparator />}
 
         {onPauseBattle && (
           <DropdownMenuItem

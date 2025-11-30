@@ -245,7 +245,7 @@ export function LiveBattlesDisplay({
                     size="sm"
                     className="bg-yellow-600 hover:bg-yellow-700 text-white"
                   >
-                    <Link href={`/admin/battles/${battle.id}/control`}>
+                    <Link href={`/battle/${battle.id}`}>
                       <Play className="w-3 h-3 mr-2 fill-current" />
                       Control
                     </Link>

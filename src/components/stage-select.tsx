@@ -141,7 +141,7 @@ export function StageSelect({
       }
 
       if (createAsLive) {
-        router.push(`/admin/battles/${battleId}/control`);
+        router.push(`/battle/${battleId}`);
       } else {
         router.push(`/battle/${battleId}`);
       }

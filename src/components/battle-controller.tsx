@@ -621,7 +621,6 @@ export function BattleController({
         onToggleVoting={handleToggleVoting}
         onPauseBattle={handleCancelBattle}
         isPausing={isCanceling || isGenerating}
-        adminUrl={isAdmin ? `/admin/battles/${battle.id}/control` : undefined}
         isLive={isLive}
       />
 

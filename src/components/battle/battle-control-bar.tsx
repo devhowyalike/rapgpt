@@ -13,7 +13,6 @@ import {
   Settings,
   StopCircle,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { ScoreCalcAnimation } from "@/components/score-calc-animation";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -147,9 +146,6 @@ export function BattleControlBar({
             onToggleVoting={onToggleVoting}
             onPauseBattle={onCancelBattle}
             isPausing={isCanceling || isGenerating}
-            adminUrl={
-              isAdmin ? `/admin/battles/${battle.id}/control` : undefined
-            }
             isLive={isLive}
           />
         </div>

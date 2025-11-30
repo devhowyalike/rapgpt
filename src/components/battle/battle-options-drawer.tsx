@@ -4,8 +4,7 @@
 
 "use client";
 
-import { MessageSquare, Pause, Shield, Vote } from "lucide-react";
-import Link from "next/link";
+import { MessageSquare, Pause, Vote } from "lucide-react";
 import { BattleDrawer } from "@/components/ui/battle-drawer";
 import { Switch } from "@/components/ui/switch";
 
@@ -18,7 +17,6 @@ interface BattleOptionsDrawerProps {
   onToggleVoting?: (enabled: boolean) => void;
   onPauseBattle?: () => void;
   isPausing?: boolean;
-  adminUrl?: string;
   isLive?: boolean;
 }
 
@@ -31,7 +29,6 @@ export function BattleOptionsDrawer({
   onToggleVoting,
   onPauseBattle,
   isPausing,
-  adminUrl,
   isLive = false,
 }: BattleOptionsDrawerProps) {
   return (
@@ -85,53 +82,32 @@ export function BattleOptionsDrawer({
         </div>
 
         {/* Actions Section */}
-        {(adminUrl || onPauseBattle) && (
+        {onPauseBattle && (
           <div className="space-y-3 pt-2 border-t border-gray-800">
             <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
               Actions
             </h3>
 
-            {adminUrl && (
-              <Link
-                href={adminUrl}
-                className="flex items-center gap-3 p-3 bg-gray-800/50 hover:bg-gray-700/50 rounded-lg transition-colors group"
-              >
-                <div className="p-2 bg-indigo-500/20 rounded-full group-hover:bg-indigo-500/30 transition-colors">
-                  <Shield className="w-5 h-5 text-indigo-400" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-medium text-white">
-                    Live Control Panel
-                  </span>
-                  <span className="text-sm text-gray-400">
-                    Admin controls & stats
-                  </span>
-                </div>
-              </Link>
-            )}
-
-            {onPauseBattle && (
-              <button
-                onClick={() => {
-                  onPauseBattle();
-                  onOpenChange(false);
-                }}
-                disabled={isPausing}
-                className="w-full flex items-center gap-3 p-3 bg-gray-800/50 hover:bg-gray-700/50 rounded-lg transition-colors group text-left"
-              >
-                <div className="p-2 bg-orange-500/20 rounded-full group-hover:bg-orange-500/30 transition-colors">
-                  <Pause className="w-5 h-5 text-orange-400" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-medium text-white">
-                    {isPausing ? "Pausing..." : "Pause Battle"}
-                  </span>
-                  <span className="text-sm text-gray-400">
-                    Stop the battle temporarily
-                  </span>
-                </div>
-              </button>
-            )}
+            <button
+              onClick={() => {
+                onPauseBattle();
+                onOpenChange(false);
+              }}
+              disabled={isPausing}
+              className="w-full flex items-center gap-3 p-3 bg-gray-800/50 hover:bg-gray-700/50 rounded-lg transition-colors group text-left"
+            >
+              <div className="p-2 bg-orange-500/20 rounded-full group-hover:bg-orange-500/30 transition-colors">
+                <Pause className="w-5 h-5 text-orange-400" />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-medium text-white">
+                  {isPausing ? "Pausing..." : "Pause Battle"}
+                </span>
+                <span className="text-sm text-gray-400">
+                  Stop the battle temporarily
+                </span>
+              </div>
+            </button>
           </div>
         )}
       </div>

@@ -139,7 +139,7 @@ export function MobileMenu({
                   {liveBattles.length > 0 && (
                     <DropdownMenuItem asChild>
                       <Link
-                        href={`/admin/battles/${liveBattles[0].id}/control`}
+                        href={`/battle/${liveBattles[0].id}`}
                         className="flex items-center gap-2 text-red-400"
                       >
                         <Radio className="w-4 h-4" />
