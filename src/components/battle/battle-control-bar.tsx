@@ -14,10 +14,12 @@ import {
   StopCircle,
 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import type { Battle } from "@/lib/shared";
 import { getAdvanceRoundButtonText } from "@/lib/shared";
 import { ScoreCalcAnimation } from "@/components/score-calc-animation";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { BattleOptionsDropdown } from "./battle-options-dropdown";
 
 interface BattleControlBarProps {
@@ -38,6 +40,7 @@ interface BattleControlBarProps {
   // Live mode props
   isLive?: boolean;
   canManageLive?: boolean;
+  isLoadingPermissions?: boolean;
   isStartingLive?: boolean;
   isStoppingLive?: boolean;
   onGoLive?: () => void;
@@ -68,6 +71,7 @@ export function BattleControlBar({
   isAdmin = false,
   isLive = false,
   canManageLive = false,
+  isLoadingPermissions = false,
   isStartingLive = false,
   isStoppingLive = false,
   onGoLive,
@@ -79,16 +83,25 @@ export function BattleControlBar({
   onToggleVoting,
   onToggleCommenting,
 }: BattleControlBarProps) {
+  const [showGoLiveConfirmation, setShowGoLiveConfirmation] = useState(false);
+
   return (
     <div className="p-4 bg-gray-900 border-t border-gray-800">
       <div className="max-w-4xl mx-auto flex flex-row gap-3">
-        {/* Battle Options Dropdown */}
-        <BattleOptionsDropdown
-          showCommenting={showCommenting}
-          showVoting={showVoting}
-          onToggleCommenting={onToggleCommenting}
-          onToggleVoting={onToggleVoting}
-        />
+        {/* Battle Options Dropdown - Desktop Only */}
+        <div className="hidden md:block">
+          <BattleOptionsDropdown
+            showCommenting={showCommenting}
+            showVoting={showVoting}
+            onToggleCommenting={onToggleCommenting}
+            onToggleVoting={onToggleVoting}
+            onPauseBattle={onCancelBattle}
+            isPausing={isCanceling || isGenerating}
+            adminUrl={
+              isAdmin ? `/admin/battles/${battle.id}/control` : undefined
+            }
+          />
+        </div>
 
         {/* Primary Action Button - Changes based on state */}
         <button
@@ -145,7 +158,8 @@ export function BattleControlBar({
           ) : isGenerating || isPreGenerating ? (
             <div className="flex items-center justify-center gap-2">
               <LoadingSpinner />
-              Kicking ballistics...
+              <span className="hidden sm:inline">Kicking ballistics...</span>
+              <span className="sm:hidden">Generating...</span>
             </div>
           ) : isReadingPhase && showVoting ? (
             <div className="flex items-center justify-center gap-2">
@@ -182,64 +196,82 @@ export function BattleControlBar({
             </div>
           ) : (
             <div className="flex items-center justify-center gap-2">
-              <Play className="w-5 h-5" />
-              {battle.verses.length === 0 ? "First up:" : "Next:"}{" "}
-              {nextPerformerName}
+              <Play className="w-5 h-5 shrink-0" />
+              <span className="whitespace-nowrap">
+                {battle.verses.length === 0 ? "First:" : "Next:"}{" "}
+                {nextPerformerName}
+              </span>
             </div>
           )}
         </button>
 
-        {/* Live Toggle Button - for owners/admins */}
-        {canManageLive && (isLive ? onEndLive : onGoLive) && (
+        {/* Live Toggle Button - Prominently displayed */}
+        {(isLoadingPermissions ||
+          (canManageLive && (isLive ? onEndLive : onGoLive))) && (
           <button
-            onClick={isLive ? onEndLive : onGoLive}
-            disabled={isStartingLive || isStoppingLive || isGenerating}
-            className={`px-3 sm:px-6 py-3 ${
-              isLive
+            onClick={
+              isLoadingPermissions
+                ? undefined
+                : isLive
+                ? onEndLive
+                : () => setShowGoLiveConfirmation(true)
+            }
+            disabled={
+              isLoadingPermissions ||
+              isStartingLive ||
+              isStoppingLive ||
+              isGenerating
+            }
+            className={`px-4 py-3 rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all ${
+              isLoadingPermissions
+                ? "bg-gray-800/50 border border-gray-700 cursor-wait"
+                : isLive
                 ? "bg-gray-700 hover:bg-gray-600"
-                : "bg-red-600 hover:bg-red-700"
-            } disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all`}
+                : "bg-red-600 hover:bg-red-700 shadow-lg shadow-red-900/50 animate-pulse"
+            } disabled:bg-gray-600 disabled:cursor-not-allowed disabled:animate-none disabled:shadow-none`}
           >
-            {isStartingLive || isStoppingLive ? (
+            {isLoadingPermissions ? (
+              <>
+                <div className="w-5 h-5 shrink-0 rounded-full border-2 border-gray-600 border-t-gray-400 animate-spin" />
+                <span className="whitespace-nowrap hidden sm:inline text-gray-400">
+                  Loading
+                </span>
+              </>
+            ) : isStartingLive || isStoppingLive ? (
               <LoadingSpinner size="sm" />
             ) : isLive ? (
-              <StopCircle className="w-5 h-5" />
+              <StopCircle className="w-5 h-5 shrink-0" />
             ) : (
-              <Radio className="w-5 h-5" />
+              <Radio className="w-5 h-5 shrink-0" />
             )}
-            <span className="hidden sm:inline">
-              {isStartingLive
-                ? "Starting..."
-                : isStoppingLive
-                ? "Stopping..."
-                : isLive
-                ? "End Live"
-                : "Go Live"}
-            </span>
+            {!isLoadingPermissions && (
+              <span className="whitespace-nowrap hidden sm:inline">
+                {isStartingLive
+                  ? "Starting..."
+                  : isStoppingLive
+                  ? "Stopping..."
+                  : isLive
+                  ? "End Live"
+                  : "Go Live"}
+              </span>
+            )}
           </button>
         )}
-
-        {/* Pause Battle Button */}
-        <button
-          onClick={onCancelBattle}
-          disabled={isCanceling || isGenerating}
-          className="px-3 sm:px-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
-        >
-          <Pause className="w-5 h-5" />
-          <span className="hidden sm:inline">Pause</span>
-        </button>
-
-        {/* Admin Control Panel Link */}
-        {isAdmin && (
-          <Link
-            href={`/admin/battles/${battle.id}/control`}
-            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
-          >
-            <Settings className="w-5 h-5" />
-            <span className="hidden sm:inline">Live Controls</span>
-          </Link>
-        )}
       </div>
+
+      <ConfirmationDialog
+        open={showGoLiveConfirmation}
+        onOpenChange={setShowGoLiveConfirmation}
+        title="Go Live?"
+        description="This broadcasts the battle live to all users. They can view, comment, and vote if allowed."
+        confirmLabel="Go Live"
+        onConfirm={() => {
+          onGoLive?.();
+          setShowGoLiveConfirmation(false);
+        }}
+        variant="danger"
+        icon={Radio}
+      />
     </div>
   );
 }

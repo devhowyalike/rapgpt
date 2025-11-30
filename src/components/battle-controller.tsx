@@ -14,7 +14,7 @@ import { SiteHeader } from "./site-header";
 import { BattleLoading } from "./battle-loading";
 import { useBattleStore } from "@/lib/battle-store";
 import { getNextPerformer, isRoundComplete } from "@/lib/battle-engine";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Settings } from "lucide-react";
 import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -29,6 +29,8 @@ import {
   MobileActionButtons,
   SidebarContainer,
   BattleControlBar,
+  BattleOptionsDropdown,
+  BattleOptionsDrawer,
 } from "@/components/battle";
 import { useScoreRevealDelay } from "@/lib/hooks/use-score-reveal-delay";
 import { useLiveBattleState } from "@/lib/hooks/use-live-battle-state";
@@ -83,6 +85,8 @@ export function BattleController({
     openVotingDrawer,
   } = useMobileDrawer();
 
+  const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
+
   // Ensure only one drawer is open at a time across the page
   useExclusiveDrawer(
     "mobile-comments-voting",
@@ -96,34 +100,58 @@ export function BattleController({
   const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
 
   // Track user's database ID for ownership check
-  const [currentUserDbId, setCurrentUserDbId] = useState<string | null>(null);
+  const [permissionState, setPermissionState] = useState<{
+    loading: boolean;
+    dbId: string | null;
+  }>({
+    loading: true,
+    dbId: null,
+  });
 
   // Fetch user's database ID on mount (needed for ownership check)
   useEffect(() => {
+    // If auth not loaded yet, keep loading
+    if (!isLoaded) return;
+
+    // If no user logged in, stop loading immediately
+    if (!user) {
+      setPermissionState({ loading: false, dbId: null });
+      return;
+    }
+
     // First try from public metadata
-    const metadataDbId = user?.publicMetadata?.dbUserId as string | undefined;
+    const metadataDbId = user.publicMetadata?.dbUserId as string | undefined;
     if (metadataDbId) {
-      setCurrentUserDbId(metadataDbId);
+      setPermissionState({ loading: false, dbId: metadataDbId });
       return;
     }
 
     // If not in metadata and user is logged in, fetch from API
-    if (user && !currentUserDbId) {
+    // Only fetch if we haven't already found the ID
+    if (!permissionState.dbId) {
       fetch("/api/user/me")
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
-          if (data?.user?.id) {
-            setCurrentUserDbId(data.user.id);
-          }
+          setPermissionState({
+            loading: false,
+            dbId: data?.user?.id || null,
+          });
         })
-        .catch((e) => console.error("Failed to fetch user profile:", e));
+        .catch((e) => {
+          console.error("Failed to fetch user profile:", e);
+          setPermissionState((prev) => ({ ...prev, loading: false }));
+        });
     }
-  }, [user, currentUserDbId]);
+  }, [user, isLoaded, permissionState.dbId]);
 
   // Check if user is the battle owner - compare with battle.creator?.userId
   const isOwner = !!(
-    currentUserDbId && battle?.creator?.userId === currentUserDbId
+    permissionState.dbId && battle?.creator?.userId === permissionState.dbId
   );
+
+  // Determine if we are still loading permissions
+  // We are loading if auth isn't loaded OR if we are fetching the DB ID
+  const isLoadingPermissions = permissionState.loading;
 
   // User can manage battle if they are admin or owner
   const canManageBattle = isAdmin || isOwner;
@@ -396,7 +424,7 @@ export function BattleController({
       }
       await cancelBattle();
 
-      const redirectUserId = currentUserDbId;
+      const redirectUserId = permissionState.dbId;
 
       const targetUrl = redirectUserId ? `/profile/${redirectUserId}` : "/";
       window.location.href = targetUrl;
@@ -535,6 +563,7 @@ export function BattleController({
                 isAdmin={isAdmin}
                 isLive={isLive}
                 canManageLive={canManageBattle}
+                isLoadingPermissions={isLoadingPermissions}
                 isStartingLive={isStartingLive}
                 isStoppingLive={isStoppingLive}
                 onGoLive={startLive}
@@ -575,6 +604,32 @@ export function BattleController({
         activeTab={mobileActiveTab}
         isDrawerOpen={showMobileDrawer}
         bottomOffset={liveBattleFabOffset}
+        settingsAction={
+          <button
+            onClick={() => setShowSettingsDrawer(true)}
+            className={`w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md ${
+              showSettingsDrawer
+                ? "bg-gray-700 text-white border-gray-600 scale-110"
+                : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-gray-700 hover:text-white hover:border-gray-600 hover:scale-105"
+            }`}
+            aria-label="Battle Options"
+          >
+            <Settings className="w-6 h-6" strokeWidth={2.5} />
+          </button>
+        }
+      />
+
+      {/* Settings Drawer */}
+      <BattleOptionsDrawer
+        open={showSettingsDrawer}
+        onOpenChange={setShowSettingsDrawer}
+        showCommenting={showCommenting}
+        showVoting={showVoting}
+        onToggleCommenting={handleToggleCommenting}
+        onToggleVoting={handleToggleVoting}
+        onPauseBattle={handleCancelBattle}
+        isPausing={isCanceling || isGenerating}
+        adminUrl={isAdmin ? `/admin/battles/${battle.id}/control` : undefined}
       />
 
       {/* Pause/End Battle Dialog */}

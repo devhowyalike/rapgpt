@@ -11,6 +11,7 @@ export { MobileActionButtons } from "./mobile-action-buttons";
 export { SidebarContainer } from "./sidebar-container";
 export { BattleControlBar } from "./battle-control-bar";
 export { BattleOptionsDropdown } from "./battle-options-dropdown";
+export { BattleOptionsDrawer } from "./battle-options-drawer";
 export { BattleStateInfo } from "./battle-state-info";
 
 

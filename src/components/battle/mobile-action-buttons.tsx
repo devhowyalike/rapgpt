@@ -16,6 +16,7 @@ interface MobileActionButtonsProps {
   isDrawerOpen?: boolean;
   bottomOffset?: string;
   className?: string;
+  settingsAction?: React.ReactNode;
 }
 
 export function MobileActionButtons({
@@ -27,8 +28,9 @@ export function MobileActionButtons({
   isDrawerOpen = false,
   bottomOffset,
   className = "",
+  settingsAction,
 }: MobileActionButtonsProps) {
-  if (!showCommenting && !showVoting) {
+  if (!showCommenting && !showVoting && !settingsAction) {
     return null;
   }
 
@@ -37,6 +39,7 @@ export function MobileActionButtons({
       className={`fixed left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40 ${className}`}
       style={bottomOffset ? { bottom: bottomOffset } : { bottom: "1.5rem" }}
     >
+      {settingsAction}
       {showCommenting && (
         <button
           onClick={onCommentsClick}
