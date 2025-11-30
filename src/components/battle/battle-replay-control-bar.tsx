@@ -12,8 +12,6 @@ import {
   OptionsButton,
   ScoresButton,
   SongButton,
-  createScoresAction,
-  createSongAction,
 } from "./control-bar-buttons";
 import { MobileActionButtons } from "./mobile-action-buttons";
 
@@ -37,6 +35,7 @@ interface BattleReplayControlBarProps {
   // Mobile drawer handlers
   onCommentsClick?: () => void;
   onVotingClick?: () => void;
+  settingsAction?: React.ReactNode;
 }
 
 export function BattleReplayControlBar({
@@ -53,33 +52,16 @@ export function BattleReplayControlBar({
   onToggleVoting,
   onCommentsClick,
   onVotingClick,
+  settingsAction,
 }: BattleReplayControlBarProps) {
   const showSongButton = showSongGenerator || showSongPlayer;
   const isScoresActive = activeTab === "scores" && isDrawerOpen;
   const isSongActive = activeTab === "song" && isDrawerOpen;
 
-  // Mobile actions
-  const scoresAction = createScoresAction({
-    isActive: isScoresActive,
-    onClick: onScoresClick,
-  });
-
-  const songAction = showSongButton
-    ? createSongAction({
-        isActive: isSongActive,
-        isSongPlaying,
-        showSongGenerator,
-        onClick: onSongClick,
-      })
-    : null;
-
-  const mobileActions = [scoresAction, songAction].filter(
-    (action): action is NonNullable<typeof action> => action !== null,
-  );
-
   return (
     <ControlBarContainer>
-      {/* Scores Button - Desktop Only */}
+      {/* Scores Button */}
+      {/* Desktop */}
       <div className="hidden md:flex flex-1">
         <ScoresButton
           isActive={isScoresActive}
@@ -87,18 +69,39 @@ export function BattleReplayControlBar({
           variant="desktop"
         />
       </div>
+      {/* Mobile - Render directly */}
+      <div className="md:hidden flex-1">
+        <ScoresButton
+          isActive={isScoresActive}
+          onClick={onScoresClick}
+          variant="mobile"
+        />
+      </div>
 
-      {/* Song/MP3 Button - Desktop Only */}
+      {/* Song/MP3 Button */}
       {showSongButton && (
-        <div className="hidden md:flex flex-1">
-          <SongButton
-            isActive={isSongActive}
-            isSongPlaying={isSongPlaying}
-            showSongGenerator={showSongGenerator}
-            onClick={onSongClick}
-            variant="desktop"
-          />
-        </div>
+        <>
+          {/* Desktop */}
+          <div className="hidden md:flex flex-1">
+            <SongButton
+              isActive={isSongActive}
+              isSongPlaying={isSongPlaying}
+              showSongGenerator={showSongGenerator}
+              onClick={onSongClick}
+              variant="desktop"
+            />
+          </div>
+          {/* Mobile - Render directly */}
+          <div className="md:hidden flex-1">
+            <SongButton
+              isActive={isSongActive}
+              isSongPlaying={isSongPlaying}
+              showSongGenerator={showSongGenerator}
+              onClick={onSongClick}
+              variant="mobile"
+            />
+          </div>
+        </>
       )}
 
       {/* Options Dropdown - Desktop Only */}
@@ -113,15 +116,16 @@ export function BattleReplayControlBar({
       </div>
 
       {/* Mobile Action Menu (Fan) - Mobile Only */}
-      <div className="md:hidden">
+      <div className="md:hidden ml-auto">
         <MobileActionButtons
           isFixed={false}
           showCommenting={showCommenting}
           showVoting={showVoting}
           onCommentsClick={onCommentsClick || (() => {})}
           onVotingClick={onVotingClick || (() => {})}
-          customActions={mobileActions}
-          className="ml-2"
+          settingsAction={settingsAction}
+          customActions={[]}
+          className=""
           alignment="right"
         />
       </div>

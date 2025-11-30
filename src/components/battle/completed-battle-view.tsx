@@ -1,20 +1,21 @@
 "use client";
 
+import { Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
+  BattleOptionsDrawer,
   BattleReplayControlBar,
   BattleScoreSection,
-  MobileActionButtons,
   SidebarContainer,
 } from "@/components/battle";
 import { RoundControls } from "@/components/round-controls";
 import { SongGenerator } from "@/components/song-generator";
 import { SongPlayer } from "@/components/song-player";
 import { BattleDrawer } from "@/components/ui/battle-drawer";
-import { useRoundData } from "@/lib/hooks/use-round-data";
 import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
 import { useMobileFooterControls } from "@/lib/hooks/use-mobile-footer-controls";
+import { useRoundData } from "@/lib/hooks/use-round-data";
 import type { Battle } from "@/lib/shared";
 import { BattleReplay } from "../battle-replay";
 import { SiteHeader } from "../site-header";
@@ -67,9 +68,15 @@ export function CompletedBattleView({
   const [activeTab, setActiveTab] = useState<"scores" | "song" | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSongPlaying, setIsSongPlaying] = useState(false);
+  const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
 
   // Ensure only one drawer is open at a time
   useExclusiveDrawer("replay-scores-song", isDrawerOpen, setIsDrawerOpen);
+  useExclusiveDrawer(
+    "mobile-settings",
+    showSettingsDrawer,
+    setShowSettingsDrawer
+  );
 
   // Check if current user is the battle creator
   const isCreator = dbUserId && battle.creator?.userId === dbUserId;
@@ -175,6 +182,19 @@ export function CompletedBattleView({
               onToggleVoting={onToggleVoting}
               onCommentsClick={openCommentsDrawer}
               onVotingClick={openVotingDrawer}
+              settingsAction={
+                <button
+                  onClick={() => setShowSettingsDrawer(true)}
+                  className={`w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md ${
+                    showSettingsDrawer
+                      ? "bg-gray-700 text-white border-gray-600 scale-110"
+                      : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-gray-700 hover:text-white hover:border-gray-600 hover:scale-105"
+                  }`}
+                  aria-label="Battle Options"
+                >
+                  <Settings className="w-6 h-6" strokeWidth={2.5} />
+                </button>
+              }
             />
 
             {/* Scores/Song Drawer */}
@@ -261,17 +281,15 @@ export function CompletedBattleView({
         </div>
       </div>
 
-      {/* Mobile FAB - positioned above control bar */}
-      <MobileActionButtons
+      {/* Settings Drawer */}
+      <BattleOptionsDrawer
+        open={showSettingsDrawer}
+        onOpenChange={setShowSettingsDrawer}
         showCommenting={showCommenting}
         showVoting={showVoting}
-        onCommentsClick={openCommentsDrawer}
-        onVotingClick={openVotingDrawer}
-        activeTab={mobileActiveTab}
-        isDrawerOpen={showMobileDrawer}
-        bottomOffset={controlBarFabOffset}
+        onToggleCommenting={onToggleCommenting}
+        onToggleVoting={onToggleVoting}
       />
     </>
   );
 }
-

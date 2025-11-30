@@ -66,10 +66,7 @@ export function MobileActionButtons({
           label: "Comments",
           component: (
             <button
-              onClick={(e) => {
-                onCommentsClick();
-                setIsOpen(false);
-              }}
+              onClick={onCommentsClick}
               className={`
             w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
             ${
@@ -91,10 +88,7 @@ export function MobileActionButtons({
           label: "Vote",
           component: (
             <button
-              onClick={(e) => {
-                onVotingClick();
-                setIsOpen(false);
-              }}
+              onClick={onVotingClick}
               className={`
             w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
             ${
@@ -164,6 +158,7 @@ export function MobileActionButtons({
                 return (
                   <motion.div
                     key={action.id}
+                    onClick={() => setIsOpen(false)}
                     initial={{ opacity: 0, y: 0, scale: 0.5 }}
                     animate={{
                       opacity: 1,
@@ -196,7 +191,7 @@ export function MobileActionButtons({
           <button
             onClick={() => setIsOpen(!isOpen)}
             className={`
-              w-12 h-12 rounded-full shadow-xl transition-colors border-2 flex items-center justify-center backdrop-blur-md relative z-50
+              w-14 h-14 rounded-full shadow-xl transition-colors border-2 flex items-center justify-center backdrop-blur-md relative z-50
               ${
                 isOpen
                   ? "bg-gray-700 text-white border-gray-600 rotate-90"

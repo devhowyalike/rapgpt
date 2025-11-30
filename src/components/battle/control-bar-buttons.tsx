@@ -163,16 +163,18 @@ export function ScoresButton({
       <button
         onClick={onClick}
         className={`
-          w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+          flex-1 px-3 py-3 font-bold text-sm h-12
+          rounded-lg border-2 transition-all duration-200 flex items-center justify-center gap-2 w-full
           ${
             isActive
-              ? "bg-yellow-600/90 text-white border-yellow-400/50"
-              : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-yellow-600/90 hover:text-white hover:border-yellow-500/50"
+              ? "bg-yellow-600 text-white border-yellow-500 shadow-lg shadow-yellow-500/30"
+              : "bg-gray-800/80 border-gray-700/50 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
           }
         `}
         aria-label="View Scores"
       >
-        <span className="text-xl">📊</span>
+        <span className="text-lg">📊</span>
+        <span>Scores</span>
       </button>
     );
   }
@@ -232,23 +234,37 @@ export function SongButton({
       <button
         onClick={onClick}
         className={`
-          w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+          flex-1 px-3 py-3 font-bold text-sm h-12
+          rounded-lg border-2 transition-all duration-200 flex items-center justify-center gap-2 w-full
           ${
             state === "playing" || state === "active"
-              ? "bg-green-600/90 text-white border-green-400/50"
+              ? "bg-green-600 text-white border-green-500 shadow-lg shadow-green-500/30"
               : state === "generator"
-              ? "bg-green-700/60 text-green-300 border-green-500/50 animate-pulse"
-              : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-green-600/90 hover:text-white hover:border-green-500/50"
+              ? "bg-green-900/40 border-green-600 text-green-400 animate-pulse"
+              : "bg-gray-800/80 border-gray-700/50 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
           }
         `}
         aria-label={showSongGenerator ? "Generate Song" : "Play Song"}
       >
-        {isSongPlaying ? (
-          <AnimatedEq className="text-white" />
+        {showSongGenerator ? (
+          <>
+            <span className="text-lg" style={{ filter: "invert(1)" }}>
+              🎵
+            </span>
+            <span className="whitespace-nowrap">Make MP3</span>
+          </>
+        ) : isSongPlaying ? (
+          <>
+            <AnimatedEq className="text-white" />
+            <span>Pause</span>
+          </>
         ) : (
-          <span className="text-xl" style={{ filter: "invert(1)" }}>
-            🎵
-          </span>
+          <>
+            <span className="text-lg" style={{ filter: "invert(1)" }}>
+              🎵
+            </span>
+            <span>Song</span>
+          </>
         )}
       </button>
     );
