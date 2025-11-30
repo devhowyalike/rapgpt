@@ -19,7 +19,11 @@ interface MobileActionButtonsProps {
   bottomOffset?: string;
   className?: string;
   settingsAction?: React.ReactNode;
-  customActions?: Array<{ id: string; component: React.ReactNode }>;
+  customActions?: Array<{
+    id: string;
+    component: React.ReactNode;
+    label?: string;
+  }>;
   isFixed?: boolean;
   alignment?: "center" | "right";
 }
@@ -27,6 +31,7 @@ interface MobileActionButtonsProps {
 interface ActionItem {
   id: string;
   component: React.ReactNode;
+  label?: string;
 }
 
 export function MobileActionButtons({
@@ -52,11 +57,13 @@ export function MobileActionButtons({
       ? {
           id: "settings",
           component: settingsAction,
+          label: "Settings",
         }
       : null,
     showCommenting
       ? {
           id: "comments",
+          label: "Comments",
           component: (
             <button
               onClick={(e) => {
@@ -81,6 +88,7 @@ export function MobileActionButtons({
     showVoting
       ? {
           id: "voting",
+          label: "Vote",
           component: (
             <button
               onClick={(e) => {
@@ -128,7 +136,7 @@ export function MobileActionButtons({
       {/* Backdrop to close when clicking outside */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/20 backdrop-blur-[1px]"
+          className="fixed inset-0 z-30 bg-black/80 backdrop-blur-[2px]"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -174,6 +182,11 @@ export function MobileActionButtons({
                     // Ensure button click events pass through
                     style={{ transformOrigin: "center center" }}
                   >
+                    {action.label && (
+                      <div className="absolute right-full mr-3 px-3 py-1.5 bg-black/80 text-white text-sm font-medium rounded-lg whitespace-nowrap backdrop-blur-md border border-white/10 shadow-lg pointer-events-none">
+                        {action.label}
+                      </div>
+                    )}
                     {action.component}
                   </motion.div>
                 );

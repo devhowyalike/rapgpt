@@ -135,6 +135,7 @@ export function BattleControlBar({
   const goLiveAction = {
     id: "go-live",
     component: goLiveButton,
+    label: isLive ? "End Live" : "Go Live",
   };
 
   return (
