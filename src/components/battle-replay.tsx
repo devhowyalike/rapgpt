@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import { useIsMobile } from "@/lib/hooks/use-is-mobile";
 import { useRoundData } from "@/lib/hooks/use-round-data";
+import { useRoundNavigation } from "@/lib/hooks/use-round-navigation";
 import type { Battle } from "@/lib/shared";
 import { BattleHeader } from "./battle/battle-header";
 import { BattleSplitView } from "./battle/battle-split-view";
@@ -29,10 +30,19 @@ export function BattleReplay({
 }: BattleReplayProps) {
   // Base mobile bottom padding to clear bottom controls (fan supplies its own)
   const mobileContentPadding = mobileBottomPadding ?? "0px";
-  const [selectedRound, setSelectedRound] = useState(1);
+
+  // Round navigation
+  const {
+    selectedRound,
+    canGoPrev,
+    canGoNext,
+    handlePrevRound,
+    handleNextRound,
+  } = useRoundNavigation();
+
   const { verses: roundVerses, score: roundScore } = useRoundData(
     battle,
-    selectedRound,
+    selectedRound
   );
   const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
   const isMobile = useIsMobile();
@@ -57,17 +67,6 @@ export function BattleReplay({
     scrollContainer.addEventListener("scroll", handleScroll);
     return () => scrollContainer.removeEventListener("scroll", handleScroll);
   }, [isMobile]);
-
-  const canGoPrev = selectedRound > 1;
-  const canGoNext = selectedRound < 3;
-
-  const handlePrevRound = () => {
-    if (canGoPrev) setSelectedRound(selectedRound - 1);
-  };
-
-  const handleNextRound = () => {
-    if (canGoNext) setSelectedRound(selectedRound + 1);
-  };
 
   return (
     <div className="flex flex-col min-h-0 md:h-full bg-linear-to-b from-stage-darker to-stage-dark">

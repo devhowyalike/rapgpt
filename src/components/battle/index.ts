@@ -14,6 +14,7 @@ export { BattleSplitView } from "./battle-split-view";
 export { BattleStateInfo } from "./battle-state-info";
 export { CompletedBattleView } from "./completed-battle-view";
 export {
+  buildMobileFanActions,
   ControlBarContainer,
   GoLiveButton,
   OptionsButton,

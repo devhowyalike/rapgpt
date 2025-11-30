@@ -6,7 +6,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Radio, Settings, StopCircle } from "lucide-react";
+import { MessageSquare, Radio, Settings, StopCircle, ThumbsUp } from "lucide-react";
 import { forwardRef, type ReactNode } from "react";
 import { AnimatedEq } from "@/components/animated-eq";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -282,3 +282,75 @@ export function SongButton({
 // =============================================================================
 // Helper to create mobile action items
 // =============================================================================
+
+import type { MobileFanButtonAction } from "./mobile-fan-button";
+
+interface BuildMobileFanActionsOptions {
+  showCommenting: boolean;
+  showVoting: boolean;
+  /** For active battles, voting is only shown when live */
+  requireLiveForVoting?: boolean;
+  isLive?: boolean;
+  onCommentsClick?: () => void;
+  onVotingClick?: () => void;
+  onSettingsClick?: () => void;
+  mobileActiveTab?: "comments" | "voting" | null;
+  isMobileDrawerOpen?: boolean;
+  settingsActive?: boolean;
+}
+
+/**
+ * Builds the mobile fan button actions array.
+ * Centralizes the logic used by both BattleControlBar and BattleReplayControlBar.
+ */
+export function buildMobileFanActions({
+  showCommenting,
+  showVoting,
+  requireLiveForVoting = false,
+  isLive = false,
+  onCommentsClick,
+  onVotingClick,
+  onSettingsClick,
+  mobileActiveTab = null,
+  isMobileDrawerOpen = false,
+  settingsActive = false,
+}: BuildMobileFanActionsOptions): MobileFanButtonAction[] {
+  const actions: MobileFanButtonAction[] = [];
+
+  if (showCommenting && onCommentsClick) {
+    actions.push({
+      id: "comments",
+      label: "Comments",
+      icon: <MessageSquare className="w-5 h-5" />,
+      onClick: onCommentsClick,
+      isActive: mobileActiveTab === "comments" && isMobileDrawerOpen,
+    });
+  }
+
+  // For active battles, voting requires isLive; for replay, it doesn't
+  const showVotingAction = requireLiveForVoting
+    ? showVoting && isLive && onVotingClick
+    : showVoting && onVotingClick;
+
+  if (showVotingAction && onVotingClick) {
+    actions.push({
+      id: "voting",
+      label: "Voting",
+      icon: <ThumbsUp className="w-5 h-5" />,
+      onClick: onVotingClick,
+      isActive: mobileActiveTab === "voting" && isMobileDrawerOpen,
+    });
+  }
+
+  if (onSettingsClick) {
+    actions.push({
+      id: "settings",
+      label: "Settings",
+      icon: <Settings className="w-5 h-5" />,
+      onClick: onSettingsClick,
+      isActive: settingsActive,
+    });
+  }
+
+  return actions;
+}

@@ -4,21 +4,19 @@
 
 "use client";
 
-import { MessageSquare, Radio, Settings, ThumbsUp } from "lucide-react";
+import { Radio } from "lucide-react";
 import { useState } from "react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import type { Battle } from "@/lib/shared";
 import { BattleOptionsDropdown } from "./battle-options-dropdown";
 import {
+  buildMobileFanActions,
   ControlBarContainer,
   GoLiveButton,
   OptionsButton,
 } from "./control-bar-buttons";
 import { MainActionButton } from "./main-action-button";
-import {
-  MobileFanButton,
-  type MobileFanButtonAction,
-} from "./mobile-fan-button";
+import { MobileFanButton } from "./mobile-fan-button";
 
 interface BattleControlBarProps {
   battle: Battle;
@@ -102,34 +100,18 @@ export function BattleControlBar({
     }
   };
 
-  const mobileFanActions: MobileFanButtonAction[] = [];
-  if (showCommenting && onCommentsClick) {
-    mobileFanActions.push({
-      id: "comments",
-      label: "Comments",
-      icon: <MessageSquare className="w-5 h-5" />,
-      onClick: onCommentsClick,
-      isActive: mobileActiveTab === "comments" && isMobileDrawerOpen,
-    });
-  }
-  if (showVoting && isLive && onVotingClick) {
-    mobileFanActions.push({
-      id: "voting",
-      label: "Voting",
-      icon: <ThumbsUp className="w-5 h-5" />,
-      onClick: onVotingClick,
-      isActive: mobileActiveTab === "voting" && isMobileDrawerOpen,
-    });
-  }
-  if (onSettingsClick) {
-    mobileFanActions.push({
-      id: "settings",
-      label: "Settings",
-      icon: <Settings className="w-5 h-5" />,
-      onClick: onSettingsClick,
-      isActive: settingsActive,
-    });
-  }
+  const mobileFanActions = buildMobileFanActions({
+    showCommenting,
+    showVoting,
+    requireLiveForVoting: true, // Active battles only show voting when live
+    isLive,
+    onCommentsClick,
+    onVotingClick,
+    onSettingsClick,
+    mobileActiveTab,
+    isMobileDrawerOpen,
+    settingsActive,
+  });
 
   return (
     <ControlBarContainer>

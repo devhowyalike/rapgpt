@@ -5,19 +5,16 @@
 
 "use client";
 
-import { MessageSquare, Settings, ThumbsUp } from "lucide-react";
 import type { Battle } from "@/lib/shared";
 import { BattleOptionsDropdown } from "./battle-options-dropdown";
 import {
+  buildMobileFanActions,
   ControlBarContainer,
   OptionsButton,
   ScoresButton,
   SongButton,
 } from "./control-bar-buttons";
-import {
-  MobileFanButton,
-  type MobileFanButtonAction,
-} from "./mobile-fan-button";
+import { MobileFanButton } from "./mobile-fan-button";
 
 interface BattleReplayControlBarProps {
   battle: Battle;
@@ -67,34 +64,17 @@ export function BattleReplayControlBar({
   const isScoresActive = activeTab === "scores" && isDrawerOpen;
   const isSongActive = activeTab === "song" && isDrawerOpen;
 
-  const mobileFanActions: MobileFanButtonAction[] = [];
-  if (showCommenting && onCommentsClick) {
-    mobileFanActions.push({
-      id: "comments",
-      label: "Comments",
-      icon: <MessageSquare className="w-5 h-5" />,
-      onClick: onCommentsClick,
-      isActive: mobileActiveTab === "comments" && isMobileDrawerOpen,
-    });
-  }
-  if (showVoting && onVotingClick) {
-    mobileFanActions.push({
-      id: "voting",
-      label: "Voting",
-      icon: <ThumbsUp className="w-5 h-5" />,
-      onClick: onVotingClick,
-      isActive: mobileActiveTab === "voting" && isMobileDrawerOpen,
-    });
-  }
-  if (onSettingsClick) {
-    mobileFanActions.push({
-      id: "settings",
-      label: "Settings",
-      icon: <Settings className="w-5 h-5" />,
-      onClick: onSettingsClick,
-      isActive: settingsActive,
-    });
-  }
+  const mobileFanActions = buildMobileFanActions({
+    showCommenting,
+    showVoting,
+    requireLiveForVoting: false, // Replay mode shows voting without requiring live
+    onCommentsClick,
+    onVotingClick,
+    onSettingsClick,
+    mobileActiveTab,
+    isMobileDrawerOpen,
+    settingsActive,
+  });
 
   return (
     <ControlBarContainer>

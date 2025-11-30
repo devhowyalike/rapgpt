@@ -14,6 +14,7 @@ import { SongPlayer } from "@/components/song-player";
 import { BattleDrawer } from "@/components/ui/battle-drawer";
 import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
 import { useRoundData } from "@/lib/hooks/use-round-data";
+import { useRoundNavigation } from "@/lib/hooks/use-round-navigation";
 import type { Battle } from "@/lib/shared";
 import { BattleReplay } from "../battle-replay";
 import { SiteHeader } from "../site-header";
@@ -55,8 +56,15 @@ export function CompletedBattleView({
 }: CompletedBattleViewProps) {
   const router = useRouter();
 
-  // Round selection state
-  const [selectedRound, setSelectedRound] = useState(1);
+  // Round navigation
+  const {
+    selectedRound,
+    canGoPrev,
+    canGoNext,
+    handlePrevRound,
+    handleNextRound,
+  } = useRoundNavigation();
+
   const { verses: roundVerses, score: roundScore } = useRoundData(
     battle,
     selectedRound,
@@ -85,17 +93,6 @@ export function CompletedBattleView({
   const showSongGenerator = canGenerateSong;
   const showSongPlayer =
     battle.status === "completed" && battle.generatedSong?.audioUrl;
-
-  const canGoPrev = selectedRound > 1;
-  const canGoNext = selectedRound < 3;
-
-  const handlePrevRound = () => {
-    if (canGoPrev) setSelectedRound(selectedRound - 1);
-  };
-
-  const handleNextRound = () => {
-    if (canGoNext) setSelectedRound(selectedRound + 1);
-  };
 
   const handleTabClick = (tab: "scores" | "song") => {
     // If clicking the same tab while open, close it
