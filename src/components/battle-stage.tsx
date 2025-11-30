@@ -41,6 +41,8 @@ interface BattleStageProps {
    * Default: 5 seconds. Set to 0 to reveal immediately.
    */
   scoreDelaySeconds?: number;
+  /** Whether the battle is currently live */
+  isLive?: boolean;
   /** WebSocket connection status when live */
   liveConnectionStatus?: ConnectionStatus;
   /** Number of viewers when live */
@@ -61,6 +63,7 @@ export function BattleStage({
   votingCompletedRound = null,
   mobileBottomPadding,
   scoreDelaySeconds = 5,
+  isLive = false,
   liveConnectionStatus = "disconnected",
   liveViewerCount = 0,
   canManageLive = false,
@@ -260,9 +263,9 @@ export function BattleStage({
           />
 
           <div className="md:flex-1 md:flex md:justify-end md:items-center md:gap-3">
-            {battle.isLive && (
+            {isLive && (
               <LiveStatusBadge
-                isLive={true}
+                isLive={isLive}
                 viewerCount={liveViewerCount}
                 connectionStatus={liveConnectionStatus}
                 canToggle={canManageLive}

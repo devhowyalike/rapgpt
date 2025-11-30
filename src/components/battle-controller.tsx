@@ -187,17 +187,31 @@ export function BattleController({
   }, [isVotingPhase, setMobileActiveTab, setShowMobileDrawer]);
 
   // Navigation guard - prevent leaving page during active battle
+  // Guard is active when:
+  // 1. Battle is paused (in progress)
+  // 2. Battle is currently live
+  // 3. Battle was recently live (completed but user manages it) - give them a moment
+  const guardCondition =
+    battle?.status === "paused" ||
+    isLive ||
+    (battle?.status === "completed" &&
+      canManageBattle &&
+      initialBattle.isLive === true);
+
   const { NavigationDialog } = useNavigationGuard({
-    when: battle?.status === "paused" || isLive,
-    title: isLive ? "End Live Battle?" : "Pause Battle?",
+    when: guardCondition,
+    title: isLive ? "End Live Battle?" : "Leave Battle?",
     message: isLive
       ? "This battle is currently live. Leaving will end the broadcast for all viewers."
-      : "Leave now? We'll pause your match.",
+      : battle?.status === "paused"
+      ? "Leave now? We'll pause your match."
+      : "Are you sure you want to leave?",
     onConfirm: async () => {
       if (isLive) {
         await stopLive();
       }
-      if (battle) {
+      // Don't need to cancel a completed battle
+      if (battle && battle.status !== "completed") {
         setIsLeaving(true);
         await cancelBattle();
       }
@@ -536,6 +550,7 @@ export function BattleController({
               votingCompletedRound={votingCompletedRound}
               scoreDelaySeconds={scoreDelaySeconds}
               mobileBottomPadding={contentPaddingOverride}
+              isLive={isLive}
               liveConnectionStatus={wsStatus}
               liveViewerCount={viewerCount}
               canManageLive={canManageBattle}
