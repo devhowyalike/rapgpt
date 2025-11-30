@@ -1,6 +1,5 @@
 "use client";
 
-import { Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
@@ -14,7 +13,6 @@ import { SongGenerator } from "@/components/song-generator";
 import { SongPlayer } from "@/components/song-player";
 import { BattleDrawer } from "@/components/ui/battle-drawer";
 import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
-import { useMobileFooterControls } from "@/lib/hooks/use-mobile-footer-controls";
 import { useRoundData } from "@/lib/hooks/use-round-data";
 import type { Battle } from "@/lib/shared";
 import { BattleReplay } from "../battle-replay";
@@ -61,7 +59,7 @@ export function CompletedBattleView({
   const [selectedRound, setSelectedRound] = useState(1);
   const { verses: roundVerses, score: roundScore } = useRoundData(
     battle,
-    selectedRound
+    selectedRound,
   );
 
   // Drawer state for scores/song
@@ -69,15 +67,13 @@ export function CompletedBattleView({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSongPlaying, setIsSongPlaying] = useState(false);
   const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
-
   // Ensure only one drawer is open at a time
   useExclusiveDrawer("replay-scores-song", isDrawerOpen, setIsDrawerOpen);
   useExclusiveDrawer(
     "mobile-settings",
     showSettingsDrawer,
-    setShowSettingsDrawer
+    setShowSettingsDrawer,
   );
-
   // Check if current user is the battle creator
   const isCreator = dbUserId && battle.creator?.userId === dbUserId;
 
@@ -139,17 +135,6 @@ export function CompletedBattleView({
     }
   };
 
-  // Mobile footer controls
-  const { contentPaddingOverride } = useMobileFooterControls({
-    hasBottomControls: false,
-    showCommenting,
-    showVoting,
-    hasSettings: true,
-  });
-
-  const controlBarFabOffset =
-    "calc(var(--battle-control-bar-height) + var(--fab-gutter))";
-
   return (
     <>
       <SiteHeader />
@@ -157,10 +142,7 @@ export function CompletedBattleView({
       <div className="px-0 md:px-6">
         <div className="max-w-7xl mx-auto flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row">
           <div className="flex-1 flex flex-col min-h-0 relative">
-            <BattleReplay
-              battle={battle}
-              mobileBottomPadding={contentPaddingOverride}
-            />
+            <BattleReplay battle={battle} />
 
             {/* Control Bar with Scores, Song, and Options */}
             <BattleReplayControlBar
@@ -182,19 +164,10 @@ export function CompletedBattleView({
               onToggleVoting={onToggleVoting}
               onCommentsClick={openCommentsDrawer}
               onVotingClick={openVotingDrawer}
-              settingsAction={
-                <button
-                  onClick={() => setShowSettingsDrawer(true)}
-                  className={`w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md ${
-                    showSettingsDrawer
-                      ? "bg-gray-700 text-white border-gray-600 scale-110"
-                      : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-gray-700 hover:text-white hover:border-gray-600 hover:scale-105"
-                  }`}
-                  aria-label="Battle Options"
-                >
-                  <Settings className="w-6 h-6" strokeWidth={2.5} />
-                </button>
-              }
+              mobileActiveTab={mobileActiveTab}
+              isMobileDrawerOpen={showMobileDrawer}
+              onSettingsClick={() => setShowSettingsDrawer(true)}
+              settingsActive={showSettingsDrawer}
             />
 
             {/* Scores/Song Drawer */}
@@ -206,8 +179,8 @@ export function CompletedBattleView({
                   activeTab === "scores"
                     ? "Round Scores"
                     : showSongGenerator
-                    ? "Generate Song"
-                    : "Generated Song"
+                      ? "Generate Song"
+                      : "Generated Song"
                 }
                 excludeBottomControls={false}
                 mobileOnly={false}
@@ -281,7 +254,6 @@ export function CompletedBattleView({
         </div>
       </div>
 
-      {/* Settings Drawer */}
       <BattleOptionsDrawer
         open={showSettingsDrawer}
         onOpenChange={setShowSettingsDrawer}

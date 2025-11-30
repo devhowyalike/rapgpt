@@ -56,7 +56,7 @@ export function BattleDrawer({
         {open && (
           <motion.div
             className={`fixed top-0 left-0 right-0 bg-black/60 backdrop-blur-sm z-30 ${
-              mobileOnly ? "lg:hidden" : ""
+              mobileOnly ? "xl:hidden" : ""
             }`}
             style={
               excludeBottomControls
@@ -75,7 +75,7 @@ export function BattleDrawer({
       {/* Content Drawer - Always mounted, never unmounted, all breakpoints */}
       <motion.div
         className={`${position} inset-x-0 z-40 bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl max-h-[70vh] flex flex-col overflow-hidden max-w-3xl mx-auto ${
-          mobileOnly ? "lg:hidden" : ""
+          mobileOnly ? "xl:hidden" : ""
         } ${!open ? "pointer-events-none" : "pointer-events-auto"}`}
         style={
           excludeBottomControls

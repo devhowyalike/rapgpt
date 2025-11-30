@@ -99,11 +99,15 @@ export async function PUT(
 
     // If battle is completed and was live, automatically stop live mode
     if (battle.status === "completed" && battle.isLive) {
-      console.log(`[Battle ${id}] Auto-stopping live mode because battle completed`);
+      console.log(
+        `[Battle ${id}] Auto-stopping live mode because battle completed`,
+      );
       battle.isLive = false;
-      
+
       // Broadcast live ended event
-      const { broadcastEvent } = await import("@/lib/websocket/broadcast-helper");
+      const { broadcastEvent } = await import(
+        "@/lib/websocket/broadcast-helper"
+      );
       await broadcastEvent(id, {
         type: "battle:live_ended",
         battleId: id,

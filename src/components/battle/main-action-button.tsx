@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  ArrowRight,
-  CheckCircle,
-  Play,
-} from "lucide-react";
+import { ArrowRight, CheckCircle, Play } from "lucide-react";
 import { ScoreCalcAnimation } from "@/components/score-calc-animation";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import type { Battle } from "@/lib/shared";
@@ -49,12 +45,12 @@ export function MainActionButton({
         isCalculatingScores
           ? undefined
           : isReadingPhase && showVoting
-          ? onBeginVoting
-          : canAdvance
-          ? onAdvanceRound
-          : canGenerate
-          ? onGenerateVerse
-          : undefined
+            ? onBeginVoting
+            : canAdvance
+              ? onAdvanceRound
+              : canGenerate
+                ? onGenerateVerse
+                : undefined
       }
       disabled={
         isGenerating ||
@@ -69,16 +65,16 @@ export function MainActionButton({
           isCalculatingScores
             ? "bg-linear-to-r from-amber-600 to-yellow-600"
             : isGenerating || isPreGenerating
-            ? "bg-linear-to-r from-teal-600 to-cyan-600"
-            : isReadingPhase
-            ? "bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
-            : isVotingPhase
-            ? "bg-linear-to-r from-purple-600 to-pink-600 animate-pulse"
-            : canAdvance
-            ? "bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 animate-pulse"
-            : canGenerate
-            ? "bg-linear-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg shadow-green-500/50"
-            : "bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"
+              ? "bg-linear-to-r from-teal-600 to-cyan-600"
+              : isReadingPhase
+                ? "bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
+                : isVotingPhase
+                  ? "bg-linear-to-r from-purple-600 to-pink-600 animate-pulse"
+                  : canAdvance
+                    ? "bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 animate-pulse"
+                    : canGenerate
+                      ? "bg-linear-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg shadow-green-500/50"
+                      : "bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"
         }
         ${
           isGenerating ||
@@ -146,4 +142,3 @@ export function MainActionButton({
     </button>
   );
 }
-

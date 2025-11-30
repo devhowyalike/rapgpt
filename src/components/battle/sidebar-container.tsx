@@ -52,7 +52,7 @@ export function SidebarContainer({
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden md:block w-96">
+      <div className="hidden xl:block w-96">
         <BattleSidebar
           battle={battle}
           onVote={onVote}

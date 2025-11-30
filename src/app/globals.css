@@ -28,9 +28,6 @@
   --live-banner-height: 60px;
   --bottom-controls-height: 72px; /* drawer offset for bottom buttons */
   --battle-control-bar-height: 80px; /* height of the battle control bar (p-4 + button height) */
-  /* Mobile floating action buttons */
-  --fab-size: 56px; /* w-14 h-14 */
-  --fab-gutter: 24px; /* spacing above bottom edge/controls */
   /* Control bar padding */
   --control-bar-base-padding: 1rem; /* p-4 equivalent */
   /* Sticky persona offsets for different battle states */

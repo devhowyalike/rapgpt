@@ -4,7 +4,7 @@
 
 "use client";
 
-import { Radio } from "lucide-react";
+import { MessageSquare, Radio, Settings, ThumbsUp } from "lucide-react";
 import { useState } from "react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import type { Battle } from "@/lib/shared";
@@ -13,10 +13,12 @@ import {
   ControlBarContainer,
   GoLiveButton,
   OptionsButton,
-  createGoLiveAction,
 } from "./control-bar-buttons";
 import { MainActionButton } from "./main-action-button";
-import { MobileActionButtons } from "./mobile-action-buttons";
+import {
+  MobileFanButton,
+  type MobileFanButtonAction,
+} from "./mobile-fan-button";
 
 interface BattleControlBarProps {
   battle: Battle;
@@ -48,10 +50,12 @@ interface BattleControlBarProps {
   // Battle options
   onToggleVoting?: (enabled: boolean) => void;
   onToggleCommenting?: (enabled: boolean) => void;
-  // Mobile Drawer Actions
   onCommentsClick?: () => void;
   onVotingClick?: () => void;
-  settingsAction?: React.ReactNode;
+  mobileActiveTab?: "comments" | "voting" | null;
+  onSettingsClick?: () => void;
+  settingsActive?: boolean;
+  isMobileDrawerOpen?: boolean;
 }
 
 export function BattleControlBar({
@@ -83,7 +87,10 @@ export function BattleControlBar({
   onToggleCommenting,
   onCommentsClick,
   onVotingClick,
-  settingsAction,
+  mobileActiveTab = null,
+  onSettingsClick,
+  settingsActive = false,
+  isMobileDrawerOpen = false,
 }: BattleControlBarProps) {
   const [showGoLiveConfirmation, setShowGoLiveConfirmation] = useState(false);
 
@@ -95,16 +102,34 @@ export function BattleControlBar({
     }
   };
 
-  // Mobile action for Go Live
-  const goLiveAction = createGoLiveAction({
-    isLive,
-    isLoadingPermissions,
-    isStartingLive,
-    isStoppingLive,
-    disabled: isGenerating,
-    onClick: onEndLive || (() => {}),
-    onShowConfirmation: () => setShowGoLiveConfirmation(true),
-  });
+  const mobileFanActions: MobileFanButtonAction[] = [];
+  if (showCommenting && onCommentsClick) {
+    mobileFanActions.push({
+      id: "comments",
+      label: "Comments",
+      icon: <MessageSquare className="w-5 h-5" />,
+      onClick: onCommentsClick,
+      isActive: mobileActiveTab === "comments" && isMobileDrawerOpen,
+    });
+  }
+  if (showVoting && isLive && onVotingClick) {
+    mobileFanActions.push({
+      id: "voting",
+      label: "Voting",
+      icon: <ThumbsUp className="w-5 h-5" />,
+      onClick: onVotingClick,
+      isActive: mobileActiveTab === "voting" && isMobileDrawerOpen,
+    });
+  }
+  if (onSettingsClick) {
+    mobileFanActions.push({
+      id: "settings",
+      label: "Settings",
+      icon: <Settings className="w-5 h-5" />,
+      onClick: onSettingsClick,
+      isActive: settingsActive,
+    });
+  }
 
   return (
     <ControlBarContainer>
@@ -126,8 +151,8 @@ export function BattleControlBar({
         onBeginVoting={onBeginVoting}
       />
 
-      {/* Battle Options Dropdown - Desktop Only */}
-      <div className="hidden md:block">
+      {/* Battle Options Dropdown */}
+      <div className="hidden xl:block">
         <BattleOptionsDropdown
           showCommenting={showCommenting}
           showVoting={showVoting}
@@ -140,9 +165,9 @@ export function BattleControlBar({
         />
       </div>
 
-      {/* Go Live Button - Desktop Only */}
+      {/* Go Live Button */}
       {(isLoadingPermissions || canManageLive) && (
-        <div className="hidden md:block">
+        <div>
           <GoLiveButton
             isLive={isLive}
             isLoadingPermissions={isLoadingPermissions}
@@ -150,27 +175,15 @@ export function BattleControlBar({
             isStoppingLive={isStoppingLive}
             disabled={isGenerating}
             onClick={handleGoLiveClick}
-            variant="desktop"
           />
         </div>
       )}
 
-      {/* Mobile Action Menu (Fan) - Mobile Only */}
-      <div className="md:hidden">
-        <MobileActionButtons
-          isFixed={false}
-          showCommenting={showCommenting}
-          showVoting={showVoting && isLive}
-          onCommentsClick={onCommentsClick || (() => {})}
-          onVotingClick={onVotingClick || (() => {})}
-          settingsAction={settingsAction}
-          customActions={
-            isLoadingPermissions || canManageLive ? [goLiveAction] : []
-          }
-          className="ml-2"
-          alignment="right"
-        />
-      </div>
+      {mobileFanActions.length > 0 && (
+        <div className="xl:hidden ml-auto">
+          <MobileFanButton actions={mobileFanActions} />
+        </div>
+      )}
 
       <ConfirmationDialog
         open={showGoLiveConfirmation}

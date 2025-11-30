@@ -5,6 +5,7 @@
 
 "use client";
 
+import { MessageSquare, Settings, ThumbsUp } from "lucide-react";
 import type { Battle } from "@/lib/shared";
 import { BattleOptionsDropdown } from "./battle-options-dropdown";
 import {
@@ -13,7 +14,10 @@ import {
   ScoresButton,
   SongButton,
 } from "./control-bar-buttons";
-import { MobileActionButtons } from "./mobile-action-buttons";
+import {
+  MobileFanButton,
+  type MobileFanButtonAction,
+} from "./mobile-fan-button";
 
 interface BattleReplayControlBarProps {
   battle: Battle;
@@ -32,10 +36,12 @@ interface BattleReplayControlBarProps {
   showVoting: boolean;
   onToggleCommenting?: (enabled: boolean) => void;
   onToggleVoting?: (enabled: boolean) => void;
-  // Mobile drawer handlers
   onCommentsClick?: () => void;
   onVotingClick?: () => void;
-  settingsAction?: React.ReactNode;
+  mobileActiveTab?: "comments" | "voting" | null;
+  onSettingsClick?: () => void;
+  settingsActive?: boolean;
+  isMobileDrawerOpen?: boolean;
 }
 
 export function BattleReplayControlBar({
@@ -52,11 +58,43 @@ export function BattleReplayControlBar({
   onToggleVoting,
   onCommentsClick,
   onVotingClick,
-  settingsAction,
+  mobileActiveTab = null,
+  onSettingsClick,
+  settingsActive = false,
+  isMobileDrawerOpen = false,
 }: BattleReplayControlBarProps) {
   const showSongButton = showSongGenerator || showSongPlayer;
   const isScoresActive = activeTab === "scores" && isDrawerOpen;
   const isSongActive = activeTab === "song" && isDrawerOpen;
+
+  const mobileFanActions: MobileFanButtonAction[] = [];
+  if (showCommenting && onCommentsClick) {
+    mobileFanActions.push({
+      id: "comments",
+      label: "Comments",
+      icon: <MessageSquare className="w-5 h-5" />,
+      onClick: onCommentsClick,
+      isActive: mobileActiveTab === "comments" && isMobileDrawerOpen,
+    });
+  }
+  if (showVoting && onVotingClick) {
+    mobileFanActions.push({
+      id: "voting",
+      label: "Voting",
+      icon: <ThumbsUp className="w-5 h-5" />,
+      onClick: onVotingClick,
+      isActive: mobileActiveTab === "voting" && isMobileDrawerOpen,
+    });
+  }
+  if (onSettingsClick) {
+    mobileFanActions.push({
+      id: "settings",
+      label: "Settings",
+      icon: <Settings className="w-5 h-5" />,
+      onClick: onSettingsClick,
+      isActive: settingsActive,
+    });
+  }
 
   return (
     <ControlBarContainer>
@@ -104,8 +142,8 @@ export function BattleReplayControlBar({
         </>
       )}
 
-      {/* Options Dropdown - Desktop Only */}
-      <div className="hidden md:block">
+      {/* Options Dropdown */}
+      <div className="hidden xl:block">
         <BattleOptionsDropdown
           showCommenting={showCommenting}
           showVoting={showVoting}
@@ -114,21 +152,11 @@ export function BattleReplayControlBar({
           customTrigger={<OptionsButton />}
         />
       </div>
-
-      {/* Mobile Action Menu (Fan) - Mobile Only */}
-      <div className="md:hidden ml-auto">
-        <MobileActionButtons
-          isFixed={false}
-          showCommenting={showCommenting}
-          showVoting={showVoting}
-          onCommentsClick={onCommentsClick || (() => {})}
-          onVotingClick={onVotingClick || (() => {})}
-          settingsAction={settingsAction}
-          customActions={[]}
-          className=""
-          alignment="right"
-        />
-      </div>
+      {mobileFanActions.length > 0 && (
+        <div className="xl:hidden ml-auto">
+          <MobileFanButton actions={mobileFanActions} />
+        </div>
+      )}
     </ControlBarContainer>
   );
 }

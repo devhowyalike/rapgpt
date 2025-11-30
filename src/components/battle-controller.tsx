@@ -6,15 +6,12 @@
 "use client";
 
 import { useAuth, useUser } from "@clerk/nextjs";
-import { AlertTriangle, Settings } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { AlertTriangle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
   BattleControlBar,
   BattleOptionsDrawer,
-  BattleOptionsDropdown,
   CompletedBattleView,
-  MobileActionButtons,
   SidebarContainer,
 } from "@/components/battle";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -28,7 +25,6 @@ import { useBattleFeatures } from "@/lib/hooks/use-battle-features";
 import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
 import { useLiveBattleState } from "@/lib/hooks/use-live-battle-state";
 import { useMobileDrawer } from "@/lib/hooks/use-mobile-drawer";
-import { useMobileFooterControls } from "@/lib/hooks/use-mobile-footer-controls";
 import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
 import { useScoreRevealDelay } from "@/lib/hooks/use-score-reveal-delay";
 import type { Battle } from "@/lib/shared";
@@ -75,6 +71,7 @@ export function BattleController({
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [isLeaving, setIsLeaving] = useState(false);
   const [isPreGenerating, setIsPreGenerating] = useState(false);
+  const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
 
   // Mobile drawer state
   const {
@@ -86,13 +83,16 @@ export function BattleController({
     openVotingDrawer,
   } = useMobileDrawer();
 
-  const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
-
   // Ensure only one drawer is open at a time across the page
   useExclusiveDrawer(
     "mobile-comments-voting",
     showMobileDrawer,
-    setShowMobileDrawer
+    setShowMobileDrawer,
+  );
+  useExclusiveDrawer(
+    "mobile-settings",
+    showSettingsDrawer,
+    setShowSettingsDrawer,
   );
 
   // Check if user is admin or owner
@@ -205,8 +205,8 @@ export function BattleController({
     message: isLive
       ? "This battle is currently live. Leaving will end the broadcast for all viewers."
       : battle?.status === "paused"
-      ? "Leave now? We'll pause your match."
-      : "Are you sure you want to leave?",
+        ? "Leave now? We'll pause your match."
+        : "Are you sure you want to leave?",
     onConfirm: async () => {
       if (isLive) {
         await stopLive();
@@ -258,7 +258,7 @@ export function BattleController({
       : null;
   const { isDelaying: isCalculatingScores } = useScoreRevealDelay(
     scoresAvailableRound,
-    scoreDelaySeconds
+    scoreDelaySeconds,
   );
 
   // Battle action handlers
@@ -299,7 +299,7 @@ export function BattleController({
       setBattle(updatedBattle);
       await saveBattle();
     },
-    [battle, setBattle, saveBattle]
+    [battle, setBattle, saveBattle],
   );
 
   // Handler to toggle commenting on/off
@@ -310,7 +310,7 @@ export function BattleController({
       setBattle(updatedBattle);
       await saveBattle();
     },
-    [battle, setBattle, saveBattle]
+    [battle, setBattle, saveBattle],
   );
 
   // Generate verse - handles both local and live modes
@@ -490,18 +490,7 @@ export function BattleController({
     );
   }
 
-  // Active battle mode (paused or live)
-  const { contentPaddingOverride } = useMobileFooterControls({
-    hasBottomControls: false,
-    showCommenting,
-    showVoting,
-    hasSettings: true,
-  });
-
   const showControlBar = battle.status === "paused";
-  const liveBattleFabOffset = showControlBar
-    ? "calc(var(--battle-control-bar-height) + var(--fab-gutter))"
-    : undefined;
 
   return (
     <>
@@ -521,7 +510,6 @@ export function BattleController({
               isVotingPhase={isVotingPhase}
               votingCompletedRound={votingCompletedRound}
               scoreDelaySeconds={scoreDelaySeconds}
-              mobileBottomPadding={contentPaddingOverride}
               isLive={isLive}
               liveConnectionStatus={wsStatus}
               liveViewerCount={viewerCount}
@@ -565,19 +553,10 @@ export function BattleController({
                 onToggleCommenting={handleToggleCommenting}
                 onCommentsClick={openCommentsDrawer}
                 onVotingClick={openVotingDrawer}
-                settingsAction={
-                  <button
-                    onClick={() => setShowSettingsDrawer(true)}
-                    className={`w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md ${
-                      showSettingsDrawer
-                        ? "bg-gray-700 text-white border-gray-600 scale-110"
-                        : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-gray-700 hover:text-white hover:border-gray-600 hover:scale-105"
-                    }`}
-                    aria-label="Battle Options"
-                  >
-                    <Settings className="w-6 h-6" strokeWidth={2.5} />
-                  </button>
-                }
+                mobileActiveTab={mobileActiveTab}
+                isMobileDrawerOpen={showMobileDrawer}
+                onSettingsClick={() => setShowSettingsDrawer(true)}
+                settingsActive={showSettingsDrawer}
               />
             )}
           </div>
@@ -599,7 +578,6 @@ export function BattleController({
         </div>
       </div>
 
-      {/* Settings Drawer */}
       <BattleOptionsDrawer
         open={showSettingsDrawer}
         onOpenChange={setShowSettingsDrawer}

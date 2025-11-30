@@ -7,7 +7,7 @@
 
 import { motion } from "framer-motion";
 import { Radio, Settings, StopCircle } from "lucide-react";
-import { type ReactNode, forwardRef } from "react";
+import { forwardRef, type ReactNode } from "react";
 import { AnimatedEq } from "@/components/animated-eq";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
@@ -50,7 +50,7 @@ export const OptionsButton = forwardRef<HTMLButtonElement, OptionsButtonProps>(
         <span className="hidden lg:inline font-medium text-sm">Options</span>
       </button>
     );
-  }
+  },
 );
 OptionsButton.displayName = "OptionsButton";
 
@@ -65,7 +65,6 @@ interface GoLiveButtonProps {
   isStoppingLive: boolean;
   disabled?: boolean;
   onClick: () => void;
-  variant: "desktop" | "mobile";
 }
 
 export function GoLiveButton({
@@ -75,42 +74,10 @@ export function GoLiveButton({
   isStoppingLive,
   disabled = false,
   onClick,
-  variant,
 }: GoLiveButtonProps) {
   const isLoading = isStartingLive || isStoppingLive;
   const isDisabled = disabled || isLoadingPermissions || isLoading;
 
-  if (variant === "mobile") {
-    return (
-      <button
-        onClick={isDisabled ? undefined : onClick}
-        disabled={isDisabled}
-        className={`
-          w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
-          ${
-            isLoadingPermissions
-              ? "bg-gray-800/50 border-gray-700 cursor-wait"
-              : isLive
-              ? "bg-gray-700 hover:bg-gray-600 border-gray-500"
-              : "bg-red-600 hover:bg-red-700 border-red-500"
-          }
-        `}
-        title={isLive ? "End Live" : "Go Live"}
-      >
-        {isLoadingPermissions ? (
-          <div className="w-6 h-6 shrink-0 rounded-full border-2 border-gray-300 border-t-transparent animate-spin" />
-        ) : isLoading ? (
-          <LoadingSpinner size="sm" />
-        ) : isLive ? (
-          <StopCircle className="w-6 h-6 shrink-0 text-white" />
-        ) : (
-          <Radio className="w-6 h-6 shrink-0 text-white" />
-        )}
-      </button>
-    );
-  }
-
-  // Desktop variant
   return (
     <button
       onClick={isDisabled ? undefined : onClick}
@@ -121,8 +88,8 @@ export function GoLiveButton({
           isLoadingPermissions
             ? "bg-gray-800/50 cursor-wait"
             : isLive
-            ? "bg-gray-700 hover:bg-gray-600"
-            : "bg-red-600 hover:bg-red-700"
+              ? "bg-gray-700 hover:bg-gray-600"
+              : "bg-red-600 hover:bg-red-700"
         }
       `}
       title={isLive ? "End Live" : "Go Live"}
@@ -240,8 +207,8 @@ export function SongButton({
             state === "playing" || state === "active"
               ? "bg-green-600 text-white border-green-500 shadow-lg shadow-green-500/30"
               : state === "generator"
-              ? "bg-green-900/40 border-green-600 text-green-400 animate-pulse"
-              : "bg-gray-800/80 border-gray-700/50 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
+                ? "bg-green-900/40 border-green-600 text-green-400 animate-pulse"
+                : "bg-gray-800/80 border-gray-700/50 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
           }
         `}
         aria-label={showSongGenerator ? "Generate Song" : "Play Song"}
@@ -281,8 +248,8 @@ export function SongButton({
           state === "playing" || state === "active"
             ? "bg-linear-to-r from-green-600 to-emerald-600 border-green-500 text-white shadow-lg shadow-green-500/30"
             : state === "generator"
-            ? "bg-linear-to-r from-green-700/40 to-emerald-700/40 border-green-600 text-green-300 hover:from-green-700/60 hover:to-emerald-700/60 hover:border-green-500 animate-pulse"
-            : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
+              ? "bg-linear-to-r from-green-700/40 to-emerald-700/40 border-green-600 text-green-300 hover:from-green-700/60 hover:to-emerald-700/60 hover:border-green-500 animate-pulse"
+              : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
         }
       `}
       whileHover={{ scale: 1.02 }}
@@ -315,51 +282,3 @@ export function SongButton({
 // =============================================================================
 // Helper to create mobile action items
 // =============================================================================
-
-export interface MobileActionItem {
-  id: string;
-  component: ReactNode;
-  label: string;
-}
-
-export function createGoLiveAction(
-  props: Omit<GoLiveButtonProps, "variant"> & { onShowConfirmation: () => void }
-): MobileActionItem {
-  const { isLive, onShowConfirmation, ...rest } = props;
-  return {
-    id: "go-live",
-    component: (
-      <GoLiveButton
-        {...rest}
-        isLive={isLive}
-        onClick={isLive ? rest.onClick : onShowConfirmation}
-        variant="mobile"
-      />
-    ),
-    label: isLive ? "End Live" : "Go Live",
-  };
-}
-
-export function createScoresAction(
-  props: Omit<ScoresButtonProps, "variant">
-): MobileActionItem {
-  return {
-    id: "scores",
-    component: <ScoresButton {...props} variant="mobile" />,
-    label: "Scores",
-  };
-}
-
-export function createSongAction(
-  props: Omit<SongButtonProps, "variant">
-): MobileActionItem {
-  return {
-    id: "song",
-    component: <SongButton {...props} variant="mobile" />,
-    label: props.showSongGenerator
-      ? "Make MP3"
-      : props.isSongPlaying
-      ? "Pause"
-      : "Song",
-  };
-}

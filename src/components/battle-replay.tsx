@@ -27,9 +27,8 @@ export function BattleReplay({
   battle,
   mobileBottomPadding,
 }: BattleReplayProps) {
-  // Base mobile bottom padding to clear bottom controls
-  const mobileContentPadding =
-    mobileBottomPadding ?? "var(--bottom-controls-height)";
+  // Base mobile bottom padding to clear bottom controls (fan supplies its own)
+  const mobileContentPadding = mobileBottomPadding ?? "0px";
   const [selectedRound, setSelectedRound] = useState(1);
   const { verses: roundVerses, score: roundScore } = useRoundData(
     battle,
@@ -114,7 +113,7 @@ export function BattleReplay({
       {/* Split Screen Stage */}
       <div
         data-scroll-container
-        className="flex-1 overflow-y-auto pb-(--mobile-bottom-padding) md:pb-24"
+        className="flex-1 overflow-y-auto pb-(--mobile-bottom-padding) xl:pb-0"
         style={{
           ["--mobile-bottom-padding" as string]: mobileContentPadding,
         }}
