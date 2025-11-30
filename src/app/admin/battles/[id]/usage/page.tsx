@@ -1,14 +1,8 @@
-import { redirect } from "next/navigation";
-import { checkRole } from "@/lib/auth/roles";
-import { SiteHeader } from "@/components/site-header";
-import { getBattleById } from "@/lib/battle-storage";
-import {
-  getBattleTokenTotals,
-  getBattleTokenTotalsByModel,
-  getBattleTokenEvents,
-} from "@/lib/usage-storage";
-import Link from "next/link";
 import { ArrowLeft, Shield } from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { SiteHeader } from "@/components/site-header";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -17,7 +11,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { checkRole } from "@/lib/auth/roles";
+import { getBattleById } from "@/lib/battle-storage";
+import {
+  getBattleTokenEvents,
+  getBattleTokenTotals,
+  getBattleTokenTotalsByModel,
+} from "@/lib/usage-storage";
 
 export const dynamic = "force-dynamic";
 

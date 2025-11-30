@@ -1,24 +1,24 @@
-import { redirect } from "next/navigation";
-import { checkRole } from "@/lib/auth/roles";
-import { SiteHeader } from "@/components/site-header";
-import { getBattleById } from "@/lib/battle-storage";
-import { getBattleTokenTotals } from "@/lib/usage-storage";
-import Link from "next/link";
 import {
   ArrowLeft,
-  Shield,
-  Eye,
-  Music,
   Calendar,
-  User,
+  Eye,
+  Hash,
   MessageSquare,
   Mic2,
-  Hash,
+  Music,
   Radio,
+  Shield,
+  User,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ROUNDS_PER_BATTLE, getDisplayRound } from "@/lib/shared";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { BattleRoundsDisplay } from "@/components/admin/battle-rounds-display";
+import { SiteHeader } from "@/components/site-header";
+import { Button } from "@/components/ui/button";
+import { checkRole } from "@/lib/auth/roles";
+import { getBattleById } from "@/lib/battle-storage";
+import { getDisplayRound, ROUNDS_PER_BATTLE } from "@/lib/shared";
+import { getBattleTokenTotals } from "@/lib/usage-storage";
 
 export const dynamic = "force-dynamic";
 
@@ -96,10 +96,10 @@ export default async function AdminBattleDetailsPage({
                   battle.status === "completed"
                     ? "bg-green-500"
                     : battle.status === "paused"
-                    ? "bg-orange-500"
-                    : battle.status === "upcoming"
-                    ? "bg-yellow-500"
-                    : "bg-gray-500"
+                      ? "bg-orange-500"
+                      : battle.status === "upcoming"
+                        ? "bg-yellow-500"
+                        : "bg-gray-500"
                 }`}
               />
               <span className="text-gray-400 text-sm uppercase font-semibold">

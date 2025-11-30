@@ -1,21 +1,21 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Switch } from "./ui/switch";
 import {
-  Radio,
-  ThumbsUp,
-  MessageSquare,
   ChevronDown,
   ChevronUp,
-  Play,
   type LucideIcon,
+  MessageSquare,
+  Play,
+  Radio,
+  ThumbsUp,
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "./ui/collapsible";
+import { Switch } from "./ui/switch";
 
 interface OptionRowProps {
   icon: LucideIcon;

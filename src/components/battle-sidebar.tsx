@@ -4,13 +4,13 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
+import { AnimatePresence, motion } from "framer-motion";
+import { MessageSquare, Send, ThumbsUp } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import type { Battle, Comment } from "@/lib/shared";
 import { ROUNDS_PER_BATTLE } from "@/lib/shared";
-import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, Send, ThumbsUp } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
-import Link from "next/link";
 
 interface BattleSidebarProps {
   battle: Battle;
@@ -41,7 +41,10 @@ export function BattleSidebar({
     process.env.NEXT_PUBLIC_USER_BATTLE_VOTING !== "false";
   const isCommentsGloballyEnabled =
     process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING !== "false";
-  const showVoting = isVotingGloballyEnabled && (battle.votingEnabled ?? true) && (battle.isLive || isArchived);
+  const showVoting =
+    isVotingGloballyEnabled &&
+    (battle.votingEnabled ?? true) &&
+    (battle.isLive || isArchived);
   const showCommenting =
     isCommentsGloballyEnabled && (battle.commentsEnabled ?? true);
 
@@ -54,7 +57,7 @@ export function BattleSidebar({
   };
 
   const [activeTab, setActiveTab] = useState<"comments" | "voting">(
-    getInitialTab()
+    getInitialTab(),
   );
 
   const [comment, setComment] = useState("");
@@ -100,7 +103,7 @@ export function BattleSidebar({
 
     const voteKey = `${battle.id}-${round}-${personaId}`;
     const currentVoteInRound = Array.from(userVotes).find((key) =>
-      key.startsWith(`${battle.id}-${round}-`)
+      key.startsWith(`${battle.id}-${round}-`),
     );
 
     // Optimistically update UI immediately
@@ -155,7 +158,7 @@ export function BattleSidebar({
             const storageKey = `battle-votes-${battle.id}`;
             localStorage.setItem(
               storageKey,
-              JSON.stringify(Array.from(newVotes))
+              JSON.stringify(Array.from(newVotes)),
             );
           }
           return newVotes;
@@ -170,14 +173,14 @@ export function BattleSidebar({
   // Helper function to check if user has already voted in a round
   const hasVotedInRound = (round: number): boolean => {
     return Array.from(userVotes).some((voteKey) =>
-      voteKey.startsWith(`${battle.id}-${round}-`)
+      voteKey.startsWith(`${battle.id}-${round}-`),
     );
   };
 
   // Helper function to get the current vote in a round (if any)
   const getCurrentVoteInRound = (round: number): string | null => {
     const vote = Array.from(userVotes).find((key) =>
-      key.startsWith(`${battle.id}-${round}-`)
+      key.startsWith(`${battle.id}-${round}-`),
     );
     return vote || null;
   };
@@ -378,15 +381,18 @@ export function BattleSidebar({
             )}
 
             {/* Message when voting hasn't started yet */}
-            {!isArchived && battle.isLive && !isVotingPhase && battle.scores.length > 0 && (
-              <div className="bg-gray-800 rounded-lg p-3 mb-4">
-                <p className="text-center text-white text-sm">
-                  {battle.currentRound === ROUNDS_PER_BATTLE
-                    ? "Voting has ended"
-                    : "Voting will begin at the end of the round"}
-                </p>
-              </div>
-            )}
+            {!isArchived &&
+              battle.isLive &&
+              !isVotingPhase &&
+              battle.scores.length > 0 && (
+                <div className="bg-gray-800 rounded-lg p-3 mb-4">
+                  <p className="text-center text-white text-sm">
+                    {battle.currentRound === ROUNDS_PER_BATTLE
+                      ? "Voting has ended"
+                      : "Voting will begin at the end of the round"}
+                  </p>
+                </div>
+              )}
 
             {/* Voting Timer in Sidebar */}
             {isVotingPhase && votingTimeRemaining !== null && (
@@ -431,7 +437,7 @@ export function BattleSidebar({
 
                 // Calculate optimistic vote counts by checking both server state and local state
                 const getOptimisticVoteCount = (
-                  position: "player1" | "player2"
+                  position: "player1" | "player2",
                 ): number => {
                   const serverVotes =
                     roundScore.positionScores[position].userVotes;
@@ -511,8 +517,8 @@ export function BattleSidebar({
                                 isVoted
                                   ? "bg-linear-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400 shadow-lg shadow-yellow-400/20 hover:scale-[1.02] hover:border-yellow-500"
                                   : !canVote
-                                  ? "bg-gray-700 border-gray-600 cursor-not-allowed"
-                                  : `hover:scale-[1.02] hover:shadow-lg border-gray-600 ${hoverBorderColor}`
+                                    ? "bg-gray-700 border-gray-600 cursor-not-allowed"
+                                    : `hover:scale-[1.02] hover:shadow-lg border-gray-600 ${hoverBorderColor}`
                               }
                               ${isSubmittingVote ? "opacity-50" : ""}
                             `}
@@ -552,7 +558,7 @@ export function BattleSidebar({
                               </button>
                             </motion.div>
                           );
-                        }
+                        },
                       )}
                     </div>
                   </motion.div>

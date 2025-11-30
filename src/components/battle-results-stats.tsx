@@ -24,14 +24,14 @@ export function BattleResultsStats({
   const getWinnerName = () => {
     // If no winner, it's a tie
     if (!winner || winner === "tie") return "Tie";
-    
+
     // If both personas have the same ID, determine winner by score
     if (player1PersonaId === player2PersonaId) {
       if (player1TotalScore > player2TotalScore) return player1PersonaName;
       if (player2TotalScore > player1TotalScore) return player2PersonaName;
       return "Tie";
     }
-    
+
     // Normal case: different personas, match by ID
     if (winner === player1PersonaId) return player1PersonaName;
     if (winner === player2PersonaId) return player2PersonaName;
@@ -57,4 +57,3 @@ export function BattleResultsStats({
     </ul>
   );
 }
-

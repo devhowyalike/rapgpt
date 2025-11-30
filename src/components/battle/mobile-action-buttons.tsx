@@ -4,10 +4,10 @@
 
 "use client";
 
-import { MessageSquare, ThumbsUp, Plus, X, Settings } from "lucide-react";
-import type { DrawerTab } from "@/lib/hooks/use-mobile-drawer";
+import { AnimatePresence, motion } from "framer-motion";
+import { MessageSquare, Plus, Settings, ThumbsUp, X } from "lucide-react";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import type { DrawerTab } from "@/lib/hooks/use-mobile-drawer";
 
 interface MobileActionButtonsProps {
   showCommenting: boolean;
@@ -113,7 +113,7 @@ export function MobileActionButtons({
   ];
 
   const actions = rawActions.filter((action): action is ActionItem =>
-    Boolean(action)
+    Boolean(action),
   );
 
   if (actions.length === 0) {
@@ -152,8 +152,8 @@ export function MobileActionButtons({
           isFixed && bottomOffset
             ? { bottom: bottomOffset }
             : isFixed
-            ? { bottom: "1.5rem" }
-            : undefined
+              ? { bottom: "1.5rem" }
+              : undefined
         }
       >
         <div className="relative">

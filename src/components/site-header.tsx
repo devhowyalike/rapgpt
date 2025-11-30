@@ -1,16 +1,16 @@
 "use client";
 
-import { Users, User } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { UserButton } from "./auth/user-button";
 import { useAuth, useUser } from "@clerk/nextjs";
+import { User, Users } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useLiveBattles } from "@/lib/hooks/use-live-battles";
-import { RapGPTLogo } from "./rapgpt-logo";
-import { DesktopNavLink } from "@/components/header/DesktopNavLink";
-import { CreateBattleButton } from "@/components/header/CreateBattleButton";
 import { AdminControls } from "@/components/header/AdminControls";
+import { CreateBattleButton } from "@/components/header/CreateBattleButton";
+import { DesktopNavLink } from "@/components/header/DesktopNavLink";
 import { MobileMenu } from "@/components/header/MobileMenu";
+import { useLiveBattles } from "@/lib/hooks/use-live-battles";
+import { UserButton } from "./auth/user-button";
+import { RapGPTLogo } from "./rapgpt-logo";
 
 // Cache admin status in memory to prevent flickering
 let cachedAdminStatus: boolean | null = null;

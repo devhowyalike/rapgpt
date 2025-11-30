@@ -1,5 +1,5 @@
+import { Globe, Lock, MoreVertical, Radio } from "lucide-react";
 import { forwardRef } from "react";
-import { Globe, Lock, Radio, MoreVertical } from "lucide-react";
 
 interface BattleStatusButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -19,8 +19,8 @@ export const BattleStatusButton = forwardRef<
         isPublic
           ? "bg-blue-600/30 text-blue-300 hover:bg-blue-600/40"
           : isArchived
-          ? "bg-purple-600/30 text-purple-300 hover:bg-purple-600/40"
-          : "bg-gray-600/30 text-gray-300 hover:bg-gray-600/40"
+            ? "bg-purple-600/30 text-purple-300 hover:bg-purple-600/40"
+            : "bg-gray-600/30 text-gray-300 hover:bg-gray-600/40"
       }`}
       title="Manage battle"
     >

@@ -4,22 +4,22 @@
 
 "use client";
 
-import { useState } from "react";
 import {
-  Play,
-  StopCircle,
   ArrowRight,
-  Settings,
-  Radio,
-  Users,
   MessageSquare,
+  Play,
+  Radio,
+  Settings,
+  StopCircle,
+  Users,
   Vote,
 } from "lucide-react";
+import { useState } from "react";
+import { BattleStateInfo } from "@/components/battle/battle-state-info";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import type { Battle } from "@/lib/shared";
 import { getAdvanceRoundButtonText } from "@/lib/shared";
 import type { ConnectionStatus } from "@/lib/websocket/types";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { BattleStateInfo } from "@/components/battle/battle-state-info";
 
 interface BattleControlPanelProps {
   battle: Battle;
@@ -29,7 +29,10 @@ interface BattleControlPanelProps {
   onStopLive: () => Promise<void>;
   onGenerateVerse: () => Promise<void>;
   onAdvanceRound: () => Promise<void>;
-  onUpdateBattleConfig?: (config: { commentsEnabled?: boolean; votingEnabled?: boolean }) => Promise<void>;
+  onUpdateBattleConfig?: (config: {
+    commentsEnabled?: boolean;
+    votingEnabled?: boolean;
+  }) => Promise<void>;
   isGenerating?: boolean;
 }
 

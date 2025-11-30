@@ -4,11 +4,11 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type { RoundScore, Persona } from "@/lib/shared";
-import { ChevronDown, ChevronUp } from "lucide-react";
 import { motion } from "framer-motion";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { APP_TITLE } from "@/lib/constants";
+import type { Persona, RoundScore } from "@/lib/shared";
 
 interface PersonaScoreCardProps {
   persona: Persona;
@@ -174,7 +174,7 @@ export function ScoreDisplay({
           animationDirection={-20}
           animationDelay={0.3}
           votingEnabled={votingEnabled}
-          isWinner={roundScore.winner === 'player1'}
+          isWinner={roundScore.winner === "player1"}
         />
         <PersonaScoreCard
           persona={player2Persona}
@@ -183,7 +183,7 @@ export function ScoreDisplay({
           animationDirection={20}
           animationDelay={0.4}
           votingEnabled={votingEnabled}
-          isWinner={roundScore.winner === 'player2'}
+          isWinner={roundScore.winner === "player2"}
         />
       </div>
     </div>

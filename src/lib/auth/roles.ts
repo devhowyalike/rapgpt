@@ -2,11 +2,11 @@
  * Role-based access control utilities
  */
 
-import { auth, currentUser } from '@clerk/nextjs/server';
-import type { Roles } from '@/types/globals';
-import { db } from '@/lib/db/client';
-import { users } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db/client";
+import { users } from "@/lib/db/schema";
+import type { Roles } from "@/types/globals";
 
 /**
  * Check if the current user has a specific role
@@ -14,20 +14,20 @@ import { eq } from 'drizzle-orm';
  */
 export async function checkRole(role: Roles): Promise<boolean> {
   const { userId } = await auth();
-  
+
   if (!userId) {
     return false;
   }
-  
+
   // Check database for user role
   const dbUser = await db.query.users.findFirst({
     where: eq(users.clerkId, userId),
   });
-  
+
   if (!dbUser) {
     return false;
   }
-  
+
   return dbUser.role === role;
 }
 
@@ -38,8 +38,8 @@ export async function isAdmin(clerkUserId: string): Promise<boolean> {
   const dbUser = await db.query.users.findFirst({
     where: eq(users.clerkId, clerkUserId),
   });
-  
-  return dbUser?.role === 'admin';
+
+  return dbUser?.role === "admin";
 }
 
 /**
@@ -47,7 +47,7 @@ export async function isAdmin(clerkUserId: string): Promise<boolean> {
  */
 export async function getCurrentUser() {
   const clerkUser = await currentUser();
-  
+
   if (!clerkUser) {
     return null;
   }
@@ -72,9 +72,9 @@ export async function getCurrentUserId(): Promise<string | null> {
  */
 export async function requireAuth() {
   const { userId } = await auth();
-  
+
   if (!userId) {
-    throw new Error('Unauthorized: Authentication required');
+    throw new Error("Unauthorized: Authentication required");
   }
 
   return userId;
@@ -85,10 +85,10 @@ export async function requireAuth() {
  */
 export async function requireAdmin() {
   const userId = await requireAuth();
-  const isAdmin = await checkRole('admin');
-  
+  const isAdmin = await checkRole("admin");
+
   if (!isAdmin) {
-    throw new Error('Forbidden: Admin access required');
+    throw new Error("Forbidden: Admin access required");
   }
 
   return userId;
@@ -97,15 +97,17 @@ export async function requireAdmin() {
 /**
  * Check if user owns a resource or is an admin
  */
-export async function canManageResource(resourceOwnerId: string): Promise<boolean> {
+export async function canManageResource(
+  resourceOwnerId: string,
+): Promise<boolean> {
   const user = await getCurrentUser();
-  
+
   if (!user) {
     return false;
   }
 
   // Admins can manage any resource
-  if (user.role === 'admin') {
+  if (user.role === "admin") {
     return true;
   }
 
@@ -118,21 +120,26 @@ export async function canManageResource(resourceOwnerId: string): Promise<boolea
  * Returns authorization result with user data or error response
  */
 export async function canManageBattle(battleId: string): Promise<
-  | { authorized: true; user: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>; isOwner: boolean; isAdmin: boolean }
+  | {
+      authorized: true;
+      user: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>;
+      isOwner: boolean;
+      isAdmin: boolean;
+    }
   | { authorized: false; error: string; status: number }
 > {
   const user = await getCurrentUser();
-  
+
   if (!user) {
     return {
       authorized: false,
-      error: 'Forbidden: Access denied',
+      error: "Forbidden: Access denied",
       status: 403,
     };
   }
 
   // Get battle record to check ownership
-  const { battles } = await import('@/lib/db/schema');
+  const { battles } = await import("@/lib/db/schema");
   const battleRecord = await db.query.battles.findFirst({
     where: eq(battles.id, battleId),
   });
@@ -140,18 +147,18 @@ export async function canManageBattle(battleId: string): Promise<
   if (!battleRecord) {
     return {
       authorized: false,
-      error: 'Battle not found',
+      error: "Battle not found",
       status: 404,
     };
   }
 
   const isOwner = battleRecord.createdBy === user.id;
-  const isAdmin = user.role === 'admin';
+  const isAdmin = user.role === "admin";
 
   if (!isOwner && !isAdmin) {
     return {
       authorized: false,
-      error: 'Forbidden: You can only control your own battles',
+      error: "Forbidden: You can only control your own battles",
       status: 403,
     };
   }
@@ -163,4 +170,3 @@ export async function canManageBattle(battleId: string): Promise<
     isAdmin,
   };
 }
-

@@ -1,7 +1,7 @@
 import {
-  getPersonaGroups,
-  getClientPersona,
   type ClientPersona,
+  getClientPersona,
+  getPersonaGroups,
 } from "@/lib/shared/personas/client";
 
 const personaGroups = getPersonaGroups();
@@ -11,7 +11,7 @@ const personaGroups = getPersonaGroups();
  */
 export function getNextVariantId(
   primaryId: string,
-  currentId?: string | null
+  currentId?: string | null,
 ): string | null {
   const group = personaGroups[primaryId] || [primaryId];
   if (!currentId) return group[0] ?? null;
@@ -19,13 +19,16 @@ export function getNextVariantId(
   if (i === -1) return group[0] ?? null;
   // Return null after cycling through all variants to allow deselection
   const nextIndex = i + 1;
-  return nextIndex < group.length ? group[nextIndex] ?? null : null;
+  return nextIndex < group.length ? (group[nextIndex] ?? null) : null;
 }
 
 /**
  * Check if a persona ID belongs to a persona group
  */
-export function isInGroup(personaId: string | null, primaryId: string): boolean {
+export function isInGroup(
+  personaId: string | null,
+  primaryId: string,
+): boolean {
   if (!personaId) return false;
   const group = personaGroups[primaryId] || [primaryId];
   return group.includes(personaId);
@@ -46,7 +49,7 @@ export function getHoverPreviewPersona(
   primary: ClientPersona,
   selectionStep: "player1" | "player2" | "complete",
   player1: ClientPersona | null,
-  player2: ClientPersona | null
+  player2: ClientPersona | null,
 ): ClientPersona {
   const group = personaGroups[primary.id] || [primary.id];
   const p1InGroup = !!(player1 && group.includes(player1.id));
@@ -77,11 +80,11 @@ export function cyclePlayerVariant(
   currentPersona: ClientPersona | null,
   isTouchDevice: boolean,
   setPersona: (persona: ClientPersona | null) => void,
-  setHoveredPersona: (persona: ClientPersona | null) => void
+  setHoveredPersona: (persona: ClientPersona | null) => void,
 ): void {
   const currentId = currentPersona?.id ?? null;
   const nextId = getNextVariantId(primaryId, currentId);
-  
+
   if (nextId) {
     const nextPersona = getClientPersona(nextId);
     if (nextPersona) {
@@ -108,11 +111,11 @@ export function selectNewPersona(
   primaryId: string,
   isTouchDevice: boolean,
   setPersona: (persona: ClientPersona | null) => void,
-  setHoveredPersona: (persona: ClientPersona | null) => void
+  setHoveredPersona: (persona: ClientPersona | null) => void,
 ): void {
   const nextId = getNextVariantId(primaryId, null);
   const nextPersona = nextId ? getClientPersona(nextId) : null;
-  
+
   if (nextPersona) {
     setPersona(nextPersona);
     if (!isTouchDevice) {
@@ -120,4 +123,3 @@ export function selectNewPersona(
     }
   }
 }
-

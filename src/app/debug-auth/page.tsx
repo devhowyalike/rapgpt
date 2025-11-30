@@ -1,6 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function DebugAuthPage() {
   const authData = await auth();
@@ -23,7 +23,7 @@ export default async function DebugAuthPage() {
                 sessionClaims: authData.sessionClaims,
               },
               null,
-              2
+              2,
             )}
           </pre>
         </div>
@@ -42,7 +42,7 @@ export default async function DebugAuthPage() {
                   }
                 : null,
               null,
-              2
+              2,
             )}
           </pre>
         </div>

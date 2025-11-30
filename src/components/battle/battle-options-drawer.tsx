@@ -4,10 +4,10 @@
 
 "use client";
 
-import { MessageSquare, Vote, Pause, Shield } from "lucide-react";
+import { MessageSquare, Pause, Shield, Vote } from "lucide-react";
 import Link from "next/link";
-import { Switch } from "@/components/ui/switch";
 import { BattleDrawer } from "@/components/ui/battle-drawer";
+import { Switch } from "@/components/ui/switch";
 
 interface BattleOptionsDrawerProps {
   open: boolean;

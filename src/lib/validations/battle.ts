@@ -3,8 +3,8 @@
  * Used for API request/response validation
  */
 
-import { z } from 'zod';
-import { sanitizeText } from '@/lib/sanitization';
+import { z } from "zod";
+import { sanitizeText } from "@/lib/sanitization";
 
 // Persona validation
 export const personaSchema = z.object({
@@ -67,7 +67,7 @@ export const roundScoreSchema = z.object({
       totalScore: z.number(),
     }),
   }),
-  winner: z.enum(['player1', 'player2']).nullable(),
+  winner: z.enum(["player1", "player2"]).nullable(),
 });
 
 // Comment validation
@@ -85,14 +85,14 @@ export const battleSchema = z.object({
   title: z.string(),
   month: z.string(),
   year: z.number().int(),
-  status: z.enum(['upcoming', 'paused', 'completed']),
+  status: z.enum(["upcoming", "paused", "completed"]),
   stageId: z.string(),
   personas: z.object({
     player1: personaSchema,
     player2: personaSchema,
   }),
   currentRound: z.number().int().min(1).max(3),
-  currentTurn: z.enum(['player1', 'player2']).nullable(),
+  currentTurn: z.enum(["player1", "player2"]).nullable(),
   verses: z.array(verseSchema),
   scores: z.array(roundScoreSchema),
   comments: z.array(commentSchema),
@@ -100,21 +100,26 @@ export const battleSchema = z.object({
   createdAt: z.number(),
   updatedAt: z.number(),
   // Optional creator field
-  creator: z.object({
-    userId: z.string(),
-    displayName: z.string(),
-    imageUrl: z.string().nullable().optional(),
-  }).nullable().optional(),
+  creator: z
+    .object({
+      userId: z.string(),
+      displayName: z.string(),
+      imageUrl: z.string().nullable().optional(),
+    })
+    .nullable()
+    .optional(),
   // Live battle fields
   isLive: z.boolean().optional(),
   liveStartedAt: z.number().optional(),
-  adminControlMode: z.enum(['manual', 'auto']).optional(),
-  autoPlayConfig: z.object({
-    verseDelay: z.number().optional(),
-    autoAdvance: z.boolean().optional(),
-    readingDuration: z.number().optional(),
-    votingDuration: z.number().optional(),
-  }).optional(),
+  adminControlMode: z.enum(["manual", "auto"]).optional(),
+  autoPlayConfig: z
+    .object({
+      verseDelay: z.number().optional(),
+      autoAdvance: z.boolean().optional(),
+      readingDuration: z.number().optional(),
+      votingDuration: z.number().optional(),
+    })
+    .optional(),
   // Battle options
   autoStartOnAdvance: z.boolean().optional(),
 });
@@ -158,4 +163,3 @@ export type CreateBattleResponse = z.infer<typeof createBattleResponseSchema>;
 export type VoteRequest = z.infer<typeof voteRequestSchema>;
 export type CommentRequest = z.infer<typeof commentRequestSchema>;
 export type GenerateVerseRequest = z.infer<typeof generateVerseRequestSchema>;
-

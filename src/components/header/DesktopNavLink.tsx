@@ -23,11 +23,13 @@ export function DesktopNavLink({
     : "text-gray-400 hover:text-white hover:bg-gray-800";
 
   return (
-    <Link href={href} className={`${baseClasses} ${activeClasses}`} prefetch={false}>
+    <Link
+      href={href}
+      className={`${baseClasses} ${activeClasses}`}
+      prefetch={false}
+    >
       {icon}
       <span>{label}</span>
     </Link>
   );
 }
-
-

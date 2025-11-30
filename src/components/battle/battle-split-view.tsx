@@ -5,9 +5,9 @@
 
 "use client";
 
-import type { Battle, RoundScore, PersonaPosition } from "@/lib/shared";
-import { PersonaSection } from "./persona-section";
+import type { Battle, PersonaPosition, RoundScore } from "@/lib/shared";
 import { cn } from "@/lib/utils";
+import { PersonaSection } from "./persona-section";
 
 interface BattleSplitViewProps {
   battle: Battle;

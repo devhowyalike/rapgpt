@@ -2,11 +2,11 @@
  * Battle storage using Vercel Postgres with Drizzle ORM
  */
 
-import type { Battle } from '@/lib/shared';
-import { db } from '@/lib/db/client';
-import { battles, users } from '@/lib/db/schema';
-import { eq, desc } from 'drizzle-orm';
-import { decrypt } from '@/lib/auth/encryption';
+import { desc, eq } from "drizzle-orm";
+import { decrypt } from "@/lib/auth/encryption";
+import { db } from "@/lib/db/client";
+import { battles, users } from "@/lib/db/schema";
+import type { Battle } from "@/lib/shared";
 
 /**
  * Get battle by ID
@@ -22,13 +22,13 @@ export async function getBattleById(id: string): Promise<Battle | null> {
       .leftJoin(users, eq(battles.createdBy, users.id))
       .where(eq(battles.id, id))
       .limit(1);
-    
+
     if (result.length === 0) {
       return null;
     }
-    
+
     const { battle, creator } = result[0];
-    
+
     // Build creator info - always include userId for ownership checks
     // Display name and image only shown if profile is public
     let creatorInfo = null;
@@ -37,38 +37,44 @@ export async function getBattleById(id: string): Promise<Battle | null> {
         // Always include userId for ownership verification
         creatorInfo = {
           userId: creator.id,
-          displayName: 'Anonymous',
+          displayName: "Anonymous",
           imageUrl: null as string | null,
         };
-        
+
         // Only populate display details if profile is public
         if (creator.isProfilePublic) {
-          creatorInfo.displayName = creator.encryptedDisplayName 
+          creatorInfo.displayName = creator.encryptedDisplayName
             ? decrypt(creator.encryptedDisplayName)
-            : (creator.encryptedName ? decrypt(creator.encryptedName) : 'Anonymous');
+            : creator.encryptedName
+              ? decrypt(creator.encryptedName)
+              : "Anonymous";
           creatorInfo.imageUrl = creator.imageUrl;
         }
       } catch (error) {
-        console.error('Error decrypting creator info:', error);
+        console.error("Error decrypting creator info:", error);
         // Still keep the userId for ownership checks
-        creatorInfo = { userId: creator.id, displayName: 'Anonymous', imageUrl: null };
+        creatorInfo = {
+          userId: creator.id,
+          displayName: "Anonymous",
+          imageUrl: null,
+        };
       }
     }
-    
+
     // Transform database format back to Battle type
     return {
       id: battle.id,
       title: battle.title,
       month: battle.month,
       year: battle.year,
-      status: battle.status as Battle['status'],
+      status: battle.status as Battle["status"],
       stageId: battle.stageId,
       personas: {
         player1: battle.player1Persona,
         player2: battle.player2Persona,
       },
       currentRound: battle.currentRound,
-      currentTurn: battle.currentTurn as Battle['currentTurn'],
+      currentTurn: battle.currentTurn as Battle["currentTurn"],
       verses: battle.verses,
       scores: battle.scores,
       comments: battle.comments,
@@ -84,13 +90,16 @@ export async function getBattleById(id: string): Promise<Battle | null> {
       // Live battle fields
       isLive: battle.isLive,
       liveStartedAt: battle.liveStartedAt?.getTime(),
-      adminControlMode: battle.adminControlMode as 'manual' | 'auto' | undefined,
-      autoPlayConfig: battle.autoPlayConfig as Battle['autoPlayConfig'],
+      adminControlMode: battle.adminControlMode as
+        | "manual"
+        | "auto"
+        | undefined,
+      autoPlayConfig: battle.autoPlayConfig as Battle["autoPlayConfig"],
       // AI-generated song
-      generatedSong: battle.generatedSong as Battle['generatedSong'],
+      generatedSong: battle.generatedSong as Battle["generatedSong"],
     };
   } catch (error) {
-    console.error('Error getting battle by ID:', error);
+    console.error("Error getting battle by ID:", error);
     return null;
   }
 }
@@ -105,12 +114,16 @@ export async function saveBattle(
     isFeatured?: boolean;
     votingEnabled?: boolean;
     commentsEnabled?: boolean;
-  }
+  },
 ): Promise<void> {
   try {
     // Check if battle exists
-    const existing = await db.select().from(battles).where(eq(battles.id, battle.id)).limit(1);
-    
+    const existing = await db
+      .select()
+      .from(battles)
+      .where(eq(battles.id, battle.id))
+      .limit(1);
+
     const battleData: any = {
       id: battle.id,
       title: battle.title,
@@ -133,14 +146,16 @@ export async function saveBattle(
       commentsEnabled: battle.commentsEnabled ?? true,
       // Live battle fields
       isLive: battle.isLive || false,
-      liveStartedAt: battle.liveStartedAt ? new Date(battle.liveStartedAt) : null,
-      adminControlMode: battle.adminControlMode || 'manual',
+      liveStartedAt: battle.liveStartedAt
+        ? new Date(battle.liveStartedAt)
+        : null,
+      adminControlMode: battle.adminControlMode || "manual",
       autoPlayConfig: battle.autoPlayConfig || null,
       autoStartOnAdvance: battle.autoStartOnAdvance ?? true,
       // AI-generated song
       generatedSong: battle.generatedSong || null,
     };
-    
+
     // Add optional fields if provided (only on insert)
     if (existing.length === 0) {
       if (options?.createdBy !== undefined) {
@@ -155,7 +170,7 @@ export async function saveBattle(
       if (options?.commentsEnabled !== undefined) {
         battleData.commentsEnabled = options.commentsEnabled;
       }
-      
+
       // Insert new battle
       await db.insert(battles).values(battleData);
     } else {
@@ -169,7 +184,7 @@ export async function saveBattle(
         .where(eq(battles.id, battle.id));
     }
   } catch (error) {
-    console.error('Error saving battle:', error);
+    console.error("Error saving battle:", error);
     throw error;
   }
 }
@@ -187,40 +202,42 @@ export async function getAllBattles(): Promise<Battle[]> {
       .from(battles)
       .leftJoin(users, eq(battles.createdBy, users.id))
       .orderBy(desc(battles.createdAt));
-    
+
     // Transform database format back to Battle type
     return result.map(({ battle, creator }) => {
       // Decrypt creator display name if available
       let creatorInfo = null;
       if (creator && creator.isProfilePublic) {
         try {
-          const displayName = creator.encryptedDisplayName 
+          const displayName = creator.encryptedDisplayName
             ? decrypt(creator.encryptedDisplayName)
-            : (creator.encryptedName ? decrypt(creator.encryptedName) : 'Anonymous');
-          
+            : creator.encryptedName
+              ? decrypt(creator.encryptedName)
+              : "Anonymous";
+
           creatorInfo = {
             userId: creator.id, // Use internal user ID for profile links
             displayName,
             imageUrl: creator.imageUrl,
           };
         } catch (error) {
-          console.error('Error decrypting creator info:', error);
+          console.error("Error decrypting creator info:", error);
         }
       }
-      
+
       return {
         id: battle.id,
         title: battle.title,
         month: battle.month,
         year: battle.year,
-        status: battle.status as Battle['status'],
+        status: battle.status as Battle["status"],
         stageId: battle.stageId,
         personas: {
           player1: battle.player1Persona,
           player2: battle.player2Persona,
         },
         currentRound: battle.currentRound,
-        currentTurn: battle.currentTurn as Battle['currentTurn'],
+        currentTurn: battle.currentTurn as Battle["currentTurn"],
         verses: battle.verses,
         scores: battle.scores,
         comments: battle.comments,
@@ -236,14 +253,17 @@ export async function getAllBattles(): Promise<Battle[]> {
         // Live battle fields
         isLive: battle.isLive,
         liveStartedAt: battle.liveStartedAt?.getTime(),
-        adminControlMode: battle.adminControlMode as 'manual' | 'auto' | undefined,
-        autoPlayConfig: battle.autoPlayConfig as Battle['autoPlayConfig'],
+        adminControlMode: battle.adminControlMode as
+          | "manual"
+          | "auto"
+          | undefined,
+        autoPlayConfig: battle.autoPlayConfig as Battle["autoPlayConfig"],
         // AI-generated song
-        generatedSong: battle.generatedSong as Battle['generatedSong'],
+        generatedSong: battle.generatedSong as Battle["generatedSong"],
       };
     });
   } catch (error) {
-    console.error('Error getting all battles:', error);
+    console.error("Error getting all battles:", error);
     return [];
   }
 }
@@ -262,40 +282,42 @@ export async function getFeaturedBattles(): Promise<Battle[]> {
       .leftJoin(users, eq(battles.createdBy, users.id))
       .where(eq(battles.isFeatured, true))
       .orderBy(desc(battles.createdAt));
-    
+
     // Transform database format back to Battle type
     return result.map(({ battle, creator }) => {
       // Decrypt creator display name if available
       let creatorInfo = null;
       if (creator && creator.isProfilePublic) {
         try {
-          const displayName = creator.encryptedDisplayName 
+          const displayName = creator.encryptedDisplayName
             ? decrypt(creator.encryptedDisplayName)
-            : (creator.encryptedName ? decrypt(creator.encryptedName) : 'Anonymous');
-          
+            : creator.encryptedName
+              ? decrypt(creator.encryptedName)
+              : "Anonymous";
+
           creatorInfo = {
             userId: creator.id, // Use internal user ID for profile links
             displayName,
             imageUrl: creator.imageUrl,
           };
         } catch (error) {
-          console.error('Error decrypting creator info:', error);
+          console.error("Error decrypting creator info:", error);
         }
       }
-      
+
       return {
         id: battle.id,
         title: battle.title,
         month: battle.month,
         year: battle.year,
-        status: battle.status as Battle['status'],
+        status: battle.status as Battle["status"],
         stageId: battle.stageId,
         personas: {
           player1: battle.player1Persona,
           player2: battle.player2Persona,
         },
         currentRound: battle.currentRound,
-        currentTurn: battle.currentTurn as Battle['currentTurn'],
+        currentTurn: battle.currentTurn as Battle["currentTurn"],
         verses: battle.verses,
         scores: battle.scores,
         comments: battle.comments,
@@ -311,14 +333,17 @@ export async function getFeaturedBattles(): Promise<Battle[]> {
         // Live battle fields
         isLive: battle.isLive,
         liveStartedAt: battle.liveStartedAt?.getTime(),
-        adminControlMode: battle.adminControlMode as 'manual' | 'auto' | undefined,
-        autoPlayConfig: battle.autoPlayConfig as Battle['autoPlayConfig'],
+        adminControlMode: battle.adminControlMode as
+          | "manual"
+          | "auto"
+          | undefined,
+        autoPlayConfig: battle.autoPlayConfig as Battle["autoPlayConfig"],
         // AI-generated song
-        generatedSong: battle.generatedSong as Battle['generatedSong'],
+        generatedSong: battle.generatedSong as Battle["generatedSong"],
       };
     });
   } catch (error) {
-    console.error('Error getting featured battles:', error);
+    console.error("Error getting featured battles:", error);
     return [];
   }
 }
@@ -329,7 +354,7 @@ export async function getFeaturedBattles(): Promise<Battle[]> {
 export async function getCurrentBattle(): Promise<Battle | null> {
   const featuredBattles = await getFeaturedBattles();
   // Only return paused featured battles, not completed ones
-  return featuredBattles.find(b => b.status === 'paused') || null;
+  return featuredBattles.find((b) => b.status === "paused") || null;
 }
 
 /**
@@ -346,40 +371,42 @@ export async function getLiveBattles(): Promise<Battle[]> {
       .leftJoin(users, eq(battles.createdBy, users.id))
       .where(eq(battles.isLive, true))
       .orderBy(desc(battles.liveStartedAt));
-    
+
     // Transform database format back to Battle type
     return result.map(({ battle, creator }) => {
       // Decrypt creator display name if available
       let creatorInfo = null;
       if (creator && creator.isProfilePublic) {
         try {
-          const displayName = creator.encryptedDisplayName 
+          const displayName = creator.encryptedDisplayName
             ? decrypt(creator.encryptedDisplayName)
-            : (creator.encryptedName ? decrypt(creator.encryptedName) : 'Anonymous');
-          
+            : creator.encryptedName
+              ? decrypt(creator.encryptedName)
+              : "Anonymous";
+
           creatorInfo = {
             userId: creator.id, // Use internal user ID for profile links
             displayName,
             imageUrl: creator.imageUrl,
           };
         } catch (error) {
-          console.error('Error decrypting creator info:', error);
+          console.error("Error decrypting creator info:", error);
         }
       }
-      
+
       return {
         id: battle.id,
         title: battle.title,
         month: battle.month,
         year: battle.year,
-        status: battle.status as Battle['status'],
+        status: battle.status as Battle["status"],
         stageId: battle.stageId,
         personas: {
           player1: battle.player1Persona,
           player2: battle.player2Persona,
         },
         currentRound: battle.currentRound,
-        currentTurn: battle.currentTurn as Battle['currentTurn'],
+        currentTurn: battle.currentTurn as Battle["currentTurn"],
         verses: battle.verses,
         scores: battle.scores,
         comments: battle.comments,
@@ -394,14 +421,17 @@ export async function getLiveBattles(): Promise<Battle[]> {
         // Live battle fields
         isLive: battle.isLive,
         liveStartedAt: battle.liveStartedAt?.getTime(),
-        adminControlMode: battle.adminControlMode as 'manual' | 'auto' | undefined,
-        autoPlayConfig: battle.autoPlayConfig as Battle['autoPlayConfig'],
+        adminControlMode: battle.adminControlMode as
+          | "manual"
+          | "auto"
+          | undefined,
+        autoPlayConfig: battle.autoPlayConfig as Battle["autoPlayConfig"],
         // AI-generated song
-        generatedSong: battle.generatedSong as Battle['generatedSong'],
+        generatedSong: battle.generatedSong as Battle["generatedSong"],
       };
     });
   } catch (error) {
-    console.error('Error getting live battles:', error);
+    console.error("Error getting live battles:", error);
     return [];
   }
 }
@@ -414,7 +444,7 @@ export async function deleteBattle(id: string): Promise<boolean> {
     await db.delete(battles).where(eq(battles.id, id));
     return true;
   } catch (error) {
-    console.error('Error deleting battle:', error);
+    console.error("Error deleting battle:", error);
     return false;
   }
 }

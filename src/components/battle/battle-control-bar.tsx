@@ -5,21 +5,21 @@
 "use client";
 
 import {
-  Play,
   ArrowRight,
-  Pause,
-  Settings,
   CheckCircle,
+  Pause,
+  Play,
   Radio,
+  Settings,
   StopCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { ScoreCalcAnimation } from "@/components/score-calc-animation";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import type { Battle } from "@/lib/shared";
 import { getAdvanceRoundButtonText } from "@/lib/shared";
-import { ScoreCalcAnimation } from "@/components/score-calc-animation";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { BattleOptionsDropdown } from "./battle-options-dropdown";
 import { MobileActionButtons } from "./mobile-action-buttons";
 
@@ -99,14 +99,11 @@ export function BattleControlBar({
         isLoadingPermissions
           ? undefined
           : isLive
-          ? onEndLive
-          : () => setShowGoLiveConfirmation(true)
+            ? onEndLive
+            : () => setShowGoLiveConfirmation(true)
       }
       disabled={
-        isLoadingPermissions ||
-        isStartingLive ||
-        isStoppingLive ||
-        isGenerating
+        isLoadingPermissions || isStartingLive || isStoppingLive || isGenerating
       }
       className={`
         w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
@@ -114,8 +111,8 @@ export function BattleControlBar({
           isLoadingPermissions
             ? "bg-gray-800/50 border-gray-700 cursor-wait"
             : isLive
-            ? "bg-gray-700 hover:bg-gray-600 border-gray-500"
-            : "bg-red-600 hover:bg-red-700 border-red-500 md:animate-pulse"
+              ? "bg-gray-700 hover:bg-gray-600 border-gray-500"
+              : "bg-red-600 hover:bg-red-700 border-red-500 md:animate-pulse"
         }
       `}
       title={isLive ? "End Live" : "Go Live"}
@@ -163,12 +160,12 @@ export function BattleControlBar({
             isCalculatingScores
               ? undefined
               : isReadingPhase && showVoting
-              ? onBeginVoting
-              : canAdvance
-              ? onAdvanceRound
-              : canGenerate
-              ? onGenerateVerse
-              : undefined
+                ? onBeginVoting
+                : canAdvance
+                  ? onAdvanceRound
+                  : canGenerate
+                    ? onGenerateVerse
+                    : undefined
           }
           disabled={
             isGenerating ||
@@ -183,16 +180,16 @@ export function BattleControlBar({
               isCalculatingScores
                 ? "bg-linear-to-r from-amber-600 to-yellow-600"
                 : isGenerating || isPreGenerating
-                ? "bg-linear-to-r from-teal-600 to-cyan-600"
-                : isReadingPhase
-                ? "bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
-                : isVotingPhase
-                ? "bg-linear-to-r from-purple-600 to-pink-600 animate-pulse"
-                : canAdvance
-                ? "bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 animate-pulse"
-                : canGenerate
-                ? "bg-linear-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg shadow-green-500/50"
-                : "bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"
+                  ? "bg-linear-to-r from-teal-600 to-cyan-600"
+                  : isReadingPhase
+                    ? "bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
+                    : isVotingPhase
+                      ? "bg-linear-to-r from-purple-600 to-pink-600 animate-pulse"
+                      : canAdvance
+                        ? "bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 animate-pulse"
+                        : canGenerate
+                          ? "bg-linear-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg shadow-green-500/50"
+                          : "bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"
             }
             ${
               isGenerating ||

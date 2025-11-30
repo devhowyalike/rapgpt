@@ -4,22 +4,22 @@
 
 "use client";
 
-import type { Battle, PersonaPosition } from "@/lib/shared";
-import { RoundTracker } from "./round-tracker";
-import { getBattleProgress, getWinnerPosition } from "@/lib/battle-engine";
 import { motion } from "framer-motion";
-import { BattleBell } from "./battle-bell";
-import { VictoryConfetti } from "./victory-confetti";
-import { useEffect, useRef, useLayoutEffect, useState } from "react";
-import { getStage, DEFAULT_STAGE } from "@/lib/shared/stages";
-import { useRoundData } from "@/lib/hooks/use-round-data";
-import { BattleHeader } from "./battle/battle-header";
-import { BattleSplitView } from "./battle/battle-split-view";
-import { BattleScoreSection } from "./battle/battle-score-section";
-import { useScoreRevealDelay } from "@/lib/hooks/use-score-reveal-delay";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { getBattleProgress, getWinnerPosition } from "@/lib/battle-engine";
 import { useIsMobile } from "@/lib/hooks/use-is-mobile";
-import { LiveStatusBadge } from "./live-status-badge";
+import { useRoundData } from "@/lib/hooks/use-round-data";
+import { useScoreRevealDelay } from "@/lib/hooks/use-score-reveal-delay";
+import type { Battle, PersonaPosition } from "@/lib/shared";
+import { DEFAULT_STAGE, getStage } from "@/lib/shared/stages";
 import type { ConnectionStatus } from "@/lib/websocket/types";
+import { BattleHeader } from "./battle/battle-header";
+import { BattleScoreSection } from "./battle/battle-score-section";
+import { BattleSplitView } from "./battle/battle-split-view";
+import { BattleBell } from "./battle-bell";
+import { LiveStatusBadge } from "./live-status-badge";
+import { RoundTracker } from "./round-tracker";
+import { VictoryConfetti } from "./victory-confetti";
 
 interface BattleStageProps {
   battle: Battle;
@@ -79,7 +79,7 @@ export function BattleStage({
     scoresAvailable && currentRoundScore ? currentRoundScore.round : null;
   const { revealedRound } = useScoreRevealDelay(
     scoresAvailableRound,
-    scoreDelaySeconds
+    scoreDelaySeconds,
   );
 
   const shouldShowScores =
@@ -115,7 +115,7 @@ export function BattleStage({
       const headerPx = parseFloat(headerVar || "0") || 0;
 
       const headerEl = document.querySelector(
-        "[data-battle-header]"
+        "[data-battle-header]",
       ) as HTMLElement | null;
       const battleHeaderHeight =
         (headerEl?.getBoundingClientRect().height as number) || 0;
@@ -130,7 +130,7 @@ export function BattleStage({
     let ro: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined") {
       const headerEl = document.querySelector(
-        "[data-battle-header]"
+        "[data-battle-header]",
       ) as HTMLElement | null;
       if (headerEl) {
         ro = new ResizeObserver(() => recalc());
@@ -163,10 +163,10 @@ export function BattleStage({
     const player2VerseId = currentRoundVerses.player2?.id;
     if (player1VerseId && player2VerseId) {
       const player1VerseIndex = battle.verses.findIndex(
-        (v) => v.id === player1VerseId
+        (v) => v.id === player1VerseId,
       );
       const player2VerseIndex = battle.verses.findIndex(
-        (v) => v.id === player2VerseId
+        (v) => v.id === player2VerseId,
       );
       mobileActiveSide =
         player2VerseIndex > player1VerseIndex ? "player2" : "player1";

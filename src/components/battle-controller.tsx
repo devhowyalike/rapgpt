@@ -5,35 +5,35 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import type { Battle } from "@/lib/shared";
-import { BattleStage } from "./battle-stage";
-import { BattleReplay } from "./battle-replay";
-import { useMobileFooterControls } from "@/lib/hooks/use-mobile-footer-controls";
-import { SiteHeader } from "./site-header";
-import { BattleLoading } from "./battle-loading";
-import { useBattleStore } from "@/lib/battle-store";
-import { getNextPerformer, isRoundComplete } from "@/lib/battle-engine";
-import { AlertTriangle, Settings } from "lucide-react";
-import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
 import { useAuth, useUser } from "@clerk/nextjs";
-import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
-import { useBattleFeatures } from "@/lib/hooks/use-battle-features";
+import { AlertTriangle, Settings } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  useBattleVote,
-  useBattleComment,
-} from "@/lib/hooks/use-battle-actions";
-import { useMobileDrawer } from "@/lib/hooks/use-mobile-drawer";
-import {
+  BattleControlBar,
+  BattleOptionsDrawer,
+  BattleOptionsDropdown,
   MobileActionButtons,
   SidebarContainer,
-  BattleControlBar,
-  BattleOptionsDropdown,
-  BattleOptionsDrawer,
 } from "@/components/battle";
-import { useScoreRevealDelay } from "@/lib/hooks/use-score-reveal-delay";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { getNextPerformer, isRoundComplete } from "@/lib/battle-engine";
+import { useBattleStore } from "@/lib/battle-store";
+import {
+  useBattleComment,
+  useBattleVote,
+} from "@/lib/hooks/use-battle-actions";
+import { useBattleFeatures } from "@/lib/hooks/use-battle-features";
+import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
 import { useLiveBattleState } from "@/lib/hooks/use-live-battle-state";
+import { useMobileDrawer } from "@/lib/hooks/use-mobile-drawer";
+import { useMobileFooterControls } from "@/lib/hooks/use-mobile-footer-controls";
+import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
+import { useScoreRevealDelay } from "@/lib/hooks/use-score-reveal-delay";
+import type { Battle } from "@/lib/shared";
+import { BattleLoading } from "./battle-loading";
+import { BattleReplay } from "./battle-replay";
+import { BattleStage } from "./battle-stage";
+import { SiteHeader } from "./site-header";
 
 interface BattleControllerProps {
   initialBattle: Battle;
@@ -91,7 +91,7 @@ export function BattleController({
   useExclusiveDrawer(
     "mobile-comments-voting",
     showMobileDrawer,
-    setShowMobileDrawer
+    setShowMobileDrawer,
   );
 
   // Check if user is admin or owner
@@ -242,7 +242,7 @@ export function BattleController({
       : null;
   const { isDelaying: isCalculatingScores } = useScoreRevealDelay(
     scoresAvailableRound,
-    scoreDelaySeconds
+    scoreDelaySeconds,
   );
 
   // Battle action handlers
@@ -283,7 +283,7 @@ export function BattleController({
       setBattle(updatedBattle);
       await saveBattle();
     },
-    [battle, setBattle, saveBattle]
+    [battle, setBattle, saveBattle],
   );
 
   // Handler to toggle commenting on/off
@@ -294,7 +294,7 @@ export function BattleController({
       setBattle(updatedBattle);
       await saveBattle();
     },
-    [battle, setBattle, saveBattle]
+    [battle, setBattle, saveBattle],
   );
 
   // Generate verse - handles both local and live modes
@@ -458,7 +458,7 @@ export function BattleController({
         hasBottomControls: true,
         showCommenting,
         showVoting,
-      }
+      },
     );
 
     return (

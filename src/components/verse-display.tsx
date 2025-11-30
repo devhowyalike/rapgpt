@@ -4,9 +4,9 @@
 
 "use client";
 
-import { useRef, useEffect } from "react";
-import type { Verse, Persona, PersonaPosition } from "@/lib/shared";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef } from "react";
+import type { Persona, PersonaPosition, Verse } from "@/lib/shared";
 
 interface VerseDisplayProps {
   verse?: Verse;

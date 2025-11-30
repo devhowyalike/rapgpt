@@ -4,17 +4,17 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { getNextPerformer } from "@/lib/battle-engine";
+import { useBattleStore } from "@/lib/battle-store";
+import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
 import type { Battle } from "@/lib/shared";
-import { BattleStage } from "../battle-stage";
-import { BattleSidebar } from "../battle-sidebar";
-import { BattleControlPanel } from "./battle-control-panel";
-import { SiteHeader } from "../site-header";
 import { useWebSocket } from "@/lib/websocket/client";
 import type { WebSocketEvent } from "@/lib/websocket/types";
-import { useBattleStore } from "@/lib/battle-store";
-import { getNextPerformer } from "@/lib/battle-engine";
-import { useNavigationGuard } from "@/lib/hooks/use-navigation-guard";
+import { BattleSidebar } from "../battle-sidebar";
+import { BattleStage } from "../battle-stage";
+import { SiteHeader } from "../site-header";
+import { BattleControlPanel } from "./battle-control-panel";
 
 interface AdminBattleControlProps {
   initialBattle: Battle;
@@ -23,7 +23,7 @@ interface AdminBattleControlProps {
 export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
   console.log(
     "[AdminBattleControl] Component mounting with battle:",
-    initialBattle?.id
+    initialBattle?.id,
   );
 
   const {
@@ -44,7 +44,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
   useEffect(() => {
     console.log(
       "[AdminBattleControl] Setting initial battle:",
-      initialBattle?.id
+      initialBattle?.id,
     );
     setBattle(initialBattle);
   }, [initialBattle, setBattle]);
@@ -100,7 +100,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
           break;
       }
     },
-    [battle, setBattle, setStreamingVerse, addVerse]
+    [battle, setBattle, setStreamingVerse, addVerse],
   );
 
   // Connect to WebSocket as admin
@@ -115,7 +115,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
     "[AdminBattleControl] WebSocket status:",
     wsStatus,
     "viewers:",
-    viewerCount
+    viewerCount,
   );
 
   // Fetch latest battle state when WebSocket connects (for sync)
@@ -129,7 +129,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
             console.log(
               "[Admin] Received synced state with",
               data.battle.comments.length,
-              "comments"
+              "comments",
             );
             setBattle(data.battle);
           }
@@ -215,7 +215,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
         `/api/battle/${initialBattle.id}/live/start`,
         {
           method: "POST",
-        }
+        },
       );
 
       if (!response.ok) {
@@ -224,7 +224,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
 
       const { battle: updatedBattle } = await response.json();
       setBattle(updatedBattle);
-      
+
       // Notify header to refresh live battles
       window.dispatchEvent(new CustomEvent("battle:status-changed"));
     } catch (error) {
@@ -239,7 +239,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
         `/api/battle/${initialBattle.id}/live/stop`,
         {
           method: "POST",
-        }
+        },
       );
 
       if (!response.ok) {
@@ -248,7 +248,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
 
       const { battle: updatedBattle } = await response.json();
       setBattle(updatedBattle);
-      
+
       // Notify header to refresh live battles
       window.dispatchEvent(new CustomEvent("battle:status-changed"));
     } catch (error) {
@@ -277,7 +277,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
 
   const handleVote = async (
     round: number,
-    personaId: string
+    personaId: string,
   ): Promise<boolean> => {
     // Admins can vote like normal users
     if (!battle) return false;
@@ -341,7 +341,7 @@ export function AdminBattleControl({ initialBattle }: AdminBattleControlProps) {
 
   console.log(
     "[AdminBattleControl] Rendering admin panel for battle:",
-    battle.id
+    battle.id,
   );
 
   return (

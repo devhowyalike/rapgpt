@@ -1,11 +1,11 @@
 import { useState } from "react";
-import type { ClientPersona } from "@/lib/shared/personas/client";
-import { getPersonaGroups } from "@/lib/shared/personas/client";
 import {
   cyclePlayerVariant,
-  selectNewPersona,
   isInGroup,
+  selectNewPersona,
 } from "@/lib/persona-selection-utils";
+import type { ClientPersona } from "@/lib/shared/personas/client";
+import { getPersonaGroups } from "@/lib/shared/personas/client";
 
 const personaGroups = getPersonaGroups();
 
@@ -22,7 +22,7 @@ interface UsePersonaSelectionReturn {
   handlePersonaClick: (
     primary: ClientPersona,
     isTouchDevice: boolean,
-    setHoveredPersona: (persona: ClientPersona | null) => void
+    setHoveredPersona: (persona: ClientPersona | null) => void,
   ) => void;
 }
 
@@ -37,7 +37,7 @@ export function usePersonaSelection(): UsePersonaSelectionReturn {
   const handlePersonaClick = (
     primary: ClientPersona,
     isTouchDevice: boolean,
-    setHoveredPersona: (persona: ClientPersona | null) => void
+    setHoveredPersona: (persona: ClientPersona | null) => void,
   ) => {
     // Clear hover preview on touch devices after click
     if (isTouchDevice) {
@@ -56,14 +56,14 @@ export function usePersonaSelection(): UsePersonaSelectionReturn {
           player1,
           isTouchDevice,
           setPlayer1,
-          setHoveredPersona
+          setHoveredPersona,
         );
       } else {
         selectNewPersona(
           primary.id,
           isTouchDevice,
           setPlayer1,
-          setHoveredPersona
+          setHoveredPersona,
         );
       }
       return;
@@ -77,14 +77,14 @@ export function usePersonaSelection(): UsePersonaSelectionReturn {
           player2,
           isTouchDevice,
           setPlayer2,
-          setHoveredPersona
+          setHoveredPersona,
         );
       } else {
         selectNewPersona(
           primary.id,
           isTouchDevice,
           setPlayer2,
-          setHoveredPersona
+          setHoveredPersona,
         );
       }
       return;
@@ -113,7 +113,7 @@ export function usePersonaSelection(): UsePersonaSelectionReturn {
           player1,
           isTouchDevice,
           setPlayer1,
-          setHoveredPersona
+          setHoveredPersona,
         );
         setLastInteractedSlot("player1");
       } else if (target === "player2") {
@@ -122,7 +122,7 @@ export function usePersonaSelection(): UsePersonaSelectionReturn {
           player2,
           isTouchDevice,
           setPlayer2,
-          setHoveredPersona
+          setHoveredPersona,
         );
         setLastInteractedSlot("player2");
       }
@@ -140,4 +140,3 @@ export function usePersonaSelection(): UsePersonaSelectionReturn {
     handlePersonaClick,
   };
 }
-

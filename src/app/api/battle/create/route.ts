@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import type { Battle } from '@/lib/shared';
-import { getPersona } from '@/lib/shared/personas';
-import { saveBattle } from '@/lib/battle-storage';
-import { createBattleRequestSchema } from '@/lib/validations/battle';
-import { getOrCreateUser } from '@/lib/auth/sync-user';
-import { z } from 'zod';
+import { auth } from "@clerk/nextjs/server";
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { getOrCreateUser } from "@/lib/auth/sync-user";
+import { saveBattle } from "@/lib/battle-storage";
+import type { Battle } from "@/lib/shared";
+import { getPersona } from "@/lib/shared/personas";
+import { createBattleRequestSchema } from "@/lib/validations/battle";
 
 // Extended schema to include isFeatured, votingEnabled, and commentsEnabled
 // Use .merge() instead of .extend() because createBattleRequestSchema contains refinements
@@ -15,18 +15,18 @@ const extendedBattleRequestSchema = createBattleRequestSchema.merge(
     votingEnabled: z.boolean().optional().default(false),
     commentsEnabled: z.boolean().optional().default(false),
     autoStartOnAdvance: z.boolean().optional().default(true),
-  })
+  }),
 );
 
 export async function POST(request: NextRequest) {
   try {
     // Require authentication for battle creation
     const { userId: clerkUserId } = await auth();
-    
+
     if (!clerkUserId) {
       return NextResponse.json(
-        { error: 'Unauthorized: You must be signed in to create battles' },
-        { status: 401 }
+        { error: "Unauthorized: You must be signed in to create battles" },
+        { status: 401 },
       );
     }
 
@@ -34,24 +34,32 @@ export async function POST(request: NextRequest) {
     const user = await getOrCreateUser(clerkUserId);
 
     const body = await request.json();
-    
+
     // Validate input with Zod
     const validation = extendedBattleRequestSchema.safeParse(body);
-    
+
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid request', details: validation.error.issues },
-        { status: 400 }
+        { error: "Invalid request", details: validation.error.issues },
+        { status: 400 },
       );
     }
-    
-    const { player1PersonaId, player2PersonaId, stageId, isFeatured, votingEnabled, commentsEnabled, autoStartOnAdvance } = validation.data;
+
+    const {
+      player1PersonaId,
+      player2PersonaId,
+      stageId,
+      isFeatured,
+      votingEnabled,
+      commentsEnabled,
+      autoStartOnAdvance,
+    } = validation.data;
 
     // If creating a featured battle, verify user is admin
-    if (isFeatured && user.role !== 'admin') {
+    if (isFeatured && user.role !== "admin") {
       return NextResponse.json(
-        { error: 'Forbidden: Only admins can create featured battles' },
-        { status: 403 }
+        { error: "Forbidden: Only admins can create featured battles" },
+        { status: 403 },
       );
     }
 
@@ -61,15 +69,15 @@ export async function POST(request: NextRequest) {
 
     if (!player1Persona || !player2Persona) {
       return NextResponse.json(
-        { error: 'Invalid persona ID(s)' },
-        { status: 400 }
+        { error: "Invalid persona ID(s)" },
+        { status: 400 },
       );
     }
 
     // Generate battle ID and metadata
     const now = Date.now();
     const battleId = `battle-${player1PersonaId}-vs-${player2PersonaId}-${now}`;
-    const month = new Date().toLocaleDateString('en-US', { month: 'long' });
+    const month = new Date().toLocaleDateString("en-US", { month: "long" });
     const year = new Date().getFullYear();
 
     // Create new battle
@@ -78,14 +86,14 @@ export async function POST(request: NextRequest) {
       title: `${player1Persona.name} vs. ${player2Persona.name}`,
       month,
       year,
-      status: 'paused',
+      status: "paused",
       stageId,
       personas: {
         player1: player1Persona,
         player2: player2Persona,
       },
       currentRound: 1,
-      currentTurn: 'player1',
+      currentTurn: "player1",
       verses: [],
       scores: [],
       comments: [],
@@ -105,11 +113,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ battleId: battle.id }, { status: 201 });
   } catch (error) {
-    console.error('Error creating battle:', error);
+    console.error("Error creating battle:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: "Internal server error" },
+      { status: 500 },
     );
   }
 }
-

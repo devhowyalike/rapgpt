@@ -1,13 +1,13 @@
 "use client";
 
+import { motion } from "framer-motion";
+import Image from "next/image";
+import { useState } from "react";
+import { VictoryConfetti } from "@/components/victory-confetti";
 import {
   getAllClientPersonas,
   getPrimaryClientPersonas,
 } from "@/lib/shared/personas/client";
-import Image from "next/image";
-import { motion } from "framer-motion";
-import { useState } from "react";
-import { VictoryConfetti } from "@/components/victory-confetti";
 
 interface PersonaGalleryProps {
   hideAltPersonas?: boolean;

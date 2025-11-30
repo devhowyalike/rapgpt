@@ -1,9 +1,9 @@
 "use client";
 
-import type { Battle } from "@/lib/shared";
 import { motion } from "framer-motion";
-import { VictoryConfetti } from "./victory-confetti";
 import { getWinnerPosition } from "@/lib/battle-engine";
+import type { Battle } from "@/lib/shared";
+import { VictoryConfetti } from "./victory-confetti";
 
 interface WinnerBannerProps {
   battle: Battle;
@@ -35,7 +35,7 @@ export function WinnerBanner({ battle, collapsed = false }: WinnerBannerProps) {
   if (battle.winner) {
     const winnerPosition = getWinnerPosition(battle);
     const winnerName =
-      winnerPosition === 'player1'
+      winnerPosition === "player1"
         ? battle.personas.player1.name
         : battle.personas.player2.name;
 

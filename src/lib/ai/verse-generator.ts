@@ -2,11 +2,11 @@
  * Unified verse generation that routes to appropriate SDK based on provider
  */
 
-import Anthropic from '@anthropic-ai/sdk';
-import { anthropic as vercelAnthropic } from '@ai-sdk/anthropic';
-import { openai } from '@ai-sdk/openai';
-import { streamText } from 'ai';
-import type { ModelConfig } from './model-config';
+import { anthropic as vercelAnthropic } from "@ai-sdk/anthropic";
+import { openai } from "@ai-sdk/openai";
+import Anthropic from "@anthropic-ai/sdk";
+import { streamText } from "ai";
+import type { ModelConfig } from "./model-config";
 
 export interface VerseGenerationParams {
   systemPrompt: string;
@@ -28,7 +28,7 @@ export interface VerseGenerationResult {
  * Generate verse using Anthropic SDK with prompt caching
  */
 async function generateWithAnthropicSDK(
-  params: VerseGenerationParams
+  params: VerseGenerationParams,
 ): Promise<VerseGenerationResult> {
   const client = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
@@ -39,22 +39,28 @@ async function generateWithAnthropicSDK(
     max_tokens: params.model.maxTokens,
     temperature: params.model.temperature,
     // Enable prompt caching on system prompt
-    system: [{
-      type: "text",
-      text: params.systemPrompt,
-      cache_control: { type: "ephemeral" }
-    }],
-    messages: [{
-      role: 'user',
-      content: params.userMessage
-    }]
+    system: [
+      {
+        type: "text",
+        text: params.systemPrompt,
+        cache_control: { type: "ephemeral" },
+      },
+    ],
+    messages: [
+      {
+        role: "user",
+        content: params.userMessage,
+      },
+    ],
   });
 
   // Convert Anthropic stream to common format
   const textStream = (async function* () {
     for await (const event of stream) {
-      if (event.type === 'content_block_delta' && 
-          event.delta.type === 'text_delta') {
+      if (
+        event.type === "content_block_delta" &&
+        event.delta.type === "text_delta"
+      ) {
         yield event.delta.text;
       }
     }
@@ -65,7 +71,8 @@ async function generateWithAnthropicSDK(
     return {
       inputTokens: finalMessage.usage.input_tokens,
       outputTokens: finalMessage.usage.output_tokens,
-      totalTokens: finalMessage.usage.input_tokens + finalMessage.usage.output_tokens,
+      totalTokens:
+        finalMessage.usage.input_tokens + finalMessage.usage.output_tokens,
       cachedInputTokens: finalMessage.usage.cache_read_input_tokens ?? 0,
     };
   };
@@ -77,15 +84,15 @@ async function generateWithAnthropicSDK(
  * Generate verse using Vercel AI SDK (works with any provider)
  */
 async function generateWithVercelSDK(
-  params: VerseGenerationParams
+  params: VerseGenerationParams,
 ): Promise<VerseGenerationResult> {
   // Select the appropriate provider from Vercel SDK
   let model;
   switch (params.model.provider) {
-    case 'anthropic':
+    case "anthropic":
       model = vercelAnthropic(params.model.modelName);
       break;
-    case 'openai':
+    case "openai":
       model = openai(params.model.modelName);
       break;
     // Add more providers as needed
@@ -96,10 +103,12 @@ async function generateWithVercelSDK(
   const result = streamText({
     model,
     system: params.systemPrompt,
-    messages: [{
-      role: 'user',
-      content: params.userMessage,
-    }],
+    messages: [
+      {
+        role: "user",
+        content: params.userMessage,
+      },
+    ],
     temperature: params.model.temperature,
     // Note: maxTokens is handled by the model provider configuration
   });
@@ -126,16 +135,17 @@ async function generateWithVercelSDK(
  * Main entry point - automatically routes to correct SDK
  */
 export async function generateVerse(
-  params: VerseGenerationParams
+  params: VerseGenerationParams,
 ): Promise<VerseGenerationResult> {
   // Use Anthropic SDK if it's an Anthropic model and supports caching
-  if (params.model.provider === 'anthropic' && params.model.supportsCaching) {
-    console.log('[Verse Generator] Using Anthropic SDK with prompt caching');
+  if (params.model.provider === "anthropic" && params.model.supportsCaching) {
+    console.log("[Verse Generator] Using Anthropic SDK with prompt caching");
     return generateWithAnthropicSDK(params);
   }
-  
+
   // Otherwise use Vercel AI SDK
-  console.log(`[Verse Generator] Using Vercel AI SDK for ${params.model.provider}`);
+  console.log(
+    `[Verse Generator] Using Vercel AI SDK for ${params.model.provider}`,
+  );
   return generateWithVercelSDK(params);
 }
-

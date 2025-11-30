@@ -1,9 +1,9 @@
-import { defineConfig } from 'drizzle-kit';
+import { defineConfig } from "drizzle-kit";
 
 export default defineConfig({
-  schema: './src/lib/db/schema.ts',
-  out: './drizzle',
-  dialect: 'postgresql',
+  schema: "./src/lib/db/schema.ts",
+  out: "./drizzle",
+  dialect: "postgresql",
   dbCredentials: {
     // Check QA_POSTGRES_URL first (for QA database), fallback to POSTGRES_URL (for local/prod)
     url: process.env.QA_POSTGRES_URL || process.env.POSTGRES_URL!,
@@ -11,4 +11,3 @@ export default defineConfig({
   verbose: true,
   strict: true,
 });
-

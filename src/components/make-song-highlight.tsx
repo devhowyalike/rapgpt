@@ -1,15 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Music2, Mic2, Wand2, Play, Download, BarChart3 } from "lucide-react";
+import { BarChart3, Download, Mic2, Music2, Play, Wand2 } from "lucide-react";
+import Image from "next/image";
 import { APP_TITLE } from "@/lib/constants";
 import { CreateBattleCTA } from "./create-battle-cta";
-import Image from "next/image";
 
 // Deterministic waveform heights to avoid hydration mismatch (Math.random() differs between server/client)
 const WAVEFORM_HEIGHTS = [
-  45, 72, 28, 85, 55, 38, 92, 65, 20, 78,
-  48, 88, 35, 60, 25, 70, 42, 95, 52, 30,
+  45, 72, 28, 85, 55, 38, 92, 65, 20, 78, 48, 88, 35, 60, 25, 70, 42, 95, 52,
+  30,
 ];
 
 interface MakeSongHighlightProps {

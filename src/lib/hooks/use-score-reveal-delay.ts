@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
  */
 export function useScoreRevealDelay(
   scoresAvailableRound: number | null,
-  delaySeconds: number
+  delaySeconds: number,
 ) {
   const [revealedRound, setRevealedRound] = useState<number | null>(null);
   const [isDelaying, setIsDelaying] = useState(false);
@@ -46,11 +46,14 @@ export function useScoreRevealDelay(
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-    timerRef.current = window.setTimeout(() => {
-      setRevealedRound(scoresAvailableRound);
-      setIsDelaying(false);
-      timerRef.current = null;
-    }, Math.max(0, (delaySeconds ?? 0) * 1000));
+    timerRef.current = window.setTimeout(
+      () => {
+        setRevealedRound(scoresAvailableRound);
+        setIsDelaying(false);
+        timerRef.current = null;
+      },
+      Math.max(0, (delaySeconds ?? 0) * 1000),
+    );
 
     return () => {
       if (timerRef.current) {
@@ -62,5 +65,3 @@ export function useScoreRevealDelay(
 
   return { revealedRound, isDelaying };
 }
-
-

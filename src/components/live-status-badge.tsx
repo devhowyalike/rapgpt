@@ -6,9 +6,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Radio, Users, WifiOff, Loader2 } from "lucide-react";
-import type { ConnectionStatus } from "@/lib/websocket/types";
+import { Loader2, Radio, Users, WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { ConnectionStatus } from "@/lib/websocket/types";
 
 interface LiveStatusBadgeProps {
   /** Whether the battle is currently live */
@@ -161,7 +161,7 @@ export function LiveStatusBadge({
     styles.text,
     styles.glow,
     isLoading && "opacity-70 cursor-not-allowed",
-    className
+    className,
   );
 
   // Clickable badge for admins/owners

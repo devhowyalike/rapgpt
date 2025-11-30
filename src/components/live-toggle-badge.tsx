@@ -6,9 +6,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Radio, Users, Wifi, Loader2 } from "lucide-react";
-import type { ConnectionStatus } from "@/lib/websocket/types";
+import { Loader2, Radio, Users, Wifi } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { ConnectionStatus } from "@/lib/websocket/types";
 
 interface LiveToggleBadgeProps {
   /** Whether the battle is currently live */

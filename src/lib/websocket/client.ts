@@ -2,10 +2,10 @@
  * Client-side WebSocket hook for real-time battle updates
  */
 
-'use client';
+"use client";
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import type { WebSocketEvent, ConnectionStatus, ClientMessage } from './types';
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { ClientMessage, ConnectionStatus, WebSocketEvent } from "./types";
 
 interface UseWebSocketOptions {
   battleId: string;
@@ -31,12 +31,14 @@ export function useWebSocket({
   enabled = true,
   onEvent,
 }: UseWebSocketOptions): UseWebSocketReturn {
-  const [status, setStatus] = useState<ConnectionStatus>('disconnected');
+  const [status, setStatus] = useState<ConnectionStatus>("disconnected");
   const [viewerCount, setViewerCount] = useState(0);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const clientIdRef = useRef<string>(`${isAdmin ? 'admin' : 'viewer'}-${Date.now()}-${Math.random()}`);
+  const clientIdRef = useRef<string>(
+    `${isAdmin ? "admin" : "viewer"}-${Date.now()}-${Math.random()}`,
+  );
   const isMountedRef = useRef(true);
   const onEventRef = useRef(onEvent);
 
@@ -46,7 +48,7 @@ export function useWebSocket({
   }, [onEvent]);
 
   const getWebSocketUrl = useCallback(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const host = window.location.host;
     return `${protocol}//${host}/ws`;
   }, []);
@@ -66,8 +68,8 @@ export function useWebSocket({
       wsRef.current = null;
     }
 
-    setStatus('connecting');
-    console.log('[WS Client] Connecting to WebSocket server...');
+    setStatus("connecting");
+    console.log("[WS Client] Connecting to WebSocket server...");
 
     try {
       const ws = new WebSocket(getWebSocketUrl());
@@ -75,14 +77,14 @@ export function useWebSocket({
 
       ws.onopen = () => {
         if (!isMountedRef.current) return;
-        
-        console.log('[WS Client] Connected');
-        setStatus('connected');
+
+        console.log("[WS Client] Connected");
+        setStatus("connected");
         reconnectAttemptsRef.current = 0;
 
         // Join the battle room
         sendMessage({
-          type: 'join',
+          type: "join",
           battleId,
           clientId: clientIdRef.current,
           isAdmin,
@@ -94,12 +96,12 @@ export function useWebSocket({
 
         try {
           const wsEvent: WebSocketEvent = JSON.parse(event.data);
-          console.log('[WS Client] Received event:', wsEvent.type);
+          console.log("[WS Client] Received event:", wsEvent.type);
 
           // Update viewer count if present
-          if (wsEvent.type === 'viewers:count') {
+          if (wsEvent.type === "viewers:count") {
             setViewerCount(wsEvent.count);
-          } else if (wsEvent.type === 'connection:acknowledged') {
+          } else if (wsEvent.type === "connection:acknowledged") {
             setViewerCount(wsEvent.viewerCount);
           }
 
@@ -108,32 +110,34 @@ export function useWebSocket({
             onEventRef.current(wsEvent);
           }
         } catch (error) {
-          console.error('[WS Client] Error parsing message:', error);
+          console.error("[WS Client] Error parsing message:", error);
         }
       };
 
       ws.onerror = (error) => {
-        console.error('[WS Client] Error:', error);
+        console.error("[WS Client] Error:", error);
         if (isMountedRef.current) {
-          setStatus('error');
+          setStatus("error");
         }
       };
 
       ws.onclose = () => {
         if (!isMountedRef.current) return;
 
-        console.log('[WS Client] Disconnected');
-        setStatus('disconnected');
+        console.log("[WS Client] Disconnected");
+        setStatus("disconnected");
         wsRef.current = null;
 
         // Attempt to reconnect
         if (enabled && reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
           const delay = Math.min(
             INITIAL_RECONNECT_DELAY * Math.pow(2, reconnectAttemptsRef.current),
-            MAX_RECONNECT_DELAY
+            MAX_RECONNECT_DELAY,
           );
 
-          console.log(`[WS Client] Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1}/${MAX_RECONNECT_ATTEMPTS})`);
+          console.log(
+            `[WS Client] Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1}/${MAX_RECONNECT_ATTEMPTS})`,
+          );
 
           reconnectTimeoutRef.current = setTimeout(() => {
             reconnectAttemptsRef.current++;
@@ -142,8 +146,8 @@ export function useWebSocket({
         }
       };
     } catch (error) {
-      console.error('[WS Client] Failed to connect:', error);
-      setStatus('error');
+      console.error("[WS Client] Failed to connect:", error);
+      setStatus("error");
     }
   }, [enabled, battleId, isAdmin, getWebSocketUrl, sendMessage]);
 
@@ -161,7 +165,7 @@ export function useWebSocket({
 
     return () => {
       isMountedRef.current = false;
-      
+
       // Clear reconnect timeout
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
@@ -170,16 +174,18 @@ export function useWebSocket({
 
       // Close WebSocket connection
       if (wsRef.current) {
-        console.log('[WS Client] Cleaning up connection');
-        
+        console.log("[WS Client] Cleaning up connection");
+
         // Send leave message before closing
         if (wsRef.current.readyState === WebSocket.OPEN) {
-          wsRef.current.send(JSON.stringify({
-            type: 'leave',
-            battleId,
-          }));
+          wsRef.current.send(
+            JSON.stringify({
+              type: "leave",
+              battleId,
+            }),
+          );
         }
-        
+
         wsRef.current.close();
         wsRef.current = null;
       }
@@ -193,4 +199,3 @@ export function useWebSocket({
     reconnect,
   };
 }
-

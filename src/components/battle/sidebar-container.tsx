@@ -4,10 +4,10 @@
 
 "use client";
 
-import type { Battle } from "@/lib/shared";
 import { BattleSidebar } from "@/components/battle-sidebar";
 import { BattleDrawer } from "@/components/ui/battle-drawer";
 import type { DrawerTab } from "@/lib/hooks/use-mobile-drawer";
+import type { Battle } from "@/lib/shared";
 
 interface SidebarContainerProps {
   battle: Battle;

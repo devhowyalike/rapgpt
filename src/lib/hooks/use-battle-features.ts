@@ -22,4 +22,3 @@ export function useBattleFeatures(battle: Battle | null) {
     isCommentsGloballyEnabled,
   };
 }
-

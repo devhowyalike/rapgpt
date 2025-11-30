@@ -4,7 +4,7 @@
 
 "use client";
 
-import { Settings, MessageSquare, Vote, Pause, Shield } from "lucide-react";
+import { MessageSquare, Pause, Settings, Shield, Vote } from "lucide-react";
 import Link from "next/link";
 import {
   DropdownMenu,

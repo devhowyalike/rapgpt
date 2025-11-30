@@ -4,10 +4,10 @@
 
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
-import { usePathname } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 import { AlertTriangle } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface UseNavigationGuardOptions {
@@ -27,7 +27,7 @@ export function useNavigationGuard({
   const [showDialog, setShowDialog] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(
-    null
+    null,
   );
   const [navigationConfirmed, setNavigationConfirmed] = useState(false);
 
@@ -152,7 +152,7 @@ export function useNavigationGuard({
       isConfirming,
       handleConfirmNavigation,
       handleCancelNavigation,
-    ]
+    ],
   );
 
   return {

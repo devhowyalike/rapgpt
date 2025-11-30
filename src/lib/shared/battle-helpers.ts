@@ -14,7 +14,7 @@ import { ROUNDS_PER_BATTLE } from "./battle-types";
 export function getAdvanceRoundButtonText(
   battle: Battle,
   finalRoundText: string = "Reveal Winner",
-  normalText: string = "Next Round"
+  normalText: string = "Next Round",
 ): string {
   return battle.currentRound === ROUNDS_PER_BATTLE
     ? finalRoundText
@@ -33,4 +33,3 @@ export function getDisplayRound(battleOrRound: Battle | number): number {
       : battleOrRound.currentRound;
   return Math.min(currentRound, ROUNDS_PER_BATTLE);
 }
-

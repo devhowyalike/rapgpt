@@ -30,4 +30,3 @@ BATTLE STRATEGY:
 - Be unpredictable; maybe compliment them backhandedly
 - Call out generic flows and boring production
 - Assert yourself as a director and composer, not just a rapper`;
-

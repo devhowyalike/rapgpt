@@ -1,26 +1,26 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
+  AlertTriangle,
+  CheckCircle,
+  Globe,
+  Lock,
+  Radio,
   Share2,
   Trash2,
-  AlertTriangle,
-  Radio,
-  CheckCircle,
-  Lock,
-  Globe,
 } from "lucide-react";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { getStage, DEFAULT_STAGE } from "@/lib/shared/stages";
-import type { Battle } from "@/lib/shared";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
+import { BattleFeatureBadges } from "@/components/battle-feature-badges";
 import { BattleInfoPanel } from "@/components/battle-info-panel";
 import { BattleStatusButton } from "@/components/battle-status-button";
-import { BattleFeatureBadges } from "@/components/battle-feature-badges";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { getWinnerPosition } from "@/lib/battle-engine";
 import { calculateTotalScores } from "@/lib/battle-position-utils";
+import type { Battle } from "@/lib/shared";
+import { DEFAULT_STAGE, getStage } from "@/lib/shared/stages";
 
 interface MyBattleCardProps {
   battle: {
@@ -267,10 +267,10 @@ export function MyBattleCard({
                       {isArchived
                         ? "Cannot Publish (Archived)"
                         : isPaused
-                        ? "Cannot Publish (Paused)"
-                        : !userIsProfilePublic
-                        ? "Cannot Publish (Private Profile)"
-                        : "Publish Battle"}
+                          ? "Cannot Publish (Paused)"
+                          : !userIsProfilePublic
+                            ? "Cannot Publish (Private Profile)"
+                            : "Publish Battle"}
                     </>
                   )}
                 </DropdownMenu.Item>

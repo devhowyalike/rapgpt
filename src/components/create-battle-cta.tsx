@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { SignInButton } from "@clerk/nextjs";
+import Link from "next/link";
 
 interface CreateBattleCTAProps {
   isAuthenticated: boolean;

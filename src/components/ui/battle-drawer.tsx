@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence, useDragControls } from "framer-motion";
+import { AnimatePresence, motion, useDragControls } from "framer-motion";
 import { X } from "lucide-react";
 import { type ReactNode, useEffect } from "react";
 

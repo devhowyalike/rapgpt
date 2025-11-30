@@ -35,8 +35,10 @@ export function PersonaGridItem({
   onMouseLeave,
   onTouchStart,
 }: PersonaGridItemProps) {
-  const showDeselect = isSelected && (showPlayer1Indicator || showPlayer2Indicator);
-  const isActiveSelection = (isPlayer1 && showPlayer1Indicator) || (isPlayer2 && showPlayer2Indicator);
+  const showDeselect =
+    isSelected && (showPlayer1Indicator || showPlayer2Indicator);
+  const isActiveSelection =
+    (isPlayer1 && showPlayer1Indicator) || (isPlayer2 && showPlayer2Indicator);
 
   return (
     <button
@@ -53,16 +55,10 @@ export function PersonaGridItem({
     >
       {/* Selection Indicators */}
       {showPlayer1Indicator && (
-        <SelectionIndicator
-          player="P1"
-          variantIndex={player1VariantIndex}
-        />
+        <SelectionIndicator player="P1" variantIndex={player1VariantIndex} />
       )}
       {showPlayer2Indicator && (
-        <SelectionIndicator
-          player="P2"
-          variantIndex={player2VariantIndex}
-        />
+        <SelectionIndicator player="P2" variantIndex={player2VariantIndex} />
       )}
 
       {/* Deselect Overlay */}
@@ -108,4 +104,3 @@ export function PersonaGridItem({
     </button>
   );
 }
-

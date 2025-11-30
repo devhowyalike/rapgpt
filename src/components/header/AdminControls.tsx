@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { Radio, Shield } from "lucide-react";
+import Link from "next/link";
 
 type AdminControlsProps = {
   isAdmin: boolean;
@@ -45,5 +45,3 @@ export function AdminControls({
     </>
   );
 }
-
-

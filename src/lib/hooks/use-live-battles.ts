@@ -66,7 +66,7 @@ export function useLiveBattles({ enabled = true }: UseLiveBattlesOptions = {}) {
       window.removeEventListener("focus", handleFocus);
       window.removeEventListener(
         "battle:status-changed",
-        handleBattleStatusChange
+        handleBattleStatusChange,
       );
     };
   }, [enabled]);
@@ -77,4 +77,3 @@ export function useLiveBattles({ enabled = true }: UseLiveBattlesOptions = {}) {
     error,
   };
 }
-

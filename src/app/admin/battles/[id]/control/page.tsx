@@ -4,12 +4,11 @@
  */
 
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import { getBattleById } from "@/lib/battle-storage";
-import { canManageBattle } from "@/lib/auth/roles";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { AdminBattleControl } from "@/components/admin/admin-battle-control";
 import { AdminErrorBoundary } from "@/components/admin/error-boundary";
+import { canManageBattle } from "@/lib/auth/roles";
+import { getBattleById } from "@/lib/battle-storage";
 
 export const dynamic = "force-dynamic";
 

@@ -2,9 +2,9 @@
  * Token usage storage and aggregation helpers
  */
 
-import { db } from '@/lib/db/client';
-import { battleTokenUsage } from '@/lib/db/schema';
-import { eq, inArray, sql } from 'drizzle-orm';
+import { eq, inArray, sql } from "drizzle-orm";
+import { db } from "@/lib/db/client";
+import { battleTokenUsage } from "@/lib/db/schema";
 
 export interface BattleTokenUsageEvent {
   id: string;
@@ -17,14 +17,16 @@ export interface BattleTokenUsageEvent {
   outputTokens?: number | null;
   totalTokens?: number | null;
   cachedInputTokens?: number | null;
-  status?: 'completed' | 'error';
+  status?: "completed" | "error";
   createdAt?: Date;
 }
 
 /**
  * Record a single token usage event for a battle generation call.
  */
-export async function recordBattleTokenUsage(event: BattleTokenUsageEvent): Promise<void> {
+export async function recordBattleTokenUsage(
+  event: BattleTokenUsageEvent,
+): Promise<void> {
   const row = {
     id: event.id,
     battleId: event.battleId,
@@ -36,7 +38,7 @@ export async function recordBattleTokenUsage(event: BattleTokenUsageEvent): Prom
     outputTokens: event.outputTokens ?? null,
     totalTokens: event.totalTokens ?? null,
     cachedInputTokens: event.cachedInputTokens ?? null,
-    status: event.status ?? 'completed',
+    status: event.status ?? "completed",
     createdAt: event.createdAt ?? new Date(),
   };
 
@@ -53,7 +55,9 @@ export interface BattleTokenTotals {
 /**
  * Get aggregate token totals for a single battle.
  */
-export async function getBattleTokenTotals(battleId: string): Promise<BattleTokenTotals> {
+export async function getBattleTokenTotals(
+  battleId: string,
+): Promise<BattleTokenTotals> {
   const [result] = await db
     .select({
       // Cast SUM (bigint) to float8 to avoid string return type from pg
@@ -77,7 +81,9 @@ export async function getBattleTokenTotals(battleId: string): Promise<BattleToke
  * Get aggregate token totals for many battles in one query.
  * Returns a map keyed by battleId for efficient lookups in the admin list.
  */
-export async function getAllBattlesTokenTotals(): Promise<Record<string, BattleTokenTotals>> {
+export async function getAllBattlesTokenTotals(): Promise<
+  Record<string, BattleTokenTotals>
+> {
   const rows = await db
     .select({
       battleId: battleTokenUsage.battleId,
@@ -112,14 +118,16 @@ export interface BattleTokenEventRow {
   outputTokens: number | null;
   totalTokens: number | null;
   cachedInputTokens: number | null;
-  status: 'completed' | 'error';
+  status: "completed" | "error";
   createdAt: Date;
 }
 
 /**
  * List raw token usage events for a battle (newest first).
  */
-export async function getBattleTokenEvents(battleId: string): Promise<BattleTokenEventRow[]> {
+export async function getBattleTokenEvents(
+  battleId: string,
+): Promise<BattleTokenEventRow[]> {
   const rows = await db
     .select()
     .from(battleTokenUsage)
@@ -139,7 +147,9 @@ export interface BattleTokenTotalsByModel {
 /**
  * Aggregate token totals by model for a battle.
  */
-export async function getBattleTokenTotalsByModel(battleId: string): Promise<BattleTokenTotalsByModel[]> {
+export async function getBattleTokenTotalsByModel(
+  battleId: string,
+): Promise<BattleTokenTotalsByModel[]> {
   const rows = await db
     .select({
       model: battleTokenUsage.model,
@@ -151,7 +161,9 @@ export async function getBattleTokenTotalsByModel(battleId: string): Promise<Bat
     .from(battleTokenUsage)
     .where(eq(battleTokenUsage.battleId, battleId))
     .groupBy(battleTokenUsage.model, battleTokenUsage.provider)
-    .orderBy(sql`coalesce(sum(${battleTokenUsage.totalTokens})::float8, 0) desc`);
+    .orderBy(
+      sql`coalesce(sum(${battleTokenUsage.totalTokens})::float8, 0) desc`,
+    );
 
   // Ensure numeric coercion
   return rows.map((r) => ({
@@ -179,10 +191,10 @@ export async function getCurrentMonthTokenTotals(): Promise<MonthlyTokenTotals> 
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1; // JS months are 0-indexed
-  
+
   // Get first day of current month
   const startOfMonth = new Date(year, month - 1, 1);
-  
+
   // Get first day of next month
   const startOfNextMonth = new Date(year, month, 1);
 
@@ -195,7 +207,7 @@ export async function getCurrentMonthTokenTotals(): Promise<MonthlyTokenTotals> 
     })
     .from(battleTokenUsage)
     .where(
-      sql`${battleTokenUsage.createdAt} >= ${startOfMonth} AND ${battleTokenUsage.createdAt} < ${startOfNextMonth}`
+      sql`${battleTokenUsage.createdAt} >= ${startOfMonth} AND ${battleTokenUsage.createdAt} < ${startOfNextMonth}`,
     );
 
   return {
@@ -203,9 +215,7 @@ export async function getCurrentMonthTokenTotals(): Promise<MonthlyTokenTotals> 
     outputTokens: Number(result?.outputTokens ?? 0),
     totalTokens: Number(result?.totalTokens ?? 0),
     cachedInputTokens: Number(result?.cachedInputTokens ?? 0),
-    month: now.toLocaleString('en-US', { month: 'long' }),
+    month: now.toLocaleString("en-US", { month: "long" }),
     year,
   };
 }
-
-

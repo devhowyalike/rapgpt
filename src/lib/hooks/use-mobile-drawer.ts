@@ -2,7 +2,7 @@
  * Custom hook for managing mobile drawer state
  */
 
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 
 export type DrawerTab = "comments" | "voting";
 
@@ -34,4 +34,3 @@ export function useMobileDrawer(initialTab: DrawerTab = "comments") {
     closeDrawer,
   };
 }
-

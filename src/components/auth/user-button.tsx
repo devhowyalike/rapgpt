@@ -4,10 +4,10 @@ import {
   SignInButton,
   SignOutButton,
   useAuth,
-  useUser,
   useClerk,
+  useUser,
 } from "@clerk/nextjs";
-import { User, ChevronDown, LogOut, Settings } from "lucide-react";
+import { ChevronDown, LogOut, Settings, User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -1,18 +1,18 @@
 import { auth } from "@clerk/nextjs/server";
+import { and, desc, eq } from "drizzle-orm";
+import { Globe, Lock, Swords, User as UserIcon } from "lucide-react";
 import { headers } from "next/headers";
-import { db } from "@/lib/db/client";
-import { battles, users, type BattleDB } from "@/lib/db/schema";
-import { desc, eq, and } from "drizzle-orm";
+import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { GuestProfileCallout } from "@/components/guest-profile-callout";
+import { ProfileBattlesFilter } from "@/components/profile-battles-filter";
+import { ProfileHeaderMenu } from "@/components/profile-header-menu";
 import { SiteHeader } from "@/components/site-header";
 import { decrypt } from "@/lib/auth/encryption";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
-import { ProfileHeaderMenu } from "@/components/profile-header-menu";
-import { GuestProfileCallout } from "@/components/guest-profile-callout";
-import { ProfileBattlesFilter } from "@/components/profile-battles-filter";
-import { Lock, Globe, User as UserIcon, Swords } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { db } from "@/lib/db/client";
+import { type BattleDB, battles, users } from "@/lib/db/schema";
 
 export const dynamic = "force-dynamic";
 
@@ -54,8 +54,8 @@ export default async function ProfilePage({
   const displayName = profileUser.encryptedDisplayName
     ? decrypt(profileUser.encryptedDisplayName)
     : profileUser.encryptedName
-    ? decrypt(profileUser.encryptedName)
-    : "Anonymous User";
+      ? decrypt(profileUser.encryptedName)
+      : "Anonymous User";
 
   // Determine what battles to show
   const isViewingAsPublic = viewAs === "public";
@@ -79,8 +79,8 @@ export default async function ProfilePage({
         and(
           eq(battles.createdBy, profileUserId),
           eq(battles.isFeatured, false),
-          eq(battles.isPublic, true)
-        )
+          eq(battles.isPublic, true),
+        ),
       )
       .orderBy(desc(battles.createdAt));
   } else {

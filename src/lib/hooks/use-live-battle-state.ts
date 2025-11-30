@@ -7,10 +7,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useWebSocket } from "@/lib/websocket/client";
 import { useBattleStore } from "@/lib/battle-store";
 import type { Battle, PersonaPosition } from "@/lib/shared";
-import type { WebSocketEvent, ConnectionStatus } from "@/lib/websocket/types";
+import { useWebSocket } from "@/lib/websocket/client";
+import type { ConnectionStatus, WebSocketEvent } from "@/lib/websocket/types";
 
 interface UseLiveBattleStateOptions {
   /** Initial battle data */
@@ -151,7 +151,7 @@ export function useLiveBattleState({
           if (battle) {
             // Check if comment already exists (to avoid duplicates from optimistic update)
             const commentExists = battle.comments.some(
-              (c) => c.id === event.comment.id
+              (c) => c.id === event.comment.id,
             );
             if (!commentExists) {
               setBattle({
@@ -174,7 +174,7 @@ export function useLiveBattleState({
       setVotingTimeRemaining,
       onMobileTabChange,
       onMobileDrawerOpen,
-    ]
+    ],
   );
 
   // Connect to WebSocket when battle is live
@@ -193,7 +193,7 @@ export function useLiveBattleState({
   useEffect(() => {
     if (wsStatus === "connected" && !hasInitiallyConnected && battle?.isLive) {
       console.log(
-        "[LiveBattleState] Initial connection - fetching latest battle state"
+        "[LiveBattleState] Initial connection - fetching latest battle state",
       );
       setHasInitiallyConnected(true);
       fetch(`/api/battle/${initialBattle.id}/sync`)
@@ -203,7 +203,7 @@ export function useLiveBattleState({
             console.log(
               "[LiveBattleState] Received synced state with",
               data.battle.comments.length,
-              "comments"
+              "comments",
             );
             setBattle(data.battle);
           }
@@ -212,7 +212,13 @@ export function useLiveBattleState({
           console.error("[LiveBattleState] Failed to sync state:", error);
         });
     }
-  }, [wsStatus, hasInitiallyConnected, initialBattle.id, setBattle, battle?.isLive]);
+  }, [
+    wsStatus,
+    hasInitiallyConnected,
+    initialBattle.id,
+    setBattle,
+    battle?.isLive,
+  ]);
 
   // Reading phase countdown
   useEffect(() => {
@@ -288,14 +294,14 @@ export function useLiveBattleState({
       }
 
       const { battle: updatedBattle } = await response.json();
-      
+
       // We no longer force-enable comments/voting here.
       // The user's previous choice (persisted in DB) should be respected.
       setBattle(updatedBattle);
 
       // Notify header to refresh live battles
       window.dispatchEvent(new CustomEvent("battle:status-changed"));
-      
+
       // Reset connection state for fresh sync
       setHasInitiallyConnected(false);
     } catch (error) {
@@ -339,7 +345,7 @@ export function useLiveBattleState({
       setIsReadingPhase(true);
       setReadingTimeRemaining(duration);
     },
-    [setIsReadingPhase, setReadingTimeRemaining]
+    [setIsReadingPhase, setReadingTimeRemaining],
   );
 
   // Begin voting phase
@@ -350,7 +356,12 @@ export function useLiveBattleState({
       setIsVotingPhase(true);
       setVotingTimeRemaining(duration);
     },
-    [setIsReadingPhase, setReadingTimeRemaining, setIsVotingPhase, setVotingTimeRemaining]
+    [
+      setIsReadingPhase,
+      setReadingTimeRemaining,
+      setIsVotingPhase,
+      setVotingTimeRemaining,
+    ],
   );
 
   // Complete voting phase
@@ -358,7 +369,7 @@ export function useLiveBattleState({
     (round: number) => {
       storeCompleteVotingPhase(round);
     },
-    [storeCompleteVotingPhase]
+    [storeCompleteVotingPhase],
   );
 
   // Update battle config (comments/voting enabled)
@@ -387,7 +398,7 @@ export function useLiveBattleState({
         throw error;
       }
     },
-    [battle, setBattle]
+    [battle, setBattle],
   );
 
   return {
@@ -419,4 +430,3 @@ export function useLiveBattleState({
     updateBattleConfig,
   };
 }
-

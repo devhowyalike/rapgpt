@@ -30,9 +30,14 @@ export interface MobileFooterControlsResult {
 }
 
 export function useMobileFooterControls(
-  options: MobileFooterControlsOptions
+  options: MobileFooterControlsOptions,
 ): MobileFooterControlsResult {
-  const { hasBottomControls, showCommenting, showVoting, hasSettings = false } = options;
+  const {
+    hasBottomControls,
+    showCommenting,
+    showVoting,
+    hasSettings = false,
+  } = options;
 
   const hasFabs = showCommenting || showVoting || hasSettings;
 

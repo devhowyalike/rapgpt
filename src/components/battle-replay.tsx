@@ -4,25 +4,25 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
-import type { Battle } from "@/lib/shared";
-import { SongGenerator } from "./song-generator";
-import { SongPlayer } from "./song-player";
-import { motion } from "framer-motion";
 import { useAuth, useUser } from "@clerk/nextjs";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
+import { useIsMobile } from "@/lib/hooks/use-is-mobile";
+import { useRoundData } from "@/lib/hooks/use-round-data";
+import type { Battle } from "@/lib/shared";
 import { AnimatedEq } from "./animated-eq";
-import { WinnerBanner } from "./winner-banner";
+import { BattleBottomControls } from "./battle/battle-bottom-controls";
+import { BattleHeader } from "./battle/battle-header";
+import { BattleScoreSection } from "./battle/battle-score-section";
+import { BattleSplitView } from "./battle/battle-split-view";
 import { CreatorAttribution } from "./creator-attribution";
 import { RoundControls } from "./round-controls";
+import { SongGenerator } from "./song-generator";
+import { SongPlayer } from "./song-player";
 import { BattleDrawer } from "./ui/battle-drawer";
-import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
-import { useRoundData } from "@/lib/hooks/use-round-data";
-import { BattleHeader } from "./battle/battle-header";
-import { BattleSplitView } from "./battle/battle-split-view";
-import { BattleBottomControls } from "./battle/battle-bottom-controls";
-import { BattleScoreSection } from "./battle/battle-score-section";
-import { useIsMobile } from "@/lib/hooks/use-is-mobile";
+import { WinnerBanner } from "./winner-banner";
 
 interface BattleReplayProps {
   battle: Battle;
@@ -42,7 +42,7 @@ export function BattleReplay({
   const [selectedRound, setSelectedRound] = useState(1);
   const { verses: roundVerses, score: roundScore } = useRoundData(
     battle,
-    selectedRound
+    selectedRound,
   );
   const { sessionClaims, isLoaded } = useAuth();
   const { user } = useUser();
@@ -245,8 +245,8 @@ export function BattleReplay({
                 activeTab === "scores"
                   ? "Round Scores"
                   : showSongGenerator
-                  ? "Generate Song"
-                  : "Generated Song"
+                    ? "Generate Song"
+                    : "Generated Song"
               }
               excludeBottomControls={true}
               mobileOnly={false}
@@ -267,7 +267,10 @@ export function BattleReplay({
                           />
                         </div>
 
-                        <BattleScoreSection battle={battle} roundScore={roundScore} />
+                        <BattleScoreSection
+                          battle={battle}
+                          roundScore={roundScore}
+                        />
                       </div>
                     )}
                   </div>
@@ -334,10 +337,10 @@ export function BattleReplay({
                       isSongPlaying
                         ? "bg-linear-to-r from-green-600 to-emerald-600 border-green-500 text-white shadow-lg shadow-green-500/30"
                         : activeTab === "song" && isDrawerOpen
-                        ? "bg-linear-to-r from-green-600 to-emerald-600 border-green-500 text-white shadow-lg shadow-green-500/30"
-                        : showSongGenerator
-                        ? "bg-linear-to-r from-green-700/40 to-emerald-700/40 border-green-600 text-green-300 hover:from-green-700/60 hover:to-emerald-700/60 hover:border-green-500 animate-pulse"
-                        : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
+                          ? "bg-linear-to-r from-green-600 to-emerald-600 border-green-500 text-white shadow-lg shadow-green-500/30"
+                          : showSongGenerator
+                            ? "bg-linear-to-r from-green-700/40 to-emerald-700/40 border-green-600 text-green-300 hover:from-green-700/60 hover:to-emerald-700/60 hover:border-green-500 animate-pulse"
+                            : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
                     }
                   `}
                   whileHover={{ scale: 1.02 }}

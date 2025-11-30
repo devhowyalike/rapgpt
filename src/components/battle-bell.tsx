@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Bell } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface BattleBellProps {
   currentRound: number;

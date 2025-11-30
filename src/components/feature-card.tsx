@@ -18,7 +18,7 @@ export function FeatureCard({
     <div
       className={cn(
         "bg-gray-900/30 border border-gray-800 rounded-lg p-6 w-[calc(50%-12px)] grow md:grow-0 lg:w-[calc(100%/3-16px)] xl:w-[calc(20%-19.2px)]",
-        className
+        className,
       )}
     >
       <div className="text-4xl mb-3">{icon}</div>

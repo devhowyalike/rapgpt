@@ -1,9 +1,9 @@
 "use client";
 
-import * as React from "react";
 import { ChevronDown, ChevronRight, Crown } from "lucide-react";
-import type { Battle, Verse, Persona } from "@/lib/shared";
+import * as React from "react";
 import { getWinnerPersonaId } from "@/lib/battle-position-utils";
+import type { Battle, Persona, Verse } from "@/lib/shared";
 
 interface BattleRoundsDisplayProps {
   battle: Battle;
@@ -11,7 +11,7 @@ interface BattleRoundsDisplayProps {
 
 export function BattleRoundsDisplay({ battle }: BattleRoundsDisplayProps) {
   const [expandedRounds, setExpandedRounds] = React.useState<Set<number>>(
-    new Set()
+    new Set(),
   );
 
   // Group verses by round
@@ -152,4 +152,3 @@ export function BattleRoundsDisplay({ battle }: BattleRoundsDisplayProps) {
     </div>
   );
 }
-
