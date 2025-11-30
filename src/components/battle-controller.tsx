@@ -7,16 +7,24 @@
 
 import { useAuth, useUser } from "@clerk/nextjs";
 import { AlertTriangle, Settings } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import {
   BattleControlBar,
   BattleOptionsDrawer,
   BattleOptionsDropdown,
+  BattleReplayControlBar,
+  BattleScoreSection,
   MobileActionButtons,
   SidebarContainer,
 } from "@/components/battle";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { RoundControls } from "@/components/round-controls";
+import { SongGenerator } from "@/components/song-generator";
+import { SongPlayer } from "@/components/song-player";
+import { BattleDrawer } from "@/components/ui/battle-drawer";
 import { getNextPerformer, isRoundComplete } from "@/lib/battle-engine";
+import { useRoundData } from "@/lib/hooks/use-round-data";
 import { useBattleStore } from "@/lib/battle-store";
 import {
   useBattleComment,
@@ -42,6 +50,263 @@ interface BattleControllerProps {
    * Default: 5 seconds.
    */
   scoreDelaySeconds?: number;
+}
+
+// Completed battle view - extracted for cleaner code organization
+interface CompletedBattleViewProps {
+  battle: Battle;
+  isAdmin: boolean;
+  dbUserId: string | null;
+  showCommenting: boolean;
+  showVoting: boolean;
+  votingCompletedRound: number | null;
+  showMobileDrawer: boolean;
+  setShowMobileDrawer: (open: boolean) => void;
+  mobileActiveTab: "comments" | "voting";
+  openCommentsDrawer: () => void;
+  openVotingDrawer: () => void;
+  onVote: (round: number, personaId: string) => Promise<boolean>;
+  onComment: (content: string) => void;
+  onToggleCommenting: (enabled: boolean) => void;
+  onToggleVoting: (enabled: boolean) => void;
+}
+
+function CompletedBattleView({
+  battle,
+  isAdmin,
+  dbUserId,
+  showCommenting,
+  showVoting,
+  votingCompletedRound,
+  showMobileDrawer,
+  setShowMobileDrawer,
+  mobileActiveTab,
+  openCommentsDrawer,
+  openVotingDrawer,
+  onVote,
+  onComment,
+  onToggleCommenting,
+  onToggleVoting,
+}: CompletedBattleViewProps) {
+  const router = useRouter();
+
+  // Round selection state
+  const [selectedRound, setSelectedRound] = useState(1);
+  const { verses: roundVerses, score: roundScore } = useRoundData(
+    battle,
+    selectedRound
+  );
+
+  // Drawer state for scores/song
+  const [activeTab, setActiveTab] = useState<"scores" | "song" | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isSongPlaying, setIsSongPlaying] = useState(false);
+
+  // Ensure only one drawer is open at a time
+  useExclusiveDrawer("replay-scores-song", isDrawerOpen, setIsDrawerOpen);
+
+  // Check if current user is the battle creator
+  const isCreator = dbUserId && battle.creator?.userId === dbUserId;
+
+  // Allow song generation for creators or admins if no song exists yet
+  const canGenerateSong =
+    (isCreator || isAdmin) &&
+    battle.status === "completed" &&
+    !battle.generatedSong?.audioUrl;
+  const showSongGenerator = canGenerateSong;
+  const showSongPlayer =
+    battle.status === "completed" && battle.generatedSong?.audioUrl;
+
+  const canGoPrev = selectedRound > 1;
+  const canGoNext = selectedRound < 3;
+
+  const handlePrevRound = () => {
+    if (canGoPrev) setSelectedRound(selectedRound - 1);
+  };
+
+  const handleNextRound = () => {
+    if (canGoNext) setSelectedRound(selectedRound + 1);
+  };
+
+  const handleTabClick = (tab: "scores" | "song") => {
+    // If clicking the same tab while open, close it
+    if (activeTab === tab && isDrawerOpen) {
+      setIsDrawerOpen(false);
+      setActiveTab(null);
+      return;
+    }
+
+    // If switching tabs while the drawer is open, animate close then open
+    if (activeTab !== tab && isDrawerOpen) {
+      setIsDrawerOpen(false);
+      window.setTimeout(() => {
+        setActiveTab(tab);
+        setIsDrawerOpen(true);
+      }, 320);
+      return;
+    }
+
+    // Drawer is closed: open with the requested tab
+    setActiveTab(tab);
+    setIsDrawerOpen(true);
+  };
+
+  const handleSongButtonClick = () => {
+    // If drawer is closed but song is playing, open it instead of pausing
+    if (isSongPlaying && !isDrawerOpen) {
+      handleTabClick("song");
+    }
+    // If drawer is open with song tab AND song is playing, pause it
+    else if (isSongPlaying && isDrawerOpen && activeTab === "song") {
+      setIsSongPlaying(false);
+    }
+    // If drawer is open with different tab OR song is not playing, toggle/switch to song tab
+    else {
+      handleTabClick("song");
+    }
+  };
+
+  // Mobile footer controls
+  const { contentPaddingOverride } = useMobileFooterControls({
+    hasBottomControls: false,
+    showCommenting,
+    showVoting,
+    hasSettings: true,
+  });
+
+  const controlBarFabOffset =
+    "calc(var(--battle-control-bar-height) + var(--fab-gutter))";
+
+  return (
+    <>
+      <SiteHeader />
+      <div style={{ height: "var(--header-height)" }} />
+      <div className="px-0 md:px-6">
+        <div className="max-w-7xl mx-auto flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row">
+          <div className="flex-1 flex flex-col min-h-0 relative">
+            <BattleReplay
+              battle={battle}
+              mobileBottomPadding={contentPaddingOverride}
+            />
+
+            {/* Control Bar with Scores, Song, and Options */}
+            <BattleReplayControlBar
+              battle={battle}
+              activeTab={activeTab}
+              isDrawerOpen={isDrawerOpen}
+              showSongGenerator={showSongGenerator}
+              showSongPlayer={!!showSongPlayer}
+              isSongPlaying={isSongPlaying}
+              onScoresClick={() => handleTabClick("scores")}
+              onSongClick={
+                showSongPlayer
+                  ? handleSongButtonClick
+                  : () => handleTabClick("song")
+              }
+              showCommenting={showCommenting}
+              showVoting={showVoting}
+              onToggleCommenting={onToggleCommenting}
+              onToggleVoting={onToggleVoting}
+              onCommentsClick={openCommentsDrawer}
+              onVotingClick={openVotingDrawer}
+            />
+
+            {/* Scores/Song Drawer */}
+            {(roundScore || showSongGenerator || showSongPlayer) && (
+              <BattleDrawer
+                open={isDrawerOpen}
+                onOpenChange={setIsDrawerOpen}
+                title={
+                  activeTab === "scores"
+                    ? "Round Scores"
+                    : showSongGenerator
+                    ? "Generate Song"
+                    : "Generated Song"
+                }
+                excludeBottomControls={false}
+                mobileOnly={false}
+                position="absolute"
+              >
+                <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 touch-scroll-container pb-(--bottom-controls-height)">
+                  <div className="p-4 md:p-6">
+                    <div className={activeTab === "scores" ? "" : "hidden"}>
+                      {roundScore && (
+                        <div>
+                          {/* Round Navigation Controls */}
+                          <div className="flex justify-center mb-6">
+                            <RoundControls
+                              selectedRound={selectedRound}
+                              canGoPrev={canGoPrev}
+                              canGoNext={canGoNext}
+                              onPrev={handlePrevRound}
+                              onNext={handleNextRound}
+                            />
+                          </div>
+
+                          <BattleScoreSection
+                            battle={battle}
+                            roundScore={roundScore}
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <div
+                      className={`max-w-2xl mx-auto ${
+                        activeTab === "song" ? "" : "hidden"
+                      }`}
+                    >
+                      {showSongGenerator && (
+                        <SongGenerator
+                          battleId={battle.id}
+                          battle={battle}
+                          onSongGenerated={() => router.refresh()}
+                        />
+                      )}
+                      {showSongPlayer && battle.generatedSong && (
+                        <SongPlayer
+                          song={battle.generatedSong}
+                          externalIsPlaying={isSongPlaying}
+                          onPlayStateChange={(playing) =>
+                            setIsSongPlaying(playing)
+                          }
+                          onTogglePlay={() => setIsSongPlaying(!isSongPlaying)}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </BattleDrawer>
+            )}
+          </div>
+
+          <SidebarContainer
+            battle={battle}
+            onVote={onVote}
+            onComment={onComment}
+            showCommenting={showCommenting}
+            showVoting={showVoting}
+            isArchived={true}
+            votingCompletedRound={votingCompletedRound}
+            showMobileDrawer={showMobileDrawer}
+            onMobileDrawerChange={setShowMobileDrawer}
+            mobileActiveTab={mobileActiveTab}
+            excludeBottomControls={true}
+          />
+        </div>
+      </div>
+
+      {/* Mobile FAB - positioned above control bar */}
+      <MobileActionButtons
+        showCommenting={showCommenting}
+        showVoting={showVoting}
+        onCommentsClick={openCommentsDrawer}
+        onVotingClick={openVotingDrawer}
+        activeTab={mobileActiveTab}
+        isDrawerOpen={showMobileDrawer}
+        bottomOffset={controlBarFabOffset}
+      />
+    </>
+  );
 }
 
 export function BattleController({
@@ -468,53 +733,24 @@ export function BattleController({
 
   // Completed battle - show replay mode
   if (battle.status === "completed") {
-    const { contentPaddingOverride, fabBottomOffset } = useMobileFooterControls(
-      {
-        hasBottomControls: true,
-        showCommenting,
-        showVoting,
-      }
-    );
-
     return (
-      <>
-        <SiteHeader />
-        <div style={{ height: "var(--header-height)" }} />
-        <div className="px-0 md:px-6">
-          <div className="max-w-7xl mx-auto flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row">
-            <div className="flex-1 flex flex-col min-h-0">
-              <BattleReplay
-                battle={battle}
-                mobileBottomPadding={contentPaddingOverride}
-              />
-            </div>
-
-            <SidebarContainer
-              battle={battle}
-              onVote={handleVote}
-              onComment={handleCommentSubmit}
-              showCommenting={showCommenting}
-              showVoting={showVoting}
-              isArchived={true}
-              votingCompletedRound={votingCompletedRound}
-              showMobileDrawer={showMobileDrawer}
-              onMobileDrawerChange={setShowMobileDrawer}
-              mobileActiveTab={mobileActiveTab}
-              excludeBottomControls={true}
-            />
-          </div>
-        </div>
-
-        <MobileActionButtons
-          showCommenting={showCommenting}
-          showVoting={showVoting}
-          onCommentsClick={openCommentsDrawer}
-          onVotingClick={openVotingDrawer}
-          activeTab={mobileActiveTab}
-          isDrawerOpen={showMobileDrawer}
-          bottomOffset={fabBottomOffset}
-        />
-      </>
+      <CompletedBattleView
+        battle={battle}
+        isAdmin={isAdmin}
+        dbUserId={permissionState.dbId}
+        showCommenting={showCommenting}
+        showVoting={showVoting}
+        votingCompletedRound={votingCompletedRound}
+        showMobileDrawer={showMobileDrawer}
+        setShowMobileDrawer={setShowMobileDrawer}
+        mobileActiveTab={mobileActiveTab}
+        openCommentsDrawer={openCommentsDrawer}
+        openVotingDrawer={openVotingDrawer}
+        onVote={handleVote}
+        onComment={handleCommentSubmit}
+        onToggleCommenting={handleToggleCommenting}
+        onToggleVoting={handleToggleVoting}
+      />
     );
   }
 

@@ -19,6 +19,11 @@ interface BattleDrawerProps {
    * If false, drawer appears on all screen sizes
    */
   mobileOnly?: boolean;
+  /**
+   * Positioning strategy
+   * @default "fixed"
+   */
+  position?: "fixed" | "absolute";
 }
 
 export function BattleDrawer({
@@ -28,6 +33,7 @@ export function BattleDrawer({
   children,
   excludeBottomControls = false,
   mobileOnly = true,
+  position = "fixed",
 }: BattleDrawerProps) {
   const dragControls = useDragControls();
 
@@ -49,7 +55,7 @@ export function BattleDrawer({
       <AnimatePresence>
         {open && (
           <motion.div
-            className={`fixed top-0 left-0 right-0 bg-black/60 backdrop-blur-sm z-40 ${
+            className={`fixed top-0 left-0 right-0 bg-black/60 backdrop-blur-sm z-30 ${
               mobileOnly ? "lg:hidden" : ""
             }`}
             style={
@@ -68,7 +74,7 @@ export function BattleDrawer({
 
       {/* Content Drawer - Always mounted, never unmounted, all breakpoints */}
       <motion.div
-        className={`fixed inset-x-0 z-50 bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl max-h-[70vh] flex flex-col overflow-hidden max-w-3xl mx-auto ${
+        className={`${position} inset-x-0 z-40 bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl max-h-[70vh] flex flex-col overflow-hidden max-w-3xl mx-auto ${
           mobileOnly ? "lg:hidden" : ""
         } ${!open ? "pointer-events-none" : "pointer-events-auto"}`}
         style={
@@ -126,8 +132,8 @@ export function BattleDrawer({
             </button>
           </div>
         )}
-        {/* Children - always mounted */}
-        {children}
+        {/* Children - only render when open to prevent overlap */}
+        {open && children}
       </motion.div>
     </>
   );
