@@ -508,12 +508,13 @@ export function BattleController({
     hasBottomControls: false,
     showCommenting,
     showVoting,
+    hasSettings: true,
   });
 
-  const liveBattleFabOffset =
-    showCommenting || showVoting
-      ? "calc(var(--battle-control-bar-height) + var(--fab-gutter))"
-      : undefined;
+  const showControlBar = battle.status === "paused";
+  const liveBattleFabOffset = showControlBar
+    ? "calc(var(--battle-control-bar-height) + var(--fab-gutter))"
+    : undefined;
 
   return (
     <>

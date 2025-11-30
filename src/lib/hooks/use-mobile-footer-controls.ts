@@ -13,6 +13,8 @@ export interface MobileFooterControlsOptions {
   /** Feature flags */
   showCommenting: boolean;
   showVoting: boolean;
+  /** Whether the settings gear is present (always true for active battles) */
+  hasSettings?: boolean;
 }
 
 export interface MobileFooterControlsResult {
@@ -30,9 +32,9 @@ export interface MobileFooterControlsResult {
 export function useMobileFooterControls(
   options: MobileFooterControlsOptions
 ): MobileFooterControlsResult {
-  const { hasBottomControls, showCommenting, showVoting } = options;
+  const { hasBottomControls, showCommenting, showVoting, hasSettings = false } = options;
 
-  const hasFabs = showCommenting || showVoting;
+  const hasFabs = showCommenting || showVoting || hasSettings;
 
   // If FABs are present, content needs additional space on mobile.
   // Otherwise, return undefined so callers keep their baseline padding.
@@ -61,5 +63,3 @@ export function useMobileFooterControls(
     controlBarMobilePadding,
   };
 }
-
-
