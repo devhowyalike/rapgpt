@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getWinnerPosition } from "@/lib/battle-engine";
 import type { Battle } from "@/lib/shared";
 import { VictoryConfetti } from "./victory-confetti";
@@ -11,6 +12,31 @@ interface WinnerBannerProps {
 }
 
 export function WinnerBanner({ battle, collapsed = false }: WinnerBannerProps) {
+  const winnerNameRef = useRef<HTMLSpanElement | null>(null);
+  const [confettiOrigin, setConfettiOrigin] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+
+  // Calculate confetti origin from winner name element position
+  const updateConfettiOrigin = useCallback(() => {
+    if (winnerNameRef.current) {
+      const rect = winnerNameRef.current.getBoundingClientRect();
+      setConfettiOrigin({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      });
+    }
+  }, []);
+
+  // Update confetti origin when winner name is rendered
+  useEffect(() => {
+    if (battle.winner && !collapsed) {
+      // Small delay to ensure the element is rendered and positioned
+      const timeoutId = setTimeout(updateConfettiOrigin, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [battle.winner, collapsed, updateConfettiOrigin]);
   if (battle.status === "paused") {
     return (
       <motion.div
@@ -48,7 +74,12 @@ export function WinnerBanner({ battle, collapsed = false }: WinnerBannerProps) {
           scale: 1,
         }}
       >
-        {!collapsed && <VictoryConfetti trigger={true} />}
+        {!collapsed && (
+          <VictoryConfetti
+            trigger={confettiOrigin !== null}
+            origin={confettiOrigin ?? undefined}
+          />
+        )}
         <div
           className={`font-bold text-yellow-400 font-(family-name:--font-bebas-neue) whitespace-nowrap relative z-10 transition-all duration-300 ${
             collapsed
@@ -56,7 +87,13 @@ export function WinnerBanner({ battle, collapsed = false }: WinnerBannerProps) {
               : "text-3xl md:text-4xl lg:text-5xl"
           }`}
         >
-          {collapsed ? `🏆 ${winnerName}` : `🏆 WINNER: ${winnerName} 🏆`}
+          {collapsed ? (
+            `🏆 ${winnerName}`
+          ) : (
+            <>
+              🏆 WINNER: <span ref={winnerNameRef}>{winnerName}</span> 🏆
+            </>
+          )}
         </div>
       </motion.div>
     );

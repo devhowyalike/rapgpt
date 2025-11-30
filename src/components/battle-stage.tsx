@@ -5,7 +5,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { getBattleProgress, getWinnerPosition } from "@/lib/battle-engine";
 import { useIsMobile } from "@/lib/hooks/use-is-mobile";
 import { useRoundData } from "@/lib/hooks/use-round-data";
@@ -100,7 +106,32 @@ export function BattleStage({
   // Mobile-only offset so the first persona does not render under the sticky trophy/header
   const isMobile = useIsMobile();
   const trophyRef = useRef<HTMLDivElement | null>(null);
+  const winnerNameRef = useRef<HTMLSpanElement | null>(null);
   const [personaTopMargin, setPersonaTopMargin] = useState(0);
+  const [confettiOrigin, setConfettiOrigin] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+
+  // Calculate confetti origin from winner name element position
+  const updateConfettiOrigin = useCallback(() => {
+    if (winnerNameRef.current) {
+      const rect = winnerNameRef.current.getBoundingClientRect();
+      setConfettiOrigin({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      });
+    }
+  }, []);
+
+  // Update confetti origin when battle is completed and winner name is rendered
+  useEffect(() => {
+    if (battle.status === "completed" && battle.winner) {
+      // Small delay to ensure the element is rendered and positioned
+      const timeoutId = setTimeout(updateConfettiOrigin, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [battle.status, battle.winner, updateConfettiOrigin]);
 
   // Compute combined offset: site header height (CSS var) + BattleHeader height
   useLayoutEffect(() => {
@@ -253,12 +284,17 @@ export function BattleStage({
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5 }}
           >
-            <VictoryConfetti trigger={true} />
+            <VictoryConfetti
+              trigger={confettiOrigin !== null}
+              origin={confettiOrigin ?? undefined}
+            />
             <div className="text-xl md:text-2xl lg:text-3xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue) relative z-10">
               🏆 WINNER:{" "}
-              {getWinnerPosition(battle) === "player1"
-                ? battle.personas.player1.name
-                : battle.personas.player2.name}{" "}
+              <span ref={winnerNameRef}>
+                {getWinnerPosition(battle) === "player1"
+                  ? battle.personas.player1.name
+                  : battle.personas.player2.name}
+              </span>{" "}
               🏆
             </div>
           </motion.div>
