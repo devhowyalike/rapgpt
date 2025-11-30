@@ -131,7 +131,7 @@ export function VerseDisplay({
       </AnimatePresence>
 
       {!verse && !isStreaming && (
-        <div className="flex items-center justify-center h-48">
+        <div className="flex justify-center">
           <p className="text-gray-500 text-center">
             Waiting for {persona.name} to drop their verse...
           </p>

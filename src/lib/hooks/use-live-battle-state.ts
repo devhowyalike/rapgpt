@@ -289,23 +289,9 @@ export function useLiveBattleState({
 
       const { battle: updatedBattle } = await response.json();
       
-      // Enable comments and voting by default when going live
-      const configResponse = await fetch(`/api/battle/${battle.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...updatedBattle,
-          commentsEnabled: true,
-          votingEnabled: true,
-        }),
-      });
-
-      if (configResponse.ok) {
-        const configData = await configResponse.json();
-        setBattle(configData.battle || { ...updatedBattle, commentsEnabled: true, votingEnabled: true });
-      } else {
-        setBattle(updatedBattle);
-      }
+      // We no longer force-enable comments/voting here.
+      // The user's previous choice (persisted in DB) should be respected.
+      setBattle(updatedBattle);
 
       // Notify header to refresh live battles
       window.dispatchEvent(new CustomEvent("battle:status-changed"));

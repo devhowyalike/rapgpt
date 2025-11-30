@@ -41,7 +41,11 @@ export function SidebarContainer({
   mobileActiveTab = "comments",
   excludeBottomControls,
 }: SidebarContainerProps) {
-  if (!showCommenting && !showVoting) {
+  // Apply the same visibility logic as BattleSidebar to ensure we don't render an empty container
+  // Voting is only shown if enabled AND (live OR archived)
+  const effectiveShowVoting = showVoting && (battle.isLive || isArchived);
+
+  if (!showCommenting && !effectiveShowVoting) {
     return null;
   }
 

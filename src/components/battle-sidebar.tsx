@@ -41,7 +41,7 @@ export function BattleSidebar({
     process.env.NEXT_PUBLIC_USER_BATTLE_VOTING !== "false";
   const isCommentsGloballyEnabled =
     process.env.NEXT_PUBLIC_USER_BATTLE_COMMENTING !== "false";
-  const showVoting = isVotingGloballyEnabled && (battle.votingEnabled ?? true);
+  const showVoting = isVotingGloballyEnabled && (battle.votingEnabled ?? true) && (battle.isLive || isArchived);
   const showCommenting =
     isCommentsGloballyEnabled && (battle.commentsEnabled ?? true);
 
@@ -184,6 +184,9 @@ export function BattleSidebar({
 
   // Helper function to check if voting is allowed for a specific round
   const canVoteOnRound = (round: number): boolean => {
+    // Only live battles allow voting
+    if (!battle.isLive) return false;
+
     // Archived battles cannot be voted on
     if (isArchived) return false;
 
@@ -375,7 +378,7 @@ export function BattleSidebar({
             )}
 
             {/* Message when voting hasn't started yet */}
-            {!isArchived && !isVotingPhase && battle.scores.length > 0 && (
+            {!isArchived && battle.isLive && !isVotingPhase && battle.scores.length > 0 && (
               <div className="bg-gray-800 rounded-lg p-3 mb-4">
                 <p className="text-center text-white text-sm">
                   {battle.currentRound === ROUNDS_PER_BATTLE

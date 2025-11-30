@@ -100,6 +100,7 @@ export function BattleControlBar({
             adminUrl={
               isAdmin ? `/admin/battles/${battle.id}/control` : undefined
             }
+            isLive={isLive}
           />
         </div>
 

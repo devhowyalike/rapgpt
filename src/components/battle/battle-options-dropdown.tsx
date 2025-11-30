@@ -26,6 +26,7 @@ interface BattleOptionsDropdownProps {
   isPausing?: boolean;
   adminUrl?: string;
   customTrigger?: React.ReactNode;
+  isLive?: boolean;
 }
 
 export function BattleOptionsDropdown({
@@ -37,6 +38,7 @@ export function BattleOptionsDropdown({
   isPausing,
   adminUrl,
   customTrigger,
+  isLive = false,
 }: BattleOptionsDropdownProps) {
   return (
     <DropdownMenu>
@@ -68,8 +70,17 @@ export function BattleOptionsDropdown({
           <div className="flex items-center gap-2">
             <Vote className="w-4 h-4 text-gray-400" />
             <span className="text-sm">Voting</span>
+            {!isLive && (
+              <span className="text-[10px] text-gray-500 whitespace-nowrap">
+                (Live Battle Only)
+              </span>
+            )}
           </div>
-          <Switch checked={showVoting} onCheckedChange={onToggleVoting} />
+          <Switch 
+            checked={showVoting && isLive} 
+            onCheckedChange={onToggleVoting} 
+            disabled={!isLive}
+          />
         </div>
 
         {(onPauseBattle || adminUrl) && <DropdownMenuSeparator />}

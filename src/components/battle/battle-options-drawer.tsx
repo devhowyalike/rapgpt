@@ -19,6 +19,7 @@ interface BattleOptionsDrawerProps {
   onPauseBattle?: () => void;
   isPausing?: boolean;
   adminUrl?: string;
+  isLive?: boolean;
 }
 
 export function BattleOptionsDrawer({
@@ -31,6 +32,7 @@ export function BattleOptionsDrawer({
   onPauseBattle,
   isPausing,
   adminUrl,
+  isLive = false,
 }: BattleOptionsDrawerProps) {
   return (
     <BattleDrawer
@@ -68,11 +70,17 @@ export function BattleOptionsDrawer({
               <div className="flex flex-col">
                 <span className="font-medium text-white">Voting</span>
                 <span className="text-sm text-gray-400">
-                  Enable crowd judging
+                  {isLive
+                    ? "Enable crowd judging"
+                    : "Available in live battles"}
                 </span>
               </div>
             </div>
-            <Switch checked={showVoting} onCheckedChange={onToggleVoting} />
+            <Switch
+              checked={showVoting && isLive}
+              onCheckedChange={onToggleVoting}
+              disabled={!isLive}
+            />
           </div>
         </div>
 

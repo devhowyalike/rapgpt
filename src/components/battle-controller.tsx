@@ -630,6 +630,7 @@ export function BattleController({
         onPauseBattle={handleCancelBattle}
         isPausing={isCanceling || isGenerating}
         adminUrl={isAdmin ? `/admin/battles/${battle.id}/control` : undefined}
+        isLive={isLive}
       />
 
       {/* Pause/End Battle Dialog */}
