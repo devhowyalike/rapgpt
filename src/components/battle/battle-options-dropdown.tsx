@@ -76,9 +76,9 @@ export function BattleOptionsDropdown({
               </span>
             )}
           </div>
-          <Switch 
-            checked={showVoting && isLive} 
-            onCheckedChange={onToggleVoting} 
+          <Switch
+            checked={showVoting && isLive}
+            onCheckedChange={onToggleVoting}
             disabled={!isLive}
           />
         </div>
