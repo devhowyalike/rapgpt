@@ -85,7 +85,7 @@ export function BattleStage({
     scoresAvailable && currentRoundScore ? currentRoundScore.round : null;
   const { revealedRound } = useScoreRevealDelay(
     scoresAvailableRound,
-    scoreDelaySeconds,
+    scoreDelaySeconds
   );
 
   const shouldShowScores =
@@ -146,7 +146,7 @@ export function BattleStage({
       const headerPx = parseFloat(headerVar || "0") || 0;
 
       const headerEl = document.querySelector(
-        "[data-battle-header]",
+        "[data-battle-header]"
       ) as HTMLElement | null;
       const battleHeaderHeight =
         (headerEl?.getBoundingClientRect().height as number) || 0;
@@ -161,7 +161,7 @@ export function BattleStage({
     let ro: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined") {
       const headerEl = document.querySelector(
-        "[data-battle-header]",
+        "[data-battle-header]"
       ) as HTMLElement | null;
       if (headerEl) {
         ro = new ResizeObserver(() => recalc());
@@ -194,10 +194,10 @@ export function BattleStage({
     const player2VerseId = currentRoundVerses.player2?.id;
     if (player1VerseId && player2VerseId) {
       const player1VerseIndex = battle.verses.findIndex(
-        (v) => v.id === player1VerseId,
+        (v) => v.id === player1VerseId
       );
       const player2VerseIndex = battle.verses.findIndex(
-        (v) => v.id === player2VerseId,
+        (v) => v.id === player2VerseId
       );
       mobileActiveSide =
         player2VerseIndex > player1VerseIndex ? "player2" : "player1";
