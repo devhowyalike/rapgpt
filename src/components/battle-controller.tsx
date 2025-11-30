@@ -91,7 +91,7 @@ export function BattleController({
   useExclusiveDrawer(
     "mobile-comments-voting",
     showMobileDrawer,
-    setShowMobileDrawer,
+    setShowMobileDrawer
   );
 
   // Check if user is admin or owner
@@ -204,14 +204,15 @@ export function BattleController({
     },
   });
 
-  // Reading phase timer effect - starts when round is complete (non-live mode)
+  // Reading phase timer effect - starts when round is complete
+  // This works for both live and non-live battles
   useEffect(() => {
-    if (!battle || isLive) return; // Skip for live battles - handled by live state hook
+    if (!battle) return;
 
     const roundComplete = isRoundComplete(battle, battle.currentRound);
     const nextPerformer = getNextPerformer(battle);
 
-    // Start reading phase when round is complete and we're not already in reading/voting phase
+    // Start reading/voting phase when round is complete and we're not already in reading/voting phase
     if (
       roundComplete &&
       !nextPerformer &&
@@ -221,16 +222,16 @@ export function BattleController({
       votingCompletedRound !== battle.currentRound &&
       showVoting
     ) {
-      setIsReadingPhase(true);
+      // Start voting phase with countdown (opens mobile drawer automatically)
+      beginVotingPhase(10);
     }
   }, [
     battle,
     isReadingPhase,
     isVotingPhase,
-    setIsReadingPhase,
+    beginVotingPhase,
     votingCompletedRound,
     showVoting,
-    isLive,
   ]);
 
   // Score reveal delay (shared logic) to drive "Calculating Score..." on the button
@@ -242,7 +243,7 @@ export function BattleController({
       : null;
   const { isDelaying: isCalculatingScores } = useScoreRevealDelay(
     scoresAvailableRound,
-    scoreDelaySeconds,
+    scoreDelaySeconds
   );
 
   // Battle action handlers
@@ -283,7 +284,7 @@ export function BattleController({
       setBattle(updatedBattle);
       await saveBattle();
     },
-    [battle, setBattle, saveBattle],
+    [battle, setBattle, saveBattle]
   );
 
   // Handler to toggle commenting on/off
@@ -294,7 +295,7 @@ export function BattleController({
       setBattle(updatedBattle);
       await saveBattle();
     },
-    [battle, setBattle, saveBattle],
+    [battle, setBattle, saveBattle]
   );
 
   // Generate verse - handles both local and live modes
@@ -458,7 +459,7 @@ export function BattleController({
         hasBottomControls: true,
         showCommenting,
         showVoting,
-      },
+      }
     );
 
     return (

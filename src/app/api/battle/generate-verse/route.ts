@@ -1,11 +1,13 @@
 import { z } from "zod";
 import { getActiveModelConfig } from "@/lib/ai/model-config";
 import { generateVerse } from "@/lib/ai/verse-generator";
+import { addVerseToBattle } from "@/lib/battle-engine";
+import { getBattleById, saveBattle } from "@/lib/battle-storage";
 import {
   buildSystemPrompt,
   getFirstVerseMessage,
 } from "@/lib/context-overrides";
-import type { Battle, Verse } from "@/lib/shared";
+import type { Verse } from "@/lib/shared";
 import { getPersona } from "@/lib/shared";
 import { recordBattleTokenUsage } from "@/lib/usage-storage";
 import { broadcastEvent } from "@/lib/websocket/broadcast-helper";
@@ -200,6 +202,28 @@ export async function POST(req: Request) {
               verseText: fullText,
               round: battle.currentRound,
             } as VerseCompleteEvent);
+
+            // Save verse to database (important for voting to work)
+            try {
+              const latestBattle = await getBattleById(battle.id);
+              if (latestBattle) {
+                const updatedBattle = addVerseToBattle(
+                  latestBattle,
+                  personaId,
+                  fullText,
+                );
+                await saveBattle(updatedBattle);
+                console.log(
+                  "[Generate Verse] Saved verse to database for battle:",
+                  battle.id,
+                );
+              }
+            } catch (saveErr) {
+              console.error(
+                "[Generate Verse] Failed to save verse to database:",
+                saveErr,
+              );
+            }
 
             // Record usage after streaming completes
             try {
