@@ -98,7 +98,7 @@ export function LiveToggleBadge({
           isLive
             ? "bg-red-600 hover:bg-red-700 text-white"
             : "bg-gray-700 hover:bg-gray-600 text-gray-300 border border-gray-600",
-          isLoading && "opacity-70 cursor-not-allowed"
+          isLoading && "opacity-70 cursor-not-allowed",
         )}
         whileHover={!isLoading ? { scale: 1.02 } : undefined}
         whileTap={!isLoading ? { scale: 0.98 } : undefined}
@@ -125,7 +125,13 @@ export function LiveToggleBadge({
           <Radio className="w-3 h-3" />
         )}
         <span className="text-[10px]">
-          {isStarting ? "STARTING..." : isStopping ? "STOPPING..." : isLive ? "LIVE" : "GO LIVE"}
+          {isStarting
+            ? "STARTING..."
+            : isStopping
+              ? "STOPPING..."
+              : isLive
+                ? "LIVE"
+                : "GO LIVE"}
         </span>
       </motion.button>
 
@@ -156,4 +162,3 @@ export function LiveToggleBadge({
     </div>
   );
 }
-
