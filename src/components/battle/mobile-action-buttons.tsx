@@ -1,11 +1,13 @@
 /**
- * Mobile floating action buttons for comments and voting
+ * Mobile floating action buttons for comments and voting with a fan effect
  */
 
 "use client";
 
-import { MessageSquare, ThumbsUp } from "lucide-react";
+import { MessageSquare, ThumbsUp, Plus, X, Settings } from "lucide-react";
 import type { DrawerTab } from "@/lib/hooks/use-mobile-drawer";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface MobileActionButtonsProps {
   showCommenting: boolean;
@@ -17,6 +19,14 @@ interface MobileActionButtonsProps {
   bottomOffset?: string;
   className?: string;
   settingsAction?: React.ReactNode;
+  customActions?: Array<{ id: string; component: React.ReactNode }>;
+  isFixed?: boolean;
+  alignment?: "center" | "right";
+}
+
+interface ActionItem {
+  id: string;
+  component: React.ReactNode;
 }
 
 export function MobileActionButtons({
@@ -29,48 +39,171 @@ export function MobileActionButtons({
   bottomOffset,
   className = "",
   settingsAction,
+  customActions = [],
+  isFixed = true,
+  alignment = "center",
 }: MobileActionButtonsProps) {
-  if (!showCommenting && !showVoting && !settingsAction) {
-    return null;
-  }
+  const [isOpen, setIsOpen] = useState(false);
 
-  return (
-    <div
-      className={`fixed left-1/2 -translate-x-1/2 flex flex-row items-center gap-3 md:hidden z-40 ${className}`}
-      style={bottomOffset ? { bottom: bottomOffset } : { bottom: "1.5rem" }}
-    >
-      {settingsAction}
-      {showCommenting && (
-        <button
-          onClick={onCommentsClick}
-          className={`
+  // Collect all available actions
+  const rawActions: (ActionItem | null | false | undefined)[] = [
+    ...customActions,
+    settingsAction
+      ? {
+          id: "settings",
+          component: settingsAction,
+        }
+      : null,
+    showCommenting
+      ? {
+          id: "comments",
+          component: (
+            <button
+              onClick={(e) => {
+                onCommentsClick();
+                setIsOpen(false);
+              }}
+              className={`
             w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
             ${
               isDrawerOpen && activeTab === "comments"
-                ? "bg-blue-600/90 text-white border-blue-400/50 scale-110"
-                : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-blue-600/90 hover:text-white hover:border-blue-500/50 hover:scale-105"
+                ? "bg-blue-600/90 text-white border-blue-400/50"
+                : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-blue-600/90 hover:text-white hover:border-blue-500/50"
             }
           `}
-        >
-          <MessageSquare className="w-6 h-6" strokeWidth={2.5} />
-        </button>
-      )}
-      {showVoting && (
-        <button
-          onClick={onVotingClick}
-          className={`
+              aria-label="Open Comments"
+            >
+              <MessageSquare className="w-6 h-6" strokeWidth={2.5} />
+            </button>
+          ),
+        }
+      : null,
+    showVoting
+      ? {
+          id: "voting",
+          component: (
+            <button
+              onClick={(e) => {
+                onVotingClick();
+                setIsOpen(false);
+              }}
+              className={`
             w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
             ${
               isDrawerOpen && activeTab === "voting"
-                ? "bg-purple-600/90 text-white border-purple-400/50 scale-110"
-                : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-purple-600/90 hover:text-white hover:border-purple-500/50 hover:scale-105"
+                ? "bg-purple-600/90 text-white border-purple-400/50"
+                : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-purple-600/90 hover:text-white hover:border-purple-500/50"
             }
           `}
-        >
-          <ThumbsUp className="w-6 h-6" strokeWidth={2.5} />
-        </button>
+              aria-label="Open Voting"
+            >
+              <ThumbsUp className="w-6 h-6" strokeWidth={2.5} />
+            </button>
+          ),
+        }
+      : null,
+  ];
+
+  const actions = rawActions.filter((action): action is ActionItem =>
+    Boolean(action)
+  );
+
+  if (actions.length === 0) {
+    return null;
+  }
+
+  // Calculate positions for vertical column
+  const getPosition = (index: number) => {
+    // Stack upwards with a gap
+    // Button size is roughly 56px (w-14). Let's use 64px spacing.
+    const step = 64;
+    return {
+      x: 0,
+      y: -(step * (index + 1)),
+    };
+  };
+
+  return (
+    <>
+      {/* Backdrop to close when clicking outside */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/20 backdrop-blur-[1px]"
+          onClick={() => setIsOpen(false)}
+        />
       )}
-    </div>
+
+      <div
+        className={`
+          ${isFixed ? "fixed left-1/2 -translate-x-1/2" : "relative"} 
+          flex items-end justify-center z-40 
+          ${isFixed ? "md:hidden" : ""} 
+          ${className}
+        `}
+        style={
+          isFixed && bottomOffset
+            ? { bottom: bottomOffset }
+            : isFixed
+            ? { bottom: "1.5rem" }
+            : undefined
+        }
+      >
+        <div className="relative">
+          <AnimatePresence>
+            {isOpen &&
+              actions.map((action, index) => {
+                const pos = getPosition(index);
+                return (
+                  <motion.div
+                    key={action.id}
+                    initial={{ opacity: 0, y: 0, scale: 0.5 }}
+                    animate={{
+                      opacity: 1,
+                      x: pos.x,
+                      y: pos.y,
+                      scale: 1,
+                    }}
+                    exit={{ opacity: 0, y: 0, scale: 0.5 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 25,
+                      delay: index * 0.05,
+                    }}
+                    className="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-14 flex items-center justify-center"
+                    // Ensure button click events pass through
+                    style={{ transformOrigin: "center center" }}
+                  >
+                    {action.component}
+                  </motion.div>
+                );
+              })}
+          </AnimatePresence>
+
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className={`
+              w-12 h-12 rounded-full shadow-xl transition-colors border-2 flex items-center justify-center backdrop-blur-md relative z-50
+              ${
+                isOpen
+                  ? "bg-gray-700 text-white border-gray-600 rotate-90"
+                  : "bg-gray-900 text-white border-gray-700 hover:scale-105"
+              }
+            `}
+            style={{ transition: "all 0.3s ease" }}
+            aria-label={isOpen ? "Close Menu" : "Open Menu"}
+          >
+            {/* Icon rotation handled by parent button rotation or swapping icons */}
+            <motion.div
+              initial={false}
+              animate={{ rotate: isOpen ? 45 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Plus className="w-6 h-6" strokeWidth={2.5} />
+            </motion.div>
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
-

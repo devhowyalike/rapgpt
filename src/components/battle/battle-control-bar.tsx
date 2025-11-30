@@ -21,6 +21,7 @@ import { ScoreCalcAnimation } from "@/components/score-calc-animation";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { BattleOptionsDropdown } from "./battle-options-dropdown";
+import { MobileActionButtons } from "./mobile-action-buttons";
 
 interface BattleControlBarProps {
   battle: Battle;
@@ -52,6 +53,10 @@ interface BattleControlBarProps {
   // Battle options
   onToggleVoting?: (enabled: boolean) => void;
   onToggleCommenting?: (enabled: boolean) => void;
+  // Mobile Drawer Actions
+  onCommentsClick?: () => void;
+  onVotingClick?: () => void;
+  settingsAction?: React.ReactNode;
 }
 
 export function BattleControlBar({
@@ -82,8 +87,55 @@ export function BattleControlBar({
   onCancelBattle,
   onToggleVoting,
   onToggleCommenting,
+  onCommentsClick,
+  onVotingClick,
+  settingsAction,
 }: BattleControlBarProps) {
   const [showGoLiveConfirmation, setShowGoLiveConfirmation] = useState(false);
+
+  const goLiveButton = (
+    <button
+      onClick={
+        isLoadingPermissions
+          ? undefined
+          : isLive
+          ? onEndLive
+          : () => setShowGoLiveConfirmation(true)
+      }
+      disabled={
+        isLoadingPermissions ||
+        isStartingLive ||
+        isStoppingLive ||
+        isGenerating
+      }
+      className={`
+        w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md
+        ${
+          isLoadingPermissions
+            ? "bg-gray-800/50 border-gray-700 cursor-wait"
+            : isLive
+            ? "bg-gray-700 hover:bg-gray-600 border-gray-500"
+            : "bg-red-600 hover:bg-red-700 border-red-500 md:animate-pulse"
+        }
+      `}
+      title={isLive ? "End Live" : "Go Live"}
+    >
+      {isLoadingPermissions ? (
+        <div className="w-6 h-6 shrink-0 rounded-full border-2 border-gray-300 border-t-transparent animate-spin" />
+      ) : isStartingLive || isStoppingLive ? (
+        <LoadingSpinner size="sm" />
+      ) : isLive ? (
+        <StopCircle className="w-6 h-6 shrink-0 text-white" />
+      ) : (
+        <Radio className="w-6 h-6 shrink-0 text-white" />
+      )}
+    </button>
+  );
+
+  const goLiveAction = {
+    id: "go-live",
+    component: goLiveButton,
+  };
 
   return (
     <div className="p-4 bg-gray-900 border-t border-gray-800">
@@ -206,58 +258,20 @@ export function BattleControlBar({
           )}
         </button>
 
-        {/* Live Toggle Button - Prominently displayed */}
-        {(isLoadingPermissions ||
-          (canManageLive && (isLive ? onEndLive : onGoLive))) && (
-          <button
-            onClick={
-              isLoadingPermissions
-                ? undefined
-                : isLive
-                ? onEndLive
-                : () => setShowGoLiveConfirmation(true)
-            }
-            disabled={
-              isLoadingPermissions ||
-              isStartingLive ||
-              isStoppingLive ||
-              isGenerating
-            }
-            className={`px-4 py-3 rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all ${
-              isLoadingPermissions
-                ? "bg-gray-800/50 border border-gray-700 cursor-wait"
-                : isLive
-                ? "bg-gray-700 hover:bg-gray-600"
-                : "bg-red-600 hover:bg-red-700 shadow-lg shadow-red-900/50 animate-pulse"
-            } disabled:bg-gray-600 disabled:cursor-not-allowed disabled:animate-none disabled:shadow-none`}
-          >
-            {isLoadingPermissions ? (
-              <>
-                <div className="w-5 h-5 shrink-0 rounded-full border-2 border-gray-600 border-t-gray-400 animate-spin" />
-                <span className="whitespace-nowrap hidden sm:inline text-gray-400">
-                  Loading
-                </span>
-              </>
-            ) : isStartingLive || isStoppingLive ? (
-              <LoadingSpinner size="sm" />
-            ) : isLive ? (
-              <StopCircle className="w-5 h-5 shrink-0" />
-            ) : (
-              <Radio className="w-5 h-5 shrink-0" />
-            )}
-            {!isLoadingPermissions && (
-              <span className="whitespace-nowrap hidden sm:inline">
-                {isStartingLive
-                  ? "Starting..."
-                  : isStoppingLive
-                  ? "Stopping..."
-                  : isLive
-                  ? "End Live"
-                  : "Go Live"}
-              </span>
-            )}
-          </button>
-        )}
+        {/* Mobile Action Menu (Fan) - Replaces Go Live Button */}
+        <MobileActionButtons
+          isFixed={false}
+          showCommenting={showCommenting}
+          showVoting={showVoting && isLive}
+          onCommentsClick={onCommentsClick || (() => {})}
+          onVotingClick={onVotingClick || (() => {})}
+          settingsAction={settingsAction}
+          customActions={
+            isLoadingPermissions || canManageLive ? [goLiveAction] : []
+          }
+          className="ml-2"
+          alignment="right"
+        />
       </div>
 
       <ConfirmationDialog

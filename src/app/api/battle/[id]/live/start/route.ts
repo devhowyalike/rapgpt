@@ -51,6 +51,7 @@ export async function POST(
 
     // Update battle to live mode
     battle.isLive = true;
+    battle.votingEnabled = true; // Automatically enable voting when going live
     battle.liveStartedAt = Date.now();
     battle.adminControlMode = battle.adminControlMode || 'manual';
     battle.updatedAt = Date.now();

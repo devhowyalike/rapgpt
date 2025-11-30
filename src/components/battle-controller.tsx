@@ -575,6 +575,21 @@ export function BattleController({
                 onCancelBattle={handleCancelBattle}
                 onToggleVoting={handleToggleVoting}
                 onToggleCommenting={handleToggleCommenting}
+                onCommentsClick={openCommentsDrawer}
+                onVotingClick={openVotingDrawer}
+                settingsAction={
+                  <button
+                    onClick={() => setShowSettingsDrawer(true)}
+                    className={`w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md ${
+                      showSettingsDrawer
+                        ? "bg-gray-700 text-white border-gray-600 scale-110"
+                        : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-gray-700 hover:text-white hover:border-gray-600 hover:scale-105"
+                    }`}
+                    aria-label="Battle Options"
+                  >
+                    <Settings className="w-6 h-6" strokeWidth={2.5} />
+                  </button>
+                }
               />
             )}
           </div>
@@ -595,30 +610,6 @@ export function BattleController({
           />
         </div>
       </div>
-
-      {/* Mobile Floating Action Buttons */}
-      <MobileActionButtons
-        showCommenting={showCommenting}
-        showVoting={showVoting}
-        onCommentsClick={openCommentsDrawer}
-        onVotingClick={openVotingDrawer}
-        activeTab={mobileActiveTab}
-        isDrawerOpen={showMobileDrawer}
-        bottomOffset={liveBattleFabOffset}
-        settingsAction={
-          <button
-            onClick={() => setShowSettingsDrawer(true)}
-            className={`w-14 h-14 rounded-full shadow-xl transition-all border-2 flex items-center justify-center backdrop-blur-md ${
-              showSettingsDrawer
-                ? "bg-gray-700 text-white border-gray-600 scale-110"
-                : "bg-gray-800/80 text-gray-300 border-gray-700/50 hover:bg-gray-700 hover:text-white hover:border-gray-600 hover:scale-105"
-            }`}
-            aria-label="Battle Options"
-          >
-            <Settings className="w-6 h-6" strokeWidth={2.5} />
-          </button>
-        }
-      />
 
       {/* Settings Drawer */}
       <BattleOptionsDrawer
