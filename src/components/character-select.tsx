@@ -68,7 +68,7 @@ export function CharacterSelect({
   const [createAsLive, setCreateAsLive] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [votingEnabled, setVotingEnabled] = useState(false);
-  const [commentsEnabled, setCommentsEnabled] = useState(false);
+  const [commentsEnabled, setCommentsEnabled] = useState(true);
   const [autoStartOnAdvance, setAutoStartOnAdvance] = useState(true);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);

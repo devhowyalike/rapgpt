@@ -73,7 +73,7 @@ export const battles = pgTable("battles", {
   isFeatured: boolean("is_featured").notNull().default(false), // true = admin featured, false = user battle
   isPublic: boolean("is_public").notNull().default(false), // Battle visibility on user profiles
   votingEnabled: boolean("voting_enabled").notNull().default(false), // Enable/disable voting
-  commentsEnabled: boolean("comments_enabled").notNull().default(false), // Enable/disable comments
+  commentsEnabled: boolean("comments_enabled").notNull().default(true), // Enable/disable comments
 
   // Live battle fields
   isLive: boolean("is_live").notNull().default(false), // Battle currently in live mode

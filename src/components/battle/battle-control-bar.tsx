@@ -92,14 +92,15 @@ export function BattleControlBar({
 }: BattleControlBarProps) {
   const [showGoLiveConfirmation, setShowGoLiveConfirmation] = useState(false);
 
+  // Mobile Go Live button (larger, circular - for fan menu)
   const goLiveButton = (
     <button
       onClick={
         isLoadingPermissions
           ? undefined
           : isLive
-            ? onEndLive
-            : () => setShowGoLiveConfirmation(true)
+          ? onEndLive
+          : () => setShowGoLiveConfirmation(true)
       }
       disabled={
         isLoadingPermissions || isStartingLive || isStoppingLive || isGenerating
@@ -110,8 +111,8 @@ export function BattleControlBar({
           isLoadingPermissions
             ? "bg-gray-800/50 border-gray-700 cursor-wait"
             : isLive
-              ? "bg-gray-700 hover:bg-gray-600 border-gray-500"
-              : "bg-red-600 hover:bg-red-700 border-red-500 md:animate-pulse"
+            ? "bg-gray-700 hover:bg-gray-600 border-gray-500"
+            : "bg-red-600 hover:bg-red-700 border-red-500"
         }
       `}
       title={isLive ? "End Live" : "Go Live"}
@@ -128,6 +129,46 @@ export function BattleControlBar({
     </button>
   );
 
+  // Desktop Go Live button (matches gear icon size/style)
+  const desktopGoLiveButton = (
+    <button
+      onClick={
+        isLoadingPermissions
+          ? undefined
+          : isLive
+          ? onEndLive
+          : () => setShowGoLiveConfirmation(true)
+      }
+      disabled={
+        isLoadingPermissions || isStartingLive || isStoppingLive || isGenerating
+      }
+      className={`
+        px-3 py-3 rounded-lg transition-all flex items-center justify-center gap-2
+        ${
+          isLoadingPermissions
+            ? "bg-gray-800/50 cursor-wait"
+            : isLive
+            ? "bg-gray-700 hover:bg-gray-600"
+            : "bg-red-600 hover:bg-red-700"
+        }
+      `}
+      title={isLive ? "End Live" : "Go Live"}
+    >
+      {isLoadingPermissions ? (
+        <div className="w-5 h-5 shrink-0 rounded-full border-2 border-gray-300 border-t-transparent animate-spin" />
+      ) : isStartingLive || isStoppingLive ? (
+        <LoadingSpinner size="sm" />
+      ) : isLive ? (
+        <StopCircle className="w-5 h-5 shrink-0 text-white" />
+      ) : (
+        <Radio className="w-5 h-5 shrink-0 text-white" />
+      )}
+      <span className="hidden lg:inline text-white font-medium text-sm">
+        {isLive ? "End Live" : "Go Live"}
+      </span>
+    </button>
+  );
+
   const goLiveAction = {
     id: "go-live",
     component: goLiveButton,
@@ -137,31 +178,18 @@ export function BattleControlBar({
   return (
     <div className="p-4 bg-gray-900 border-t border-gray-800">
       <div className="max-w-4xl mx-auto flex flex-row gap-3">
-        {/* Battle Options Dropdown - Desktop Only */}
-        <div className="hidden md:block">
-          <BattleOptionsDropdown
-            showCommenting={showCommenting}
-            showVoting={showVoting}
-            onToggleCommenting={onToggleCommenting}
-            onToggleVoting={onToggleVoting}
-            onPauseBattle={onCancelBattle}
-            isPausing={isCanceling || isGenerating}
-            isLive={isLive}
-          />
-        </div>
-
         {/* Primary Action Button - Changes based on state */}
         <button
           onClick={
             isCalculatingScores
               ? undefined
               : isReadingPhase && showVoting
-                ? onBeginVoting
-                : canAdvance
-                  ? onAdvanceRound
-                  : canGenerate
-                    ? onGenerateVerse
-                    : undefined
+              ? onBeginVoting
+              : canAdvance
+              ? onAdvanceRound
+              : canGenerate
+              ? onGenerateVerse
+              : undefined
           }
           disabled={
             isGenerating ||
@@ -176,16 +204,16 @@ export function BattleControlBar({
               isCalculatingScores
                 ? "bg-linear-to-r from-amber-600 to-yellow-600"
                 : isGenerating || isPreGenerating
-                  ? "bg-linear-to-r from-teal-600 to-cyan-600"
-                  : isReadingPhase
-                    ? "bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
-                    : isVotingPhase
-                      ? "bg-linear-to-r from-purple-600 to-pink-600 animate-pulse"
-                      : canAdvance
-                        ? "bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 animate-pulse"
-                        : canGenerate
-                          ? "bg-linear-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg shadow-green-500/50"
-                          : "bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"
+                ? "bg-linear-to-r from-teal-600 to-cyan-600"
+                : isReadingPhase
+                ? "bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
+                : isVotingPhase
+                ? "bg-linear-to-r from-purple-600 to-pink-600 animate-pulse"
+                : canAdvance
+                ? "bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 animate-pulse"
+                : canGenerate
+                ? "bg-linear-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg shadow-green-500/50"
+                : "bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"
             }
             ${
               isGenerating ||
@@ -252,20 +280,51 @@ export function BattleControlBar({
           )}
         </button>
 
-        {/* Mobile Action Menu (Fan) - Replaces Go Live Button */}
-        <MobileActionButtons
-          isFixed={false}
-          showCommenting={showCommenting}
-          showVoting={showVoting && isLive}
-          onCommentsClick={onCommentsClick || (() => {})}
-          onVotingClick={onVotingClick || (() => {})}
-          settingsAction={settingsAction}
-          customActions={
-            isLoadingPermissions || canManageLive ? [goLiveAction] : []
-          }
-          className="ml-2"
-          alignment="right"
-        />
+        {/* Battle Options Dropdown - Desktop Only */}
+        <div className="hidden md:block">
+          <BattleOptionsDropdown
+            showCommenting={showCommenting}
+            showVoting={showVoting}
+            onToggleCommenting={onToggleCommenting}
+            onToggleVoting={onToggleVoting}
+            onPauseBattle={onCancelBattle}
+            isPausing={isCanceling || isGenerating}
+            isLive={isLive}
+            customTrigger={
+              <button
+                className="px-3 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg text-white font-bold flex items-center justify-center gap-2 transition-all"
+                aria-label="Battle Options"
+              >
+                <Settings className="w-5 h-5" />
+                <span className="hidden lg:inline font-medium text-sm">
+                  Options
+                </span>
+              </button>
+            }
+          />
+        </div>
+
+        {/* Go Live Button - Desktop Only */}
+        {(isLoadingPermissions || canManageLive) && (
+          <div className="hidden md:block">{desktopGoLiveButton}</div>
+        )}
+
+        {/* Mobile Action Menu (Fan) - Mobile Only */}
+        <div className="md:hidden">
+          <MobileActionButtons
+            isFixed={false}
+            showCommenting={showCommenting}
+            showVoting={showVoting && isLive}
+            onCommentsClick={onCommentsClick || (() => {})}
+            onVotingClick={onVotingClick || (() => {})}
+            settingsAction={settingsAction}
+            customActions={
+              isLoadingPermissions || canManageLive ? [goLiveAction] : []
+            }
+            className="ml-2"
+            alignment="right"
+          />
+        </div>
       </div>
 
       <ConfirmationDialog

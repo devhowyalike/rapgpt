@@ -113,7 +113,7 @@ export function MobileActionButtons({
   ];
 
   const actions = rawActions.filter((action): action is ActionItem =>
-    Boolean(action),
+    Boolean(action)
   );
 
   if (actions.length === 0) {
@@ -152,8 +152,8 @@ export function MobileActionButtons({
           isFixed && bottomOffset
             ? { bottom: bottomOffset }
             : isFixed
-              ? { bottom: "1.5rem" }
-              : undefined
+            ? { bottom: "1.5rem" }
+            : undefined
         }
       >
         <div className="relative">
