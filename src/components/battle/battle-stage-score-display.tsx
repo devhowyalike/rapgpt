@@ -30,7 +30,7 @@ export function BattleStageScoreDisplay({
     >
       <div className="max-w-4xl mx-auto">
         <motion.h3
-          className="text-xl md:text-2xl font-(family-name:--font-bebas-neue) text-center mb-4 text-yellow-400"
+          className="text-xl md:text-2xl font-(family-name:--font-bebas-neue) text-center mb-2 md:mb-4 text-yellow-400"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4, delay: 0.2 }}

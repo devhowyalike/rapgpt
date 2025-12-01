@@ -158,22 +158,6 @@ export function ScoreDisplay({
 
   return (
     <div className={className}>
-      {/* Collapse Toggle Button */}
-      <button
-        ref={toggleRef}
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-center gap-2 mb-3 text-gray-400 hover:text-white transition-colors group outline-none"
-      >
-        <span className="text-sm font-medium">
-          {isExpanded ? "Hide Details" : "Show Details"}
-        </span>
-        {isExpanded ? (
-          <ChevronUp className="w-4 h-4 group-hover:transform group-hover:-translate-y-0.5 transition-transform" />
-        ) : (
-          <ChevronDown className="w-4 h-4 group-hover:transform group-hover:translate-y-0.5 transition-transform" />
-        )}
-      </button>
-
       <div ref={expandedRef} className="grid grid-cols-2 gap-2 md:gap-4">
         <PersonaScoreCard
           persona={player1Persona}
@@ -196,6 +180,22 @@ export function ScoreDisplay({
           isWinner={roundScore.winner === "player2"}
         />
       </div>
+
+      {/* Collapse Toggle Button */}
+      <button
+        ref={toggleRef}
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-center gap-2 mt-2 md:mt-3 text-gray-400 hover:text-white transition-colors group outline-none"
+      >
+        <span className="text-sm font-medium">
+          {isExpanded ? "Hide Details" : "Show Details"}
+        </span>
+        {isExpanded ? (
+          <ChevronUp className="w-4 h-4 group-hover:transform group-hover:-translate-y-0.5 transition-transform" />
+        ) : (
+          <ChevronDown className="w-4 h-4 group-hover:transform group-hover:translate-y-0.5 transition-transform" />
+        )}
+      </button>
     </div>
   );
 }
