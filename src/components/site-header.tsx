@@ -126,7 +126,7 @@ export function SiteHeader() {
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between h-full gap-4">
         {/* Left Section: Hamburger (mobile), Logo and Navigation Links */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1 md:gap-4">
           {/* Mobile Hamburger Menu - Left of Logo */}
           <MobileMenu
             isSignedIn={Boolean(isSignedIn)}
