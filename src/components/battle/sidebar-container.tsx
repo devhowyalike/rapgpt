@@ -5,7 +5,10 @@
 "use client";
 
 import { BattleSidebar } from "@/components/battle-sidebar";
+import { CommentsContent } from "@/components/battle/comments-content";
+import { VotingContent } from "@/components/battle/voting-content";
 import { BattleDrawer } from "@/components/ui/battle-drawer";
+import { DrawerScrollContent } from "@/components/ui/drawer-scroll-content";
 import type { DrawerTab } from "@/lib/hooks/use-mobile-drawer";
 import type { Battle } from "@/lib/shared";
 
@@ -64,7 +67,7 @@ export function SidebarContainer({
         />
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer - single scroll container like MP3 drawer */}
       {showMobileDrawer !== undefined && onMobileDrawerChange && (
         <BattleDrawer
           open={showMobileDrawer}
@@ -72,18 +75,26 @@ export function SidebarContainer({
           title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
           excludeBottomControls={excludeBottomControls}
         >
-          <div className="flex-1 overflow-y-auto min-h-0 touch-scroll-container">
-            <BattleSidebar
-              battle={battle}
-              onVote={onVote}
+          {mobileActiveTab === "comments" && showCommenting && (
+            <CommentsContent
+              comments={battle.comments}
               onComment={onComment}
               isArchived={isArchived}
-              isVotingPhase={isVotingPhase}
-              votingTimeRemaining={votingTimeRemaining}
-              votingCompletedRound={votingCompletedRound}
-              defaultTab={mobileActiveTab}
+              battleStatus={battle.status}
             />
-          </div>
+          )}
+          {mobileActiveTab === "voting" && effectiveShowVoting && (
+            <DrawerScrollContent>
+              <VotingContent
+                battle={battle}
+                onVote={onVote}
+                isArchived={isArchived}
+                isVotingPhase={isVotingPhase}
+                votingTimeRemaining={votingTimeRemaining}
+                votingCompletedRound={votingCompletedRound}
+              />
+            </DrawerScrollContent>
+          )}
         </BattleDrawer>
       )}
     </>

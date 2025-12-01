@@ -6,6 +6,7 @@
 
 import { MessageSquare, Pause, Vote } from "lucide-react";
 import { BattleDrawer } from "@/components/ui/battle-drawer";
+import { DrawerScrollContent } from "@/components/ui/drawer-scroll-content";
 import { Switch } from "@/components/ui/switch";
 
 interface BattleOptionsDrawerProps {
@@ -36,9 +37,9 @@ export function BattleOptionsDrawer({
       open={open}
       onOpenChange={onOpenChange}
       title="Battle Options"
-      excludeBottomControls={false}
+      excludeBottomControls
     >
-      <div className="p-4 space-y-6">
+      <DrawerScrollContent className="p-4 space-y-6">
         {/* Toggles Section */}
         <div className="space-y-4">
           <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
@@ -110,7 +111,7 @@ export function BattleOptionsDrawer({
             </button>
           </div>
         )}
-      </div>
+      </DrawerScrollContent>
     </BattleDrawer>
   );
 }

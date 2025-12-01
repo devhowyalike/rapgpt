@@ -5,6 +5,7 @@
 
 export { BattleBottomControls } from "./battle-bottom-controls";
 export { BattleControlBar } from "./battle-control-bar";
+export { CommentsContent } from "./comments-content";
 export { BattleHeader } from "./battle-header";
 export { BattleOptionsDrawer } from "./battle-options-drawer";
 export { BattleOptionsDropdown } from "./battle-options-dropdown";
@@ -28,3 +29,4 @@ export { MainActionButton } from "./main-action-button";
 export { MobileFanButton } from "./mobile-fan-button";
 export { PersonaSection } from "./persona-section";
 export { SidebarContainer } from "./sidebar-container";
+export { VotingContent } from "./voting-content";

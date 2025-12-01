@@ -574,6 +574,7 @@ export function BattleController({
             showMobileDrawer={showMobileDrawer}
             onMobileDrawerChange={setShowMobileDrawer}
             mobileActiveTab={mobileActiveTab}
+            excludeBottomControls
           />
         </div>
       </div>

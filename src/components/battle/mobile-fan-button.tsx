@@ -58,13 +58,11 @@ export function MobileFanButton({
         {isOpen && (
           <motion.div
             key="fan-overlay"
-            className={`fixed inset-0 z-30 bg-black/70 backdrop-blur-sm xl:hidden ${
-              isFloating ? "" : "pointer-events-none"
-            }`}
+            className="fixed inset-0 z-30 bg-black/70 backdrop-blur-sm xl:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={isFloating ? () => setIsOpen(false) : undefined}
+            onClick={() => setIsOpen(false)}
           />
         )}
       </AnimatePresence>
