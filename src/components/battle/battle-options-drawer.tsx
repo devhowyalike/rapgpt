@@ -60,7 +60,11 @@ export function BattleOptionsDrawer({
             />
           </div>
 
-          <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+          <div
+            className={`flex items-center justify-between p-3 bg-gray-800/50 rounded-lg transition-opacity ${
+              !isLive ? "opacity-50" : ""
+            }`}
+          >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-purple-500/20 rounded-full">
                 <Vote className="w-5 h-5 text-purple-400" />
@@ -68,9 +72,7 @@ export function BattleOptionsDrawer({
               <div className="flex flex-col">
                 <span className="font-medium text-white">Voting</span>
                 <span className="text-sm text-gray-400">
-                  {isLive
-                    ? "Enable crowd judging"
-                    : "Available in live battles"}
+                  {isLive ? "Enable crowd judging" : "Go live to activate"}
                 </span>
               </div>
             </div>
