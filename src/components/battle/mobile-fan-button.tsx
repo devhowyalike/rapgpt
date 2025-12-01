@@ -11,6 +11,8 @@ export interface MobileFanButtonAction {
   onClick: () => void;
   isActive?: boolean;
   disabled?: boolean;
+  /** Custom variant for special styling (e.g., "danger" for red) */
+  variant?: "default" | "danger";
 }
 
 interface MobileFanButtonProps {
@@ -86,16 +88,19 @@ export function MobileFanButton({
                   <motion.button
                     key={action.id}
                     whileTap={{ scale: 0.95 }}
-                    initial={{ opacity: 0, y: 0, scale: 0.8 }}
+                    initial={{ opacity: 0, y: -offset, scale: 0.5 }}
                     animate={{ opacity: 1, y: -offset, scale: 1 }}
-                    exit={{ opacity: 0, y: 0, scale: 0.8 }}
+                    exit={{ opacity: 0, y: -offset, scale: 0.5 }}
                     transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       action.onClick();
                       setIsOpen(false);
                     }}
                     className={`absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full border backdrop-blur-md shadow-lg flex items-center justify-center text-white ${
-                      action.isActive
+                      action.variant === "danger"
+                        ? "bg-red-600 border-red-500 hover:bg-red-700"
+                        : action.isActive
                         ? "bg-blue-600 border-blue-400"
                         : "bg-gray-900/90 border-gray-700 hover:bg-gray-800"
                     }`}
@@ -103,7 +108,7 @@ export function MobileFanButton({
                   >
                     {action.icon}
                     <span className="sr-only">{action.label}</span>
-                    <span className="pointer-events-none absolute right-full mr-2 rounded-md bg-black/70 px-2 py-1 text-xs text-white shadow-lg">
+                    <span className="pointer-events-none absolute right-full mr-2 whitespace-nowrap rounded-md bg-black/70 px-2 py-1 text-xs text-white shadow-lg">
                       {action.label}
                     </span>
                   </motion.button>

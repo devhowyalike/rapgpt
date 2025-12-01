@@ -6,7 +6,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MessageSquare, Radio, Settings, StopCircle, ThumbsUp } from "lucide-react";
+import {
+  MessageSquare,
+  Radio,
+  Settings,
+  StopCircle,
+  ThumbsUp,
+} from "lucide-react";
 import { forwardRef, type ReactNode } from "react";
 import { AnimatedEq } from "@/components/animated-eq";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -55,6 +61,40 @@ export const OptionsButton = forwardRef<HTMLButtonElement, OptionsButtonProps>(
 OptionsButton.displayName = "OptionsButton";
 
 // =============================================================================
+// Go Live State Helper (shared between button and mobile fan)
+// =============================================================================
+
+interface GoLiveStateOptions {
+  isLive: boolean;
+  isLoadingPermissions?: boolean;
+  isStartingLive?: boolean;
+  isStoppingLive?: boolean;
+}
+
+export function getGoLiveState({
+  isLive,
+  isLoadingPermissions = false,
+  isStartingLive = false,
+  isStoppingLive = false,
+}: GoLiveStateOptions) {
+  const isLoading = isStartingLive || isStoppingLive;
+  const label = isLive ? "End Live" : "Go Live";
+  const icon = isLive ? (
+    <StopCircle className="w-5 h-5" />
+  ) : (
+    <Radio className="w-5 h-5" />
+  );
+
+  return {
+    label,
+    icon,
+    isLoading,
+    isLoadingPermissions,
+    isDisabled: isLoadingPermissions || isLoading,
+  };
+}
+
+// =============================================================================
 // Go Live Button
 // =============================================================================
 
@@ -75,13 +115,18 @@ export function GoLiveButton({
   disabled = false,
   onClick,
 }: GoLiveButtonProps) {
-  const isLoading = isStartingLive || isStoppingLive;
-  const isDisabled = disabled || isLoadingPermissions || isLoading;
+  const { label, isLoading, isDisabled } = getGoLiveState({
+    isLive,
+    isLoadingPermissions,
+    isStartingLive,
+    isStoppingLive,
+  });
+  const buttonDisabled = disabled || isDisabled;
 
   return (
     <button
-      onClick={isDisabled ? undefined : onClick}
-      disabled={isDisabled}
+      onClick={buttonDisabled ? undefined : onClick}
+      disabled={buttonDisabled}
       className={`
         px-3 py-3 rounded-lg transition-all flex items-center justify-center gap-2
         ${
@@ -92,7 +137,7 @@ export function GoLiveButton({
               : "bg-red-600 hover:bg-red-700"
         }
       `}
-      title={isLive ? "End Live" : "Go Live"}
+      title={label}
     >
       {isLoadingPermissions ? (
         <div className="w-5 h-5 shrink-0 rounded-full border-2 border-gray-300 border-t-transparent animate-spin" />
@@ -104,7 +149,7 @@ export function GoLiveButton({
         <Radio className="w-5 h-5 shrink-0 text-white" />
       )}
       <span className="hidden lg:inline text-white font-medium text-sm">
-        {isLive ? "End Live" : "Go Live"}
+        {label}
       </span>
     </button>
   );
@@ -297,6 +342,12 @@ interface BuildMobileFanActionsOptions {
   mobileActiveTab?: "comments" | "voting" | null;
   isMobileDrawerOpen?: boolean;
   settingsActive?: boolean;
+  // Go Live mobile action
+  showGoLive?: boolean;
+  isLoadingPermissions?: boolean;
+  isStartingLive?: boolean;
+  isStoppingLive?: boolean;
+  onGoLiveClick?: () => void;
 }
 
 /**
@@ -314,8 +365,33 @@ export function buildMobileFanActions({
   mobileActiveTab = null,
   isMobileDrawerOpen = false,
   settingsActive = false,
+  showGoLive = false,
+  isLoadingPermissions = false,
+  isStartingLive = false,
+  isStoppingLive = false,
+  onGoLiveClick,
 }: BuildMobileFanActionsOptions): MobileFanButtonAction[] {
   const actions: MobileFanButtonAction[] = [];
+
+  // Go Live action (shown first for prominence)
+  if (showGoLive && onGoLiveClick) {
+    const goLiveState = getGoLiveState({
+      isLive,
+      isLoadingPermissions,
+      isStartingLive,
+      isStoppingLive,
+    });
+    actions.push({
+      id: "go-live",
+      label: goLiveState.label,
+      icon: goLiveState.icon,
+      onClick: onGoLiveClick,
+      isActive: isLive,
+      disabled: goLiveState.isDisabled,
+      // Red when not live, gray when live (ending)
+      variant: isLive ? "default" : "danger",
+    });
+  }
 
   if (showCommenting && onCommentsClick) {
     actions.push({

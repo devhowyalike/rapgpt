@@ -7,7 +7,6 @@
 
 import { useBattleStage } from "@/lib/hooks/use-battle-stage";
 import type { Battle, PersonaPosition } from "@/lib/shared";
-import { DEFAULT_STAGE, getStage } from "@/lib/shared/stages";
 import type { ConnectionStatus } from "@/lib/websocket/types";
 import { BattleSplitView } from "./battle/battle-split-view";
 import { BattleStageActiveHeader } from "./battle/battle-stage-active-header";

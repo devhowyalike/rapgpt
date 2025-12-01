@@ -111,6 +111,12 @@ export function BattleControlBar({
     mobileActiveTab,
     isMobileDrawerOpen,
     settingsActive,
+    // Go Live in mobile fan (hidden on xl+ where dedicated button shows)
+    showGoLive: isLoadingPermissions || canManageLive,
+    isLoadingPermissions,
+    isStartingLive,
+    isStoppingLive,
+    onGoLiveClick: handleGoLiveClick,
   });
 
   return (
@@ -147,9 +153,9 @@ export function BattleControlBar({
         />
       </div>
 
-      {/* Go Live Button */}
+      {/* Go Live Button - hidden on mobile, shown on xl+ (mobile uses fan menu) */}
       {(isLoadingPermissions || canManageLive) && (
-        <div>
+        <div className="hidden xl:block">
           <GoLiveButton
             isLive={isLive}
             isLoadingPermissions={isLoadingPermissions}
