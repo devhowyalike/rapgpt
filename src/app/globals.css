@@ -193,7 +193,7 @@ body {
   animation: none;
 }
 
-/* Sticky persona cards on mobile */
+/* Sticky persona cards - keeps profiles visible when scrolling through verses */
 .persona-card-sticky {
   position: sticky;
   top: var(--header-height);
@@ -204,7 +204,8 @@ body {
 
 @media (min-width: 768px) {
   .persona-card-sticky {
-    position: static;
+    /* On desktop, battle header is not sticky, so stick at top of scroll container */
+    top: 0;
   }
 }
 

@@ -160,7 +160,7 @@ export function BattleStage(props: BattleStageProps) {
 
       {/* Split Screen Stage */}
       <div
-        className="flex-1 overflow-y-auto"
+        className={`flex-1 ${isReplayMode ? "overflow-y-auto" : ""}`}
         {...(isReplayMode ? { "data-scroll-container": true } : {})}
       >
         <BattleSplitView
