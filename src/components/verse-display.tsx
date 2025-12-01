@@ -27,6 +27,12 @@ export function VerseDisplay({
   const streamingBars =
     streamingText?.split("\n").filter((line) => line.trim()) || [];
 
+  // Use position-based player colors instead of persona accent color
+  const playerColor =
+    position === "player1"
+      ? "rgb(var(--player1-color))"
+      : "rgb(var(--player2-color))";
+
   // Ref for streaming container to enable auto-scrolling
   const streamingContainerRef = useRef<HTMLDivElement>(null);
 
@@ -61,13 +67,13 @@ export function VerseDisplay({
               >
                 <span
                   className="text-sm opacity-50 w-8 shrink-0"
-                  style={{ color: persona.accentColor }}
+                  style={{ color: playerColor }}
                 >
                   {index + 1}.
                 </span>
                 <p
                   className="text-lg md:text-xl text-white font-medium leading-relaxed flex-1"
-                  style={{ textShadow: `0 0 10px ${persona.accentColor}40` }}
+                  style={{ textShadow: `0 0 10px ${playerColor}40` }}
                 >
                   {bar.text}
                 </p>
@@ -96,13 +102,13 @@ export function VerseDisplay({
               >
                 <span
                   className="text-sm opacity-50 w-8 shrink-0"
-                  style={{ color: persona.accentColor }}
+                  style={{ color: playerColor }}
                 >
                   {index + 1}.
                 </span>
                 <p
                   className="text-lg md:text-xl text-white font-medium leading-relaxed flex-1"
-                  style={{ textShadow: `0 0 10px ${persona.accentColor}40` }}
+                  style={{ textShadow: `0 0 10px ${playerColor}40` }}
                 >
                   {line}
                 </p>
@@ -116,11 +122,11 @@ export function VerseDisplay({
               >
                 <div
                   className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: persona.accentColor }}
+                  style={{ backgroundColor: playerColor }}
                 />
                 <span
                   className="text-sm"
-                  style={{ color: persona.accentColor }}
+                  style={{ color: playerColor }}
                 >
                   {persona.name} is spitting...
                 </span>

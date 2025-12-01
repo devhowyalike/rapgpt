@@ -13,6 +13,7 @@ import type { Persona, RoundScore } from "@/lib/shared";
 interface PersonaScoreCardProps {
   persona: Persona;
   score: RoundScore["positionScores"]["player1"];
+  position: "player1" | "player2";
   isExpanded: boolean;
   animationDirection: number; // -20 for left, 20 for right
   animationDelay: number;
@@ -23,17 +24,24 @@ interface PersonaScoreCardProps {
 function PersonaScoreCard({
   persona,
   score,
+  position,
   isExpanded,
   animationDirection,
   animationDelay,
   votingEnabled,
   isWinner,
 }: PersonaScoreCardProps) {
+  // Use position-based player colors instead of persona accent color
+  const playerColor =
+    position === "player1"
+      ? "rgb(var(--player1-color))"
+      : "rgb(var(--player2-color))";
+
   if (isExpanded) {
     return (
       <motion.div
         className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2"
-        style={{ borderColor: persona.accentColor + "40" }}
+        style={{ borderColor: `${playerColor}40` }}
         initial={{ opacity: 0, x: animationDirection }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.4, delay: animationDelay }}
@@ -41,14 +49,14 @@ function PersonaScoreCard({
         <div className="text-center">
           <div
             className="text-xs font-medium mb-1 md:mb-2 opacity-80 flex items-center justify-center gap-1"
-            style={{ color: persona.accentColor }}
+            style={{ color: playerColor }}
           >
             <span>{persona.name}</span>
             {isWinner && <span className="text-yellow-400">👑</span>}
           </div>
           <div
             className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
-            style={{ color: persona.accentColor }}
+            style={{ color: playerColor }}
           >
             {score.totalScore.toFixed(1)}
           </div>
@@ -89,21 +97,21 @@ function PersonaScoreCard({
   return (
     <motion.div
       className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2 flex flex-col items-center justify-center"
-      style={{ borderColor: persona.accentColor + "40" }}
+      style={{ borderColor: `${playerColor}40` }}
       initial={{ opacity: 0, x: animationDirection }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4, delay: animationDelay }}
     >
       <div
         className="text-xs font-medium mb-1 md:mb-2 opacity-80 flex items-center gap-1"
-        style={{ color: persona.accentColor }}
+        style={{ color: playerColor }}
       >
         <span>{persona.name}</span>
         {isWinner && <span className="text-yellow-400">👑</span>}
       </div>
       <div
         className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue)"
-        style={{ color: persona.accentColor }}
+        style={{ color: playerColor }}
       >
         {score.totalScore.toFixed(1)}
       </div>
@@ -170,6 +178,7 @@ export function ScoreDisplay({
         <PersonaScoreCard
           persona={player1Persona}
           score={player1Score}
+          position="player1"
           isExpanded={isExpanded}
           animationDirection={-20}
           animationDelay={0.3}
@@ -179,6 +188,7 @@ export function ScoreDisplay({
         <PersonaScoreCard
           persona={player2Persona}
           score={player2Score}
+          position="player2"
           isExpanded={isExpanded}
           animationDirection={20}
           animationDelay={0.4}
