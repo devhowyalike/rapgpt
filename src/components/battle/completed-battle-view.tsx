@@ -16,7 +16,7 @@ import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
 import { useRoundData } from "@/lib/hooks/use-round-data";
 import { useRoundNavigation } from "@/lib/hooks/use-round-navigation";
 import type { Battle } from "@/lib/shared";
-import { BattleReplay } from "../battle-replay";
+import { BattleStage } from "../battle-stage";
 import { SiteHeader } from "../site-header";
 
 interface CompletedBattleViewProps {
@@ -139,7 +139,7 @@ export function CompletedBattleView({
       <div className="px-0 md:px-6">
         <div className="max-w-7xl mx-auto flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row">
           <div className="flex-1 flex flex-col min-h-0 relative">
-            <BattleReplay battle={battle} />
+            <BattleStage battle={battle} mode="replay" />
 
             {/* Control Bar with Scores, Song, and Options */}
             <BattleReplayControlBar
