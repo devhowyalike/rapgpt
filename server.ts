@@ -199,12 +199,13 @@ app.prepare().then(() => {
     const { pathname } = parse(request.url || "", true);
 
     if (pathname === "/ws") {
+      // Handle our custom WebSocket endpoint
       wss.handleUpgrade(request, socket, head, (ws) => {
         wss.emit("connection", ws, request);
       });
-    } else {
-      socket.destroy();
     }
+    // Let Next.js handle its own WebSocket upgrades (HMR, etc.)
+    // by NOT destroying the socket for other paths
   });
 
   // Handle WebSocket connections
