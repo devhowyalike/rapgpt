@@ -11,6 +11,9 @@ export { BattleOptionsDropdown } from "./battle-options-dropdown";
 export { BattleReplayControlBar } from "./battle-replay-control-bar";
 export { BattleScoreSection } from "./battle-score-section";
 export { BattleSplitView } from "./battle-split-view";
+export { BattleStageActiveHeader } from "./battle-stage-active-header";
+export { BattleStageReplayHeader } from "./battle-stage-replay-header";
+export { BattleStageScoreDisplay } from "./battle-stage-score-display";
 export { BattleStateInfo } from "./battle-state-info";
 export { CompletedBattleView } from "./completed-battle-view";
 export {
