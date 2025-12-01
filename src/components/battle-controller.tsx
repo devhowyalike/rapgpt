@@ -219,16 +219,18 @@ export function BattleController({
     },
   });
 
-  // Reading phase timer effect - starts when round is complete
-  // This works for both live and non-live battles
+  // Voting phase timer effect - starts when round is complete in LIVE battles only
+  // Non-live battles allow users to vote at their leisure without a countdown
   useEffect(() => {
     if (!battle) return;
 
     const roundComplete = isRoundComplete(battle, battle.currentRound);
     const nextPerformer = getNextPerformer(battle);
 
-    // Start reading/voting phase when round is complete and we're not already in reading/voting phase
+    // Start voting phase with countdown ONLY for live battles
+    // Non-live battles show the voting UI in the sidebar without forcing a countdown
     if (
+      isLive &&
       roundComplete &&
       !nextPerformer &&
       battle.status === "paused" &&
@@ -242,6 +244,7 @@ export function BattleController({
     }
   }, [
     battle,
+    isLive,
     isReadingPhase,
     isVotingPhase,
     beginVotingPhase,
