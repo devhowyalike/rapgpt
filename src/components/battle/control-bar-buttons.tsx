@@ -427,7 +427,7 @@ export function buildMobileFanActions({
   if (onSettingsClick) {
     actions.push({
       id: "settings",
-      label: "Settings",
+      label: "Options",
       icon: <Settings className="w-5 h-5" />,
       onClick: onSettingsClick,
       isActive: settingsActive,
