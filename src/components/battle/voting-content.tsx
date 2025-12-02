@@ -242,7 +242,7 @@ export function VotingContent({
                 key={roundScore.round}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-gray-800 rounded-lg p-4"
+                className="bg-gray-900/50 border border-gray-800 rounded-lg p-4"
               >
                 <h3 className="font-(family-name:--font-bebas-neue) text-xl text-yellow-400 mb-4">
                   ROUND {roundScore.round}
@@ -260,6 +260,10 @@ export function VotingContent({
                       const voteKey = `${battle.id}-${roundScore.round}-${persona.id}`;
                       const isVoted = userVotes.has(voteKey);
                       const canVote = canVoteOnRound(roundScore.round);
+                      const playerColor =
+                        position === "player1"
+                          ? "rgb(var(--player1-color))"
+                          : "rgb(var(--player2-color))";
 
                       return (
                         <motion.div
@@ -285,8 +289,8 @@ export function VotingContent({
                               isVoted
                                 ? "bg-linear-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400 shadow-lg shadow-yellow-400/20 hover:scale-[1.02] hover:border-yellow-500"
                                 : !canVote
-                                ? "bg-gray-700 border-gray-600 cursor-not-allowed"
-                                : `hover:scale-[1.02] hover:shadow-lg border-gray-600 ${hoverBorderColor}`
+                                ? "bg-gray-800 border-gray-700 cursor-not-allowed"
+                                : `bg-black/20 hover:bg-black/40 hover:scale-[1.02] hover:shadow-lg border-gray-700 ${hoverBorderColor}`
                             }
                             ${isSubmittingVote ? "opacity-50" : ""}
                           `}
@@ -295,7 +299,7 @@ export function VotingContent({
                               <div className="flex items-center gap-2">
                                 <span
                                   className="font-medium"
-                                  style={{ color: persona.accentColor }}
+                                  style={{ color: playerColor }}
                                 >
                                   {persona.name}
                                 </span>
