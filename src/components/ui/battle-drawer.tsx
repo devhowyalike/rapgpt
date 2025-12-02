@@ -49,6 +49,17 @@ export function BattleDrawer({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, onOpenChange]);
 
+  // Use padding to space above controls instead of positioning the whole drawer up.
+  // This ensures the drawer background extends behind the controls, preventing gaps/peaking.
+  // The controls (z-50) will sit on top of the drawer's bottom padding (z-40).
+  const drawerStyle = excludeBottomControls
+    ? { bottom: 0, paddingBottom: "var(--bottom-controls-height)" }
+    : { bottom: 0 };
+
+  const maxHeightClass = excludeBottomControls
+    ? "max-h-[calc(70vh+var(--bottom-controls-height))]"
+    : "max-h-[70vh]";
+
   return (
     <>
       {/* Animated Overlay */}
@@ -74,14 +85,10 @@ export function BattleDrawer({
 
       {/* Content Drawer - Always mounted, never unmounted, all breakpoints */}
       <motion.div
-        className={`${position} inset-x-0 z-40 bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl max-h-[70vh] flex flex-col overflow-hidden max-w-3xl mx-auto ${
+        className={`${position} inset-x-0 z-40 bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl ${maxHeightClass} flex flex-col overflow-hidden max-w-3xl mx-auto ${
           mobileOnly ? "xl:hidden" : ""
         } ${!open ? "pointer-events-none" : "pointer-events-auto"}`}
-        style={
-          excludeBottomControls
-            ? { bottom: "var(--bottom-controls-height)" }
-            : { bottom: 0 }
-        }
+        style={drawerStyle}
         initial={{ y: "100%" }}
         animate={{ y: open ? 0 : "100%" }}
         transition={{
