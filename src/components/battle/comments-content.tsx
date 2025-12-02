@@ -5,10 +5,10 @@
 
 "use client";
 
+import { SignInPrompt } from "@/components/auth/sign-in-prompt";
 import { useUser } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
 import { Send } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { Comment } from "@/lib/shared";
 
@@ -114,17 +114,7 @@ export function CommentsContent({
       {!isArchived && (
         <div className="shrink-0 p-4 pb-6 md:pb-4 border-t border-gray-800 bg-gray-900">
           {isLoaded && !user ? (
-            <div className="text-center py-3">
-              <p className="text-gray-400 text-sm mb-3">
-                Sign in to leave a comment
-              </p>
-              <Link
-                href="/sign-in"
-                className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-colors text-sm font-medium"
-              >
-                Sign In
-              </Link>
-            </div>
+            <SignInPrompt message="Sign in to leave a comment" />
           ) : (
             <form onSubmit={handleSubmitComment}>
               <div className="flex gap-2">

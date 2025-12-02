@@ -4,6 +4,8 @@
 
 "use client";
 
+import { SignInPrompt } from "@/components/auth/sign-in-prompt";
+import { useUser } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import type { Battle } from "@/lib/shared";
@@ -26,6 +28,7 @@ export function VotingContent({
   votingTimeRemaining = null,
   votingCompletedRound = null,
 }: VotingContentProps) {
+  const { user, isLoaded } = useUser();
   const [isSubmittingVote, setIsSubmittingVote] = useState(false);
   const [optimisticVote, setOptimisticVote] = useState<string | null>(null);
   const [userVotes, setUserVotes] = useState<Set<string>>(() => {
@@ -131,149 +134,151 @@ export function VotingContent({
   };
 
   return (
-    <div className="p-4 space-y-6">
-      {isArchived && battle.scores.length > 0 && (
-        <div className="bg-gray-800 rounded-lg p-3 mb-4">
-          <p className="text-center text-white text-sm">
-            {battle.status === "paused"
-              ? "Voting is disabled for paused battles"
-              : "Voting is disabled for archived battles"}
-          </p>
-        </div>
-      )}
-
-      {/* Message when voting hasn't started yet */}
-      {!isArchived &&
-        battle.isLive &&
-        !isVotingPhase &&
-        battle.scores.length > 0 && (
+    <div className="flex flex-col flex-1 min-h-0">
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-6 touch-scroll-container">
+        {isArchived && battle.scores.length > 0 && (
           <div className="bg-gray-800 rounded-lg p-3 mb-4">
             <p className="text-center text-white text-sm">
-              {battle.currentRound === ROUNDS_PER_BATTLE
-                ? "Voting has ended"
-                : "Voting will begin at the end of the round"}
+              {battle.status === "paused"
+                ? "Voting is disabled for paused battles"
+                : "Voting is disabled for archived battles"}
             </p>
           </div>
         )}
 
-      {/* Voting Timer in Sidebar */}
-      {isVotingPhase && votingTimeRemaining !== null && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-linear-to-r from-purple-600 to-blue-600 rounded-lg p-4 mb-4"
-        >
-          <div className="text-center">
-            <div className="text-white text-sm font-medium mb-1">
-              ⏱️ VOTING ACTIVE
+        {/* Message when voting hasn't started yet */}
+        {!isArchived &&
+          battle.isLive &&
+          !isVotingPhase &&
+          battle.scores.length > 0 && (
+            <div className="bg-gray-800 rounded-lg p-3 mb-4">
+              <p className="text-center text-white text-sm">
+                {battle.currentRound === ROUNDS_PER_BATTLE
+                  ? "Voting has ended"
+                  : "Voting will begin at the end of the round"}
+              </p>
             </div>
-            <div className="text-3xl font-bold text-white mb-1 font-bebas-neue">
-              {votingTimeRemaining}s
+          )}
+
+        {/* Voting Timer in Sidebar */}
+        {isVotingPhase && votingTimeRemaining !== null && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-linear-to-r from-purple-600 to-blue-600 rounded-lg p-4 mb-4"
+          >
+            <div className="text-center">
+              <div className="text-white text-sm font-medium mb-1">
+                ⏱️ VOTING ACTIVE
+              </div>
+              <div className="text-3xl font-bold text-white mb-1 font-bebas-neue">
+                {votingTimeRemaining}s
+              </div>
+              <div className="text-white/80 text-xs">Vote now!</div>
+              <div className="mt-3 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
+                  style={{ width: `${(votingTimeRemaining / 10) * 100}%` }}
+                />
+              </div>
             </div>
-            <div className="text-white/80 text-xs">Vote now!</div>
-            <div className="mt-3 h-1.5 bg-white/20 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-white rounded-full transition-all duration-1000 ease-linear"
-                style={{ width: `${(votingTimeRemaining / 10) * 100}%` }}
-              />
-            </div>
-          </div>
-        </motion.div>
-      )}
+          </motion.div>
+        )}
 
-      {battle.scores
-        .slice()
-        .reverse()
-        .map((roundScore) => {
-          // During review (reading) phase, don't show the current round's voting pair
-          const isCurrentRound = roundScore.round === battle.currentRound;
-          const hideCurrentRoundDuringReview =
-            !isArchived &&
-            isCurrentRound &&
-            !isVotingPhase &&
-            votingCompletedRound !== roundScore.round;
+        {battle.scores
+          .slice()
+          .reverse()
+          .map((roundScore) => {
+            // During review (reading) phase, don't show the current round's voting pair
+            const isCurrentRound = roundScore.round === battle.currentRound;
+            const hideCurrentRoundDuringReview =
+              !isArchived &&
+              isCurrentRound &&
+              !isVotingPhase &&
+              votingCompletedRound !== roundScore.round;
 
-          if (hideCurrentRoundDuringReview) {
-            return null;
-          }
+            if (hideCurrentRoundDuringReview) {
+              return null;
+            }
 
-          // Calculate optimistic vote counts by checking both server state and local state
-          const getOptimisticVoteCount = (
-            position: "player1" | "player2",
-          ): number => {
-            const serverVotes =
-              roundScore.positionScores[position].userVotes;
-            const personaId =
-              roundScore.positionScores[position].personaId;
-            // Count local votes for this persona in this round that aren't yet reflected in server state
-            const localVoteKey = `${battle.id}-${roundScore.round}-${personaId}`;
-            const hasLocalVote = userVotes.has(localVoteKey);
+            // Calculate optimistic vote counts by checking both server state and local state
+            const getOptimisticVoteCount = (
+              position: "player1" | "player2",
+            ): number => {
+              const serverVotes =
+                roundScore.positionScores[position].userVotes;
+              const personaId =
+                roundScore.positionScores[position].personaId;
+              // Count local votes for this persona in this round that aren't yet reflected in server state
+              const localVoteKey = `${battle.id}-${roundScore.round}-${personaId}`;
+              const hasLocalVote = userVotes.has(localVoteKey);
 
-            // If we have a local vote that's being optimistically shown, ensure it's counted
-            // Note: This assumes server votes don't yet include our local vote
-            return hasLocalVote ? Math.max(serverVotes, 1) : serverVotes;
-          };
+              // If we have a local vote that's being optimistically shown, ensure it's counted
+              // Note: This assumes server votes don't yet include our local vote
+              return hasLocalVote ? Math.max(serverVotes, 1) : serverVotes;
+            };
 
-          // Create array of personas with their scores and sort by votes (highest first)
-          const sortedPersonas = [
-            {
-              persona: battle.personas.player1,
-              position: "player1" as const,
-              score: roundScore.positionScores.player1,
-              optimisticVotes: getOptimisticVoteCount("player1"),
-              hoverBorderColor: "hover:border-blue-500",
-            },
-            {
-              persona: battle.personas.player2,
-              position: "player2" as const,
-              score: roundScore.positionScores.player2,
-              optimisticVotes: getOptimisticVoteCount("player2"),
-              hoverBorderColor: "hover:border-purple-500",
-            },
-          ].sort((a, b) => b.optimisticVotes - a.optimisticVotes);
+            // Create array of personas with their scores and sort by votes (highest first)
+            const sortedPersonas = [
+              {
+                persona: battle.personas.player1,
+                position: "player1" as const,
+                score: roundScore.positionScores.player1,
+                optimisticVotes: getOptimisticVoteCount("player1"),
+                hoverBorderColor: "hover:border-blue-500",
+              },
+              {
+                persona: battle.personas.player2,
+                position: "player2" as const,
+                score: roundScore.positionScores.player2,
+                optimisticVotes: getOptimisticVoteCount("player2"),
+                hoverBorderColor: "hover:border-purple-500",
+              },
+            ].sort((a, b) => b.optimisticVotes - a.optimisticVotes);
 
-          return (
-            <motion.div
-              key={roundScore.round}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-gray-800 rounded-lg p-4"
-            >
-              <h3 className="font-(family-name:--font-bebas-neue) text-xl text-yellow-400 mb-4">
-                ROUND {roundScore.round}
-              </h3>
+            return (
+              <motion.div
+                key={roundScore.round}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-gray-800 rounded-lg p-4"
+              >
+                <h3 className="font-(family-name:--font-bebas-neue) text-xl text-yellow-400 mb-4">
+                  ROUND {roundScore.round}
+                </h3>
 
-              <div className="space-y-3">
-                {sortedPersonas.map(
-                  ({
-                    persona,
-                    position,
-                    score,
-                    optimisticVotes,
-                    hoverBorderColor,
-                  }) => {
-                    const voteKey = `${battle.id}-${roundScore.round}-${persona.id}`;
-                    const isVoted = userVotes.has(voteKey);
-                    const canVote = canVoteOnRound(roundScore.round);
+                <div className="space-y-3">
+                  {sortedPersonas.map(
+                    ({
+                      persona,
+                      position,
+                      score,
+                      optimisticVotes,
+                      hoverBorderColor,
+                    }) => {
+                      const voteKey = `${battle.id}-${roundScore.round}-${persona.id}`;
+                      const isVoted = userVotes.has(voteKey);
+                      const canVote = canVoteOnRound(roundScore.round);
 
-                    return (
-                      <motion.div
-                        key={persona.id}
-                        layout
-                        transition={{
-                          layout: {
-                            type: "spring",
-                            stiffness: 350,
-                            damping: 25,
-                          },
-                        }}
-                      >
-                        <button
-                          onClick={() =>
-                            handleVote(roundScore.round, persona.id)
-                          }
-                          disabled={!canVote || isSubmittingVote}
-                          className={`
+                      return (
+                        <motion.div
+                          key={persona.id}
+                          layout
+                          transition={{
+                            layout: {
+                              type: "spring",
+                              stiffness: 350,
+                              damping: 25,
+                              delay: 0.1,
+                            },
+                          }}
+                        >
+                          <button
+                            onClick={() =>
+                              handleVote(roundScore.round, persona.id)
+                            }
+                            disabled={!canVote || isSubmittingVote}
+                            className={`
                             w-full p-3 rounded-lg border-2 transition-all
                             ${
                               isVoted
@@ -284,54 +289,61 @@ export function VotingContent({
                             }
                             ${isSubmittingVote ? "opacity-50" : ""}
                           `}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span
-                                className="font-medium"
-                                style={{ color: persona.accentColor }}
-                              >
-                                {persona.name}
-                              </span>
-                              {isVoted && (
-                                <span className="text-yellow-400 text-xs">
-                                  ✓ Your vote
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className="font-medium"
+                                  style={{ color: persona.accentColor }}
+                                >
+                                  {persona.name}
+                                </span>
+                                {isVoted && (
+                                  <span className="text-yellow-400 text-xs">
+                                    ✓ Your vote
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-400">
+                                  {optimisticVotes}{" "}
+                                  {optimisticVotes === 1 ? "vote" : "votes"}
+                                </span>
+                                {roundScore.winner === position && (
+                                  <span>🏆</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-400 mt-1">
+                              Score: {score?.totalScore.toFixed(1)}
+                              {isVoted && canVote && (
+                                <span className="ml-2 text-xs text-yellow-400">
+                                  (click to undo)
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm text-gray-400">
-                                {optimisticVotes}{" "}
-                                {optimisticVotes === 1 ? "vote" : "votes"}
-                              </span>
-                              {roundScore.winner === position && (
-                                <span>🏆</span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="text-sm text-gray-400 mt-1">
-                            Score: {score?.totalScore.toFixed(1)}
-                            {isVoted && canVote && (
-                              <span className="ml-2 text-xs text-yellow-400">
-                                (click to undo)
-                              </span>
-                            )}
-                          </div>
-                        </button>
-                      </motion.div>
-                    );
-                  },
-                )}
-              </div>
-            </motion.div>
-          );
-        })}
+                          </button>
+                        </motion.div>
+                      );
+                    },
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
 
-      {battle.scores.length === 0 && (
-        <div className="text-center text-white py-8">
-          No rounds completed yet.
-          <br />
-          Check back after the first round!
+        {battle.scores.length === 0 && (
+          <div className="text-center text-white py-8">
+            No rounds completed yet.
+            <br />
+            Check back after the first round!
+          </div>
+        )}
+      </div>
+
+      {!isArchived && isLoaded && !user && (
+        <div className="shrink-0 p-4 pb-6 md:pb-4 border-t border-gray-800 bg-gray-900">
+          <SignInPrompt message="Sign in to vote" />
         </div>
       )}
     </div>

@@ -193,11 +193,10 @@ export function BattleController({
   // 2. Battle is currently live
   // 3. Battle was recently live (completed but user manages it) - give them a moment
   const guardCondition =
-    battle?.status === "paused" ||
-    isLive ||
-    (battle?.status === "completed" &&
-      canManageBattle &&
-      initialBattle.isLive === true);
+    canManageBattle &&
+    (battle?.status === "paused" ||
+      isLive ||
+      (battle?.status === "completed" && initialBattle.isLive === true));
 
   const { NavigationDialog } = useNavigationGuard({
     when: guardCondition,

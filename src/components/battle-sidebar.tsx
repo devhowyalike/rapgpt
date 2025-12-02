@@ -148,16 +148,14 @@ export function BattleSidebar({
         )}
 
         {showVoting && activeTab === "voting" && (
-          <div className="flex-1 min-h-0 overflow-y-auto touch-scroll-container">
-            <VotingContent
-              battle={battle}
-              onVote={onVote}
-              isArchived={isArchived}
-              isVotingPhase={isVotingPhase}
-              votingTimeRemaining={votingTimeRemaining}
-              votingCompletedRound={votingCompletedRound}
-            />
-          </div>
+          <VotingContent
+            battle={battle}
+            onVote={onVote}
+            isArchived={isArchived}
+            isVotingPhase={isVotingPhase}
+            votingTimeRemaining={votingTimeRemaining}
+            votingCompletedRound={votingCompletedRound}
+          />
         )}
       </div>
     </div>
