@@ -39,6 +39,7 @@ interface BattleControlBarProps {
   isLoadingPermissions?: boolean;
   isStartingLive?: boolean;
   isStoppingLive?: boolean;
+  hostEndedBattle?: boolean;
   onGoLive?: () => void;
   onEndLive?: () => void;
   onGenerateVerse: () => void;
@@ -75,6 +76,7 @@ export function BattleControlBar({
   isLoadingPermissions = false,
   isStartingLive = false,
   isStoppingLive = false,
+  hostEndedBattle = false,
   onGoLive,
   onEndLive,
   onGenerateVerse,
@@ -119,6 +121,20 @@ export function BattleControlBar({
     isStoppingLive,
     onGoLiveClick: handleGoLiveClick,
   });
+
+  // Show special message when host ended the battle (for viewers only)
+  if (hostEndedBattle && !canManageLive) {
+    return (
+      <ControlBarContainer>
+        <div className="flex-1 flex items-center justify-center gap-2 text-gray-400">
+          <Radio className="w-4 h-4" />
+          <span className="text-sm font-medium">
+            The host has ended this live broadcast
+          </span>
+        </div>
+      </ControlBarContainer>
+    );
+  }
 
   return (
     <ControlBarContainer>

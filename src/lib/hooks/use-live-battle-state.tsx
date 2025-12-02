@@ -6,9 +6,11 @@
 
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import * as Dialog from "@radix-ui/react-dialog";
+import { Radio } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useBattleStore } from "@/lib/battle-store";
-import type { Battle, PersonaPosition } from "@/lib/shared";
+import type { Battle } from "@/lib/shared";
 import { useWebSocket } from "@/lib/websocket/client";
 import type { ConnectionStatus, WebSocketEvent } from "@/lib/websocket/types";
 
@@ -55,6 +57,12 @@ interface UseLiveBattleStateReturn {
     commentsEnabled?: boolean;
     votingEnabled?: boolean;
   }) => Promise<void>;
+
+  // Battle ended dialog (for viewers)
+  BattleEndedDialog: () => React.JSX.Element;
+
+  // Flag indicating host ended the battle while viewer was watching
+  hostEndedBattle: boolean;
 }
 
 export function useLiveBattleState({
@@ -84,6 +92,8 @@ export function useLiveBattleState({
   const [isStartingLive, setIsStartingLive] = useState(false);
   const [isStoppingLive, setIsStoppingLive] = useState(false);
   const [hasInitiallyConnected, setHasInitiallyConnected] = useState(false);
+  const [showBattleEndedDialog, setShowBattleEndedDialog] = useState(false);
+  const [hostEndedBattle, setHostEndedBattle] = useState(false);
 
   // Initialize battle state
   useEffect(() => {
@@ -97,9 +107,17 @@ export function useLiveBattleState({
 
       switch (event.type) {
         case "battle:live_started":
-        case "battle:live_ended":
         case "state:sync":
           setBattle(event.battle);
+          break;
+
+        case "battle:live_ended":
+          setBattle(event.battle);
+          // Show dialog and set flag for viewers (non-managers) when host ends the battle
+          if (!canManage) {
+            setShowBattleEndedDialog(true);
+            setHostEndedBattle(true);
+          }
           break;
 
         case "verse:streaming": {
@@ -151,7 +169,7 @@ export function useLiveBattleState({
           if (battle) {
             // Check if comment already exists (to avoid duplicates from optimistic update)
             const commentExists = battle.comments.some(
-              (c) => c.id === event.comment.id,
+              (c) => c.id === event.comment.id
             );
             if (!commentExists) {
               setBattle({
@@ -174,7 +192,8 @@ export function useLiveBattleState({
       setVotingTimeRemaining,
       onMobileTabChange,
       onMobileDrawerOpen,
-    ],
+      canManage,
+    ]
   );
 
   // Connect to WebSocket when battle is live
@@ -193,7 +212,7 @@ export function useLiveBattleState({
   useEffect(() => {
     if (wsStatus === "connected" && !hasInitiallyConnected && battle?.isLive) {
       console.log(
-        "[LiveBattleState] Initial connection - fetching latest battle state",
+        "[LiveBattleState] Initial connection - fetching latest battle state"
       );
       setHasInitiallyConnected(true);
       fetch(`/api/battle/${initialBattle.id}/sync`)
@@ -203,7 +222,7 @@ export function useLiveBattleState({
             console.log(
               "[LiveBattleState] Received synced state with",
               data.battle.comments.length,
-              "comments",
+              "comments"
             );
             setBattle(data.battle);
           }
@@ -345,7 +364,7 @@ export function useLiveBattleState({
       setIsReadingPhase(true);
       setReadingTimeRemaining(duration);
     },
-    [setIsReadingPhase, setReadingTimeRemaining],
+    [setIsReadingPhase, setReadingTimeRemaining]
   );
 
   // Begin voting phase
@@ -361,7 +380,7 @@ export function useLiveBattleState({
       setReadingTimeRemaining,
       setIsVotingPhase,
       setVotingTimeRemaining,
-    ],
+    ]
   );
 
   // Complete voting phase
@@ -369,7 +388,7 @@ export function useLiveBattleState({
     (round: number) => {
       storeCompleteVotingPhase(round);
     },
-    [storeCompleteVotingPhase],
+    [storeCompleteVotingPhase]
   );
 
   // Update battle config (comments/voting enabled)
@@ -398,7 +417,48 @@ export function useLiveBattleState({
         throw error;
       }
     },
-    [battle, setBattle],
+    [battle, setBattle]
+  );
+
+  // Battle ended dialog component for viewers
+  const BattleEndedDialog = useCallback(
+    () => (
+      <Dialog.Root
+        open={showBattleEndedDialog}
+        onOpenChange={setShowBattleEndedDialog}
+      >
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-gray-900 border border-gray-800 rounded-lg shadow-2xl p-6 animate-in fade-in zoom-in-95">
+            <div className="flex items-start gap-4">
+              <div className="shrink-0 w-12 h-12 rounded-full bg-gray-700/50 flex items-center justify-center">
+                <Radio className="w-6 h-6 text-gray-400" />
+              </div>
+              <div className="flex-1">
+                <Dialog.Title className="text-xl font-bold text-white mb-2">
+                  Live Broadcast Ended
+                </Dialog.Title>
+                <Dialog.Description className="text-gray-400 mb-4">
+                  The host has ended this live battle. You can still view the
+                  battle results and replay the verses.
+                </Dialog.Description>
+
+                <div className="flex gap-3 justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setShowBattleEndedDialog(false)}
+                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white font-medium transition-colors"
+                  >
+                    Got it
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+    ),
+    [showBattleEndedDialog]
   );
 
   return {
@@ -428,5 +488,11 @@ export function useLiveBattleState({
 
     // Config controls
     updateBattleConfig,
+
+    // Battle ended dialog
+    BattleEndedDialog,
+
+    // Host ended battle flag
+    hostEndedBattle,
   };
 }

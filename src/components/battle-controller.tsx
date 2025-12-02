@@ -171,6 +171,8 @@ export function BattleController({
     stopLive,
     votingTimeRemaining,
     beginVotingPhase,
+    BattleEndedDialog,
+    hostEndedBattle,
   } = useLiveBattleState({
     initialBattle,
     canManage: canManageBattle,
@@ -555,6 +557,7 @@ export function BattleController({
                 isLoadingPermissions={isLoadingPermissions}
                 isStartingLive={isStartingLive}
                 isStoppingLive={isStoppingLive}
+                hostEndedBattle={hostEndedBattle}
                 onGoLive={startLive}
                 onEndLive={handleEndLiveClick}
                 onGenerateVerse={handleGenerateVerse}
@@ -638,6 +641,9 @@ export function BattleController({
 
       {/* Navigation Guard Dialog */}
       <NavigationDialog />
+
+      {/* Battle Ended Dialog (for viewers) */}
+      <BattleEndedDialog />
     </>
   );
 }
