@@ -27,7 +27,7 @@ interface ControlBarContainerProps {
 
 export function ControlBarContainer({ children }: ControlBarContainerProps) {
   return (
-    <div className="relative z-40 p-4 bg-gray-900 border-t border-gray-800">
+    <div className="relative z-50 p-4 bg-gray-900 border-t border-gray-800">
       <div className="max-w-4xl mx-auto flex flex-row items-center gap-3">
         {children}
       </div>

@@ -185,7 +185,7 @@ export function ScoreDisplay({
       <button
         ref={toggleRef}
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-center gap-2 mt-2 md:mt-3 text-gray-400 hover:text-white transition-colors group outline-none"
+        className="w-full flex items-center justify-center gap-2 mt-2 md:mt-3 mb-4 md:mb-0 text-gray-400 hover:text-white transition-colors group outline-none"
       >
         <span className="text-sm font-medium">
           {isExpanded ? "Hide Details" : "Show Details"}
