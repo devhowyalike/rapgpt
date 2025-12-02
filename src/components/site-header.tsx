@@ -112,9 +112,12 @@ export function SiteHeader({ activeBattleState }: SiteHeaderProps) {
       cachedClerkUserId = user.id;
     } else {
       fetch("/api/user/me")
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) return null;
+          return res.json();
+        })
         .then((data) => {
-          if (data.user?.id) {
+          if (data?.user?.id) {
             setDbUserId(data.user.id);
             cachedDbUserId = data.user.id;
             cachedClerkUserId = user.id;

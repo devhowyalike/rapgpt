@@ -8,8 +8,8 @@ const isPublicRoute = createRouteMatcher([
   "/community",
   "/sign-in(.*)",
   "/api/webhooks(.*)", // Webhooks should be public
-  "/api/battle(.*)/comment", // Comment routes handle their own auth
-  "/api/battle(.*)/vote", // Vote routes handle their own auth
+  "/api/battle(.*)", // Battle APIs (sync, etc) handle their own auth or are public
+  "/api/user(.*)", // User APIs handle their own auth
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
