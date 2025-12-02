@@ -121,6 +121,9 @@ export function VotingContent({
 
   // Helper function to check if voting is allowed for a specific round
   const canVoteOnRound = (round: number): boolean => {
+    // User must be signed in to vote
+    if (!isLoaded || !user) return false;
+
     // Only live battles allow voting
     if (!battle.isLive) return false;
 

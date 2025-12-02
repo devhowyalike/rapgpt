@@ -4,7 +4,7 @@ import { ArrowRight, CheckCircle, Play } from "lucide-react";
 import { ScoreCalcAnimation } from "@/components/score-calc-animation";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import type { Battle } from "@/lib/shared";
-import { getAdvanceRoundButtonText } from "@/lib/shared";
+import { getAdvanceRoundButtonText, ROUNDS_PER_BATTLE } from "@/lib/shared";
 
 interface MainActionButtonProps {
   battle: Battle;
@@ -105,7 +105,9 @@ export function MainActionButton({
           <div className="flex items-center justify-center gap-2 h-full">
             <span className="text-xl leading-none flex items-center">⏳</span>
             <span className="hidden sm:inline leading-none">
-              Waiting for host to advance...
+              {battle.currentRound === ROUNDS_PER_BATTLE
+                ? "Waiting for host to reveal winner..."
+                : "Waiting for host to advance..."}
             </span>
             <span className="sm:hidden leading-none">Waiting for host...</span>
           </div>
