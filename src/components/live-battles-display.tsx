@@ -28,6 +28,8 @@ export function LiveBattlesDisplay({
 }: LiveBattlesDisplayProps) {
   const [liveBattles, setLiveBattles] = useState<Battle[]>(initialBattles);
   const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = useRef(true);
 
   const getWebSocketUrl = useCallback(() => {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -36,14 +38,22 @@ export function LiveBattlesDisplay({
   }, []);
 
   useEffect(() => {
+    isMountedRef.current = true;
+
     // Connect to WebSocket for global homepage updates
     const connectWebSocket = () => {
+      // Don't connect if unmounted or already connected
+      if (!isMountedRef.current) return;
       if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
       const ws = new WebSocket(getWebSocketUrl());
       wsRef.current = ws;
 
       ws.onopen = () => {
+        if (!isMountedRef.current) {
+          ws.close();
+          return;
+        }
         console.log("[Homepage WS] Connected");
 
         // Join the global homepage room
@@ -53,11 +63,13 @@ export function LiveBattlesDisplay({
             battleId: "__homepage__",
             clientId: `homepage-${Date.now()}`,
             isAdmin: false,
-          }),
+          })
         );
       };
 
       ws.onmessage = (event) => {
+        if (!isMountedRef.current) return;
+
         try {
           const wsEvent: WebSocketEvent = JSON.parse(event.data);
           // console.log("[Homepage WS] Received event:", wsEvent.type);
@@ -69,7 +81,7 @@ export function LiveBattlesDisplay({
                 const exists = prev.find((b) => b.id === wsEvent.battle.id);
                 if (exists) {
                   return prev.map((b) =>
-                    b.id === wsEvent.battle.id ? wsEvent.battle : b,
+                    b.id === wsEvent.battle.id ? wsEvent.battle : b
                   );
                 }
                 return [wsEvent.battle, ...prev];
@@ -80,7 +92,7 @@ export function LiveBattlesDisplay({
             case "battle:live_ended": {
               // Remove battle from the list
               setLiveBattles((prev) =>
-                prev.filter((b) => b.id !== wsEvent.battleId),
+                prev.filter((b) => b.id !== wsEvent.battleId)
               );
               break;
             }
@@ -92,7 +104,7 @@ export function LiveBattlesDisplay({
                   const exists = prev.find((b) => b.id === wsEvent.battle.id);
                   if (exists) {
                     return prev.map((b) =>
-                      b.id === wsEvent.battle.id ? wsEvent.battle : b,
+                      b.id === wsEvent.battle.id ? wsEvent.battle : b
                     );
                   }
                   return [wsEvent.battle, ...prev];
@@ -106,23 +118,36 @@ export function LiveBattlesDisplay({
         }
       };
 
-      ws.onerror = (error) => {
-        console.error("[Homepage WS] Error:", error);
+      ws.onerror = () => {
+        // Only log if still mounted - errors during cleanup are expected
+        if (isMountedRef.current) {
+          console.warn("[Homepage WS] Connection error");
+        }
       };
 
       ws.onclose = () => {
         console.log("[Homepage WS] Disconnected");
 
-        // Attempt to reconnect after 5 seconds
-        setTimeout(() => {
-          connectWebSocket();
-        }, 5000);
+        // Only attempt to reconnect if still mounted
+        if (isMountedRef.current) {
+          reconnectTimeoutRef.current = setTimeout(() => {
+            connectWebSocket();
+          }, 5000);
+        }
       };
     };
 
     connectWebSocket();
 
     return () => {
+      isMountedRef.current = false;
+
+      // Clear any pending reconnect timeout
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+
       if (wsRef.current) {
         wsRef.current.close();
         wsRef.current = null;
