@@ -47,7 +47,7 @@ export function MainActionButton({
     return (
       <div
         className={`
-          flex-1 px-2 h-[42px] flex items-center justify-center rounded-lg text-white font-bold transition-all
+          flex-1 px-2 h-(--control-button-height) flex items-center justify-center rounded-lg text-white font-bold transition-all
           ${
             isCalculatingScores
               ? "bg-linear-to-r from-amber-600 to-yellow-600"
@@ -154,7 +154,7 @@ export function MainActionButton({
         (!canGenerate && !canAdvance && !(isReadingPhase && showVoting))
       }
       className={`
-        flex-1 px-2 h-[42px] flex items-center justify-center rounded-lg text-white font-bold transition-all
+        flex-1 px-2 h-(--control-button-height) flex items-center justify-center rounded-lg text-white font-bold transition-all
         ${
           isCalculatingScores
             ? "bg-linear-to-r from-amber-600 to-yellow-600"

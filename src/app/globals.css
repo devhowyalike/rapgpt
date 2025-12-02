@@ -27,7 +27,10 @@
   --battle-header-height: 89px; /* battle header with round tracker and stage info */
   --live-banner-height: 60px;
   --bottom-controls-height: 72px; /* drawer offset for bottom buttons */
-  --battle-control-bar-height: 80px; /* height of the battle control bar (p-4 + button height) */
+  --control-button-height: 42px; /* Standard height for main action buttons */
+  --battle-control-bar-height: calc(
+    var(--control-button-height) + 2rem
+  ); /* height of the battle control bar (p-4 + button height) */
   /* Control bar padding */
   --control-bar-base-padding: 1rem; /* p-4 equivalent */
   /* Sticky persona offsets for different battle states */
@@ -129,9 +132,7 @@ body {
 }
 
 .neon-glow {
-  text-shadow:
-    0 0 10px currentColor,
-    0 0 20px currentColor,
+  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor,
     0 0 30px currentColor;
 }
 

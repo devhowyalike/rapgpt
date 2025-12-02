@@ -117,7 +117,7 @@ export function MobileFanButton({
           <button
             type="button"
             onClick={() => setIsOpen((prev) => !prev)}
-            className={`w-[42px] h-[42px] rounded-full border-2 border-gray-700 bg-gray-900 text-white shadow-xl flex items-center justify-center transition-transform ${
+            className={`w-(--control-button-height) h-(--control-button-height) rounded-full border-2 border-gray-700 bg-gray-900 text-white shadow-xl flex items-center justify-center transition-transform ${
               isOpen ? "rotate-45" : "hover:scale-105"
             }`}
             aria-label={isOpen ? "Close actions" : "Open actions"}
