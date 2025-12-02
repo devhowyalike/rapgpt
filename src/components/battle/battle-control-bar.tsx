@@ -39,6 +39,7 @@ interface BattleControlBarProps {
   isLoadingPermissions?: boolean;
   isStartingLive?: boolean;
   isStoppingLive?: boolean;
+  hostEndedBattle?: boolean;
   onGoLive?: () => void;
   onEndLive?: () => void;
   onGenerateVerse: () => void;
@@ -75,6 +76,7 @@ export function BattleControlBar({
   isLoadingPermissions = false,
   isStartingLive = false,
   isStoppingLive = false,
+  hostEndedBattle = false,
   onGoLive,
   onEndLive,
   onGenerateVerse,
@@ -107,21 +109,36 @@ export function BattleControlBar({
     isLive,
     onCommentsClick,
     onVotingClick,
-    onSettingsClick,
+    onSettingsClick: canManageLive ? onSettingsClick : undefined, // Only show settings to battle manager
     mobileActiveTab,
     isMobileDrawerOpen,
     settingsActive,
     // Go Live in mobile fan (hidden on xl+ where dedicated button shows)
-    showGoLive: isLoadingPermissions || canManageLive,
-    isLoadingPermissions,
+    // Only show when permissions are confirmed - don't flash for non-owners
+    showGoLive: canManageLive,
+    isLoadingPermissions: false, // No longer needed since we don't show while loading
     isStartingLive,
     isStoppingLive,
     onGoLiveClick: handleGoLiveClick,
   });
 
+  // Show special message when host ended the battle (for viewers only)
+  if (hostEndedBattle && !canManageLive) {
+    return (
+      <ControlBarContainer>
+        <div className="flex-1 flex items-center justify-center gap-2 text-gray-400">
+          <Radio className="w-4 h-4" />
+          <span className="text-sm font-medium">
+            The host has ended this live broadcast
+          </span>
+        </div>
+      </ControlBarContainer>
+    );
+  }
+
   return (
     <ControlBarContainer>
-      {/* Primary Action Button - Changes based on state */}
+      {/* Primary Action Button - Shows actions for managers, status for viewers */}
       <MainActionButton
         battle={battle}
         isGenerating={isGenerating}
@@ -137,28 +154,32 @@ export function BattleControlBar({
         onGenerateVerse={onGenerateVerse}
         onAdvanceRound={onAdvanceRound}
         onBeginVoting={onBeginVoting}
+        canManage={canManageLive}
       />
 
-      {/* Battle Options Dropdown */}
-      <div className="hidden xl:block">
-        <BattleOptionsDropdown
-          showCommenting={showCommenting}
-          showVoting={showVoting}
-          onToggleCommenting={onToggleCommenting}
-          onToggleVoting={onToggleVoting}
-          onPauseBattle={onCancelBattle}
-          isPausing={isCanceling || isGenerating}
-          isLive={isLive}
-          customTrigger={<OptionsButton />}
-        />
-      </div>
+      {/* Battle Options Dropdown - Only visible to battle manager (owner/admin) */}
+      {canManageLive && (
+        <div className="hidden xl:block">
+          <BattleOptionsDropdown
+            showCommenting={showCommenting}
+            showVoting={showVoting}
+            onToggleCommenting={onToggleCommenting}
+            onToggleVoting={onToggleVoting}
+            onPauseBattle={onCancelBattle}
+            isPausing={isCanceling || isGenerating}
+            isLive={isLive}
+            customTrigger={<OptionsButton />}
+          />
+        </div>
+      )}
 
       {/* Go Live Button - hidden on mobile, shown on xl+ (mobile uses fan menu) */}
-      {(isLoadingPermissions || canManageLive) && (
+      {/* Only show when permissions are confirmed - don't flash for non-owners */}
+      {canManageLive && (
         <div className="hidden xl:block">
           <GoLiveButton
             isLive={isLive}
-            isLoadingPermissions={isLoadingPermissions}
+            isLoadingPermissions={false}
             isStartingLive={isStartingLive}
             isStoppingLive={isStoppingLive}
             disabled={isGenerating}

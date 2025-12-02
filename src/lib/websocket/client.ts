@@ -115,9 +115,13 @@ export function useWebSocket({
       };
 
       ws.onerror = (error) => {
-        console.error("[WS Client] Error:", error);
+        // Only log errors if not closing/reconnecting intentionally
+        // When navigating away, the connection might be closed abruptly which is fine
         if (isMountedRef.current) {
-          setStatus("error");
+           // Use console.debug instead of error to avoid cluttering production logs
+           // for expected disconnections
+           console.debug("[WS Client] Connection warning:", error);
+           setStatus("error");
         }
       };
 

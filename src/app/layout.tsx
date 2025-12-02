@@ -1,6 +1,7 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Bebas_Neue, Inter } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 import { APP_TITLE } from "@/lib/constants";
 
@@ -31,6 +32,7 @@ export default function RootLayout({
       <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
         <body className={`${inter.variable} ${bebasNeue.variable} antialiased`}>
           {children}
+          <Toaster theme="dark" position="top-center" richColors />
         </body>
       </html>
     </ClerkProvider>

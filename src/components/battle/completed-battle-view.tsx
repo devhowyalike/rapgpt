@@ -67,7 +67,7 @@ export function CompletedBattleView({
 
   const { verses: roundVerses, score: roundScore } = useRoundData(
     battle,
-    selectedRound,
+    selectedRound
   );
 
   // Drawer state for scores/song
@@ -80,7 +80,7 @@ export function CompletedBattleView({
   useExclusiveDrawer(
     "mobile-settings",
     showSettingsDrawer,
-    setShowSettingsDrawer,
+    setShowSettingsDrawer
   );
   // Check if current user is the battle creator
   const isCreator = dbUserId && battle.creator?.userId === dbUserId;
@@ -163,8 +163,13 @@ export function CompletedBattleView({
               onVotingClick={openVotingDrawer}
               mobileActiveTab={mobileActiveTab}
               isMobileDrawerOpen={showMobileDrawer}
-              onSettingsClick={() => setShowSettingsDrawer(true)}
+              onSettingsClick={
+                isCreator || isAdmin
+                  ? () => setShowSettingsDrawer(true)
+                  : undefined
+              }
               settingsActive={showSettingsDrawer}
+              canManage={isCreator || isAdmin}
             />
 
             {/* Scores/Song Drawer */}
@@ -176,8 +181,8 @@ export function CompletedBattleView({
                   activeTab === "scores"
                     ? "Round Scores"
                     : showSongGenerator
-                      ? "Generate Song"
-                      : "Generated Song"
+                    ? "Generate Song"
+                    : "Generated Song"
                 }
                 excludeBottomControls={false}
                 mobileOnly={false}
@@ -251,14 +256,17 @@ export function CompletedBattleView({
         </div>
       </div>
 
-      <BattleOptionsDrawer
-        open={showSettingsDrawer}
-        onOpenChange={setShowSettingsDrawer}
-        showCommenting={showCommenting}
-        showVoting={showVoting}
-        onToggleCommenting={onToggleCommenting}
-        onToggleVoting={onToggleVoting}
-      />
+      {/* Settings drawer - only render for battle manager (creator/admin) */}
+      {(isCreator || isAdmin) && (
+        <BattleOptionsDrawer
+          open={showSettingsDrawer}
+          onOpenChange={setShowSettingsDrawer}
+          showCommenting={showCommenting}
+          showVoting={showVoting}
+          onToggleCommenting={onToggleCommenting}
+          onToggleVoting={onToggleVoting}
+        />
+      )}
     </>
   );
 }

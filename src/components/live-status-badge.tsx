@@ -157,12 +157,15 @@ export function LiveStatusBadge({
     </div>
   );
 
+  const isClickable = canToggle && onToggle;
+
   const badgeClasses = cn(
-    "flex items-center px-2.5 py-1.5 rounded-full font-bold transition-colors cursor-pointer",
+    "flex items-center px-2.5 py-1.5 rounded-full font-bold transition-colors",
     styles.bg,
     styles.border,
     styles.text,
     styles.glow,
+    isClickable ? "cursor-pointer" : "cursor-default",
     isLoading && "opacity-70 cursor-not-allowed",
     className
   );

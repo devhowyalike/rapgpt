@@ -13,6 +13,7 @@ import { LiveStatusBadge } from "@/components/live-status-badge";
 import { useLiveBattles } from "@/lib/hooks/use-live-battles";
 import { UserButton } from "./auth/user-button";
 import { RapGPTLogo } from "./rapgpt-logo";
+import type { ConnectionStatus } from "@/lib/websocket/types";
 
 // Cache admin status in memory to prevent flickering
 let cachedAdminStatus: boolean | null = null;
@@ -26,7 +27,7 @@ interface SiteHeaderProps {
   activeBattleState?: {
     isLive: boolean;
     viewerCount: number;
-    connectionStatus: string;
+    connectionStatus: ConnectionStatus;
     canManageLive?: boolean;
     onDisconnect?: () => void;
   };
@@ -111,9 +112,12 @@ export function SiteHeader({ activeBattleState }: SiteHeaderProps) {
       cachedClerkUserId = user.id;
     } else {
       fetch("/api/user/me")
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) return null;
+          return res.json();
+        })
         .then((data) => {
-          if (data.user?.id) {
+          if (data?.user?.id) {
             setDbUserId(data.user.id);
             cachedDbUserId = data.user.id;
             cachedClerkUserId = user.id;

@@ -8,7 +8,6 @@ import { BattleSidebar } from "@/components/battle-sidebar";
 import { CommentsContent } from "@/components/battle/comments-content";
 import { VotingContent } from "@/components/battle/voting-content";
 import { BattleDrawer } from "@/components/ui/battle-drawer";
-import { DrawerScrollContent } from "@/components/ui/drawer-scroll-content";
 import type { DrawerTab } from "@/lib/hooks/use-mobile-drawer";
 import type { Battle } from "@/lib/shared";
 
@@ -84,16 +83,14 @@ export function SidebarContainer({
             />
           )}
           {mobileActiveTab === "voting" && effectiveShowVoting && (
-            <DrawerScrollContent>
-              <VotingContent
-                battle={battle}
-                onVote={onVote}
-                isArchived={isArchived}
-                isVotingPhase={isVotingPhase}
-                votingTimeRemaining={votingTimeRemaining}
-                votingCompletedRound={votingCompletedRound}
-              />
-            </DrawerScrollContent>
+            <VotingContent
+              battle={battle}
+              onVote={onVote}
+              isArchived={isArchived}
+              isVotingPhase={isVotingPhase}
+              votingTimeRemaining={votingTimeRemaining}
+              votingCompletedRound={votingCompletedRound}
+            />
           )}
         </BattleDrawer>
       )}

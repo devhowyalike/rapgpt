@@ -39,6 +39,8 @@ interface BattleReplayControlBarProps {
   onSettingsClick?: () => void;
   settingsActive?: boolean;
   isMobileDrawerOpen?: boolean;
+  /** Whether the current user can manage the battle (owner or admin) */
+  canManage?: boolean;
 }
 
 export function BattleReplayControlBar({
@@ -59,6 +61,7 @@ export function BattleReplayControlBar({
   onSettingsClick,
   settingsActive = false,
   isMobileDrawerOpen = false,
+  canManage = false,
 }: BattleReplayControlBarProps) {
   const showSongButton = showSongGenerator || showSongPlayer;
   const isScoresActive = activeTab === "scores" && isDrawerOpen;
@@ -70,7 +73,7 @@ export function BattleReplayControlBar({
     requireLiveForVoting: false, // Replay mode shows voting without requiring live
     onCommentsClick,
     onVotingClick,
-    onSettingsClick,
+    onSettingsClick: canManage ? onSettingsClick : undefined, // Only show settings to battle manager
     mobileActiveTab,
     isMobileDrawerOpen,
     settingsActive,
@@ -122,16 +125,18 @@ export function BattleReplayControlBar({
         </>
       )}
 
-      {/* Options Dropdown */}
-      <div className="hidden xl:block">
-        <BattleOptionsDropdown
-          showCommenting={showCommenting}
-          showVoting={showVoting}
-          onToggleCommenting={onToggleCommenting}
-          onToggleVoting={onToggleVoting}
-          customTrigger={<OptionsButton />}
-        />
-      </div>
+      {/* Options Dropdown - Only visible to battle manager (owner/admin) */}
+      {canManage && (
+        <div className="hidden xl:block">
+          <BattleOptionsDropdown
+            showCommenting={showCommenting}
+            showVoting={showVoting}
+            onToggleCommenting={onToggleCommenting}
+            onToggleVoting={onToggleVoting}
+            customTrigger={<OptionsButton />}
+          />
+        </div>
+      )}
       {mobileFanActions.length > 0 && (
         <div className="xl:hidden ml-auto">
           <MobileFanButton actions={mobileFanActions} />
