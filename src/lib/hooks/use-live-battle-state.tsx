@@ -9,6 +9,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { Radio } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useBattleStore } from "@/lib/battle-store";
 import type { Battle } from "@/lib/shared";
 import { useWebSocket } from "@/lib/websocket/client";
@@ -94,6 +95,8 @@ export function useLiveBattleState({
   const [hasInitiallyConnected, setHasInitiallyConnected] = useState(false);
   const [showBattleEndedDialog, setShowBattleEndedDialog] = useState(false);
   const [hostEndedBattle, setHostEndedBattle] = useState(false);
+  // Track if we were ever live - keeps WebSocket connected for restart notifications
+  const [wasEverLive, setWasEverLive] = useState(initialBattle.isLive ?? false);
 
   // Initialize battle state
   useEffect(() => {
@@ -107,6 +110,21 @@ export function useLiveBattleState({
 
       switch (event.type) {
         case "battle:live_started":
+          setBattle(event.battle);
+          // Reset the host ended flag when battle restarts - this notifies viewers
+          if (hostEndedBattle) {
+            setHostEndedBattle(false);
+            setShowBattleEndedDialog(false);
+            // Allow a fresh sync to happen when the host restarts
+            setHasInitiallyConnected(false);
+            // Show toast notification that battle is live again
+            toast.success("Battle is back live!", {
+              description: "The host has restarted the broadcast.",
+              duration: 4000,
+            });
+          }
+          break;
+
         case "state:sync":
           setBattle(event.battle);
           break;
@@ -193,10 +211,20 @@ export function useLiveBattleState({
       onMobileTabChange,
       onMobileDrawerOpen,
       canManage,
+      hostEndedBattle,
     ]
   );
 
-  // Connect to WebSocket when battle is live
+  // Track when battle goes live to keep WebSocket connected for restart notifications
+  useEffect(() => {
+    if (battle?.isLive) {
+      setWasEverLive(true);
+    }
+  }, [battle?.isLive]);
+
+  // Keep WebSocket connected as long as viewer is on a battle page that was/is live
+  // This ensures they receive restart notifications if host ends and restarts
+  // Connection naturally closes when they navigate away (component unmount)
   const {
     status: wsStatus,
     viewerCount,
@@ -204,7 +232,7 @@ export function useLiveBattleState({
   } = useWebSocket({
     battleId: initialBattle.id,
     isAdmin: canManage,
-    enabled: battle?.isLive ?? false,
+    enabled: wasEverLive,
     onEvent: handleWebSocketEvent,
   });
 
