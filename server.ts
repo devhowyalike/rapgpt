@@ -2,21 +2,22 @@
  * Custom Next.js server with WebSocket support
  */
 
-import { createServer } from 'http';
-import { parse } from 'url';
-import next from 'next';
-import { WebSocketServer, WebSocket } from 'ws';
-import type { WebSocketEvent, ClientMessage } from './src/lib/websocket/types';
-import { setWebSocketServer } from './src/lib/websocket/server';
+import { createServer } from "http";
+import next from "next";
+import { parse } from "url";
+import { WebSocket, WebSocketServer } from "ws";
+import { setWebSocketServer } from "./src/lib/websocket/server";
+import type { ClientMessage, WebSocketEvent } from "./src/lib/websocket/types";
 
-const dev = process.env.NODE_ENV !== 'production';
-const hostname = process.env.HOSTNAME || 'localhost';
-const port = parseInt(process.env.PORT || '3000', 10);
+const dev = process.env.NODE_ENV !== "production";
+const hostname = process.env.HOSTNAME || "localhost";
+const port = parseInt(process.env.PORT || "3000", 10);
 
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
-const INTERNAL_BROADCAST_SECRET = process.env.INTERNAL_BROADCAST_SECRET || 'dev-secret';
+const INTERNAL_BROADCAST_SECRET =
+  process.env.INTERNAL_BROADCAST_SECRET || "dev-secret";
 
 interface ClientConnection {
   ws: WebSocket;
@@ -37,15 +38,19 @@ function joinBattleRoom(battleId: string, client: ClientConnection) {
     battleRooms.set(battleId, new Set());
   }
   battleRooms.get(battleId)?.add(client);
-  console.log(`[WS] Client ${client.clientId} joined battle ${battleId}. Room size: ${battleRooms.get(battleId)?.size}`);
+  console.log(
+    `[WS] Client ${client.clientId} joined battle ${battleId}. Room size: ${battleRooms.get(battleId)?.size}`,
+  );
 }
 
 function leaveBattleRoom(battleId: string, client: ClientConnection) {
   const room = battleRooms.get(battleId);
   if (room) {
     room.delete(client);
-    console.log(`[WS] Client ${client.clientId} left battle ${battleId}. Room size: ${room.size}`);
-    
+    console.log(
+      `[WS] Client ${client.clientId} left battle ${battleId}. Room size: ${room.size}`,
+    );
+
     if (room.size === 0) {
       battleRooms.delete(battleId);
       console.log(`[WS] Room ${battleId} is empty, removed`);
@@ -53,7 +58,11 @@ function leaveBattleRoom(battleId: string, client: ClientConnection) {
   }
 }
 
-function broadcast(battleId: string, event: WebSocketEvent, excludeClient?: WebSocket) {
+function broadcast(
+  battleId: string,
+  event: WebSocketEvent,
+  excludeClient?: WebSocket,
+) {
   const room = battleRooms.get(battleId);
   if (!room) {
     console.warn(`[WS] No room found for battle ${battleId}`);
@@ -64,17 +73,25 @@ function broadcast(battleId: string, event: WebSocketEvent, excludeClient?: WebS
   let sentCount = 0;
 
   room.forEach((client) => {
-    if (client.ws !== excludeClient && client.ws.readyState === WebSocket.OPEN) {
+    if (
+      client.ws !== excludeClient &&
+      client.ws.readyState === WebSocket.OPEN
+    ) {
       client.ws.send(message);
       sentCount++;
     }
   });
 
-  console.log(`[WS] Broadcasted ${event.type} to ${sentCount} clients in battle ${battleId}`);
+  console.log(
+    `[WS] Broadcasted ${event.type} to ${sentCount} clients in battle ${battleId}`,
+  );
 
   // Also broadcast to homepage room for live status changes
-  if (battleId !== '__homepage__' && (event.type === 'battle:live_started' || event.type === 'battle:live_ended')) {
-    const homepageRoom = battleRooms.get('__homepage__');
+  if (
+    battleId !== "__homepage__" &&
+    (event.type === "battle:live_started" || event.type === "battle:live_ended")
+  ) {
+    const homepageRoom = battleRooms.get("__homepage__");
     if (homepageRoom) {
       let homepageSentCount = 0;
       homepageRoom.forEach((client) => {
@@ -83,7 +100,9 @@ function broadcast(battleId: string, event: WebSocketEvent, excludeClient?: WebS
           homepageSentCount++;
         }
       });
-      console.log(`[WS] Broadcasted ${event.type} to ${homepageSentCount} homepage clients`);
+      console.log(
+        `[WS] Broadcasted ${event.type} to ${homepageSentCount} homepage clients`,
+      );
     }
   }
 }
@@ -91,9 +110,9 @@ function broadcast(battleId: string, event: WebSocketEvent, excludeClient?: WebS
 function getViewerCount(battleId: string): number {
   const room = battleRooms.get(battleId);
   if (!room) return 0;
-  
+
   // Count only non-admin clients
-  return Array.from(room).filter(c => !c.isAdmin).length;
+  return Array.from(room).filter((c) => !c.isAdmin).length;
 }
 
 function broadcastViewerCount(battleId: string) {
@@ -102,7 +121,7 @@ function broadcastViewerCount(battleId: string) {
 
   const count = getViewerCount(battleId);
   broadcast(battleId, {
-    type: 'viewers:count',
+    type: "viewers:count",
     battleId,
     timestamp: Date.now(),
     count,
@@ -112,57 +131,60 @@ function broadcastViewerCount(battleId: string) {
 app.prepare().then(() => {
   const server = createServer(async (req, res) => {
     // Only log non-internal Next.js requests
-    const url = req.url || '';
-    const isInternalNextRequest = url.startsWith('/__nextjs') || 
-                                   url.startsWith('/_next/') ||
-                                   url.includes('hot-update');
-    
+    const url = req.url || "";
+    const isInternalNextRequest =
+      url.startsWith("/__nextjs") ||
+      url.startsWith("/_next/") ||
+      url.includes("hot-update");
+
     if (!isInternalNextRequest) {
       console.log(`[Server] Request: ${req.method} ${url}`);
     }
-    
+
     // Internal endpoint for broadcasting WebSocket events from API routes
     // Must be handled BEFORE Next.js to prevent 404
-    if (url.startsWith('/__internal/ws-broadcast') && req.method === 'POST') {
-      console.log('[Server] Matched internal broadcast endpoint');
+    if (url.startsWith("/__internal/ws-broadcast") && req.method === "POST") {
+      console.log("[Server] Matched internal broadcast endpoint");
       // Verify internal secret
-      const secret = req.headers['x-internal-secret'];
+      const secret = req.headers["x-internal-secret"];
       if (secret !== INTERNAL_BROADCAST_SECRET) {
-        res.writeHead(403, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Forbidden' }));
+        res.writeHead(403, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Forbidden" }));
         return;
       }
 
-      let body = '';
-      req.on('data', chunk => {
+      let body = "";
+      req.on("data", (chunk) => {
         body += chunk.toString();
       });
-      
-      req.on('end', () => {
+
+      req.on("end", () => {
         try {
           const { battleId, event } = JSON.parse(body);
-          console.log(`[Internal Broadcast] Received request for battle ${battleId}, event ${event.type}`);
+          console.log(
+            `[Internal Broadcast] Received request for battle ${battleId}, event ${event.type}`,
+          );
           broadcast(battleId, event);
-          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ success: true }));
         } catch (error) {
-          console.error('[Internal Broadcast] Error:', error);
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Internal error' }));
+          console.error("[Internal Broadcast] Error:", error);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Internal error" }));
         }
       });
       return;
     }
-    
+
     // Pass everything else to Next.js
-    const parsedUrl = parse(req.url || '', true);
+    const parsedUrl = parse(req.url || "", true);
     await handle(req, res, parsedUrl);
   });
 
   // Create WebSocket server
-  const wss = new WebSocketServer({ 
+  const wss = new WebSocketServer({
     noServer: true,
-    path: '/ws',
+    path: "/ws",
   });
 
   // Set up WebSocket server for broadcasting from API routes
@@ -173,26 +195,27 @@ app.prepare().then(() => {
   });
 
   // Handle WebSocket upgrade
-  server.on('upgrade', (request, socket, head) => {
-    const { pathname } = parse(request.url || '', true);
-    
-    if (pathname === '/ws') {
+  server.on("upgrade", (request, socket, head) => {
+    const { pathname } = parse(request.url || "", true);
+
+    if (pathname === "/ws") {
+      // Handle our custom WebSocket endpoint
       wss.handleUpgrade(request, socket, head, (ws) => {
-        wss.emit('connection', ws, request);
+        wss.emit("connection", ws, request);
       });
-    } else {
-      socket.destroy();
     }
+    // Let Next.js handle its own WebSocket upgrades (HMR, etc.)
+    // by NOT destroying the socket for other paths
   });
 
   // Handle WebSocket connections
-  wss.on('connection', (ws: WebSocket) => {
-    console.log('[WS] New connection established');
+  wss.on("connection", (ws: WebSocket) => {
+    console.log("[WS] New connection established");
 
     const connection: ClientConnection = {
       ws,
-      battleId: '',
-      clientId: '',
+      battleId: "",
+      clientId: "",
       isAdmin: false,
       isAlive: true,
     };
@@ -200,12 +223,12 @@ app.prepare().then(() => {
     clients.set(ws, connection);
 
     // Handle incoming messages
-    ws.on('message', (data: Buffer) => {
+    ws.on("message", (data: Buffer) => {
       try {
         const message: ClientMessage = JSON.parse(data.toString());
-        
+
         switch (message.type) {
-          case 'join': {
+          case "join": {
             // Leave previous room if any
             if (connection.battleId) {
               const oldBattleId = connection.battleId;
@@ -217,17 +240,19 @@ app.prepare().then(() => {
             connection.battleId = message.battleId;
             connection.clientId = message.clientId || `client-${Date.now()}`;
             connection.isAdmin = message.isAdmin || false;
-            
+
             joinBattleRoom(message.battleId, connection);
 
             // Send acknowledgment with current state
-            ws.send(JSON.stringify({
-              type: 'connection:acknowledged',
-              battleId: message.battleId,
-              clientId: connection.clientId,
-              timestamp: Date.now(),
-              viewerCount: getViewerCount(message.battleId),
-            } as WebSocketEvent));
+            ws.send(
+              JSON.stringify({
+                type: "connection:acknowledged",
+                battleId: message.battleId,
+                clientId: connection.clientId,
+                timestamp: Date.now(),
+                viewerCount: getViewerCount(message.battleId),
+              } as WebSocketEvent),
+            );
 
             // Broadcast viewer count update
             broadcastViewerCount(message.battleId);
@@ -235,7 +260,7 @@ app.prepare().then(() => {
             // Notify if admin joined
             if (connection.isAdmin) {
               broadcast(message.battleId, {
-                type: 'admin:connected',
+                type: "admin:connected",
                 battleId: message.battleId,
                 adminId: connection.clientId,
                 timestamp: Date.now(),
@@ -244,7 +269,7 @@ app.prepare().then(() => {
             break;
           }
 
-          case 'leave': {
+          case "leave": {
             if (connection.battleId) {
               leaveBattleRoom(connection.battleId, connection);
               broadcastViewerCount(connection.battleId);
@@ -252,26 +277,28 @@ app.prepare().then(() => {
             break;
           }
 
-          case 'sync_request': {
+          case "sync_request": {
             // Client is requesting state sync - handled by Next.js API route
             // Send a minimal acknowledgment here
-            ws.send(JSON.stringify({
-              type: 'connection:acknowledged',
-              battleId: message.battleId,
-              clientId: connection.clientId,
-              timestamp: Date.now(),
-              viewerCount: getViewerCount(message.battleId),
-            } as WebSocketEvent));
+            ws.send(
+              JSON.stringify({
+                type: "connection:acknowledged",
+                battleId: message.battleId,
+                clientId: connection.clientId,
+                timestamp: Date.now(),
+                viewerCount: getViewerCount(message.battleId),
+              } as WebSocketEvent),
+            );
             break;
           }
         }
       } catch (error) {
-        console.error('[WS] Error parsing message:', error);
+        console.error("[WS] Error parsing message:", error);
       }
     });
 
     // Handle connection close
-    ws.on('close', () => {
+    ws.on("close", () => {
       if (connection.battleId) {
         leaveBattleRoom(connection.battleId, connection);
         broadcastViewerCount(connection.battleId);
@@ -279,26 +306,26 @@ app.prepare().then(() => {
         // Notify if admin disconnected
         if (connection.isAdmin && battleRooms.has(connection.battleId)) {
           broadcast(connection.battleId, {
-            type: 'admin:disconnected',
+            type: "admin:disconnected",
             battleId: connection.battleId,
             adminId: connection.clientId,
             timestamp: Date.now(),
           });
         }
       }
-      
+
       clients.delete(ws);
-      console.log('[WS] Connection closed');
+      console.log("[WS] Connection closed");
     });
 
     // Handle errors
-    ws.on('error', (error) => {
-      console.error('[WS] Connection error:', error);
+    ws.on("error", (error) => {
+      console.error("[WS] Connection error:", error);
     });
 
     // Heartbeat to detect broken connections
     connection.isAlive = true;
-    ws.on('pong', () => {
+    ws.on("pong", () => {
       connection.isAlive = true;
     });
   });
@@ -307,7 +334,9 @@ app.prepare().then(() => {
   const pingInterval = setInterval(() => {
     clients.forEach((connection, ws) => {
       if (!connection.isAlive) {
-        console.log(`[WS] Terminating dead connection for client ${connection.clientId}`);
+        console.log(
+          `[WS] Terminating dead connection for client ${connection.clientId}`,
+        );
         ws.terminate();
         return;
       }
@@ -317,7 +346,7 @@ app.prepare().then(() => {
     });
   }, 30000);
 
-  wss.on('close', () => {
+  wss.on("close", () => {
     clearInterval(pingInterval);
   });
 
@@ -326,4 +355,3 @@ app.prepare().then(() => {
     console.log(`> WebSocket server ready on ws://${hostname}:${port}/ws`);
   });
 });
-

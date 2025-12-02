@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { Mic2 } from "lucide-react";
 import { SignInButton } from "@clerk/nextjs";
+import { Mic2 } from "lucide-react";
+import Link from "next/link";
 
 export function CreateBattleButton({ isSignedIn }: { isSignedIn: boolean }) {
   const classes =
@@ -32,5 +32,3 @@ export function CreateBattleButton({ isSignedIn }: { isSignedIn: boolean }) {
     </SignInButton>
   );
 }
-
-

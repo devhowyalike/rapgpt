@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth, SignInButton } from "@clerk/nextjs";
+import { SignInButton, useAuth } from "@clerk/nextjs";
 import { ReactNode } from "react";
 
 interface ProtectedActionProps {

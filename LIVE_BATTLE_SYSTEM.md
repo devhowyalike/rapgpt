@@ -89,7 +89,6 @@ Viewers who join mid-battle are automatically synchronized:
 
 ### Mobile Experience
 
-- Floating action buttons for Comments and Voting
 - Slide-up drawer for easy access
 - Optimized for portrait viewing
 

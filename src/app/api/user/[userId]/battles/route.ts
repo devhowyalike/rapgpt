@@ -1,12 +1,12 @@
+import { desc, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import { checkRole } from "@/lib/auth/roles";
 import { db } from "@/lib/db/client";
 import { battles } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
-import { checkRole } from "@/lib/auth/roles";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ userId: string }> }
+  { params }: { params: Promise<{ userId: string }> },
 ) {
   try {
     // Check if user is admin
@@ -15,7 +15,7 @@ export async function GET(
     if (!isAdmin) {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -33,8 +33,7 @@ export async function GET(
     console.error("Error fetching user battles:", error);
     return NextResponse.json(
       { error: "Failed to fetch user battles" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

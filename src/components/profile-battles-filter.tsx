@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { type BattleDB } from "@/lib/db/schema";
+import { ChevronDown, ChevronUp, Filter, X } from "lucide-react";
+import { useMemo, useState } from "react";
 import { MyBattleCard } from "@/components/my-battle-card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Filter, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { type BattleDB } from "@/lib/db/schema";
 
 interface CollapsibleBattleSectionProps {
   title: string;
@@ -128,15 +128,15 @@ export function ProfileBattlesFilter({
 
   // Separate paused and completed battles
   const pausedBattles = filteredBattles.filter(
-    (battle) => battle.status === "paused"
+    (battle) => battle.status === "paused",
   );
   const completedBattles = filteredBattles.filter(
-    (battle) => battle.status !== "paused"
+    (battle) => battle.status !== "paused",
   );
 
   // Check if any filters are active
   const hasActiveFilters = Object.values(filters).some(
-    (value) => value === true
+    (value) => value === true,
   );
 
   // Clear all filters

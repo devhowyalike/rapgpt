@@ -1,23 +1,31 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
 import {
-  ArrowUpDown,
-  Radio,
-  MoreVertical,
-  Trash2,
   AlertTriangle,
-  Music,
+  ArrowUpDown,
   Check,
-  X,
-  Play,
   FileText,
   Hash,
+  MoreVertical,
+  Music,
+  Play,
+  Radio,
+  Trash2,
+  X,
 } from "lucide-react";
-import type { Battle } from "@/lib/shared";
-import { ROUNDS_PER_BATTLE, getDisplayRound } from "@/lib/shared";
-import type { BattleTokenTotals } from "@/lib/usage-storage";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import * as React from "react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -26,17 +34,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useRouter } from "next/navigation";
-import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import type { Battle } from "@/lib/shared";
+import { getDisplayRound, ROUNDS_PER_BATTLE } from "@/lib/shared";
+import type { BattleTokenTotals } from "@/lib/usage-storage";
 
 type SortField =
   | "matchup"
@@ -63,12 +63,12 @@ export function BattlesTable({
     React.useState<SortDirection>("desc");
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   const [battleToDelete, setBattleToDelete] = React.useState<Battle | null>(
-    null
+    null,
   );
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [selectedBattles, setSelectedBattles] = React.useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = React.useState(false);
 
@@ -120,7 +120,7 @@ export function BattlesTable({
       const deletePromises = Array.from(selectedBattles).map((battleId) =>
         fetch(`/api/battle/${battleId}/delete`, {
           method: "DELETE",
-        })
+        }),
       );
 
       const responses = await Promise.all(deletePromises);
@@ -128,7 +128,7 @@ export function BattlesTable({
 
       if (failedDeletes.length > 0) {
         setErrorMessage(
-          `Failed to delete ${failedDeletes.length} of ${selectedBattles.size} battles`
+          `Failed to delete ${failedDeletes.length} of ${selectedBattles.size} battles`,
         );
         setIsDeleting(false);
       } else {
@@ -346,10 +346,10 @@ export function BattlesTable({
                     battle.status === "completed"
                       ? "bg-green-900/30 text-green-400 border border-green-500/30"
                       : battle.status === "paused"
-                      ? "bg-orange-900/30 text-orange-400 border border-orange-500/30"
-                      : battle.status === "upcoming"
-                      ? "bg-yellow-900/30 text-yellow-400 border border-yellow-500/30"
-                      : "bg-gray-700/50 text-gray-400 border border-gray-600/30"
+                        ? "bg-orange-900/30 text-orange-400 border border-orange-500/30"
+                        : battle.status === "upcoming"
+                          ? "bg-yellow-900/30 text-yellow-400 border border-yellow-500/30"
+                          : "bg-gray-700/50 text-gray-400 border border-gray-600/30"
                   }`}
                 >
                   {battle.status}

@@ -6,14 +6,7 @@ Refactored `battle-controller.tsx` (750 lines) into smaller, reusable components
 
 ## Created Components
 
-### 1. **MobileActionButtons** (`src/components/battle/mobile-action-buttons.tsx`)
-
-- Extracted floating action buttons for comments and voting (mobile only)
-- Handles active state and visual feedback
-- **Shared by:** `battle-controller.tsx`, `live-battle-viewer.tsx`
-- **Eliminated duplication:** ~90 lines per file
-
-### 2. **SidebarContainer** (`src/components/battle/sidebar-container.tsx`)
+### 1. **SidebarContainer** (`src/components/battle/sidebar-container.tsx`)
 
 - Wraps both desktop sidebar and mobile drawer
 - Manages BattleSidebar rendering for both desktop and mobile views
@@ -21,7 +14,7 @@ Refactored `battle-controller.tsx` (750 lines) into smaller, reusable components
 - **Shared by:** `battle-controller.tsx`, `live-battle-viewer.tsx`
 - **Eliminated duplication:** ~60 lines per file
 
-### 3. **BattleControlBar** (`src/components/battle/battle-control-bar.tsx`)
+### 2. **BattleControlBar** (`src/components/battle/battle-control-bar.tsx`)
 
 - Extracted control bar for ongoing battles
 - Handles primary action button states (generate, voting, advance)

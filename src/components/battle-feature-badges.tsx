@@ -1,4 +1,4 @@
-import { ThumbsUp, MessageSquare, Music2 } from "lucide-react";
+import { MessageSquare, Music2, ThumbsUp } from "lucide-react";
 
 interface BattleFeatureBadgesProps {
   votingEnabled?: boolean;

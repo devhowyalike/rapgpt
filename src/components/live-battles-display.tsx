@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
-import Link from "next/link";
+import { MessageSquare, Play, Users } from "lucide-react";
 import Image from "next/image";
-import { Users, MessageSquare, Play } from "lucide-react";
-import type { Battle } from "@/lib/shared";
-import { ROUNDS_PER_BATTLE, getDisplayRound } from "@/lib/shared";
-import type { WebSocketEvent } from "@/lib/websocket/types";
+import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -15,7 +13,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import type { Battle } from "@/lib/shared";
+import { getDisplayRound, ROUNDS_PER_BATTLE } from "@/lib/shared";
+import type { WebSocketEvent } from "@/lib/websocket/types";
 
 interface LiveBattlesDisplayProps {
   initialBattles: Battle[];
@@ -53,7 +53,7 @@ export function LiveBattlesDisplay({
             battleId: "__homepage__",
             clientId: `homepage-${Date.now()}`,
             isAdmin: false,
-          })
+          }),
         );
       };
 
@@ -69,7 +69,7 @@ export function LiveBattlesDisplay({
                 const exists = prev.find((b) => b.id === wsEvent.battle.id);
                 if (exists) {
                   return prev.map((b) =>
-                    b.id === wsEvent.battle.id ? wsEvent.battle : b
+                    b.id === wsEvent.battle.id ? wsEvent.battle : b,
                   );
                 }
                 return [wsEvent.battle, ...prev];
@@ -80,7 +80,7 @@ export function LiveBattlesDisplay({
             case "battle:live_ended": {
               // Remove battle from the list
               setLiveBattles((prev) =>
-                prev.filter((b) => b.id !== wsEvent.battleId)
+                prev.filter((b) => b.id !== wsEvent.battleId),
               );
               break;
             }
@@ -92,7 +92,7 @@ export function LiveBattlesDisplay({
                   const exists = prev.find((b) => b.id === wsEvent.battle.id);
                   if (exists) {
                     return prev.map((b) =>
-                      b.id === wsEvent.battle.id ? wsEvent.battle : b
+                      b.id === wsEvent.battle.id ? wsEvent.battle : b,
                     );
                   }
                   return [wsEvent.battle, ...prev];
@@ -245,7 +245,7 @@ export function LiveBattlesDisplay({
                     size="sm"
                     className="bg-yellow-600 hover:bg-yellow-700 text-white"
                   >
-                    <Link href={`/admin/battles/${battle.id}/control`}>
+                    <Link href={`/battle/${battle.id}`}>
                       <Play className="w-3 h-3 mr-2 fill-current" />
                       Control
                     </Link>

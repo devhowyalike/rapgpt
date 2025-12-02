@@ -1,16 +1,19 @@
 "use client";
 
-import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+import {
+  BattleResultsStats,
+  type BattleResultsStatsProps,
+} from "@/components/battle-results-stats";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import type { Stage } from "@/lib/shared/stages";
-import { ROUNDS_PER_BATTLE, getDisplayRound } from "@/lib/shared";
 import type { Battle } from "@/lib/shared";
-import { BattleResultsStats, type BattleResultsStatsProps } from "@/components/battle-results-stats";
+import { getDisplayRound, ROUNDS_PER_BATTLE } from "@/lib/shared";
+import type { Stage } from "@/lib/shared/stages";
 
 interface BattleInfoPanelProps {
   type: "progress" | "results";

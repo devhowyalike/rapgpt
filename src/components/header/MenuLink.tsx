@@ -11,7 +11,12 @@ type MenuLinkProps = {
   isActive?: boolean;
 };
 
-export function MenuLink({ href, icon, label, isActive = false }: MenuLinkProps) {
+export function MenuLink({
+  href,
+  icon,
+  label,
+  isActive = false,
+}: MenuLinkProps) {
   const activeClasses = isActive ? "text-white font-medium" : "";
 
   return (
@@ -23,5 +28,3 @@ export function MenuLink({ href, icon, label, isActive = false }: MenuLinkProps)
     </DropdownMenuItem>
   );
 }
-
-

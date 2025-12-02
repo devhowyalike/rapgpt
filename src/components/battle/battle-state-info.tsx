@@ -3,7 +3,7 @@
  */
 
 import type { Battle } from "@/lib/shared";
-import { ROUNDS_PER_BATTLE, getDisplayRound } from "@/lib/shared";
+import { getDisplayRound, ROUNDS_PER_BATTLE } from "@/lib/shared";
 
 interface BattleStateInfoProps {
   battle: Battle;
@@ -34,4 +34,3 @@ export function BattleStateInfo({ battle, className }: BattleStateInfoProps) {
     </div>
   );
 }
-

@@ -1,9 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
+import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db/client";
-import { users, battles } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
+import { db } from "@/lib/db/client";
+import { battles, users } from "@/lib/db/schema";
 
 export async function PATCH() {
   try {
@@ -36,12 +36,7 @@ export async function PATCH() {
           isPublic: false,
           updatedAt: new Date(),
         })
-        .where(
-          and(
-            eq(battles.createdBy, user.id),
-            eq(battles.isPublic, true)
-          )
-        );
+        .where(and(eq(battles.createdBy, user.id), eq(battles.isPublic, true)));
     }
 
     return NextResponse.json({
@@ -52,8 +47,7 @@ export async function PATCH() {
     console.error("Error toggling profile privacy:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

@@ -2,9 +2,9 @@
  * Vercel Postgres client with Drizzle ORM
  */
 
-import { drizzle, type VercelPgDatabase } from 'drizzle-orm/vercel-postgres';
-import { createPool, type VercelPool } from '@vercel/postgres';
-import * as schema from './schema';
+import { createPool, type VercelPool } from "@vercel/postgres";
+import { drizzle, type VercelPgDatabase } from "drizzle-orm/vercel-postgres";
+import * as schema from "./schema";
 
 /**
  * Lazy initialization of database connection
@@ -16,11 +16,11 @@ let poolInstance: VercelPool | null = null;
 function getPool() {
   if (!poolInstance) {
     const connectionString = process.env.POSTGRES_URL;
-    
+
     if (!connectionString) {
-      throw new Error('POSTGRES_URL environment variable is not set');
+      throw new Error("POSTGRES_URL environment variable is not set");
     }
-    
+
     poolInstance = createPool({ connectionString });
   }
   return poolInstance;
@@ -41,7 +41,7 @@ function getDb() {
 export const db = new Proxy({} as VercelPgDatabase<typeof schema>, {
   get(_target, prop) {
     return getDb()[prop as keyof VercelPgDatabase<typeof schema>];
-  }
+  },
 }) as VercelPgDatabase<typeof schema>;
 
 /**
@@ -50,6 +50,5 @@ export const db = new Proxy({} as VercelPgDatabase<typeof schema>, {
 export const sql = new Proxy({} as VercelPool, {
   get(_target, prop) {
     return getPool()[prop as keyof VercelPool];
-  }
+  },
 }) as VercelPool;
-

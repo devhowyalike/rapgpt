@@ -1,33 +1,36 @@
-import { NextRequest } from 'next/server';
-import { revalidatePath } from 'next/cache';
-import { auth } from '@clerk/nextjs/server';
-import { getBattleById, saveBattle } from '@/lib/battle-storage';
-import { commentRequestSchema } from '@/lib/validations/battle';
-import { isBattleArchived } from '@/lib/battle-engine';
-import { createArchivedBattleResponse } from '@/lib/validations/utils';
-import { db } from '@/lib/db/client';
-import { comments } from '@/lib/db/schema';
-import { nanoid } from 'nanoid';
-import { decrypt } from '@/lib/auth/encryption';
-import { getOrCreateUser } from '@/lib/auth/sync-user';
-import { broadcastEvent } from '@/lib/websocket/broadcast-helper';
-import type { CommentAddedEvent } from '@/lib/websocket/types';
+import { auth } from "@clerk/nextjs/server";
+import { nanoid } from "nanoid";
+import { revalidatePath } from "next/cache";
+import { NextRequest } from "next/server";
+import { decrypt } from "@/lib/auth/encryption";
+import { getOrCreateUser } from "@/lib/auth/sync-user";
+import { isBattleArchived } from "@/lib/battle-engine";
+import { getBattleById, saveBattle } from "@/lib/battle-storage";
+import { db } from "@/lib/db/client";
+import { comments } from "@/lib/db/schema";
+import { commentRequestSchema } from "@/lib/validations/battle";
+import { createArchivedBattleResponse } from "@/lib/validations/utils";
+import { broadcastEvent } from "@/lib/websocket/broadcast-helper";
+import type { CommentAddedEvent } from "@/lib/websocket/types";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     // Require authentication
     const { userId: clerkUserId } = await auth();
-    
+
     if (!clerkUserId) {
-      return new Response(JSON.stringify({ 
-        error: 'Unauthorized: You must be signed in to comment' 
-      }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized: You must be signed in to comment",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Get or create user from database (syncs from Clerk if needed)
@@ -35,42 +38,45 @@ export async function POST(
 
     const { id } = await params;
     const body = await request.json();
-    
+
     // Validate input with Zod
     const validation = commentRequestSchema.safeParse(body);
-    
+
     if (!validation.success) {
-      return new Response(JSON.stringify({ 
-        error: 'Invalid request', 
-        details: validation.error.issues 
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Invalid request",
+          details: validation.error.issues,
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
-    
+
     const { content, round } = validation.data;
 
     const battle = await getBattleById(id);
 
     if (!battle) {
-      return new Response(JSON.stringify({ error: 'Battle not found' }), {
+      return new Response(JSON.stringify({ error: "Battle not found" }), {
         status: 404,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     // Prevent comments on archived battles
     if (isBattleArchived(battle)) {
-      return createArchivedBattleResponse('comment');
+      return createArchivedBattleResponse("comment");
     }
 
     // Get display name for comment (use displayName or fallback to name)
-    const username = user.encryptedDisplayName 
+    const username = user.encryptedDisplayName
       ? decrypt(user.encryptedDisplayName)
-      : user.encryptedName 
+      : user.encryptedName
         ? decrypt(user.encryptedName)
-        : 'Anonymous';
+        : "Anonymous";
 
     // Insert comment into database
     const commentId = nanoid();
@@ -101,7 +107,7 @@ export async function POST(
     // Broadcast comment event if battle is live
     if (battle.isLive) {
       await broadcastEvent(id, {
-        type: 'comment:added',
+        type: "comment:added",
         battleId: id,
         timestamp: Date.now(),
         comment,
@@ -113,14 +119,13 @@ export async function POST(
 
     return new Response(JSON.stringify({ success: true, comment }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('Error submitting comment:', error);
-    return new Response(JSON.stringify({ error: 'Failed to submit comment' }), {
+    console.error("Error submitting comment:", error);
+    return new Response(JSON.stringify({ error: "Failed to submit comment" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 }
-

@@ -4,8 +4,8 @@
  */
 
 import { useMemo } from "react";
-import type { Battle, Verse, RoundScore } from "@/lib/shared";
 import { getRoundVerses } from "@/lib/battle-engine";
+import type { Battle, RoundScore, Verse } from "@/lib/shared";
 
 interface RoundData {
   verses: {
@@ -44,5 +44,3 @@ export function useRoundData(battle: Battle, round: number): RoundData {
     };
   }, [battle, round]);
 }
-
-

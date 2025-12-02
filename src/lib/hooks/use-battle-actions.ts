@@ -34,7 +34,7 @@ export function useBattleVote({ battleId, onSuccess }: UseBattleVoteOptions) {
         return false;
       }
     },
-    [battleId, onSuccess]
+    [battleId, onSuccess],
   );
 
   return handleVote;
@@ -75,9 +75,8 @@ export function useBattleComment({
         throw error;
       }
     },
-    [battle, onSuccess]
+    [battle, onSuccess],
   );
 
   return handleComment;
 }
-

@@ -23,33 +23,41 @@ export function RoundTracker({
   return (
     <>
       {/* Mobile: Show only current round text */}
-      <div className={`md:hidden flex items-center justify-center ${className}`}>
+      <div
+        className={`md:hidden flex items-center justify-center ${className}`}
+      >
         <span className="text-sm text-gray-400 font-medium whitespace-nowrap">
           Round {currentRound} of {ROUNDS_PER_BATTLE}
         </span>
       </div>
 
       {/* Desktop: Show all rounds */}
-      <div className={`hidden md:flex items-center justify-center gap-3 pt-2 ${className}`}>
-        {Array.from({ length: ROUNDS_PER_BATTLE }).map((_, index) => {
-          const round = index + 1;
-          const isRoundCompleted = round <= completedRounds;
-          const isCurrent = round === currentRound;
+      <div
+        className={`hidden md:flex flex-col items-center justify-center gap-2 pt-2 ${className}`}
+      >
+        <span className="text-xs text-gray-400 uppercase tracking-wider">
+          Round
+        </span>
+        <div className="flex items-center gap-3">
+          {Array.from({ length: ROUNDS_PER_BATTLE }).map((_, index) => {
+            const round = index + 1;
+            const isRoundCompleted = round <= completedRounds;
+            const isCurrent = round === currentRound;
 
-          return (
-            <motion.div
-              key={round}
-              className="flex flex-col items-center gap-1"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
+            return (
               <motion.div
-                className={`
-                  w-16 h-16 rounded-full
+                key={round}
+                className="flex flex-col items-center"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <motion.div
+                  className={`
+                  w-12 h-12 rounded-full
                   flex items-center justify-center
-                  font-[family-name:var(--font-bebas-neue)]
-                  text-2xl
+                  font-(family-name:--font-bebas-neue)
+                  text-xl
                   transition-colors duration-300
                   ${
                     isRoundCompleted
@@ -67,32 +75,30 @@ export function RoundTracker({
                       : ""
                   }
                 `}
-                animate={
-                  isCurrent
-                    ? {
-                        scale: [1, 1.1, 1],
-                        boxShadow: [
-                          "0 0 0px rgba(59, 130, 246, 0.5)",
-                          "0 0 20px rgba(59, 130, 246, 0.8)",
-                          "0 0 0px rgba(59, 130, 246, 0.5)",
-                        ],
-                      }
-                    : {}
-                }
-                transition={{
-                  duration: 2,
-                  repeat: isCurrent ? Number.POSITIVE_INFINITY : 0,
-                  ease: "easeInOut",
-                }}
-              >
-                {isRoundCompleted ? "✓" : round}
+                  animate={
+                    isCurrent
+                      ? {
+                          scale: [1, 1.1, 1],
+                          boxShadow: [
+                            "0 0 0px rgba(59, 130, 246, 0.5)",
+                            "0 0 20px rgba(59, 130, 246, 0.8)",
+                            "0 0 0px rgba(59, 130, 246, 0.5)",
+                          ],
+                        }
+                      : {}
+                  }
+                  transition={{
+                    duration: 2,
+                    repeat: isCurrent ? Number.POSITIVE_INFINITY : 0,
+                    ease: "easeInOut",
+                  }}
+                >
+                  {isRoundCompleted ? "✓" : round}
+                </motion.div>
               </motion.div>
-              <span className="text-sm text-gray-400 font-medium">
-                ROUND {round}
-              </span>
-            </motion.div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </>
   );

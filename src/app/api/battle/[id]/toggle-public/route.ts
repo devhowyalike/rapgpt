@@ -1,13 +1,13 @@
 import { auth } from "@clerk/nextjs/server";
+import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { db } from "@/lib/db/client";
 import { battles } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
-import { getOrCreateUser } from "@/lib/auth/sync-user";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { userId: clerkUserId } = await auth();
@@ -28,7 +28,7 @@ export async function PATCH(
     if (!battle) {
       return NextResponse.json(
         { error: "Battle not found or you don't have permission to modify it" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -36,15 +36,18 @@ export async function PATCH(
     if (!battle.isPublic && battle.status === "paused") {
       return NextResponse.json(
         { error: "Cannot publish paused battles. Complete the battle first." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Prevent publishing battles if user profile is private
     if (!battle.isPublic && !user.isProfilePublic) {
       return NextResponse.json(
-        { error: "Cannot publish battles with a private profile. Make your profile public first." },
-        { status: 400 }
+        {
+          error:
+            "Cannot publish battles with a private profile. Make your profile public first.",
+        },
+        { status: 400 },
       );
     }
 
@@ -66,8 +69,7 @@ export async function PATCH(
     console.error("Error toggling battle public status:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

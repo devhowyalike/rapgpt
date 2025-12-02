@@ -50,17 +50,13 @@ export function BattleHeader({
       data-battle-header
       className={cn(
         "left-0 right-0 z-20 border-b border-gray-800 transition-all duration-300",
-        compact 
-          ? "px-3 py-1.5 md:px-6 md:py-4" 
-          : "px-4 py-2 md:px-6 md:py-4",
+        compact ? "px-3 py-1.5 md:px-6 md:py-4" : "px-4 py-2 md:px-6 md:py-4",
         sticky && "sticky top-(--header-height) md:top-auto md:relative",
         variantClasses[variant],
-        className
+        className,
       )}
     >
       <div className="max-w-7xl mx-auto">{children}</div>
     </div>
   );
 }
-
-

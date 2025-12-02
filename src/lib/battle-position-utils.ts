@@ -3,7 +3,12 @@
  * These helpers bridge the gap between position-based scoring and persona-based UI/APIs
  */
 
-import type { Battle, RoundScore, Persona, PersonaPosition } from '@/lib/shared';
+import type {
+  Battle,
+  Persona,
+  PersonaPosition,
+  RoundScore,
+} from "@/lib/shared";
 
 /**
  * Get the position (player1 or player2) for a given persona ID in a battle
@@ -11,10 +16,10 @@ import type { Battle, RoundScore, Persona, PersonaPosition } from '@/lib/shared'
  */
 export function getPersonaPosition(
   battle: Battle,
-  personaId: string
+  personaId: string,
 ): PersonaPosition | null {
-  if (battle.personas.player1.id === personaId) return 'player1';
-  if (battle.personas.player2.id === personaId) return 'player2';
+  if (battle.personas.player1.id === personaId) return "player1";
+  if (battle.personas.player2.id === personaId) return "player2";
   return null;
 }
 
@@ -23,7 +28,7 @@ export function getPersonaPosition(
  */
 export function getPersonaByPosition(
   battle: Battle,
-  position: PersonaPosition
+  position: PersonaPosition,
 ): Persona {
   return battle.personas[position];
 }
@@ -34,7 +39,7 @@ export function getPersonaByPosition(
  */
 export function getWinnerPersonaId(
   battle: Battle,
-  roundScore: RoundScore
+  roundScore: RoundScore,
 ): string | null {
   if (!roundScore.winner) return null;
   return battle.personas[roundScore.winner].id;
@@ -47,7 +52,7 @@ export function getWinnerPersonaId(
 export function getRoundScoreForPersona(
   battle: Battle,
   roundScore: RoundScore,
-  personaId: string
+  personaId: string,
 ) {
   const position = getPersonaPosition(battle, personaId);
   if (!position) return null;
@@ -60,7 +65,7 @@ export function getRoundScoreForPersona(
 export function isPersonaRoundWinner(
   battle: Battle,
   roundScore: RoundScore,
-  personaId: string
+  personaId: string,
 ): boolean {
   const position = getPersonaPosition(battle, personaId);
   return position !== null && roundScore.winner === position;
@@ -69,10 +74,7 @@ export function isPersonaRoundWinner(
 /**
  * Get both position and persona info together
  */
-export function getPositionInfo(
-  battle: Battle,
-  position: PersonaPosition
-) {
+export function getPositionInfo(battle: Battle, position: PersonaPosition) {
   return {
     position,
     persona: battle.personas[position],
@@ -85,8 +87,8 @@ export function getPositionInfo(
  */
 export function getAllPositionInfo(battle: Battle) {
   return {
-    player1: getPositionInfo(battle, 'player1'),
-    player2: getPositionInfo(battle, 'player2'),
+    player1: getPositionInfo(battle, "player1"),
+    player2: getPositionInfo(battle, "player2"),
   };
 }
 
@@ -96,7 +98,7 @@ export function getAllPositionInfo(battle: Battle) {
  */
 export function getPositionScore(
   roundScore: RoundScore,
-  position: PersonaPosition
+  position: PersonaPosition,
 ): number {
   return roundScore.positionScores?.[position]?.totalScore ?? 0;
 }
@@ -105,16 +107,16 @@ export function getPositionScore(
  * Calculate total scores for both positions across all rounds
  */
 export function calculateTotalScores(scoresOrBattle: RoundScore[] | Battle) {
-  const scores = Array.isArray(scoresOrBattle) 
-    ? scoresOrBattle 
+  const scores = Array.isArray(scoresOrBattle)
+    ? scoresOrBattle
     : scoresOrBattle.scores;
-    
+
   let player1Total = 0;
   let player2Total = 0;
 
   for (const roundScore of scores) {
-    player1Total += getPositionScore(roundScore, 'player1');
-    player2Total += getPositionScore(roundScore, 'player2');
+    player1Total += getPositionScore(roundScore, "player1");
+    player2Total += getPositionScore(roundScore, "player2");
   }
 
   return {
@@ -122,4 +124,3 @@ export function calculateTotalScores(scoresOrBattle: RoundScore[] | Battle) {
     player2: Math.round(player2Total),
   };
 }
-

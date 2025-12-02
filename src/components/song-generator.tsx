@@ -5,24 +5,24 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
-import { Music2, Zap, RefreshCw } from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
+import { motion } from "framer-motion";
+import { Music2, RefreshCw, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
 } from "@/components/ui/card";
-import { motion } from "framer-motion";
-import type {
-  SongGenerationBeatStyle,
-  Battle,
-} from "@/lib/shared/battle-types";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { APP_TITLE } from "@/lib/constants";
+import type {
+  Battle,
+  SongGenerationBeatStyle,
+} from "@/lib/shared/battle-types";
 import { SongManualComplete } from "./song-manual-complete";
-import { useAuth } from "@clerk/nextjs";
 
 interface SongGeneratorProps {
   battleId: string;
@@ -87,7 +87,7 @@ export function SongGenerator({
       setProgress(Math.round(Math.min(20 + (attempts / maxAttempts) * 70, 90)));
 
       const statusResponse = await fetch(
-        `/api/battle/${battleId}/song-status?taskId=${taskId}`
+        `/api/battle/${battleId}/song-status?taskId=${taskId}`,
       );
 
       if (!statusResponse.ok) {
@@ -105,7 +105,7 @@ export function SongGenerator({
         // Show manual complete option after timeout
         setShowManualComplete(true);
         throw new Error(
-          "Song generation timed out. The song may still be processing. You can manually complete it using the form below or refresh later."
+          "Song generation timed out. The song may still be processing. You can manually complete it using the form below or refresh later.",
         );
       }
 
@@ -159,7 +159,7 @@ export function SongGenerator({
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "An unexpected error occurred"
+        err instanceof Error ? err.message : "An unexpected error occurred",
       );
       setProgress(0);
     } finally {
@@ -177,7 +177,7 @@ export function SongGenerator({
       !isResuming
     ) {
       console.log(
-        "[SongGenerator] Found incomplete song, auto-resuming polling..."
+        "[SongGenerator] Found incomplete song, auto-resuming polling...",
       );
       setIsResuming(true);
       setIsGenerating(true);
@@ -192,7 +192,7 @@ export function SongGenerator({
         })
         .catch((err) => {
           setError(
-            err instanceof Error ? err.message : "An unexpected error occurred"
+            err instanceof Error ? err.message : "An unexpected error occurred",
           );
           setProgress(0);
         })
@@ -210,8 +210,8 @@ export function SongGenerator({
           {hasIncompleteSong && isResuming
             ? "Checking song generation status..."
             : hasIncompleteSong
-            ? "Your song is still being generated. Click below to check its status."
-            : `Turn this battle into a full song! Choose your beat style and let ${APP_TITLE} create the track.`}
+              ? "Your song is still being generated. Click below to check its status."
+              : `Turn this battle into a full song! Choose your beat style and let ${APP_TITLE} create the track.`}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -294,10 +294,10 @@ export function SongGenerator({
                 hasIncompleteSong
                   ? "bg-linear-to-r from-blue-600 to-cyan-600 hover:opacity-90"
                   : selectedStyle
-                  ? `bg-linear-to-r ${
-                      BEAT_STYLES.find((s) => s.id === selectedStyle)?.color
-                    } hover:opacity-90`
-                  : "bg-gray-700"
+                    ? `bg-linear-to-r ${
+                        BEAT_STYLES.find((s) => s.id === selectedStyle)?.color
+                      } hover:opacity-90`
+                    : "bg-gray-700"
               }
             `}
           >

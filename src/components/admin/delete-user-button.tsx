@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -25,7 +25,7 @@ export function DeleteUserButton({
   const handleDelete = async () => {
     setIsDeleting(true);
     setErrorMessage(null);
-    
+
     try {
       const response = await fetch(`/api/user/${userId}/delete`, {
         method: "DELETE",
@@ -82,4 +82,3 @@ The user will not be able to sign back in. This action cannot be undone.`}
     </>
   );
 }
-

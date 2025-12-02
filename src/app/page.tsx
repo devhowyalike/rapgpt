@@ -1,15 +1,15 @@
-import { getLiveBattles } from "@/lib/battle-storage";
-import { SiteHeader } from "@/components/site-header";
-import { LiveBattlesDisplay } from "@/components/live-battles-display";
-import { PersonaGallery } from "@/components/persona-gallery";
-import { MakeSongHighlight } from "@/components/make-song-highlight";
-import { CreateBattleCTA } from "@/components/create-battle-cta";
-import { APP_TITLE, MADE_BY, TAGLINE, YEAR } from "@/lib/constants";
 import { auth } from "@clerk/nextjs/server";
-import { getUserByClerkId } from "@/lib/auth/sync-user";
 import { Calendar } from "lucide-react";
+import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { FeatureCard } from "@/components/feature-card";
+import { LiveBattlesDisplay } from "@/components/live-battles-display";
+import { MakeSongHighlight } from "@/components/make-song-highlight";
+import { PersonaGallery } from "@/components/persona-gallery";
 import { RapGPTLogo } from "@/components/rapgpt-logo";
+import { SiteHeader } from "@/components/site-header";
+import { getUserByClerkId } from "@/lib/auth/sync-user";
+import { getLiveBattles } from "@/lib/battle-storage";
+import { APP_TITLE, MADE_BY, TAGLINE, YEAR } from "@/lib/constants";
 
 // Revalidate every 10 seconds to show live battles
 export const revalidate = 10;

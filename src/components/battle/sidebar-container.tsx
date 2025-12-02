@@ -4,10 +4,13 @@
 
 "use client";
 
-import type { Battle } from "@/lib/shared";
 import { BattleSidebar } from "@/components/battle-sidebar";
+import { CommentsContent } from "@/components/battle/comments-content";
+import { VotingContent } from "@/components/battle/voting-content";
 import { BattleDrawer } from "@/components/ui/battle-drawer";
+import { DrawerScrollContent } from "@/components/ui/drawer-scroll-content";
 import type { DrawerTab } from "@/lib/hooks/use-mobile-drawer";
+import type { Battle } from "@/lib/shared";
 
 interface SidebarContainerProps {
   battle: Battle;
@@ -41,14 +44,18 @@ export function SidebarContainer({
   mobileActiveTab = "comments",
   excludeBottomControls,
 }: SidebarContainerProps) {
-  if (!showCommenting && !showVoting) {
+  // Apply the same visibility logic as BattleSidebar to ensure we don't render an empty container
+  // Voting is only shown if enabled AND (live OR archived)
+  const effectiveShowVoting = showVoting && (battle.isLive || isArchived);
+
+  if (!showCommenting && !effectiveShowVoting) {
     return null;
   }
 
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden md:block w-96">
+      <div className="hidden xl:block w-96">
         <BattleSidebar
           battle={battle}
           onVote={onVote}
@@ -60,7 +67,7 @@ export function SidebarContainer({
         />
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer - single scroll container like MP3 drawer */}
       {showMobileDrawer !== undefined && onMobileDrawerChange && (
         <BattleDrawer
           open={showMobileDrawer}
@@ -68,18 +75,26 @@ export function SidebarContainer({
           title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
           excludeBottomControls={excludeBottomControls}
         >
-          <div className="flex-1 overflow-y-auto min-h-0 touch-scroll-container">
-            <BattleSidebar
-              battle={battle}
-              onVote={onVote}
+          {mobileActiveTab === "comments" && showCommenting && (
+            <CommentsContent
+              comments={battle.comments}
               onComment={onComment}
               isArchived={isArchived}
-              isVotingPhase={isVotingPhase}
-              votingTimeRemaining={votingTimeRemaining}
-              votingCompletedRound={votingCompletedRound}
-              defaultTab={mobileActiveTab}
+              battleStatus={battle.status}
             />
-          </div>
+          )}
+          {mobileActiveTab === "voting" && effectiveShowVoting && (
+            <DrawerScrollContent>
+              <VotingContent
+                battle={battle}
+                onVote={onVote}
+                isArchived={isArchived}
+                isVotingPhase={isVotingPhase}
+                votingTimeRemaining={votingTimeRemaining}
+                votingCompletedRound={votingCompletedRound}
+              />
+            </DrawerScrollContent>
+          )}
         </BattleDrawer>
       )}
     </>

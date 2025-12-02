@@ -2,9 +2,9 @@
  * Battle system types for Versuz platform
  */
 
-export type BattleStatus = 'upcoming' | 'paused' | 'completed';
-export type PersonaPosition = 'player1' | 'player2';
-export type SongGenerationBeatStyle = 'g-funk' | 'boom-bap' | 'trap';
+export type BattleStatus = "upcoming" | "paused" | "completed";
+export type PersonaPosition = "player1" | "player2";
+export type SongGenerationBeatStyle = "g-funk" | "boom-bap" | "trap";
 
 export interface Persona {
   id: string;
@@ -20,7 +20,7 @@ export interface Persona {
    */
   altCostumes?: string[];
   musicStyleDescription?: string; // Platform-agnostic music generation descriptors (no copyrighted artist names)
-  vocalGender?: 'm' | 'f'; // Vocal gender for music generation APIs
+  vocalGender?: "m" | "f"; // Vocal gender for music generation APIs
   isHoopla?: boolean;
 }
 
@@ -119,7 +119,7 @@ export interface Battle {
   // Live battle fields
   isLive?: boolean;
   liveStartedAt?: number;
-  adminControlMode?: 'manual' | 'auto';
+  adminControlMode?: "manual" | "auto";
   autoPlayConfig?: {
     verseDelay?: number;
     autoAdvance?: boolean;
@@ -155,4 +155,3 @@ export interface Vote {
 export const ROUNDS_PER_BATTLE = 3;
 export const BARS_PER_VERSE = 8;
 export const MAX_COMMENTS = 500;
-

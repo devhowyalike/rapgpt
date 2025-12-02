@@ -14,4 +14,3 @@ ATTITUDE:
 - Teases opponents with clever misdirection
 - Brags about rare vinyl and deep cut knowledge
 `;
-

@@ -1,34 +1,41 @@
-import { NextRequest } from 'next/server';
-import { revalidatePath } from 'next/cache';
-import { auth } from '@clerk/nextjs/server';
-import { getBattleById, saveBattle } from '@/lib/battle-storage';
-import { updateScoreWithVotes, isBattleArchived, isRoundComplete } from '@/lib/battle-engine';
-import { voteRequestSchema } from '@/lib/validations/battle';
-import { createArchivedBattleResponse } from '@/lib/validations/utils';
-import { db } from '@/lib/db/client';
-import { votes } from '@/lib/db/schema';
-import { and, eq } from 'drizzle-orm';
-import { nanoid } from 'nanoid';
-import { getOrCreateUser } from '@/lib/auth/sync-user';
-import { broadcastEvent } from '@/lib/websocket/broadcast-helper';
-import type { VoteCastEvent } from '@/lib/websocket/types';
-import { getPersonaPosition } from '@/lib/battle-position-utils';
+import { auth } from "@clerk/nextjs/server";
+import { and, eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import { revalidatePath } from "next/cache";
+import { NextRequest } from "next/server";
+import { getOrCreateUser } from "@/lib/auth/sync-user";
+import {
+  isBattleArchived,
+  isRoundComplete,
+  updateScoreWithVotes,
+} from "@/lib/battle-engine";
+import { getPersonaPosition } from "@/lib/battle-position-utils";
+import { getBattleById, saveBattle } from "@/lib/battle-storage";
+import { db } from "@/lib/db/client";
+import { votes } from "@/lib/db/schema";
+import { voteRequestSchema } from "@/lib/validations/battle";
+import { createArchivedBattleResponse } from "@/lib/validations/utils";
+import { broadcastEvent } from "@/lib/websocket/broadcast-helper";
+import type { VoteCastEvent } from "@/lib/websocket/types";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     // Require authentication
     const { userId: clerkUserId } = await auth();
-    
+
     if (!clerkUserId) {
-      return new Response(JSON.stringify({ 
-        error: 'Unauthorized: You must be signed in to vote' 
-      }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized: You must be signed in to vote",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Get or create user from database (syncs from Clerk if needed)
@@ -36,56 +43,66 @@ export async function POST(
 
     const { id } = await params;
     const body = await request.json();
-    
+
     // Validate input with Zod
     const validation = voteRequestSchema.safeParse(body);
-    
+
     if (!validation.success) {
-      return new Response(JSON.stringify({ 
-        error: 'Invalid request', 
-        details: validation.error.issues 
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Invalid request",
+          details: validation.error.issues,
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
-    
+
     const { round, personaId } = validation.data;
 
     const battle = await getBattleById(id);
 
     if (!battle) {
-      return new Response(JSON.stringify({ error: 'Battle not found' }), {
+      return new Response(JSON.stringify({ error: "Battle not found" }), {
         status: 404,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     // Prevent votes on archived battles
     if (isBattleArchived(battle)) {
-      return createArchivedBattleResponse('vote');
+      return createArchivedBattleResponse("vote");
     }
 
     // Only allow voting on the current round
     if (round !== battle.currentRound) {
-      return new Response(JSON.stringify({ 
-        error: 'Can only vote on the current round',
-        currentRound: battle.currentRound,
-        attemptedRound: round
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Can only vote on the current round",
+          currentRound: battle.currentRound,
+          attemptedRound: round,
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Only allow voting if the round is complete (both personas have performed)
     if (!isRoundComplete(battle, round)) {
-      return new Response(JSON.stringify({ 
-        error: 'Round is not complete yet. Wait for both personas to perform.' 
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          error:
+            "Round is not complete yet. Wait for both personas to perform.",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Check if user has already voted on this round
@@ -93,30 +110,33 @@ export async function POST(
       where: and(
         eq(votes.battleId, id),
         eq(votes.round, round),
-        eq(votes.userId, user.id)
+        eq(votes.userId, user.id),
       ),
     });
 
     // Find the round score
-    const roundScoreIndex = battle.scores.findIndex(s => s.round === round);
-    
+    const roundScoreIndex = battle.scores.findIndex((s) => s.round === round);
+
     if (roundScoreIndex === -1) {
-      return new Response(JSON.stringify({ error: 'Round not found' }), {
+      return new Response(JSON.stringify({ error: "Round not found" }), {
         status: 404,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     const roundScore = battle.scores[roundScoreIndex];
-    
+
     // Determine which position the persona is in
     const position = getPersonaPosition(battle, personaId);
-    
+
     if (!position) {
-      return new Response(JSON.stringify({ error: 'Invalid persona for this battle' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ error: "Invalid persona for this battle" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     if (existingVote) {
@@ -124,34 +144,50 @@ export async function POST(
       if (existingVote.personaId === personaId) {
         // Clicking the same persona - undo the vote
         await db.delete(votes).where(eq(votes.id, existingVote.id));
-        
+
         // Decrement vote count
         const currentVotes = roundScore.positionScores[position].userVotes;
-        const updatedScore = updateScoreWithVotes(roundScore, position, Math.max(0, currentVotes - 1));
+        const updatedScore = updateScoreWithVotes(
+          roundScore,
+          position,
+          Math.max(0, currentVotes - 1),
+        );
         battle.scores[roundScoreIndex] = updatedScore;
       } else {
         // Voting for a different persona - update the vote
-        await db.update(votes)
+        await db
+          .update(votes)
           .set({ personaId, createdAt: new Date() })
           .where(eq(votes.id, existingVote.id));
-        
+
         // Determine old position
         const oldPosition = getPersonaPosition(battle, existingVote.personaId);
         if (!oldPosition) {
-          return new Response(JSON.stringify({ error: 'Invalid previous vote persona' }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json' },
-          });
+          return new Response(
+            JSON.stringify({ error: "Invalid previous vote persona" }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         }
-        
+
         // Decrement old persona's votes
         const oldVotes = roundScore.positionScores[oldPosition].userVotes;
-        let updatedScore = updateScoreWithVotes(roundScore, oldPosition, Math.max(0, oldVotes - 1));
-        
+        let updatedScore = updateScoreWithVotes(
+          roundScore,
+          oldPosition,
+          Math.max(0, oldVotes - 1),
+        );
+
         // Increment new persona's votes
         const newVotes = updatedScore.positionScores[position].userVotes;
-        updatedScore = updateScoreWithVotes(updatedScore, position, newVotes + 1);
-        
+        updatedScore = updateScoreWithVotes(
+          updatedScore,
+          position,
+          newVotes + 1,
+        );
+
         battle.scores[roundScoreIndex] = updatedScore;
       }
     } else {
@@ -166,7 +202,11 @@ export async function POST(
 
       // Increment vote count
       const currentVotes = roundScore.positionScores[position].userVotes;
-      const updatedScore = updateScoreWithVotes(roundScore, position, currentVotes + 1);
+      const updatedScore = updateScoreWithVotes(
+        roundScore,
+        position,
+        currentVotes + 1,
+      );
       battle.scores[roundScoreIndex] = updatedScore;
     }
 
@@ -177,7 +217,7 @@ export async function POST(
     // Broadcast vote event if battle is live
     if (battle.isLive) {
       await broadcastEvent(id, {
-        type: 'vote:cast',
+        type: "vote:cast",
         battleId: id,
         timestamp: Date.now(),
         round,
@@ -191,14 +231,13 @@ export async function POST(
 
     return new Response(JSON.stringify({ success: true, battle }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('Error submitting vote:', error);
-    return new Response(JSON.stringify({ error: 'Failed to submit vote' }), {
+    console.error("Error submitting vote:", error);
+    return new Response(JSON.stringify({ error: "Failed to submit vote" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 }
-

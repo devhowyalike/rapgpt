@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useClerk } from "@clerk/nextjs";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
+  AlertTriangle,
+  Eye,
   Globe,
   Lock,
   MoreVertical,
   UserCog,
-  Eye,
-  AlertTriangle,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useClerk } from "@clerk/nextjs";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { useEffect, useState } from "react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 interface ProfileHeaderMenuProps {

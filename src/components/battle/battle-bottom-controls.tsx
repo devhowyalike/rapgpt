@@ -32,7 +32,7 @@ export function BattleBottomControls({
     <div
       className={cn(
         "fixed bottom-0 left-0 right-0 z-60 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800",
-        className
+        className,
       )}
       style={{ height }}
     >
@@ -42,5 +42,3 @@ export function BattleBottomControls({
     </div>
   );
 }
-
-

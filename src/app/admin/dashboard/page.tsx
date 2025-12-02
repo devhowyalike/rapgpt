@@ -1,15 +1,15 @@
-import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { db } from "@/lib/db/client";
-import { users } from "@/lib/db/schema";
 import { desc, eq } from "drizzle-orm";
-import { decrypt } from "@/lib/auth/encryption";
-import { checkRole } from "@/lib/auth/roles";
-import Link from "next/link";
 import { Shield, Star } from "lucide-react";
-import { SiteHeader } from "@/components/site-header";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { AdminDashboardClient } from "@/components/admin/admin-dashboard-client";
 import { MonthlyTokenUsage } from "@/components/admin/monthly-token-usage";
+import { SiteHeader } from "@/components/site-header";
+import { decrypt } from "@/lib/auth/encryption";
+import { checkRole } from "@/lib/auth/roles";
+import { db } from "@/lib/db/client";
+import { users } from "@/lib/db/schema";
 import { getCurrentMonthTokenTotals } from "@/lib/usage-storage";
 
 export const dynamic = "force-dynamic";
@@ -49,8 +49,8 @@ export default async function AdminDashboardPage() {
         displayName = user.encryptedDisplayName
           ? decrypt(user.encryptedDisplayName)
           : user.encryptedName
-          ? decrypt(user.encryptedName)
-          : "Anonymous";
+            ? decrypt(user.encryptedName)
+            : "Anonymous";
 
         email = decrypt(user.encryptedEmail);
       } catch (error) {

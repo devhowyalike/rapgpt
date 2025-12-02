@@ -25,4 +25,3 @@ BATTLE STRATEGY:
 - Rap about believing in yourself to overcome their disses
 - Use simple, catchy rhymes that get the crowd chanting
 - Reference your teachers (Master Onion, Mooselini, etc.)`;
-

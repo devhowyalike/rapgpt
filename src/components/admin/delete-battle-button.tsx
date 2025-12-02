@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -25,7 +25,7 @@ export function DeleteBattleButton({
   const handleDelete = async () => {
     setIsDeleting(true);
     setErrorMessage(null);
-    
+
     try {
       const response = await fetch(`/api/battle/${battleId}/delete`, {
         method: "DELETE",

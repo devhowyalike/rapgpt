@@ -1,27 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  getPrimaryClientPersonas,
-  getClientPersona,
-  type ClientPersona,
-} from "@/lib/shared/personas/client";
 import { useAuth } from "@clerk/nextjs";
-import { StageSelect } from "./stage-select";
-import { PlayerDisplay } from "./selection/player-display";
-import { SelectionGrid } from "./selection/selection-grid";
-import { SessionRestoreLoading } from "./session-restore-loading";
-import { PersonaGridItem } from "./selection/persona-grid-item";
-import { VsGlow } from "./selection/vs-glow";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { SiteHeader } from "@/components/site-header";
 import { usePersonaSelection } from "@/hooks/use-persona-selection";
 import {
   getHoverPreviewPersona,
-  isInGroup,
   getVariantIndex,
+  isInGroup,
 } from "@/lib/persona-selection-utils";
-import { SiteHeader } from "@/components/site-header";
+import {
+  type ClientPersona,
+  getClientPersona,
+  getPrimaryClientPersonas,
+} from "@/lib/shared/personas/client";
 import { cn } from "@/lib/utils";
+import { PersonaGridItem } from "./selection/persona-grid-item";
+import { PlayerDisplay } from "./selection/player-display";
+import { SelectionGrid } from "./selection/selection-grid";
+import { VsGlow } from "./selection/vs-glow";
+import { SessionRestoreLoading } from "./session-restore-loading";
+import { StageSelect } from "./stage-select";
 
 const SESSION_STORAGE_KEY = "rapgpt_battle_selections";
 
@@ -62,13 +62,13 @@ export function CharacterSelect({
   } = usePersonaSelection();
 
   const [hoveredPersona, setHoveredPersona] = useState<ClientPersona | null>(
-    null
+    null,
   );
   const [showStageSelect, setShowStageSelect] = useState(false);
   const [createAsLive, setCreateAsLive] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [votingEnabled, setVotingEnabled] = useState(false);
-  const [commentsEnabled, setCommentsEnabled] = useState(false);
+  const [commentsEnabled, setCommentsEnabled] = useState(true);
   const [autoStartOnAdvance, setAutoStartOnAdvance] = useState(true);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -145,7 +145,7 @@ export function CharacterSelect({
           // This provides visual feedback that the session is being restored
           if (minLoadingDelay > 0) {
             await new Promise((resolve) =>
-              setTimeout(resolve, minLoadingDelay)
+              setTimeout(resolve, minLoadingDelay),
             );
           }
         }
@@ -375,11 +375,11 @@ export function CharacterSelect({
                         {primaryPersonas.map((persona) => {
                           const p1InGroup = isInGroup(
                             player1?.id ?? null,
-                            persona.id
+                            persona.id,
                           );
                           const p2InGroup = isInGroup(
                             player2?.id ?? null,
-                            persona.id
+                            persona.id,
                           );
                           const p1VariantIndex =
                             p1InGroup && player1
@@ -414,8 +414,8 @@ export function CharacterSelect({
                                     persona,
                                     selectionStep,
                                     player1,
-                                    player2
-                                  )
+                                    player2,
+                                  ),
                                 )
                               }
                               onMouseLeave={() => setHoveredPersona(null)}
@@ -453,7 +453,7 @@ export function CharacterSelect({
                                 selections.showStageSelect = true;
                                 sessionStorage.setItem(
                                   SESSION_STORAGE_KEY,
-                                  JSON.stringify(selections)
+                                  JSON.stringify(selections),
                                 );
                                 setSelectionStep("complete");
                                 setShowStageSelect(true);
@@ -473,7 +473,7 @@ export function CharacterSelect({
                         "w-full px-8 md:px-12 py-4 rounded-lg font-black text-xl tracking-wider transition-all duration-300 transform",
                         !player1
                           ? "bg-gray-800 text-gray-600 cursor-not-allowed"
-                          : "bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.8)] text-white shadow-lg shadow-yellow-500/20"
+                          : "bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.8)] text-white shadow-lg shadow-yellow-500/20",
                       )}
                     >
                       CONFIRM PLAYER 1
@@ -505,7 +505,7 @@ export function CharacterSelect({
                                 selections.showStageSelect = true;
                                 sessionStorage.setItem(
                                   SESSION_STORAGE_KEY,
-                                  JSON.stringify(selections)
+                                  JSON.stringify(selections),
                                 );
                                 setSelectionStep("complete");
                                 setShowStageSelect(true);
@@ -525,7 +525,7 @@ export function CharacterSelect({
                         "w-full px-8 md:px-12 py-4 rounded-lg font-black text-xl tracking-wider transition-all duration-300 transform",
                         !player2
                           ? "bg-gray-800 text-gray-600 cursor-not-allowed"
-                          : "bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.8)] text-white shadow-lg shadow-yellow-500/20"
+                          : "bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.8)] text-white shadow-lg shadow-yellow-500/20",
                       )}
                     >
                       CONFIRM PLAYER 2

@@ -1,13 +1,13 @@
+import { auth } from "@clerk/nextjs/server";
+import { desc, eq, sql } from "drizzle-orm";
+import { ChevronLeft, ChevronRight, Users as UsersIcon } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { GuestProfileCallout } from "@/components/guest-profile-callout";
+import { SiteHeader } from "@/components/site-header";
+import { decrypt } from "@/lib/auth/encryption";
 import { db } from "@/lib/db/client";
 import { users } from "@/lib/db/schema";
-import { desc, sql, eq } from "drizzle-orm";
-import Link from "next/link";
-import { SiteHeader } from "@/components/site-header";
-import { GuestProfileCallout } from "@/components/guest-profile-callout";
-import { decrypt } from "@/lib/auth/encryption";
-import { Users as UsersIcon, ChevronLeft, ChevronRight } from "lucide-react";
-import Image from "next/image";
-import { auth } from "@clerk/nextjs/server";
 
 // Revalidate every 5 minutes
 export const revalidate = 300;
@@ -90,8 +90,8 @@ export default async function CommunityPage({
               const displayName = user.encryptedDisplayName
                 ? decrypt(user.encryptedDisplayName)
                 : user.encryptedName
-                ? decrypt(user.encryptedName)
-                : "Anonymous User";
+                  ? decrypt(user.encryptedName)
+                  : "Anonymous User";
 
               return (
                 <Link

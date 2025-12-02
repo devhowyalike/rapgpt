@@ -1,6 +1,6 @@
 "use client";
 
-import { Zap, ArrowUpRight, ArrowDownRight, Coins } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Coins, Zap } from "lucide-react";
 import type { MonthlyTokenTotals } from "@/lib/usage-storage";
 
 interface MonthlyTokenUsageProps {
@@ -10,7 +10,7 @@ interface MonthlyTokenUsageProps {
 export function MonthlyTokenUsage({ totals }: MonthlyTokenUsageProps) {
   // Format numbers with commas
   const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('en-US').format(num);
+    return new Intl.NumberFormat("en-US").format(num);
   };
 
   const stats = [
@@ -105,4 +105,3 @@ export function MonthlyTokenUsage({ totals }: MonthlyTokenUsageProps) {
     </div>
   );
 }
-

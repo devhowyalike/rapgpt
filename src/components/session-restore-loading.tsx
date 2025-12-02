@@ -31,7 +31,11 @@ export function SessionRestoreLoading({
         className="text-center"
       >
         <div className="mb-6">
-          <LoadingSpinner size="2xl" variant="highlight" className="inline-block" />
+          <LoadingSpinner
+            size="2xl"
+            variant="highlight"
+            className="inline-block"
+          />
         </div>
         <h2 className="text-2xl md:text-3xl font-black text-yellow-400 mb-2 uppercase">
           {title}
@@ -41,4 +45,3 @@ export function SessionRestoreLoading({
     </div>
   );
 }
-

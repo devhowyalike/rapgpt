@@ -4,11 +4,11 @@
  */
 
 import { currentUser } from "@clerk/nextjs/server";
+import { eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
 import { db } from "@/lib/db/client";
 import { users } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
 import { encrypt } from "./encryption";
-import { nanoid } from "nanoid";
 
 /**
  * Gets or creates a user in the database from Clerk
@@ -33,7 +33,6 @@ export async function getOrCreateUser(clerkUserId: string) {
     return existingUser;
   }
 
-
   // User doesn't exist, fetch from Clerk and create
   const clerkUser = await currentUser();
 
@@ -43,7 +42,7 @@ export async function getOrCreateUser(clerkUserId: string) {
 
   // Get primary email
   const primaryEmail = clerkUser.emailAddresses.find(
-    (email) => email.id === clerkUser.primaryEmailAddressId
+    (email) => email.id === clerkUser.primaryEmailAddressId,
   );
 
   if (!primaryEmail) {
@@ -56,7 +55,8 @@ export async function getOrCreateUser(clerkUserId: string) {
 
   // Encrypt sensitive data
   const encryptedEmail = encrypt(primaryEmail.emailAddress);
-  const fullName = `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim();
+  const fullName =
+    `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim();
   const encryptedName = fullName ? encrypt(fullName) : null;
 
   // Create user in database
@@ -75,8 +75,9 @@ export async function getOrCreateUser(clerkUserId: string) {
 
   await db.insert(users).values(newUser);
 
-  console.log(`✅ User synced from Clerk: ${clerkUser.id} (${isFirstUser ? "Admin" : "User"})`);
+  console.log(
+    `✅ User synced from Clerk: ${clerkUser.id} (${isFirstUser ? "Admin" : "User"})`,
+  );
 
   return newUser;
 }
-

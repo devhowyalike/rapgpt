@@ -9,7 +9,7 @@ import { useEffect } from "react";
 export function useExclusiveDrawer(
   drawerId: string,
   isOpen: boolean,
-  setOpen: (open: boolean) => void
+  setOpen: (open: boolean) => void,
 ) {
   // Close this drawer if another drawer announces it opened
   useEffect(() => {
@@ -25,11 +25,14 @@ export function useExclusiveDrawer(
       }
     };
 
-    window.addEventListener("exclusive-drawer:open", handleExclusiveOpen as EventListener);
+    window.addEventListener(
+      "exclusive-drawer:open",
+      handleExclusiveOpen as EventListener,
+    );
     return () => {
       window.removeEventListener(
         "exclusive-drawer:open",
-        handleExclusiveOpen as EventListener
+        handleExclusiveOpen as EventListener,
       );
     };
   }, [drawerId, isOpen, setOpen]);
@@ -38,9 +41,9 @@ export function useExclusiveDrawer(
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (isOpen) {
-      window.dispatchEvent(new CustomEvent("exclusive-drawer:open", { detail: drawerId }));
+      window.dispatchEvent(
+        new CustomEvent("exclusive-drawer:open", { detail: drawerId }),
+      );
     }
   }, [drawerId, isOpen]);
 }
-
-

@@ -1,10 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Music2, Mic2, Wand2, Play, Download, BarChart3 } from "lucide-react";
+import { BarChart3, Download, Mic2, Music2, Play, Wand2 } from "lucide-react";
+import Image from "next/image";
 import { APP_TITLE } from "@/lib/constants";
 import { CreateBattleCTA } from "./create-battle-cta";
-import Image from "next/image";
+
+// Deterministic waveform heights to avoid hydration mismatch (Math.random() differs between server/client)
+const WAVEFORM_HEIGHTS = [
+  45, 72, 28, 85, 55, 38, 92, 65, 20, 78, 48, 88, 35, 60, 25, 70, 42, 95, 52,
+  30,
+];
 
 interface MakeSongHighlightProps {
   isAuthenticated: boolean;
@@ -110,14 +116,14 @@ export function MakeSongHighlight({ isAuthenticated }: MakeSongHighlightProps) {
               </div>
             </div>
 
-            {/* Waveform Visualization Mock */}
+            {/* Waveform Visualization Mock - using deterministic heights to avoid hydration mismatch */}
             <div className="h-16 flex items-end justify-between gap-1 mb-6 px-2">
-              {[...Array(20)].map((_, i) => (
+              {WAVEFORM_HEIGHTS.map((height, i) => (
                 <div
                   key={i}
                   className="w-2 bg-purple-500/50 rounded-t-sm animate-pulse"
                   style={{
-                    height: `${Math.max(20, Math.random() * 100)}%`,
+                    height: `${height}%`,
                     animationDelay: `${i * 0.05}s`,
                   }}
                 />

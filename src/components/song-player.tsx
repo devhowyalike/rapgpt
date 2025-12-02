@@ -5,12 +5,12 @@
 
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Play, Pause, Download, Music2, Volume2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { Download, Music2, Pause, Play, Volume2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
-import { motion } from "framer-motion";
 import type { SongGenerationBeatStyle } from "@/lib/shared/battle-types";
 
 interface SongPlayerProps {

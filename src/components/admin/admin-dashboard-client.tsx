@@ -1,12 +1,12 @@
 "use client";
 
-import * as React from "react";
+import { Eye, EyeOff, Music, Shield, Star, User } from "lucide-react";
 import Link from "next/link";
-import { Shield, User, Star, Music, Eye, EyeOff } from "lucide-react";
+import * as React from "react";
 import { DeleteBattleButton } from "@/components/admin/delete-battle-button";
 import { DeleteUserButton } from "@/components/admin/delete-user-button";
-import type { UserDB, BattleDB } from "@/lib/db/schema";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import type { BattleDB, UserDB } from "@/lib/db/schema";
 
 interface AdminDashboardClientProps {
   users: Array<UserDB & { displayName: string; email: string }>;
@@ -18,7 +18,7 @@ export function AdminDashboardClient({
   currentUserId,
 }: AdminDashboardClientProps) {
   const [selectedUserId, setSelectedUserId] = React.useState<string | null>(
-    null
+    null,
   );
   const [userBattles, setUserBattles] = React.useState<BattleDB[]>([]);
   const [isLoadingBattles, setIsLoadingBattles] = React.useState(false);
@@ -141,7 +141,11 @@ export function AdminDashboardClient({
         ) : isLoadingBattles ? (
           <div className="flex items-center justify-center h-[400px] text-gray-400">
             <div className="text-center">
-              <LoadingSpinner size="xl" variant="accent" className="mx-auto mb-4" />
+              <LoadingSpinner
+                size="xl"
+                variant="accent"
+                className="mx-auto mb-4"
+              />
               <p>Loading battles...</p>
             </div>
           </div>

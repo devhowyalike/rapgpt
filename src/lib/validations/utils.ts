@@ -2,8 +2,8 @@
  * Validation utilities for API routes
  */
 
-import { type ZodType, type z } from 'zod';
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { type ZodType, type z } from "zod";
 
 /**
  * Validates request body against a Zod schema
@@ -11,7 +11,7 @@ import { NextResponse } from 'next/server';
  */
 export async function validateRequest<T extends ZodType>(
   request: Request,
-  schema: T
+  schema: T,
 ): Promise<z.infer<T>> {
   try {
     const body = await request.json();
@@ -19,8 +19,8 @@ export async function validateRequest<T extends ZodType>(
 
     if (!validation.success) {
       throw NextResponse.json(
-        { error: 'Invalid request', details: validation.error.issues },
-        { status: 400 }
+        { error: "Invalid request", details: validation.error.issues },
+        { status: 400 },
       );
     }
 
@@ -30,8 +30,8 @@ export async function validateRequest<T extends ZodType>(
       throw error;
     }
     throw NextResponse.json(
-      { error: 'Invalid JSON in request body' },
-      { status: 400 }
+      { error: "Invalid JSON in request body" },
+      { status: 400 },
     );
   }
 }
@@ -42,16 +42,18 @@ export async function validateRequest<T extends ZodType>(
  */
 export function validate<T extends ZodType>(
   data: unknown,
-  schema: T
-): { success: true; data: z.infer<T> } | { success: false; error: NextResponse } {
+  schema: T,
+):
+  | { success: true; data: z.infer<T> }
+  | { success: false; error: NextResponse } {
   const validation = schema.safeParse(data);
 
   if (!validation.success) {
     return {
       success: false,
       error: NextResponse.json(
-        { error: 'Invalid data', details: validation.error.issues },
-        { status: 400 }
+        { error: "Invalid data", details: validation.error.issues },
+        { status: 400 },
       ),
     };
   }
@@ -63,14 +65,15 @@ export function validate<T extends ZodType>(
  * Creates a 403 Forbidden response for archived battles
  * Used when users try to comment or vote on completed/incomplete battles
  */
-export function createArchivedBattleResponse(action: 'comment' | 'vote'): Response {
-  const actionText = action === 'comment' ? 'Comments are' : 'Voting is';
+export function createArchivedBattleResponse(
+  action: "comment" | "vote",
+): Response {
+  const actionText = action === "comment" ? "Comments are" : "Voting is";
   return new Response(
-    JSON.stringify({ error: `${actionText} disabled for archived battles` }), 
+    JSON.stringify({ error: `${actionText} disabled for archived battles` }),
     {
       status: 403,
-      headers: { 'Content-Type': 'application/json' },
-    }
+      headers: { "Content-Type": "application/json" },
+    },
   );
 }
-

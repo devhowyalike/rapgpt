@@ -5,9 +5,12 @@ interface SelectionIndicatorProps {
   variantIndex: number;
 }
 
-export function SelectionIndicator({ player, variantIndex }: SelectionIndicatorProps) {
+export function SelectionIndicator({
+  player,
+  variantIndex,
+}: SelectionIndicatorProps) {
   const isPlayer1 = player === "P1";
-  
+
   return (
     <div
       className={`
@@ -29,4 +32,3 @@ export function SelectionIndicator({ player, variantIndex }: SelectionIndicatorP
     </div>
   );
 }
-

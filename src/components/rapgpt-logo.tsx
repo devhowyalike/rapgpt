@@ -1,8 +1,8 @@
 "use client";
 
-import { APP_TITLE } from "@/lib/constants";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { APP_TITLE } from "@/lib/constants";
 
 interface RapGPTLogoProps {
   size?: "sm" | "md" | "lg" | "xl";

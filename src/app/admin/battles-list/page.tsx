@@ -1,11 +1,11 @@
-import { getAllBattles } from "@/lib/battle-storage";
-import { Shield, ArrowLeft } from "lucide-react";
-import { checkRole } from "@/lib/auth/roles";
-import { redirect } from "next/navigation";
-import { SiteHeader } from "@/components/site-header";
-import { BattlesTable } from "@/components/admin/battles-table";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft, Shield } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { BattlesTable } from "@/components/admin/battles-table";
+import { SiteHeader } from "@/components/site-header";
+import { Button } from "@/components/ui/button";
+import { checkRole } from "@/lib/auth/roles";
+import { getAllBattles } from "@/lib/battle-storage";
 import { getAllBattlesTokenTotals } from "@/lib/usage-storage";
 
 // Revalidate every 5 seconds to show live status
@@ -35,7 +35,10 @@ export default async function BattlesListPage() {
             Monitor and manage all battles ({battles.length} total)
           </p>
           <Button variant="outline" asChild>
-            <Link href="/admin/dashboard" className="text-purple-400 border-purple-400 bg-gray-900/50 hover:bg-purple-400/10">
+            <Link
+              href="/admin/dashboard"
+              className="text-purple-400 border-purple-400 bg-gray-900/50 hover:bg-purple-400/10"
+            >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Admin Dashboard
             </Link>

@@ -1,17 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { SignInButton, SignOutButton, useClerk } from "@clerk/nextjs";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  ChevronLeft,
+  Home,
+  Menu,
+  Radio,
+  Settings,
+  Shield,
+  User,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
-import { useClerk, SignInButton, SignOutButton } from "@clerk/nextjs";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Home, Users, Menu, User, ChevronLeft, Settings, Radio, Shield } from "lucide-react";
 import { MenuLink } from "./MenuLink";
 
 type LiveBattle = { id: string };
@@ -84,7 +93,9 @@ export function MobileMenu({
                         <div className="text-sm font-medium text-white truncate">
                           {displayName}
                         </div>
-                        <div className="text-xs text-gray-400">Account settings</div>
+                        <div className="text-xs text-gray-400">
+                          Account settings
+                        </div>
                       </div>
                       <ChevronLeft className="w-4 h-4 rotate-180" />
                     </div>
@@ -128,7 +139,7 @@ export function MobileMenu({
                   {liveBattles.length > 0 && (
                     <DropdownMenuItem asChild>
                       <Link
-                        href={`/admin/battles/${liveBattles[0].id}/control`}
+                        href={`/battle/${liveBattles[0].id}`}
                         className="flex items-center gap-2 text-red-400"
                       >
                         <Radio className="w-4 h-4" />
@@ -204,5 +215,3 @@ export function MobileMenu({
     </DropdownMenu>
   );
 }
-
-

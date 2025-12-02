@@ -26,4 +26,3 @@ BATTLE STRATEGY:
 - Threaten them with a "magic wand"
 - Contrast beautiful melodies with dark, possessive lyrics
 `;
-

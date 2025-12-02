@@ -31,9 +31,8 @@ export function LoadingSpinner({
         "rounded-full animate-spin",
         sizeClasses[size],
         variantClasses[variant],
-        className
+        className,
       )}
     />
   );
 }
-

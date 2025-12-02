@@ -5,10 +5,10 @@
 
 "use client";
 
-import type { Persona, Verse, PersonaPosition } from "@/lib/shared";
+import type { Persona, PersonaPosition, Verse } from "@/lib/shared";
+import { cn } from "@/lib/utils";
 import { PersonaCard } from "../persona-card";
 import { VerseDisplay } from "../verse-display";
-import { cn } from "@/lib/utils";
 
 interface PersonaSectionProps {
   persona: Persona;
@@ -61,7 +61,7 @@ export function PersonaSection({
           cardPadding,
           "border-b border-gray-800",
           enableSticky && "persona-card-sticky",
-          "bg-gray-900 z-10"
+          "bg-gray-900 z-10",
         )}
         style={
           enableSticky

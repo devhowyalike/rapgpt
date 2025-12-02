@@ -1,7 +1,7 @@
 "use client";
 
-import { Sparkles } from "lucide-react";
 import { SignInButton } from "@clerk/nextjs";
+import { Sparkles } from "lucide-react";
 
 export function GuestProfileCallout() {
   return (

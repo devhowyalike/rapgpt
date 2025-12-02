@@ -1,7 +1,7 @@
-import { getBattleById } from "@/lib/battle-storage";
 import { notFound } from "next/navigation";
+import { getBattleById } from "@/lib/battle-storage";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function TestBattlePage({
   params,
