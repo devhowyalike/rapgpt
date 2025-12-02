@@ -32,7 +32,14 @@ export default function RootLayout({
       <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
         <body className={`${inter.variable} ${bebasNeue.variable} antialiased`}>
           {children}
-          <Toaster theme="dark" position="top-center" richColors />
+          <Toaster
+            theme="dark"
+            position="bottom-center"
+            richColors
+            toastOptions={{
+              className: "text-white",
+            }}
+          />
         </body>
       </html>
     </ClerkProvider>

@@ -83,19 +83,21 @@ export function BattleReplayControlBar({
     <ControlBarContainer>
       {/* Scores Button */}
       {/* Desktop */}
-      <div className="hidden md:flex flex-1">
+      <div className={`hidden md:flex flex-1 ${!showSongButton ? "justify-center" : ""}`}>
         <ScoresButton
           isActive={isScoresActive}
           onClick={onScoresClick}
           variant="desktop"
+          className={!showSongButton ? "flex-none w-auto min-w-[200px]" : ""}
         />
       </div>
       {/* Mobile - Render directly */}
-      <div className="md:hidden flex-1">
+      <div className={`md:hidden flex-1 ${!showSongButton ? "flex justify-center" : ""}`}>
         <ScoresButton
           isActive={isScoresActive}
           onClick={onScoresClick}
           variant="mobile"
+          className={!showSongButton ? "flex-none w-auto min-w-[50%]" : ""}
         />
       </div>
 

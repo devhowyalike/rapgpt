@@ -351,6 +351,18 @@ export function useLiveBattleState({
 
       // Reset connection state for fresh sync
       setHasInitiallyConnected(false);
+
+      // Show voting enabled toast once per battle for the host
+      const toastKey = `voting-toast-shown-${battle.id}`;
+      if (!sessionStorage.getItem(toastKey)) {
+        sessionStorage.setItem(toastKey, "true");
+        toast.info("Voting is now enabled!", {
+          description: "Manage it in the options menu.",
+          duration: 5000,
+          className: "text-white text-pretty",
+          descriptionClassName: "text-white/80 text-pretty",
+        });
+      }
     } catch (error) {
       console.error("Error starting live mode:", error);
       throw error;

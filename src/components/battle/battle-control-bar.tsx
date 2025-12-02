@@ -155,6 +155,7 @@ export function BattleControlBar({
         onAdvanceRound={onAdvanceRound}
         onBeginVoting={onBeginVoting}
         canManage={canManageLive}
+        isLoadingPermissions={isLoadingPermissions}
       />
 
       {/* Battle Options Dropdown - Only visible to battle manager (owner/admin) */}
