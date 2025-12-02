@@ -262,6 +262,7 @@ export function BattleController({
   const { isDelaying: isCalculatingScores } = useScoreRevealDelay(
     scoresAvailableRound,
     scoreDelaySeconds,
+    battle?.id,
   );
 
   // Battle action handlers

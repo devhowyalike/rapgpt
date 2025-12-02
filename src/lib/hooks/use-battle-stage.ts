@@ -100,6 +100,7 @@ export function useBattleStage({
   const { revealedRound } = useScoreRevealDelay(
     scoresAvailableRound,
     isReplayMode ? 0 : scoreDelaySeconds,
+    battle.id,
   );
 
   const shouldShowScores =
