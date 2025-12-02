@@ -124,10 +124,7 @@ export function VerseDisplay({
                   className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: playerColor }}
                 />
-                <span
-                  className="text-sm"
-                  style={{ color: playerColor }}
-                >
+                <span className="text-sm" style={{ color: playerColor }}>
                   {persona.name} is spitting...
                 </span>
               </motion.div>
@@ -138,7 +135,7 @@ export function VerseDisplay({
 
       {!verse && !isStreaming && (
         <div className="flex justify-center">
-          <p className="text-gray-500 text-center">
+          <p className="text-gray-500 text-center text-pretty">
             Waiting for {persona.name} to drop their verse...
           </p>
         </div>
