@@ -1,11 +1,17 @@
 import { SignIn } from "@clerk/nextjs";
 import { SiteHeader } from "@/components/site-header";
 
-export default function SignInPage() {
+interface SignInPageProps {
+  searchParams: Promise<{ redirect_url?: string }>;
+}
+
+export default async function SignInPage({ searchParams }: SignInPageProps) {
+  const { redirect_url } = await searchParams;
+
   return (
     <>
       <SiteHeader />
-      <div className="min-h-[100dvh] flex items-center justify-center bg-linear-to-br from-gray-900 via-purple-900 to-black p-4 pt-20">
+      <div className="min-h-dvh flex items-center justify-center bg-linear-to-br from-gray-900 via-purple-900 to-black p-4 pt-20">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="font-bebas text-6xl text-white mb-2">RapGPT</h1>
@@ -15,6 +21,7 @@ export default function SignInPage() {
           </div>
 
           <SignIn
+            forceRedirectUrl={redirect_url}
             appearance={{
               elements: {
                 rootBox: "mx-auto",
