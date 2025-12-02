@@ -52,7 +52,7 @@ export function VotingContent({
 
     const voteKey = `${battle.id}-${round}-${personaId}`;
     const currentVoteInRound = Array.from(userVotes).find((key) =>
-      key.startsWith(`${battle.id}-${round}-`),
+      key.startsWith(`${battle.id}-${round}-`)
     );
 
     // Optimistically update UI immediately
@@ -107,7 +107,7 @@ export function VotingContent({
             const storageKey = `battle-votes-${battle.id}`;
             localStorage.setItem(
               storageKey,
-              JSON.stringify(Array.from(newVotes)),
+              JSON.stringify(Array.from(newVotes))
             );
           }
           return newVotes;
@@ -203,12 +203,10 @@ export function VotingContent({
 
             // Calculate optimistic vote counts by checking both server state and local state
             const getOptimisticVoteCount = (
-              position: "player1" | "player2",
+              position: "player1" | "player2"
             ): number => {
-              const serverVotes =
-                roundScore.positionScores[position].userVotes;
-              const personaId =
-                roundScore.positionScores[position].personaId;
+              const serverVotes = roundScore.positionScores[position].userVotes;
+              const personaId = roundScore.positionScores[position].personaId;
               // Count local votes for this persona in this round that aren't yet reflected in server state
               const localVoteKey = `${battle.id}-${roundScore.round}-${personaId}`;
               const hasLocalVote = userVotes.has(localVoteKey);
@@ -284,8 +282,8 @@ export function VotingContent({
                               isVoted
                                 ? "bg-linear-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400 shadow-lg shadow-yellow-400/20 hover:scale-[1.02] hover:border-yellow-500"
                                 : !canVote
-                                  ? "bg-gray-700 border-gray-600 cursor-not-allowed"
-                                  : `hover:scale-[1.02] hover:shadow-lg border-gray-600 ${hoverBorderColor}`
+                                ? "bg-gray-700 border-gray-600 cursor-not-allowed"
+                                : `hover:scale-[1.02] hover:shadow-lg border-gray-600 ${hoverBorderColor}`
                             }
                             ${isSubmittingVote ? "opacity-50" : ""}
                           `}
@@ -325,7 +323,7 @@ export function VotingContent({
                           </button>
                         </motion.div>
                       );
-                    },
+                    }
                   )}
                 </div>
               </motion.div>
@@ -349,4 +347,3 @@ export function VotingContent({
     </div>
   );
 }
-

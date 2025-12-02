@@ -107,7 +107,7 @@ export function BattleControlBar({
     isLive,
     onCommentsClick,
     onVotingClick,
-    onSettingsClick,
+    onSettingsClick: canManageLive ? onSettingsClick : undefined, // Only show settings to battle manager
     mobileActiveTab,
     isMobileDrawerOpen,
     settingsActive,
@@ -121,7 +121,7 @@ export function BattleControlBar({
 
   return (
     <ControlBarContainer>
-      {/* Primary Action Button - Changes based on state */}
+      {/* Primary Action Button - Shows actions for managers, status for viewers */}
       <MainActionButton
         battle={battle}
         isGenerating={isGenerating}
@@ -137,21 +137,24 @@ export function BattleControlBar({
         onGenerateVerse={onGenerateVerse}
         onAdvanceRound={onAdvanceRound}
         onBeginVoting={onBeginVoting}
+        canManage={canManageLive}
       />
 
-      {/* Battle Options Dropdown */}
-      <div className="hidden xl:block">
-        <BattleOptionsDropdown
-          showCommenting={showCommenting}
-          showVoting={showVoting}
-          onToggleCommenting={onToggleCommenting}
-          onToggleVoting={onToggleVoting}
-          onPauseBattle={onCancelBattle}
-          isPausing={isCanceling || isGenerating}
-          isLive={isLive}
-          customTrigger={<OptionsButton />}
-        />
-      </div>
+      {/* Battle Options Dropdown - Only visible to battle manager (owner/admin) */}
+      {canManageLive && (
+        <div className="hidden xl:block">
+          <BattleOptionsDropdown
+            showCommenting={showCommenting}
+            showVoting={showVoting}
+            onToggleCommenting={onToggleCommenting}
+            onToggleVoting={onToggleVoting}
+            onPauseBattle={onCancelBattle}
+            isPausing={isCanceling || isGenerating}
+            isLive={isLive}
+            customTrigger={<OptionsButton />}
+          />
+        </div>
+      )}
 
       {/* Go Live Button - hidden on mobile, shown on xl+ (mobile uses fan menu) */}
       {(isLoadingPermissions || canManageLive) && (

@@ -87,12 +87,12 @@ export function BattleController({
   useExclusiveDrawer(
     "mobile-comments-voting",
     showMobileDrawer,
-    setShowMobileDrawer,
+    setShowMobileDrawer
   );
   useExclusiveDrawer(
     "mobile-settings",
     showSettingsDrawer,
-    setShowSettingsDrawer,
+    setShowSettingsDrawer
   );
 
   // Check if user is admin or owner
@@ -193,10 +193,11 @@ export function BattleController({
   // 2. Battle is currently live
   // 3. Battle was recently live (completed but user manages it) - give them a moment
   const guardCondition =
-    canManageBattle &&
-    (battle?.status === "paused" ||
-      isLive ||
-      (battle?.status === "completed" && initialBattle.isLive === true));
+    battle?.status === "paused" ||
+    isLive ||
+    (battle?.status === "completed" &&
+      canManageBattle &&
+      initialBattle.isLive === true);
 
   const { NavigationDialog } = useNavigationGuard({
     when: guardCondition,
@@ -204,8 +205,8 @@ export function BattleController({
     message: isLive
       ? "This battle is currently live. Leaving will end the broadcast for all viewers."
       : battle?.status === "paused"
-        ? "Leave now? We'll pause your match."
-        : "Are you sure you want to leave?",
+      ? "Leave now? We'll pause your match."
+      : "Are you sure you want to leave?",
     onConfirm: async () => {
       if (isLive) {
         await stopLive();
@@ -261,7 +262,7 @@ export function BattleController({
   const { isDelaying: isCalculatingScores } = useScoreRevealDelay(
     scoresAvailableRound,
     scoreDelaySeconds,
-    battle?.id,
+    battle?.id
   );
 
   // Battle action handlers
@@ -302,7 +303,7 @@ export function BattleController({
       setBattle(updatedBattle);
       await saveBattle();
     },
-    [battle, setBattle, saveBattle],
+    [battle, setBattle, saveBattle]
   );
 
   // Handler to toggle commenting on/off
@@ -313,7 +314,7 @@ export function BattleController({
       setBattle(updatedBattle);
       await saveBattle();
     },
-    [battle, setBattle, saveBattle],
+    [battle, setBattle, saveBattle]
   );
 
   // Generate verse - handles both local and live modes
