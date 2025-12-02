@@ -69,8 +69,7 @@ export function MainActionButton({
         ) : isGenerating || isPreGenerating ? (
           <div className="flex items-center justify-center gap-2">
             <LoadingSpinner />
-            <span className="hidden sm:inline">Verse incoming...</span>
-            <span className="sm:hidden">Generating...</span>
+            <span>Kickin' ballistics...</span>
           </div>
         ) : isVotingPhase && votingTimeRemaining !== null && showVoting ? (
           <div className="flex items-center justify-between gap-4 w-full">
@@ -189,8 +188,7 @@ export function MainActionButton({
       ) : isGenerating || isPreGenerating ? (
         <div className="flex items-center justify-center gap-2">
           <LoadingSpinner />
-          <span className="hidden sm:inline">Kicking ballistics...</span>
-          <span className="sm:hidden">Generating...</span>
+          <span>Kickin' ballistics...</span>
         </div>
       ) : isReadingPhase && showVoting ? (
         <div className="flex items-center justify-center gap-2">
