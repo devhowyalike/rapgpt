@@ -28,7 +28,9 @@ interface ControlBarContainerProps {
 export function ControlBarContainer({ children }: ControlBarContainerProps) {
   return (
     <div className="relative z-60 p-4 bg-gray-900 border-t border-gray-800">
-      <div className="max-w-4xl mx-auto flex flex-row items-center gap-3">{children}</div>
+      <div className="max-w-4xl mx-auto flex flex-row items-center gap-3">
+        {children}
+      </div>
     </div>
   );
 }
@@ -56,7 +58,7 @@ export const OptionsButton = forwardRef<HTMLButtonElement, OptionsButtonProps>(
         <span className="hidden lg:inline font-medium text-sm">Options</span>
       </button>
     );
-  },
+  }
 );
 OptionsButton.displayName = "OptionsButton";
 
@@ -133,8 +135,8 @@ export function GoLiveButton({
           isLoadingPermissions
             ? "bg-gray-800/50 cursor-wait"
             : isLive
-              ? "bg-red-600 hover:bg-red-700"
-              : "bg-red-600 hover:bg-red-700"
+            ? "bg-red-600 hover:bg-red-700"
+            : "bg-red-600 hover:bg-red-700"
         }
       `}
       title={label}
@@ -252,8 +254,8 @@ export function SongButton({
             state === "playing" || state === "active"
               ? "bg-green-600 text-white border-green-500 shadow-lg shadow-green-500/30"
               : state === "generator"
-                ? "bg-green-900/40 border-green-600 text-green-400 animate-pulse"
-                : "bg-gray-800/80 border-gray-700/50 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
+              ? "bg-green-900/40 border-green-600 text-green-400 animate-pulse"
+              : "bg-gray-800/80 border-gray-700/50 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
           }
         `}
         aria-label={showSongGenerator ? "Generate Song" : "Play Song"}
@@ -293,8 +295,8 @@ export function SongButton({
           state === "playing" || state === "active"
             ? "bg-linear-to-r from-green-600 to-emerald-600 border-green-500 text-white shadow-lg shadow-green-500/30"
             : state === "generator"
-              ? "bg-linear-to-r from-green-700/40 to-emerald-700/40 border-green-600 text-green-300 hover:from-green-700/60 hover:to-emerald-700/60 hover:border-green-500 animate-pulse"
-              : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
+            ? "bg-linear-to-r from-green-700/40 to-emerald-700/40 border-green-600 text-green-300 hover:from-green-700/60 hover:to-emerald-700/60 hover:border-green-500 animate-pulse"
+            : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
         }
       `}
       whileHover={{ scale: 1.02 }}

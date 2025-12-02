@@ -112,8 +112,9 @@ export function BattleControlBar({
     isMobileDrawerOpen,
     settingsActive,
     // Go Live in mobile fan (hidden on xl+ where dedicated button shows)
-    showGoLive: isLoadingPermissions || canManageLive,
-    isLoadingPermissions,
+    // Only show when permissions are confirmed - don't flash for non-owners
+    showGoLive: canManageLive,
+    isLoadingPermissions: false, // No longer needed since we don't show while loading
     isStartingLive,
     isStoppingLive,
     onGoLiveClick: handleGoLiveClick,
@@ -157,11 +158,12 @@ export function BattleControlBar({
       )}
 
       {/* Go Live Button - hidden on mobile, shown on xl+ (mobile uses fan menu) */}
-      {(isLoadingPermissions || canManageLive) && (
+      {/* Only show when permissions are confirmed - don't flash for non-owners */}
+      {canManageLive && (
         <div className="hidden xl:block">
           <GoLiveButton
             isLive={isLive}
-            isLoadingPermissions={isLoadingPermissions}
+            isLoadingPermissions={false}
             isStartingLive={isStartingLive}
             isStoppingLive={isStoppingLive}
             disabled={isGenerating}
