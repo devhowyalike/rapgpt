@@ -92,16 +92,14 @@ export function LiveStatusBadge({
   const statusText = isStarting
     ? "STARTING..."
     : isStopping
-      ? "STOPPING..."
-      : !isLive
-        ? "GO LIVE"
-        : isConnecting
-          ? "CONNECTING"
-          : hasConnectionIssue
-            ? "RECONNECTING"
-            : canToggle
-              ? "DISCONNECT"
-              : "LIVE";
+    ? "STOPPING..."
+    : !isLive
+    ? "GO LIVE"
+    : isConnecting
+    ? "CONNECTING"
+    : hasConnectionIssue
+    ? "RECONNECTING"
+    : "LIVE";
 
   // Render status icon inline
   const renderStatusIcon = () => {
@@ -141,6 +139,9 @@ export function LiveStatusBadge({
   // Show viewer count only when live and connected with viewers
   const showViewers = isLive && isConnected && viewerCount > 0;
 
+  // Format viewer count
+  const formattedViewerCount = viewerCount > 999 ? "999+" : viewerCount;
+
   const badgeContent = (
     <div className="flex items-center gap-1.5">
       {renderStatusIcon()}
@@ -148,20 +149,22 @@ export function LiveStatusBadge({
       {showViewers && (
         <div className="flex items-center gap-1 pl-2 ml-2 border-l border-white/30">
           <Users className="w-3 h-3 opacity-80" />
-          <span className="text-[10px] tabular-nums">{viewerCount}</span>
+          <span className="text-[10px] tabular-nums">
+            {formattedViewerCount}
+          </span>
         </div>
       )}
     </div>
   );
 
   const badgeClasses = cn(
-    "flex items-center px-2.5 py-1.5 rounded-full font-bold transition-colors",
+    "flex items-center px-2.5 py-1.5 rounded-full font-bold transition-colors cursor-pointer",
     styles.bg,
     styles.border,
     styles.text,
     styles.glow,
     isLoading && "opacity-70 cursor-not-allowed",
-    className,
+    className
   );
 
   // Clickable badge for admins/owners

@@ -498,7 +498,15 @@ export function BattleController({
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader
+        activeBattleState={{
+          isLive: isLive,
+          viewerCount: viewerCount,
+          connectionStatus: wsStatus,
+          canManageLive: canManageBattle,
+          onDisconnect: handleEndLiveClick,
+        }}
+      />
       <div style={{ height: "var(--header-height)" }} />
 
       <div className="px-0 md:px-6">

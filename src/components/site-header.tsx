@@ -6,8 +6,10 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminControls } from "@/components/header/AdminControls";
 import { CreateBattleButton } from "@/components/header/CreateBattleButton";
+import Link from "next/link";
 import { DesktopNavLink } from "@/components/header/DesktopNavLink";
 import { MobileMenu } from "@/components/header/MobileMenu";
+import { LiveStatusBadge } from "@/components/live-status-badge";
 import { useLiveBattles } from "@/lib/hooks/use-live-battles";
 import { UserButton } from "./auth/user-button";
 import { RapGPTLogo } from "./rapgpt-logo";
@@ -20,7 +22,17 @@ let cachedUserId: string | null = null;
 let cachedDbUserId: string | null = null;
 let cachedClerkUserId: string | null = null;
 
-export function SiteHeader() {
+interface SiteHeaderProps {
+  activeBattleState?: {
+    isLive: boolean;
+    viewerCount: number;
+    connectionStatus: string;
+    canManageLive?: boolean;
+    onDisconnect?: () => void;
+  };
+}
+
+export function SiteHeader({ activeBattleState }: SiteHeaderProps) {
   const { userId, isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
   const pathname = usePathname();
@@ -159,9 +171,31 @@ export function SiteHeader() {
 
         {/* Right Section: Live Signal, Admin, User, Create Battle */}
         <div className="flex items-center gap-3">
+          {activeBattleState?.isLive ? (
+            <LiveStatusBadge
+              isLive={activeBattleState.isLive}
+              viewerCount={activeBattleState.viewerCount}
+              connectionStatus={activeBattleState.connectionStatus}
+              canToggle={activeBattleState.canManageLive}
+              onToggle={activeBattleState.onDisconnect}
+            />
+          ) : (
+            // Show live badge as a link if there are active live battles and we're not on the battle page
+            liveBattles.length > 0 && (
+              <Link href={`/battle/${liveBattles[0].id}`}>
+                <LiveStatusBadge
+                  isLive={true}
+                  viewerCount={0} // We don't know viewer count here without subscribing
+                  connectionStatus="connected"
+                  canToggle={false}
+                  className="cursor-pointer hover:scale-105 transition-transform"
+                />
+              </Link>
+            )
+          )}
+
           <AdminControls
             isAdmin={isAdmin}
-            liveBattles={liveBattles as Array<{ id: string }>}
             isAdminActive={isActiveLink("/admin")}
           />
 

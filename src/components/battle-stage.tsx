@@ -147,11 +147,6 @@ export function BattleStage(props: BattleStageProps) {
       ) : (
         <BattleStageActiveHeader
           battle={battle}
-          isLive={isLive}
-          liveConnectionStatus={liveConnectionStatus}
-          liveViewerCount={liveViewerCount}
-          canManageLive={canManageLive}
-          onDisconnect={onDisconnect}
           confettiOrigin={confettiOrigin}
           trophyRef={trophyRef}
           winnerNameRef={winnerNameRef}

@@ -9,20 +9,13 @@ import { motion } from "framer-motion";
 import { getBattleProgress, getWinnerPosition } from "@/lib/battle-engine";
 import type { Battle } from "@/lib/shared";
 import { DEFAULT_STAGE, getStage } from "@/lib/shared/stages";
-import type { ConnectionStatus } from "@/lib/websocket/types";
 import { BattleBell } from "../battle-bell";
-import { LiveStatusBadge } from "../live-status-badge";
 import { RoundTracker } from "../round-tracker";
 import { VictoryConfetti } from "../victory-confetti";
 import { BattleHeader } from "./battle-header";
 
 interface BattleStageActiveHeaderProps {
   battle: Battle;
-  isLive: boolean;
-  liveConnectionStatus: ConnectionStatus;
-  liveViewerCount: number;
-  canManageLive: boolean;
-  onDisconnect?: () => void;
   confettiOrigin: { x: number; y: number } | null;
   trophyRef: React.RefObject<HTMLDivElement | null>;
   winnerNameRef: React.RefObject<HTMLSpanElement | null>;
@@ -30,11 +23,6 @@ interface BattleStageActiveHeaderProps {
 
 export function BattleStageActiveHeader({
   battle,
-  isLive,
-  liveConnectionStatus,
-  liveViewerCount,
-  canManageLive,
-  onDisconnect,
   confettiOrigin,
   trophyRef,
   winnerNameRef,
@@ -66,15 +54,6 @@ export function BattleStageActiveHeader({
         />
 
         <div className="md:flex-1 md:flex md:justify-end md:items-center md:gap-3">
-          {isLive && (
-            <LiveStatusBadge
-              isLive={isLive}
-              viewerCount={liveViewerCount}
-              connectionStatus={liveConnectionStatus}
-              canToggle={canManageLive}
-              onToggle={onDisconnect}
-            />
-          )}
           <RoundTracker
             currentRound={battle.currentRound}
             completedRounds={progress.completedRounds}

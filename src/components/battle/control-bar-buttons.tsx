@@ -133,7 +133,7 @@ export function GoLiveButton({
           isLoadingPermissions
             ? "bg-gray-800/50 cursor-wait"
             : isLive
-              ? "bg-gray-700 hover:bg-gray-600"
+              ? "bg-red-600 hover:bg-red-700"
               : "bg-red-600 hover:bg-red-700"
         }
       `}
@@ -388,8 +388,8 @@ export function buildMobileFanActions({
       onClick: onGoLiveClick,
       isActive: isLive,
       disabled: goLiveState.isDisabled,
-      // Red when not live, gray when live (ending)
-      variant: isLive ? "default" : "danger",
+      // Red when not live, red when live (ending)
+      variant: isLive ? "danger" : "danger",
     });
   }
 
