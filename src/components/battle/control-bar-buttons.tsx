@@ -165,12 +165,14 @@ interface ScoresButtonProps {
   isActive: boolean;
   onClick: () => void;
   variant: "desktop" | "mobile";
+  className?: string;
 }
 
 export function ScoresButton({
   isActive,
   onClick,
   variant,
+  className = "",
 }: ScoresButtonProps) {
   if (variant === "mobile") {
     return (
@@ -184,6 +186,7 @@ export function ScoresButton({
               ? "bg-yellow-600 text-white border-yellow-500 shadow-lg shadow-yellow-500/30"
               : "bg-gray-800/80 border-gray-700/50 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
           }
+          ${className}
         `}
         aria-label="View Scores"
       >
@@ -205,6 +208,7 @@ export function ScoresButton({
             ? "bg-linear-to-r from-yellow-600 to-orange-600 border-yellow-500 text-white shadow-lg shadow-yellow-500/30"
             : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
         }
+        ${className}
       `}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
