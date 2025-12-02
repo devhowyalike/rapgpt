@@ -46,6 +46,29 @@ interface BattleStore {
   saveBattle: () => Promise<void>;
 }
 
+// Helper to get voting completed round from localStorage
+const getStoredVotingCompletedRound = (battleId: string | null): number | null => {
+  if (typeof window === "undefined" || !battleId) return null;
+  const key = `battle-voting-completed-${battleId}`;
+  const stored = localStorage.getItem(key);
+  if (stored) {
+    const parsed = parseInt(stored, 10);
+    return isNaN(parsed) ? null : parsed;
+  }
+  return null;
+};
+
+// Helper to persist voting completed round to localStorage
+const storeVotingCompletedRound = (battleId: string | null, round: number | null) => {
+  if (typeof window === "undefined" || !battleId) return;
+  const key = `battle-voting-completed-${battleId}`;
+  if (round === null) {
+    localStorage.removeItem(key);
+  } else {
+    localStorage.setItem(key, String(round));
+  }
+};
+
 export const useBattleStore = create<BattleStore>((set, get) => ({
   battle: null,
   isLoading: false,
@@ -59,7 +82,11 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
   readingTimeRemaining: null,
   isReadingPhase: false,
 
-  setBattle: (battle) => set({ battle }),
+  setBattle: (battle) => {
+    // When battle changes, restore votingCompletedRound from localStorage
+    const storedRound = getStoredVotingCompletedRound(battle?.id ?? null);
+    set({ battle, votingCompletedRound: storedRound });
+  },
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
   setStreamingVerse: (verse, personaId, position = null) =>
@@ -70,13 +97,20 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
     }),
   setVotingTimeRemaining: (time) => set({ votingTimeRemaining: time }),
   setIsVotingPhase: (isVoting) => set({ isVotingPhase: isVoting }),
-  setVotingCompletedRound: (round) => set({ votingCompletedRound: round }),
-  completeVotingPhase: (round) =>
+  setVotingCompletedRound: (round) => {
+    const { battle } = get();
+    storeVotingCompletedRound(battle?.id ?? null, round);
+    set({ votingCompletedRound: round });
+  },
+  completeVotingPhase: (round) => {
+    const { battle } = get();
+    storeVotingCompletedRound(battle?.id ?? null, round);
     set({
       isVotingPhase: false,
       votingTimeRemaining: null,
       votingCompletedRound: round,
-    }),
+    });
+  },
   setReadingTimeRemaining: (time) => set({ readingTimeRemaining: time }),
   setIsReadingPhase: (isReading) => set({ isReadingPhase: isReading }),
 
@@ -162,7 +196,9 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
         throw new Error("Failed to fetch battle");
       }
       const battle = await response.json();
-      set({ battle, isLoading: false });
+      // Restore votingCompletedRound from localStorage when fetching battle
+      const storedRound = getStoredVotingCompletedRound(battle?.id ?? null);
+      set({ battle, votingCompletedRound: storedRound, isLoading: false });
     } catch (error) {
       set({
         error:
