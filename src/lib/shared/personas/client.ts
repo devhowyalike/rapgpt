@@ -112,7 +112,7 @@ export const raygun: ClientPersona = {
   avatar: "/avatars/raygun.webp",
   accentColor: "#00d4ff",
   musicStyleDescription:
-    "alternative hip-hop, experimental beats, eclectic samples, playful delivery, genre-blending production, unconventional flow patterns, edgy electronic elements",
+    "eccentric alternative hip-hop, spoken word flows, Australian accent, quirky beats, unconventional rhythms, playful and absurdist, lo-fi aesthetic",
   vocalGender: "f",
 };
 
