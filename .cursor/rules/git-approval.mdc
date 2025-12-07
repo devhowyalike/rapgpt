@@ -1,0 +1,9 @@
+---
+description: Require explicit user approval before running git commit
+globs: *
+alwaysApply: true
+---
+
+You must NEVER run `git commit` without my explicit approval. If you are asked to implement a feature, make the code changes but do NOT commit them. Wait for me to ask for a commit or to review the changes.
+
+
