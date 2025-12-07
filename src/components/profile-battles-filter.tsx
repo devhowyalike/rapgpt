@@ -46,7 +46,7 @@ function CollapsibleBattleSection({
         )}
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <div className="flex flex-col gap-2">
           {battles.map((battle) => (
             <MyBattleCard
               key={battle.id}
@@ -70,7 +70,8 @@ interface ProfileBattlesFilterProps {
 }
 
 interface Filters {
-  public: boolean;
+  live: boolean;
+  published: boolean;
   private: boolean;
   paused: boolean;
   completed: boolean;
@@ -86,10 +87,13 @@ export function ProfileBattlesFilter({
   userIsProfilePublic,
 }: ProfileBattlesFilterProps) {
   const [showFilters, setShowFilters] = useState(false);
+  const [isLiveOpen, setIsLiveOpen] = useState(true);
+  const [isPublishedOpen, setIsPublishedOpen] = useState(true);
   const [isPausedOpen, setIsPausedOpen] = useState(true);
   const [isCompletedOpen, setIsCompletedOpen] = useState(true);
   const [filters, setFilters] = useState<Filters>({
-    public: false,
+    live: false,
+    published: false,
     private: false,
     paused: false,
     completed: false,
@@ -101,8 +105,11 @@ export function ProfileBattlesFilter({
   // Apply filters to battles
   const filteredBattles = useMemo(() => {
     return battles.filter((battle) => {
-      // Public filter - if checked, show only public battles
-      if (filters.public && !battle.isPublic) return false;
+      // Live filter - if checked, show only live battles
+      if (filters.live && !battle.isLive) return false;
+
+      // Published filter - if checked, show only public battles
+      if (filters.published && !battle.isPublic) return false;
 
       // Private filter - if checked, show only private battles
       if (filters.private && battle.isPublic) return false;
@@ -126,23 +133,28 @@ export function ProfileBattlesFilter({
     });
   }, [battles, filters]);
 
-  // Separate paused and completed battles
+  // Group battles
+  const liveBattles = filteredBattles.filter((battle) => battle.isLive);
+  const publishedBattles = filteredBattles.filter(
+    (battle) => battle.isPublic && !battle.isLive
+  );
   const pausedBattles = filteredBattles.filter(
-    (battle) => battle.status === "paused",
+    (battle) => !battle.isPublic && battle.status === "paused" && !battle.isLive
   );
   const completedBattles = filteredBattles.filter(
-    (battle) => battle.status !== "paused",
+    (battle) => !battle.isPublic && battle.status !== "paused" && !battle.isLive
   );
 
   // Check if any filters are active
   const hasActiveFilters = Object.values(filters).some(
-    (value) => value === true,
+    (value) => value === true
   );
 
   // Clear all filters
   const clearFilters = () => {
     setFilters({
-      public: false,
+      live: false,
+      published: false,
       private: false,
       paused: false,
       completed: false,
@@ -198,13 +210,21 @@ export function ProfileBattlesFilter({
       {showFilters && (
         <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6">
           <div className="flex flex-wrap gap-6">
-            {/* Public Filter */}
+            {/* Live Filter */}
+            <FilterCheckbox
+              id="live"
+              label="Live"
+              checked={filters.live}
+              onCheckedChange={() => toggleFilter("live")}
+            />
+
+            {/* Published Filter */}
             {isOwnProfile && (
               <FilterCheckbox
-                id="public"
-                label="Public"
-                checked={filters.public}
-                onCheckedChange={() => toggleFilter("public")}
+                id="published"
+                label="Published"
+                checked={filters.published}
+                onCheckedChange={() => toggleFilter("published")}
               />
             )}
 
@@ -277,6 +297,28 @@ export function ProfileBattlesFilter({
         </div>
       ) : (
         <div className="space-y-8">
+          {/* Live Battles Section */}
+          <CollapsibleBattleSection
+            title="Live Battles"
+            battles={liveBattles}
+            isOpen={isLiveOpen}
+            onOpenChange={setIsLiveOpen}
+            shareUrl={shareUrl}
+            isOwnProfile={isOwnProfile}
+            userIsProfilePublic={userIsProfilePublic}
+          />
+
+          {/* Published Battles Section */}
+          <CollapsibleBattleSection
+            title="Published Battles"
+            battles={publishedBattles}
+            isOpen={isPublishedOpen}
+            onOpenChange={setIsPublishedOpen}
+            shareUrl={shareUrl}
+            isOwnProfile={isOwnProfile}
+            userIsProfilePublic={userIsProfilePublic}
+          />
+
           {/* Paused Battles Section */}
           <CollapsibleBattleSection
             title="Paused Battles"

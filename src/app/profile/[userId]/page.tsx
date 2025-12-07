@@ -9,6 +9,7 @@ import { GuestProfileCallout } from "@/components/guest-profile-callout";
 import { ProfileBattlesFilter } from "@/components/profile-battles-filter";
 import { ProfileHeaderMenu } from "@/components/profile-header-menu";
 import { SiteHeader } from "@/components/site-header";
+import { CreateBattleButton } from "@/components/header/CreateBattleButton";
 import { decrypt } from "@/lib/auth/encryption";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { db } from "@/lib/db/client";
@@ -54,8 +55,8 @@ export default async function ProfilePage({
   const displayName = profileUser.encryptedDisplayName
     ? decrypt(profileUser.encryptedDisplayName)
     : profileUser.encryptedName
-      ? decrypt(profileUser.encryptedName)
-      : "Anonymous User";
+    ? decrypt(profileUser.encryptedName)
+    : "Anonymous User";
 
   // Determine what battles to show
   const isViewingAsPublic = viewAs === "public";
@@ -79,8 +80,8 @@ export default async function ProfilePage({
         and(
           eq(battles.createdBy, profileUserId),
           eq(battles.isFeatured, false),
-          eq(battles.isPublic, true),
-        ),
+          eq(battles.isPublic, true)
+        )
       )
       .orderBy(desc(battles.createdAt));
   } else {
@@ -95,110 +96,132 @@ export default async function ProfilePage({
   const shareUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
 
   return (
-    <div className="min-h-dvh bg-linear-to-br from-gray-900 via-purple-900 to-black">
+    <>
       <SiteHeader />
-      <div className="max-w-6xl mx-auto px-4 pt-[calc(var(--header-height)+3rem)] pb-16 md:pt-[calc(var(--header-height)+4rem)] md:pb-24">
-        {/* User Profile Header */}
-        <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-4 md:p-8 mb-6 md:mb-8">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6">
-            {profileUser.imageUrl ? (
-              <Image
-                src={profileUser.imageUrl}
-                alt={displayName}
-                width={120}
-                height={120}
-                className="rounded-full border-2 md:border-4 border-purple-500 w-20 h-20 sm:w-24 sm:h-24 md:w-[120px] md:h-[120px]"
-              />
-            ) : (
-              <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-[120px] md:h-[120px] rounded-full bg-purple-600/30 flex items-center justify-center border-2 md:border-4 border-purple-500">
-                <UserIcon className="text-purple-300 w-10 h-10 sm:w-12 sm:h-12 md:w-[60px] md:h-[60px]" />
-              </div>
-            )}
-            <div className="flex-1 text-center md:text-left">
-              <div className="flex items-start justify-between gap-2 md:gap-4 mb-2">
-                <h1 className="font-bebas text-3xl sm:text-4xl md:text-5xl text-white line-clamp-2">
-                  {displayName}
-                </h1>
-                {isOwnProfile && (
-                  <ProfileHeaderMenu
-                    initialIsPublic={profileUser.isProfilePublic}
-                    userId={profileUserId}
-                  />
-                )}
-              </div>
-              <p className="text-gray-400 mb-3 md:mb-4 text-sm md:text-base">
-                Member since{" "}
-                {new Date(profileUser.createdAt).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "short",
-                })}
-              </p>
-              {isOwnProfile && (
-                <div className="flex items-center gap-2 justify-center md:justify-start flex-wrap">
-                  {isViewingAsPublic ? (
-                    <span className="px-2 md:px-3 py-1 rounded bg-blue-600/30 text-blue-300 flex items-center gap-1 text-xs md:text-sm">
-                      <UserIcon className="w-3 h-3 md:w-[14px] md:h-[14px]" />
-                      Viewing as Public
-                    </span>
-                  ) : profileUser.isProfilePublic ? (
-                    <span className="px-2 md:px-3 py-1 rounded bg-green-600/30 text-green-300 flex items-center gap-1 text-xs md:text-sm">
-                      <Globe className="w-3 h-3 md:w-[14px] md:h-[14px]" />
-                      Public Profile
-                    </span>
-                  ) : (
-                    <span className="px-2 md:px-3 py-1 rounded bg-gray-600/30 text-gray-300 flex items-center gap-1 text-xs md:text-sm">
-                      <Lock className="w-3 h-3 md:w-[14px] md:h-[14px]" />
-                      Private Profile
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+
+      {/* Hero Section - Matches Homepage Design */}
+      <section className="relative pt-24 pb-12 md:pt-32 md:pb-12 overflow-hidden bg-black text-white selection:bg-yellow-500/30">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl z-0 pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
         </div>
 
-        {/* Battles Section */}
-        <div>
-          <div className="flex items-center justify-between mb-4 md:mb-6 gap-2">
-            <h2 className="font-bebas text-2xl sm:text-3xl md:text-4xl text-white">
+        <div className="container mx-auto px-4 relative z-10 flex flex-col items-center text-center">
+          {/* Avatar */}
+          <div className="mb-6 animate-slide-up">
+            {profileUser.imageUrl ? (
+              <div className="relative">
+                <div className="absolute -inset-1 rounded-full bg-linear-to-r from-purple-600 to-blue-600 opacity-75 blur-sm" />
+                <Image
+                  src={profileUser.imageUrl}
+                  alt={displayName}
+                  width={128}
+                  height={128}
+                  className="relative rounded-full border-2 border-white/20 w-24 h-24 md:w-32 md:h-32 object-cover"
+                />
+              </div>
+            ) : (
+              <div className="relative">
+                <div className="absolute -inset-1 rounded-full bg-linear-to-r from-purple-600 to-blue-600 opacity-75 blur-sm" />
+                <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full bg-black border-2 border-white/20 flex items-center justify-center">
+                  <UserIcon className="text-gray-400 w-12 h-12 md:w-16 md:h-16" />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Name & Menu */}
+          <div className="flex items-center gap-4 justify-center mb-4 animate-slide-up [animation-delay:100ms]">
+            <h1 className="font-bebas text-4xl md:text-6xl text-white tracking-wide wrap-break-word max-w-[80vw] text-center">
+              {displayName}
+            </h1>
+            {isOwnProfile && (
+              <div className="shrink-0">
+                <ProfileHeaderMenu
+                  initialIsPublic={profileUser.isProfilePublic}
+                  userId={profileUserId}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Info & Badges */}
+          <div className="flex flex-col items-center gap-3 animate-slide-up [animation-delay:200ms]">
+            <p className="text-gray-400 text-lg">
+              Member since{" "}
+              {new Date(profileUser.createdAt).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+              })}
+            </p>
+
+            {isOwnProfile && (
+              <div className="flex items-center gap-2 justify-center flex-wrap">
+                {isViewingAsPublic ? (
+                  <span className="px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 flex items-center gap-1.5 text-sm">
+                    <UserIcon className="w-3.5 h-3.5" />
+                    Viewing as Public
+                  </span>
+                ) : profileUser.isProfilePublic ? (
+                  <span className="px-3 py-1 rounded-full border border-green-500/30 bg-green-500/10 text-green-300 flex items-center gap-1.5 text-sm">
+                    <Globe className="w-3.5 h-3.5" />
+                    Public Profile
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 rounded-full border border-gray-500/30 bg-gray-500/10 text-gray-300 flex items-center gap-1.5 text-sm">
+                    <Lock className="w-3.5 h-3.5" />
+                    Private Profile
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Battles Section */}
+      <div className="bg-linear-to-b from-stage-darker to-stage-dark min-h-[60vh] flex flex-col items-center p-6 pt-12 pb-24">
+        <div className="max-w-6xl mx-auto w-full">
+          <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
+            <h2 className="font-bebas text-3xl md:text-4xl text-white">
               {isOwnProfile ? "My e-Beefs" : "e-Beefs"}
             </h2>
             {isOwnProfile && !isViewingAsPublic && userBattles.length > 0 && (
-              <Link
-                href="/new-battle"
-                className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-semibold text-sm md:text-base"
-              >
-                <Swords className="w-4 h-4 md:w-5 md:h-5" />
-                <span className="hidden sm:inline">Create Battle</span>
-                <span className="sm:hidden">Create</span>
-              </Link>
+              <CreateBattleButton isSignedIn={true} mobileText="Create" />
             )}
           </div>
 
           {!profileUser.isProfilePublic && !isOwnProfile ? (
-            <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 md:p-12 text-center">
-              <Lock className="w-12 h-12 md:w-16 md:h-16 text-gray-500 mx-auto mb-3 md:mb-4" />
-              <h3 className="font-bebas text-2xl md:text-3xl text-white mb-2 md:mb-4">
+            <div className="bg-gray-900/50 border border-white/10 rounded-xl p-12 text-center max-w-2xl mx-auto mt-8">
+              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Lock className="w-10 h-10 text-gray-500" />
+              </div>
+              <h3 className="font-bebas text-3xl text-white mb-3">
                 Private Profile
               </h3>
-              <p className="text-gray-400 text-sm md:text-base">
-                This user has set their profile to private.
+              <p className="text-gray-400">
+                This user has chosen to keep their battle history private.
               </p>
             </div>
           ) : userBattles.length === 0 ? (
-            <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 md:p-12 text-center">
-              <h3 className="font-bebas text-2xl md:text-3xl text-white mb-2 md:mb-4">
+            <div className="bg-gray-900/50 border border-white/10 rounded-xl p-12 text-center max-w-2xl mx-auto mt-8">
+              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Swords className="w-10 h-10 text-gray-500" />
+              </div>
+              <h3 className="font-bebas text-3xl text-white mb-3">
                 {isOwnProfile ? "No Battles Yet" : "No Public Battles"}
               </h3>
-              <p className="text-gray-400 mb-4 md:mb-6 text-sm md:text-base">
+              <p className="text-gray-400 mb-8">
                 {isOwnProfile
-                  ? "Create your first battle to see it here"
-                  : "This user hasn't published any battles yet"}
+                  ? "Step into the arena and create your first AI rap battle."
+                  : "This user hasn't published any battles yet."}
               </p>
               {isOwnProfile && (
                 <Link
                   href="/new-battle"
-                  className="inline-flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-semibold text-sm md:text-base"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full transition-all hover:scale-105 font-bold"
                 >
                   Create Your First Battle
                 </Link>
@@ -213,10 +236,16 @@ export default async function ProfilePage({
             />
           )}
         </div>
-
-        {/* Guest Callout - Show to non-signed-in users */}
-        {!clerkUserId && <GuestProfileCallout />}
       </div>
-    </div>
+
+      {/* Guest Callout - Show to non-signed-in users */}
+      {!clerkUserId && (
+        <div className="bg-stage-dark border-t border-white/5 py-12">
+          <div className="max-w-4xl mx-auto px-4">
+            <GuestProfileCallout />
+          </div>
+        </div>
+      )}
+    </>
   );
 }

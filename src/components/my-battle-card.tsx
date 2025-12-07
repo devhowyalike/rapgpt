@@ -4,23 +4,28 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
   AlertTriangle,
   CheckCircle,
+  Eye,
   Globe,
   Lock,
+  MessageSquare,
+  MoreVertical,
+  Music2,
+  Play,
   Radio,
   Share2,
+  ThumbsUp,
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import { BattleFeatureBadges } from "@/components/battle-feature-badges";
-import { BattleInfoPanel } from "@/components/battle-info-panel";
 import { BattleStatusButton } from "@/components/battle-status-button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { getWinnerPosition } from "@/lib/battle-engine";
 import { calculateTotalScores } from "@/lib/battle-position-utils";
-import type { Battle } from "@/lib/shared";
 import { DEFAULT_STAGE, getStage } from "@/lib/shared/stages";
+import { cn } from "@/lib/utils";
+import { getDisplayRound } from "@/lib/shared";
 
 interface MyBattleCardProps {
   battle: {
@@ -68,7 +73,8 @@ export function MyBattleCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPublic, setIsPublic] = useState(battle.isPublic || false);
   const [isTogglingPublic, setIsTogglingPublic] = useState(false);
-  const [toggleError, setToggleError] = useState<string | null>(null);
+  const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const [showUnpublishDialog, setShowUnpublishDialog] = useState(false);
   const [showCopiedDialog, setShowCopiedDialog] = useState(false);
 
   const personas = {
@@ -79,7 +85,6 @@ export function MyBattleCard({
   const battleUrl = `${shareUrl}/battle/${battle.id}`;
   const stage = getStage(battle.stageId || "") || DEFAULT_STAGE;
 
-  // Sync local state with prop when battle.isPublic changes (e.g., after profile privacy toggle)
   useEffect(() => {
     setIsPublic(battle.isPublic || false);
   }, [battle.isPublic]);
@@ -91,7 +96,6 @@ export function MyBattleCard({
 
   const handleTogglePublic = async () => {
     setIsTogglingPublic(true);
-    setToggleError(null);
     try {
       const response = await fetch(`/api/battle/${battle.id}/toggle-public`, {
         method: "PATCH",
@@ -99,15 +103,22 @@ export function MyBattleCard({
       const data = await response.json();
       if (data.success) {
         setIsPublic(data.isPublic);
+        startTransition(() => {
+          router.refresh();
+        });
+        return true;
       } else if (data.error) {
-        setToggleError(data.error);
+        alert(data.error);
+        return false;
       }
     } catch (error) {
       console.error("Failed to toggle battle public status:", error);
-      setToggleError("Failed to update battle status");
+      alert("Failed to update battle status");
+      return false;
     } finally {
       setIsTogglingPublic(false);
     }
+    return false;
   };
 
   const handleDelete = async () => {
@@ -119,7 +130,6 @@ export function MyBattleCard({
 
       if (response.ok) {
         setShowDeleteDialog(false);
-        // Use startTransition for smooth UI updates without flashing
         startTransition(() => {
           router.refresh();
         });
@@ -135,26 +145,19 @@ export function MyBattleCard({
     }
   };
 
-  // Calculate battle progress stats for paused battles
+  // Stats & Helpers
   const isPaused = battle.status === "paused";
   const isCompleted = battle.status === "completed";
   const isArchived = !!battle.liveStartedAt && !battle.isLive;
+  const isLive = battle.isLive;
   const currentRound = battle.currentRound || 1;
   const versesCount = battle.verses?.length || 0;
+  const cannotPublish = !isPublic && (isPaused || !userIsProfilePublic);
 
-  // Check if battle can be published
-  const cannotPublish =
-    !isPublic && (isPaused || !userIsProfilePublic || isArchived);
-
-  // Calculate final stats for completed battles
   const calculateFinalStats = () => {
     if (!isCompleted || !battle.scores) return null;
-
-    const totalRounds = battle.scores.length;
     const totalScores = calculateTotalScores(battle.scores);
-
     return {
-      totalRounds,
       player1TotalScore: totalScores.player1,
       player2TotalScore: totalScores.player2,
       winner: battle.winner,
@@ -163,230 +166,330 @@ export function MyBattleCard({
 
   const finalStats = calculateFinalStats();
 
-  // Format title with crown next to winner's name
-  const formatTitleWithCrown = () => {
-    // Replace "vs" with "vs." for consistency
-    let formattedTitle = battle.title.replace(/ vs /g, " vs. ");
+  // Determine winner position directly from scores to handle same-name/same-persona battles correctly
+  const winnerPosition =
+    isCompleted && battle.scores ? getWinnerPosition(battle as any) : null;
 
-    if (
-      !isCompleted ||
-      !finalStats ||
-      !finalStats.winner ||
-      finalStats.winner === "tie"
-    ) {
-      return formattedTitle;
-    }
-
-    // Create a Battle-like object with proper structure for getWinnerPosition
-    const battleForWinner = {
-      ...battle,
-      personas,
-      scores: battle.scores || [],
-    } as unknown as Battle;
-
-    const winnerPosition = getWinnerPosition(battleForWinner);
-    const winnerName =
-      winnerPosition === "player1"
-        ? personas.player1.name
-        : personas.player2.name;
-
-    // Replace the winner's name with their name + crown
-    return formattedTitle.replace(winnerName, `${winnerName} 👑`);
+  const getWinnerName = () => {
+    if (!finalStats?.winner || finalStats.winner === "tie") return "Tie";
+    if (finalStats.winner === personas.player1.id) return personas.player1.name;
+    if (finalStats.winner === personas.player2.id) return personas.player2.name;
+    return finalStats.winner;
   };
 
-  // Prepare props for reusable components
-  const featureBadgesProps = {
-    votingEnabled: battle.votingEnabled,
-    commentsEnabled: battle.commentsEnabled,
-    hasGeneratedSong: !!battle.generatedSong?.audioUrl,
-  };
+  const winnerId = finalStats?.winner;
 
-  const battleResultsProps = finalStats
-    ? {
-        winner: finalStats.winner,
-        player1PersonaId: personas.player1.id,
-        player1PersonaName: personas.player1.name,
-        player2PersonaId: personas.player2.id,
-        player2PersonaName: personas.player2.name,
-        player1TotalScore: finalStats.player1TotalScore,
-        player2TotalScore: finalStats.player2TotalScore,
-        totalRounds: finalStats.totalRounds,
-      }
-    : null;
+  const statusColor = isLive
+    ? "red"
+    : isCompleted
+    ? "green"
+    : isPaused
+    ? "orange"
+    : "gray";
+
+  // Determine border/bg styles based on status for the "strip" effect
+  const stripColor =
+    statusColor === "red"
+      ? "bg-red-500"
+      : statusColor === "green"
+      ? "bg-green-500"
+      : statusColor === "orange"
+      ? "bg-orange-500"
+      : "bg-gray-500";
 
   return (
     <div
-      className={`flex flex-col md:min-h-[320px] bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 hover:border-purple-500/40 transition-all ${
-        isDeleting || isPending ? "opacity-50 pointer-events-none" : ""
-      }`}
+      className={cn(
+        "group relative flex flex-col md:flex-row md:items-center bg-zinc-900/50 backdrop-blur-sm border border-white/5 rounded-lg overflow-hidden transition-all duration-200 hover:bg-zinc-900/80 hover:border-white/10",
+        (isDeleting || isPending) && "opacity-50 pointer-events-none"
+      )}
     >
-      <div className="flex items-start justify-between mb-2 gap-3">
-        <div className="flex-1">
-          <Link
-            href={`/battle/${battle.id}`}
-            className="font-bebas text-2xl text-white hover:text-purple-400 transition-colors block text-pretty"
-          >
-            {formatTitleWithCrown()}
-          </Link>
-        </div>
-        {showManagement && (
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger asChild>
-              <BattleStatusButton isPublic={isPublic} isArchived={isArchived} />
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Portal>
-              <DropdownMenu.Content
-                className="min-w-[180px] bg-gray-800 border border-gray-700 rounded-lg p-1 shadow-xl z-50"
-                sideOffset={5}
-                align="end"
-              >
-                <DropdownMenu.Item
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-200 hover:bg-gray-700 rounded cursor-pointer outline-none"
-                  onClick={handleShare}
-                >
-                  <Share2 size={16} />
-                  Share Link
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  className={`flex items-center gap-2 px-3 py-2 text-sm rounded cursor-pointer outline-none ${
-                    cannotPublish
-                      ? "text-gray-500 cursor-not-allowed"
-                      : "text-gray-200 hover:bg-gray-700"
-                  }`}
-                  onClick={cannotPublish ? undefined : handleTogglePublic}
-                  disabled={isTogglingPublic || cannotPublish}
-                >
-                  {isPublic ? (
-                    <>
-                      <Lock size={16} />
-                      Unpublish Battle
-                    </>
-                  ) : (
-                    <>
-                      <Globe size={16} />
-                      {isArchived
-                        ? "Cannot Publish (Archived)"
-                        : isPaused
-                          ? "Cannot Publish (Paused)"
-                          : !userIsProfilePublic
-                            ? "Cannot Publish (Private Profile)"
-                            : "Publish Battle"}
-                    </>
-                  )}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-gray-700 rounded cursor-pointer outline-none"
-                  onClick={() => setShowDeleteDialog(true)}
-                >
-                  <Trash2 size={16} />
-                  Delete Battle
-                </DropdownMenu.Item>
-              </DropdownMenu.Content>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Root>
+      {/* Status Strip (Left Edge) */}
+      <div
+        className={cn(
+          "absolute left-0 top-0 bottom-0 w-1 md:w-1.5",
+          stripColor
         )}
-      </div>
+      />
 
-      {/* Created date below title */}
-      <div className="text-xs text-gray-500 mb-2">
-        Created {battle.createdAt.toLocaleDateString()}
-      </div>
-
-      {/* Paused badge and Feature badges on same row */}
-      <div className="flex items-center gap-2 mb-4 flex-wrap">
-        {battle.isLive && (
-          <span className="px-3 py-1 rounded bg-red-600 text-white flex items-center gap-1.5 font-semibold animate-pulse">
-            <Radio size={14} className="fill-white" />
-            LIVE
-          </span>
+      {/* Main Content Container */}
+      <div className="flex flex-1 flex-col md:flex-row md:items-center gap-2 md:gap-4 p-3 px-4 md:p-4 md:pl-6 relative">
+        {/* Top Right Management Menu (Absolute Positioned) */}
+        {showManagement && !isPaused && (
+          <div className="absolute top-2 right-2 md:top-auto md:bottom-auto md:right-4 z-20">
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger asChild>
+                <button
+                  className="p-1.5 rounded-full text-gray-500 hover:text-white hover:bg-white/10 transition-colors outline-none"
+                  onClick={(e) => e.stopPropagation()} // Prevent card click
+                >
+                  <MoreVertical size={16} />
+                </button>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Portal>
+                <DropdownMenu.Content
+                  className="min-w-[160px] bg-gray-900 border border-gray-800 rounded-lg p-1 shadow-xl z-50 text-gray-200"
+                  sideOffset={5}
+                  align="end"
+                >
+                  <DropdownMenu.Item asChild>
+                    <Link
+                      href={`/battle/${battle.id}`}
+                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-800 rounded cursor-pointer outline-none"
+                    >
+                      {isLive ? (
+                        <Radio size={14} />
+                      ) : isPaused ? (
+                        <Play size={14} />
+                      ) : (
+                        <Eye size={14} />
+                      )}
+                      {isPaused
+                        ? "Resume Battle"
+                        : isLive
+                        ? "Join Live Battle"
+                        : isCompleted
+                        ? "Replay Battle"
+                        : "View Battle"}
+                    </Link>
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-800 rounded cursor-pointer outline-none"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleShare();
+                    }}
+                  >
+                    <Share2 size={14} />
+                    Share
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-2 text-sm rounded cursor-pointer outline-none",
+                      cannotPublish
+                        ? "text-gray-500 cursor-not-allowed"
+                        : "hover:bg-gray-800"
+                    )}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!cannotPublish) {
+                        if (!isPublic) {
+                          setShowPublishDialog(true);
+                        } else {
+                          setShowUnpublishDialog(true);
+                        }
+                      }
+                    }}
+                    disabled={isTogglingPublic || cannotPublish}
+                  >
+                    {isPublic ? (
+                      <>
+                        <Lock size={14} />
+                        Unpublish
+                      </>
+                    ) : (
+                      <>
+                        <Globe size={14} />
+                        Publish
+                      </>
+                    )}
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Separator className="h-px bg-gray-800 my-1" />
+                  <DropdownMenu.Item
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-gray-800 rounded cursor-pointer outline-none"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowDeleteDialog(true);
+                    }}
+                  >
+                    <Trash2 size={14} />
+                    Delete
+                  </DropdownMenu.Item>
+                </DropdownMenu.Content>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Root>
+          </div>
         )}
-        {showManagement && battle.status !== "completed" && (
-          <span
-            className={`px-3 py-1 rounded capitalize text-sm ${
-              battle.status === "paused"
-                ? "bg-orange-600/30 text-orange-300"
-                : "bg-gray-600/30 text-gray-400"
-            }`}
-          >
-            {battle.status}
-          </span>
-        )}
-        <BattleFeatureBadges {...featureBadgesProps} />
-      </div>
 
-      {/* Spacer to push Battle Results to consistent position on desktop only */}
-      <div className="hidden md:flex md:flex-1 md:min-h-0" />
-
-      {isPaused && (
-        <BattleInfoPanel
-          type="progress"
-          createdAt={battle.createdAt}
-          stage={stage}
-          currentRound={currentRound}
-          versesCount={versesCount}
-        />
-      )}
-
-      {isCompleted && finalStats && (
-        <BattleInfoPanel
-          type="results"
-          createdAt={battle.createdAt}
-          stage={stage}
-          resultsStats={battleResultsProps}
-        />
-      )}
-
-      {/* Error message for toggle failures */}
-      {toggleError && (
-        <div className="mb-4 p-3 bg-red-900/30 rounded-lg border border-red-500/30">
-          <p className="text-sm text-red-300">{toggleError}</p>
-        </div>
-      )}
-
-      <div className="flex items-center gap-3">
+        {/* Left: Matchup & Meta */}
         <Link
           href={`/battle/${battle.id}`}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-white ${
-            battle.isLive
-              ? "bg-red-600 hover:bg-red-700"
-              : "bg-purple-600 hover:bg-purple-700"
-          }`}
+          className="flex-1 min-w-0 group-hover:opacity-100 pr-8 md:pr-0" // Add padding right to avoid overlap with menu on mobile
         >
-          {battle.isLive ? (
-            <>
-              <Radio size={16} className="fill-white" />
-              Join Live
-            </>
-          ) : battle.status === "paused" ? (
-            "Resume Beef"
-          ) : battle.status === "completed" ? (
-            "Replay Battle"
-          ) : (
-            "View Battle"
-          )}
+          <div className="flex flex-col gap-1">
+            {/* Matchup Title */}
+            <div className="flex flex-col md:flex-row md:flex-wrap md:items-baseline gap-x-2 text-lg md:text-xl font-bebas tracking-wide leading-tight">
+              <div className="flex items-center gap-2 truncate">
+                <span className="text-blue-400">{personas.player1.name}</span>
+                {isCompleted && winnerPosition === "player1" && (
+                  <span title="Winner">🏆</span>
+                )}
+                <span className="text-gray-600 text-sm font-sans italic font-bold">
+                  vs
+                </span>
+              </div>
+              <div className="flex items-center gap-2 truncate">
+                <span className="text-red-400">{personas.player2.name}</span>
+                {isCompleted && winnerPosition === "player2" && (
+                  <span title="Winner">🏆</span>
+                )}
+              </div>
+            </div>
+
+            {/* Subtext: Stage • Date */}
+            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 text-xs text-gray-500 uppercase tracking-wider mt-1">
+              <div className="flex items-center gap-2 truncate max-w-full">
+                <span className="truncate">
+                  {stage.flag} {stage.name}
+                </span>
+                <span className="hidden md:inline">•</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="whitespace-nowrap">
+                  {battle.createdAt.toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </span>
+                {/* Feature Icons - Inline */}
+                {(battle.generatedSong?.audioUrl ||
+                  battle.votingEnabled ||
+                  battle.commentsEnabled ||
+                  isArchived) && (
+                  <div className="flex items-center gap-1.5 ml-2 border-l border-white/10 pl-2">
+                    {isArchived && (
+                      <Radio size={10} className="text-gray-400" />
+                    )}
+                    {battle.generatedSong?.audioUrl && (
+                      <Music2 size={10} className="text-green-400" />
+                    )}
+                    {battle.votingEnabled && (
+                      <ThumbsUp size={10} className="text-blue-400" />
+                    )}
+                    {battle.commentsEnabled && (
+                      <MessageSquare size={10} className="text-purple-400" />
+                    )}
+                  </div>
+                )}
+
+                {/* Round Info for Paused Battles */}
+                {isPaused && (
+                  <div className="flex items-center gap-2 ml-2 border-l border-white/10 pl-2">
+                    <span>Round {getDisplayRound(currentRound)}</span>
+                  </div>
+                )}
+
+                {isCompleted && (
+                  <div className="flex items-center gap-2 ml-2 border-l border-white/10 pl-2 text-xs font-semibold text-gray-400">
+                    <span>
+                      {finalStats?.player1TotalScore}-
+                      {finalStats?.player2TotalScore}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </Link>
+
+        {/* Middle/Right: Status & Outcome & Actions */}
+        <div className="flex flex-col md:flex-row items-end md:items-center gap-3 md:gap-4 md:ml-auto">
+          <Link
+            href={`/battle/${battle.id}`}
+            className="flex flex-row md:flex-col md:items-end gap-3 md:gap-1 min-w-[140px] md:text-right"
+          >
+            {isLive ? (
+              <>
+                <span className="flex items-center gap-1.5 text-xs font-bold text-red-400 animate-pulse uppercase tracking-wide">
+                  <Radio size={12} className="fill-current" />
+                  Live Now
+                </span>
+                <span className="text-sm text-gray-300">
+                  Round {getDisplayRound(currentRound)}
+                </span>
+              </>
+            ) : null}
+          </Link>
+
+          {/* Action Button - Only show if actionable (Live/Paused) */}
+          {(isLive || isPaused) && (
+            <div
+              className={cn(
+                "flex items-center gap-2 mt-2 md:mt-0",
+                isPaused &&
+                  "absolute top-3 right-3 md:static md:top-auto md:right-auto"
+              )}
+            >
+              <Link
+                href={`/battle/${battle.id}`}
+                className={cn(
+                  "px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide transition-all whitespace-nowrap",
+                  isLive
+                    ? "bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-900/20"
+                    : "bg-purple-600 hover:bg-purple-700 text-white"
+                )}
+              >
+                {isLive ? "Join" : "Resume"}
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Remove the old footer container entirely */}
+
+      {/* Dialogs */}
+      <ConfirmationDialog
+        open={showPublishDialog}
+        onOpenChange={setShowPublishDialog}
+        title="Publish Battle?"
+        description="Publishing this battle will make it visible on your public profile and the community page. Anyone will be able to view and share it."
+        confirmLabel="Publish"
+        onConfirm={async () => {
+          const success = await handleTogglePublic();
+          if (success) setShowPublishDialog(false);
+        }}
+        isLoading={isTogglingPublic}
+        variant="info"
+        icon={Globe}
+      />
+
+      <ConfirmationDialog
+        open={showUnpublishDialog}
+        onOpenChange={setShowUnpublishDialog}
+        title="Unpublish Battle?"
+        description="Unpublishing this battle will make it private. It will only be visible to you."
+        confirmLabel="Unpublish"
+        onConfirm={async () => {
+          const success = await handleTogglePublic();
+          if (success) setShowUnpublishDialog(false);
+        }}
+        isLoading={isTogglingPublic}
+        variant="info"
+        icon={Lock}
+      />
+
       <ConfirmationDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         title="Delete Battle?"
-        description="Are you sure you want to delete this beef? This will also delete all votes and comments. This action cannot be undone."
-        confirmLabel="Delete Battle"
+        description="Are you sure you want to delete this beef? This action cannot be undone."
+        confirmLabel="Delete"
         onConfirm={handleDelete}
         isLoading={isDeleting}
         variant="danger"
         icon={AlertTriangle}
       />
 
-      {/* Link Copied Success Dialog */}
       <ConfirmationDialog
         open={showCopiedDialog}
         onOpenChange={setShowCopiedDialog}
-        title="Link Copied!"
-        description="The battle link has been copied to your clipboard."
+        title="Link Copied"
+        description="The battle link has been copied to your clipboard and is ready to paste."
         confirmLabel="OK"
+        cancelLabel={null}
         onConfirm={() => setShowCopiedDialog(false)}
         variant="success"
         icon={CheckCircle}
