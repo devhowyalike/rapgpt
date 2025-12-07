@@ -28,7 +28,7 @@ export default function BattleNotFound() {
             <CardTitle className="text-3xl font-bebas text-white tracking-wide">
               Battle Not Found
             </CardTitle>
-            <CardDescription className="text-gray-400 text-lg">
+            <CardDescription className="text-gray-400 text-lg text-pretty">
               The beat has dropped...but not here.
             </CardDescription>
           </CardHeader>
