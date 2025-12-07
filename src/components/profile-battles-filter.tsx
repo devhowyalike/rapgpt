@@ -70,6 +70,7 @@ interface ProfileBattlesFilterProps {
 }
 
 interface Filters {
+  live: boolean;
   published: boolean;
   private: boolean;
   paused: boolean;
@@ -86,10 +87,12 @@ export function ProfileBattlesFilter({
   userIsProfilePublic,
 }: ProfileBattlesFilterProps) {
   const [showFilters, setShowFilters] = useState(false);
+  const [isLiveOpen, setIsLiveOpen] = useState(true);
   const [isPublishedOpen, setIsPublishedOpen] = useState(true);
   const [isPausedOpen, setIsPausedOpen] = useState(true);
   const [isCompletedOpen, setIsCompletedOpen] = useState(true);
   const [filters, setFilters] = useState<Filters>({
+    live: false,
     published: false,
     private: false,
     paused: false,
@@ -102,6 +105,9 @@ export function ProfileBattlesFilter({
   // Apply filters to battles
   const filteredBattles = useMemo(() => {
     return battles.filter((battle) => {
+      // Live filter - if checked, show only live battles
+      if (filters.live && !battle.isLive) return false;
+
       // Published filter - if checked, show only public battles
       if (filters.published && !battle.isPublic) return false;
 
@@ -128,12 +134,17 @@ export function ProfileBattlesFilter({
   }, [battles, filters]);
 
   // Group battles
-  const publishedBattles = filteredBattles.filter((battle) => battle.isPublic);
+  const liveBattles = filteredBattles.filter((battle) => battle.isLive);
+  const publishedBattles = filteredBattles.filter(
+    (battle) => battle.isPublic && !battle.isLive
+  );
   const pausedBattles = filteredBattles.filter(
-    (battle) => !battle.isPublic && battle.status === "paused"
+    (battle) =>
+      !battle.isPublic && battle.status === "paused" && !battle.isLive
   );
   const completedBattles = filteredBattles.filter(
-    (battle) => !battle.isPublic && battle.status !== "paused"
+    (battle) =>
+      !battle.isPublic && battle.status !== "paused" && !battle.isLive
   );
 
   // Check if any filters are active
@@ -144,6 +155,7 @@ export function ProfileBattlesFilter({
   // Clear all filters
   const clearFilters = () => {
     setFilters({
+      live: false,
       published: false,
       private: false,
       paused: false,
@@ -200,6 +212,14 @@ export function ProfileBattlesFilter({
       {showFilters && (
         <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6">
           <div className="flex flex-wrap gap-6">
+            {/* Live Filter */}
+            <FilterCheckbox
+              id="live"
+              label="Live"
+              checked={filters.live}
+              onCheckedChange={() => toggleFilter("live")}
+            />
+
             {/* Published Filter */}
             {isOwnProfile && (
               <FilterCheckbox
@@ -279,6 +299,17 @@ export function ProfileBattlesFilter({
         </div>
       ) : (
         <div className="space-y-8">
+          {/* Live Battles Section */}
+          <CollapsibleBattleSection
+            title="Live Battles"
+            battles={liveBattles}
+            isOpen={isLiveOpen}
+            onOpenChange={setIsLiveOpen}
+            shareUrl={shareUrl}
+            isOwnProfile={isOwnProfile}
+            userIsProfilePublic={userIsProfilePublic}
+          />
+
           {/* Published Battles Section */}
           <CollapsibleBattleSection
             title="Published Battles"
