@@ -76,6 +76,7 @@ export function MyBattleCard({
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [showUnpublishDialog, setShowUnpublishDialog] = useState(false);
   const [showCopiedDialog, setShowCopiedDialog] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const personas = {
     player1: battle.player1Persona as any,
@@ -154,6 +155,17 @@ export function MyBattleCard({
   const versesCount = battle.verses?.length || 0;
   const cannotPublish = !isPublic && (isPaused || !userIsProfilePublic);
 
+  const hasMenu = showManagement && !isPaused;
+  const hasAction = isLive || isPaused;
+
+  const handleCardClick = () => {
+    if (hasMenu) {
+      setMenuOpen(true);
+    } else if (hasAction) {
+      router.push(`/battle/${battle.id}`);
+    }
+  };
+
   const calculateFinalStats = () => {
     if (!isCompleted || !battle.scores) return null;
     const totalScores = calculateTotalScores(battle.scores);
@@ -201,8 +213,10 @@ export function MyBattleCard({
     <div
       className={cn(
         "group relative flex flex-col md:flex-row md:items-center bg-zinc-900/50 backdrop-blur-sm border border-white/5 rounded-lg overflow-hidden transition-all duration-200 hover:bg-zinc-900/80 hover:border-white/10",
-        (isDeleting || isPending) && "opacity-50 pointer-events-none"
+        (isDeleting || isPending) && "opacity-50 pointer-events-none",
+        (hasMenu || hasAction) && "cursor-pointer"
       )}
+      onClick={handleCardClick}
     >
       {/* Status Strip (Left Edge) */}
       <div
@@ -215,9 +229,9 @@ export function MyBattleCard({
       {/* Main Content Container */}
       <div className="flex flex-1 flex-col md:flex-row md:items-center gap-2 md:gap-4 p-3 px-4 md:p-4 md:pl-6 relative">
         {/* Top Right Management Menu (Absolute Positioned) */}
-        {showManagement && !isPaused && (
+        {hasMenu && (
           <div className="absolute top-2 right-2 md:top-auto md:bottom-auto md:right-4 z-20">
-            <DropdownMenu.Root>
+            <DropdownMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>
               <DropdownMenu.Trigger asChild>
                 <button
                   className="p-1.5 rounded-full text-gray-500 hover:text-white hover:bg-white/10 transition-colors outline-none"
@@ -312,8 +326,7 @@ export function MyBattleCard({
         )}
 
         {/* Left: Matchup & Meta */}
-        <Link
-          href={`/battle/${battle.id}`}
+        <div
           className="flex-1 min-w-0 group-hover:opacity-100 pr-8 md:pr-0" // Add padding right to avoid overlap with menu on mobile
         >
           <div className="flex flex-col gap-1">
@@ -392,14 +405,11 @@ export function MyBattleCard({
               </div>
             </div>
           </div>
-        </Link>
+        </div>
 
         {/* Middle/Right: Status & Outcome & Actions */}
         <div className="flex flex-col md:flex-row items-end md:items-center gap-3 md:gap-4 md:ml-auto">
-          <Link
-            href={`/battle/${battle.id}`}
-            className="flex flex-row md:flex-col md:items-end gap-3 md:gap-1 min-w-[140px] md:text-right"
-          >
+          <div className="flex flex-row md:flex-col md:items-end gap-3 md:gap-1 min-w-[140px] md:text-right">
             {isLive ? (
               <>
                 <span className="flex items-center gap-1.5 text-xs font-bold text-red-400 animate-pulse uppercase tracking-wide">
@@ -411,7 +421,7 @@ export function MyBattleCard({
                 </span>
               </>
             ) : null}
-          </Link>
+          </div>
 
           {/* Action Button - Only show if actionable (Live/Paused) */}
           {(isLive || isPaused) && (
@@ -430,6 +440,7 @@ export function MyBattleCard({
                     ? "bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-900/20"
                     : "bg-purple-600 hover:bg-purple-700 text-white"
                 )}
+                onClick={(e) => e.stopPropagation()}
               >
                 {isLive ? "Join" : "Resume"}
               </Link>
