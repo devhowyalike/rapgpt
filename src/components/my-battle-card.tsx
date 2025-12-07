@@ -4,7 +4,6 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
   AlertTriangle,
   CheckCircle,
-  Clock,
   Eye,
   Globe,
   Lock,
@@ -24,10 +23,9 @@ import { BattleStatusButton } from "@/components/battle-status-button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { getWinnerPosition } from "@/lib/battle-engine";
 import { calculateTotalScores } from "@/lib/battle-position-utils";
-import type { Battle } from "@/lib/shared";
 import { DEFAULT_STAGE, getStage } from "@/lib/shared/stages";
 import { cn } from "@/lib/utils";
-import { getDisplayRound, ROUNDS_PER_BATTLE } from "@/lib/shared";
+import { getDisplayRound } from "@/lib/shared";
 
 interface MyBattleCardProps {
   battle: {
@@ -75,7 +73,6 @@ export function MyBattleCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPublic, setIsPublic] = useState(battle.isPublic || false);
   const [isTogglingPublic, setIsTogglingPublic] = useState(false);
-  const [toggleError, setToggleError] = useState<string | null>(null);
   const [showCopiedDialog, setShowCopiedDialog] = useState(false);
 
   const personas = {
@@ -97,7 +94,6 @@ export function MyBattleCard({
 
   const handleTogglePublic = async () => {
     setIsTogglingPublic(true);
-    setToggleError(null);
     try {
       const response = await fetch(`/api/battle/${battle.id}/toggle-public`, {
         method: "PATCH",
@@ -106,11 +102,11 @@ export function MyBattleCard({
       if (data.success) {
         setIsPublic(data.isPublic);
       } else if (data.error) {
-        setToggleError(data.error);
+        alert(data.error);
       }
     } catch (error) {
       console.error("Failed to toggle battle public status:", error);
-      setToggleError("Failed to update battle status");
+      alert("Failed to update battle status");
     } finally {
       setIsTogglingPublic(false);
     }
@@ -211,7 +207,7 @@ export function MyBattleCard({
       {/* Main Content Container */}
       <div className="flex flex-1 flex-col md:flex-row md:items-center gap-2 md:gap-4 p-3 px-4 md:p-4 md:pl-6 relative">
         {/* Top Right Management Menu (Absolute Positioned) */}
-        {showManagement && (
+        {showManagement && !isPaused && (
           <div className="absolute top-2 right-2 md:top-auto md:bottom-auto md:right-4 z-20">
             <DropdownMenu.Root>
               <DropdownMenu.Trigger asChild>
@@ -242,6 +238,8 @@ export function MyBattleCard({
                         ? "Resume Battle"
                         : isLive
                         ? "Join Battle"
+                        : isCompleted
+                        ? "Replay Battle"
                         : "View Battle"}
                     </Link>
                   </DropdownMenu.Item>
@@ -356,6 +354,13 @@ export function MyBattleCard({
                   </div>
                 )}
 
+                {/* Round Info for Paused Battles */}
+                {isPaused && (
+                  <div className="flex items-center gap-2 ml-2 border-l border-white/10 pl-2">
+                    <span>Round {getDisplayRound(currentRound)}</span>
+                  </div>
+                )}
+
                 {isCompleted && (
                   <div className="flex items-center gap-2 ml-2 border-l border-white/10 pl-2 text-xs font-semibold text-gray-400">
                     <span>
@@ -385,22 +390,18 @@ export function MyBattleCard({
                   Round {getDisplayRound(currentRound)}
                 </span>
               </>
-            ) : isCompleted ? null : (
-              <>
-                <span className="flex items-center gap-1.5 md:justify-end text-xs font-bold text-orange-400 uppercase tracking-wide">
-                  <Clock size={12} />
-                  Paused
-                </span>
-                <span className="text-xs text-gray-500">
-                  Round {getDisplayRound(currentRound)}
-                </span>
-              </>
-            )}
+            ) : null}
           </Link>
 
           {/* Action Button - Only show if actionable (Live/Paused) */}
           {(isLive || isPaused) && (
-            <div className="flex items-center gap-2 mt-2 md:mt-0">
+            <div
+              className={cn(
+                "flex items-center gap-2 mt-2 md:mt-0",
+                isPaused &&
+                  "absolute top-3 right-3 md:static md:top-auto md:right-auto"
+              )}
+            >
               <Link
                 href={`/battle/${battle.id}`}
                 className={cn(
