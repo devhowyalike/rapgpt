@@ -133,7 +133,7 @@ export default async function ProfilePage({
 
           {/* Name & Menu */}
           <div className="flex items-center gap-4 justify-center mb-4 animate-slide-up [animation-delay:100ms]">
-            <h1 className="font-bebas text-4xl md:text-6xl text-white tracking-wide break-words max-w-[80vw] text-center">
+            <h1 className="font-bebas text-4xl md:text-6xl text-white tracking-wide wrap-break-word max-w-[80vw] text-center">
               {displayName}
             </h1>
             {isOwnProfile && (

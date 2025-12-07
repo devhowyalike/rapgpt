@@ -46,7 +46,7 @@ function CollapsibleBattleSection({
         )}
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <div className="flex flex-col gap-2">
           {battles.map((battle) => (
             <MyBattleCard
               key={battle.id}
@@ -128,15 +128,15 @@ export function ProfileBattlesFilter({
 
   // Separate paused and completed battles
   const pausedBattles = filteredBattles.filter(
-    (battle) => battle.status === "paused",
+    (battle) => battle.status === "paused"
   );
   const completedBattles = filteredBattles.filter(
-    (battle) => battle.status !== "paused",
+    (battle) => battle.status !== "paused"
   );
 
   // Check if any filters are active
   const hasActiveFilters = Object.values(filters).some(
-    (value) => value === true,
+    (value) => value === true
   );
 
   // Clear all filters
