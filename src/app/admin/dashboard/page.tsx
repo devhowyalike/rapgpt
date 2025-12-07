@@ -101,13 +101,6 @@ export default async function AdminDashboardPage({
             </div>
             <div className="flex items-center gap-4">
               <Link
-                href="/admin/usage"
-                className="px-4 py-2 bg-purple-900/50 hover:bg-purple-900/80 text-white rounded-lg transition-colors flex items-center gap-2 border border-purple-500/30"
-              >
-                <Shield size={20} />
-                All Time Usage
-              </Link>
-              <Link
                 href="/admin/battles-list"
                 className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center gap-2"
               >

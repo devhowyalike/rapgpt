@@ -5,8 +5,10 @@ import {
   ArrowUpRight,
   ChevronDown,
   Coins,
+  Shield,
   Zap,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MonthlyTokenTotals } from "@/lib/usage-storage";
 
@@ -154,7 +156,7 @@ export function MonthlyTokenUsage({
       </div>
 
       {/* Summary text */}
-      <div className="mt-4 pt-4 border-t border-gray-700">
+      <div className="mt-4 pt-4 border-t border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-gray-400 text-sm">
           {totals.totalTokens > 0 ? (
             <>
@@ -172,6 +174,14 @@ export function MonthlyTokenUsage({
             "No token usage recorded for this month yet."
           )}
         </p>
+
+        <Link
+          href="/admin/usage"
+          className="px-3 py-1.5 bg-purple-900/30 hover:bg-purple-900/50 text-purple-300 text-xs rounded-md transition-colors flex items-center gap-2 border border-purple-500/20"
+        >
+          <Shield size={14} />
+          All Time Usage
+        </Link>
       </div>
     </div>
   );
