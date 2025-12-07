@@ -9,7 +9,7 @@ import { RapGPTLogo } from "@/components/rapgpt-logo";
 import { SiteHeader } from "@/components/site-header";
 import { getUserByClerkId } from "@/lib/auth/sync-user";
 import { getLiveBattles } from "@/lib/battle-storage";
-import { APP_TITLE, MADE_BY, TAGLINE, YEAR } from "@/lib/constants";
+import { MADE_BY, TAGLINE_2, YEAR } from "@/lib/constants";
 
 // Revalidate every 10 seconds to show live battles
 export const revalidate = 10;
@@ -48,7 +48,7 @@ export default async function Home() {
             </span>
           </div>
 
-          <div className="relative w-fit mx-auto mb-6">
+          <div className="relative w-fit mx-auto">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 animate-slide-up [animation-delay:100ms]">
               <span className="text-[250px] md:text-[450px] opacity-15 rotate-12 block select-none pointer-events-none grayscale-0">
                 🎤
@@ -61,7 +61,7 @@ export default async function Home() {
           </div>
 
           <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up [animation-delay:200ms]">
-            {TAGLINE}&trade;
+            {TAGLINE_2}&trade;
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up [animation-delay:300ms]">
