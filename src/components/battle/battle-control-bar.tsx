@@ -55,6 +55,7 @@ interface BattleControlBarProps {
   onSettingsClick?: () => void;
   settingsActive?: boolean;
   isMobileDrawerOpen?: boolean;
+  pauseLabel?: string;
 }
 
 export function BattleControlBar({
@@ -91,6 +92,7 @@ export function BattleControlBar({
   onSettingsClick,
   settingsActive = false,
   isMobileDrawerOpen = false,
+  pauseLabel,
 }: BattleControlBarProps) {
   const [showGoLiveConfirmation, setShowGoLiveConfirmation] = useState(false);
 
@@ -168,6 +170,7 @@ export function BattleControlBar({
             onToggleVoting={onToggleVoting}
             onPauseBattle={onCancelBattle}
             isPausing={isCanceling || isGenerating}
+            pauseLabel={pauseLabel}
             isLive={isLive}
             customTrigger={<OptionsButton />}
           />

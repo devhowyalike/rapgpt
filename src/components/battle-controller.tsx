@@ -497,6 +497,7 @@ export function BattleController({
   }
 
   const showControlBar = battle.status === "paused";
+  const pauseLabel = isGenerating ? "Spittin' lyrics..." : "Pausing...";
 
   return (
     <>
@@ -572,6 +573,7 @@ export function BattleController({
                 isMobileDrawerOpen={showMobileDrawer}
                 onSettingsClick={() => setShowSettingsDrawer(true)}
                 settingsActive={showSettingsDrawer}
+                pauseLabel={pauseLabel}
               />
             )}
           </div>
@@ -603,6 +605,7 @@ export function BattleController({
         onToggleVoting={handleToggleVoting}
         onPauseBattle={handleCancelBattle}
         isPausing={isCanceling || isGenerating}
+        pauseLabel={pauseLabel}
         isLive={isLive}
       />
 

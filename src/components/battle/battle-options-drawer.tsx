@@ -18,6 +18,7 @@ interface BattleOptionsDrawerProps {
   onToggleVoting?: (enabled: boolean) => void;
   onPauseBattle?: () => void;
   isPausing?: boolean;
+  pauseLabel?: string;
   isLive?: boolean;
 }
 
@@ -30,6 +31,7 @@ export function BattleOptionsDrawer({
   onToggleVoting,
   onPauseBattle,
   isPausing,
+  pauseLabel,
   isLive = false,
 }: BattleOptionsDrawerProps) {
   return (
@@ -104,7 +106,7 @@ export function BattleOptionsDrawer({
               </div>
               <div className="flex flex-col">
                 <span className="font-medium text-white">
-                  {isPausing ? "Pausing..." : "Pause Battle"}
+                  {isPausing ? pauseLabel || "Pausing..." : "Pause Battle"}
                 </span>
                 <span className="text-sm text-gray-400">
                   Stop the battle temporarily

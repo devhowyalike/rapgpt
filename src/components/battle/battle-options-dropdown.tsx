@@ -23,6 +23,7 @@ interface BattleOptionsDropdownProps {
   // New props for moving actions into menu
   onPauseBattle?: () => void;
   isPausing?: boolean;
+  pauseLabel?: string;
   customTrigger?: React.ReactNode;
   isLive?: boolean;
 }
@@ -34,6 +35,7 @@ export function BattleOptionsDropdown({
   onToggleVoting,
   onPauseBattle,
   isPausing,
+  pauseLabel,
   customTrigger,
   isLive = false,
 }: BattleOptionsDropdownProps) {
@@ -89,7 +91,9 @@ export function BattleOptionsDropdown({
             className="flex items-center gap-2 py-2 text-orange-400 focus:text-orange-500 cursor-pointer"
           >
             <Pause className="w-4 h-4" />
-            <span>{isPausing ? "Pausing..." : "Pause Battle"}</span>
+            <span>
+              {isPausing ? pauseLabel || "Pausing..." : "Pause Battle"}
+            </span>
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>
