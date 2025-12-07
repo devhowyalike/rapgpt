@@ -57,117 +57,142 @@ export default async function CommunityPage({
   const hasNextPage = pageNumber < totalPages;
 
   return (
-    <div className="min-h-dvh bg-linear-to-br from-gray-900 via-purple-900 to-black">
+    <>
       <SiteHeader />
-      <div className="max-w-6xl mx-auto px-4 pt-[calc(var(--header-height)+3rem)] pb-16 md:pt-[calc(var(--header-height)+4rem)] md:pb-24">
-        <div className="mb-6 md:mb-8">
-          <div className="flex items-center justify-between mb-2 gap-2">
-            <h1 className="font-bebas text-3xl sm:text-4xl md:text-6xl text-white flex items-center gap-2 sm:gap-3">
-              <UsersIcon className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12" />
-              Community
-            </h1>
-            <p className="text-gray-400 text-xs sm:text-sm shrink-0">
-              {totalUsers} {totalUsers === 1 ? "member" : "members"}
-            </p>
-          </div>
-          <p className="text-gray-400 text-sm md:text-lg">
+
+      {/* Hero Section */}
+      <section className="relative pt-20 pb-12 md:pt-32 md:pb-16 overflow-hidden bg-black text-white selection:bg-yellow-500/30">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl z-0 pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10 text-center">
+          <h1 className="text-5xl md:text-7xl font-(family-name:--font-bebas-neue) mb-6 animate-slide-up flex items-center justify-center gap-4">
+            <UsersIcon className="w-10 h-10 md:w-16 md:h-16 text-white" />
+            Community
+          </h1>
+
+          <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto leading-relaxed animate-slide-up [animation-delay:100ms] px-4">
             Meet the RapGPT community and check out their battles
           </p>
         </div>
+      </section>
 
-        {allUsers.length === 0 ? (
-          <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6 md:p-12 text-center">
-            <h2 className="font-bebas text-2xl md:text-3xl text-white mb-2 md:mb-4">
-              No Users Yet
-            </h2>
-            <p className="text-gray-400 text-sm md:text-base">
-              Be the first to join the community!
-            </p>
+      {/* Main Content */}
+      <div className="bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center p-4 md:p-6 min-h-[50vh]">
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="flex items-center justify-between mb-6 border-b border-white/5 pb-4">
+            <h2 className="text-xl font-semibold text-white/90">All Members</h2>
+            <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm text-yellow-400/90 font-medium">
+              {totalUsers} {totalUsers === 1 ? "Member" : "Members"}
+            </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3 md:gap-4">
-            {allUsers.map((user) => {
-              const displayName = user.encryptedDisplayName
-                ? decrypt(user.encryptedDisplayName)
-                : user.encryptedName
+
+          {allUsers.length === 0 ? (
+            <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-12 text-center max-w-2xl mx-auto mt-8">
+              <h2 className="font-(family-name:--font-bebas-neue) text-3xl text-white mb-4">
+                No Users Yet
+              </h2>
+              <p className="text-gray-400">
+                Be the first to join the community!
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-4">
+              {allUsers.map((user) => {
+                const displayName = user.encryptedDisplayName
+                  ? decrypt(user.encryptedDisplayName)
+                  : user.encryptedName
                   ? decrypt(user.encryptedName)
                   : "Anonymous User";
 
-              return (
-                <Link
-                  key={user.id}
-                  href={`/profile/${user.id}`}
-                  className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-3 md:p-6 hover:border-purple-500/40 transition-all hover:scale-105"
-                >
-                  <div className="flex flex-col items-center text-center gap-2 md:gap-3">
-                    {user.imageUrl ? (
-                      <Image
-                        src={user.imageUrl}
-                        alt={displayName}
-                        width={80}
-                        height={80}
-                        className="rounded-full border-2 border-purple-500 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-purple-600/30 flex items-center justify-center border-2 border-purple-500">
-                        <UsersIcon className="text-purple-300 w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" />
+                return (
+                  <Link
+                    key={user.id}
+                    href={`/profile/${user.id}`}
+                    className="group bg-gray-900/30 border border-gray-800 rounded-lg p-2 sm:p-4 md:p-6 hover:bg-gray-800/50 hover:border-purple-500/40 transition-all duration-300 hover:-translate-y-1"
+                  >
+                    <div className="flex flex-col items-center justify-center text-center gap-2 sm:gap-3 md:gap-4 h-full">
+                      {user.imageUrl ? (
+                        <div className="relative">
+                          <Image
+                            src={user.imageUrl}
+                            alt={displayName}
+                            width={80}
+                            height={80}
+                            className="rounded-full border-2 border-gray-700 group-hover:border-purple-500 transition-colors w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-gray-800 flex items-center justify-center border-2 border-gray-700 group-hover:border-purple-500 transition-colors">
+                          <UsersIcon className="text-gray-400 group-hover:text-purple-400 w-6 h-6 sm:w-8 sm:h-8 transition-colors" />
+                        </div>
+                      )}
+                      <div className="w-full">
+                        <h3 className="font-semibold text-white text-xs sm:text-base md:text-lg line-clamp-1 group-hover:text-yellow-400 transition-colors truncate w-full">
+                          {displayName}
+                        </h3>
+                        <p className="text-[10px] sm:text-xs text-gray-500 mt-1 hidden sm:block">
+                          Joined{" "}
+                          {new Date(user.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              year: "numeric",
+                            }
+                          )}
+                        </p>
                       </div>
-                    )}
-                    <div>
-                      <h3 className="font-semibold text-white text-sm md:text-lg line-clamp-1">
-                        {displayName}
-                      </h3>
-                      <p className="text-xs md:text-sm text-gray-400">
-                        Joined{" "}
-                        {new Date(user.createdAt).toLocaleDateString("en-US", {
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </p>
                     </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
 
-        {!isAuthenticated && <GuestProfileCallout />}
+          {!isAuthenticated && (
+            <div className="mt-12">
+              <GuestProfileCallout />
+            </div>
+          )}
 
-        {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div className="mt-6 md:mt-8 flex items-center justify-center gap-2">
-            <Link
-              href={`/community?page=${pageNumber - 1}`}
-              className={`flex items-center gap-1 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-lg transition-colors text-sm md:text-base ${
-                hasPrevPage
-                  ? "bg-purple-600 hover:bg-purple-700 text-white"
-                  : "bg-gray-700 text-gray-500 cursor-not-allowed pointer-events-none"
-              }`}
-            >
-              <ChevronLeft className="w-4 h-4 md:w-[18px] md:h-[18px]" />
-              <span className="hidden sm:inline">Previous</span>
-              <span className="sm:hidden">Prev</span>
-            </Link>
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="mt-12 flex items-center justify-center gap-2">
+              <Link
+                href={`/community?page=${pageNumber - 1}`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors border ${
+                  hasPrevPage
+                    ? "bg-gray-900 border-gray-700 text-white hover:bg-gray-800 hover:border-gray-600"
+                    : "bg-gray-900/50 border-gray-800 text-gray-600 cursor-not-allowed pointer-events-none"
+                }`}
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Previous</span>
+              </Link>
 
-            <span className="px-2 md:px-4 py-1.5 md:py-2 text-gray-300 text-sm md:text-base">
-              Page {pageNumber} of {totalPages}
-            </span>
+              <span className="px-4 py-2 text-gray-400 text-sm">
+                Page {pageNumber} of {totalPages}
+              </span>
 
-            <Link
-              href={`/community?page=${pageNumber + 1}`}
-              className={`flex items-center gap-1 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-lg transition-colors text-sm md:text-base ${
-                hasNextPage
-                  ? "bg-purple-600 hover:bg-purple-700 text-white"
-                  : "bg-gray-700 text-gray-500 cursor-not-allowed pointer-events-none"
-              }`}
-            >
-              Next
-              <ChevronRight className="w-4 h-4 md:w-[18px] md:h-[18px]" />
-            </Link>
-          </div>
-        )}
+              <Link
+                href={`/community?page=${pageNumber + 1}`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors border ${
+                  hasNextPage
+                    ? "bg-gray-900 border-gray-700 text-white hover:bg-gray-800 hover:border-gray-600"
+                    : "bg-gray-900/50 border-gray-800 text-gray-600 cursor-not-allowed pointer-events-none"
+                }`}
+              >
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
