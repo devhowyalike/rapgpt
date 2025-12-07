@@ -5,11 +5,13 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
+  Eye,
   Globe,
   Lock,
   MessageSquare,
   MoreVertical,
   Music2,
+  Play,
   Radio,
   Share2,
   ThumbsUp,
@@ -226,6 +228,23 @@ export function MyBattleCard({
                   sideOffset={5}
                   align="end"
                 >
+                  <DropdownMenu.Item asChild>
+                    <Link
+                      href={`/battle/${battle.id}`}
+                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-800 rounded cursor-pointer outline-none"
+                    >
+                      {isPaused || isLive ? (
+                        <Play size={14} />
+                      ) : (
+                        <Eye size={14} />
+                      )}
+                      {isPaused
+                        ? "Resume Battle"
+                        : isLive
+                        ? "Join Battle"
+                        : "View Battle"}
+                    </Link>
+                  </DropdownMenu.Item>
                   <DropdownMenu.Item
                     className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-800 rounded cursor-pointer outline-none"
                     onClick={(e) => {
@@ -417,7 +436,7 @@ export function MyBattleCard({
         open={showCopiedDialog}
         onOpenChange={setShowCopiedDialog}
         title="Link Copied"
-        description="The battle link is ready to share."
+        description="The battle link has been copied to your clipboard and is ready to paste."
         confirmLabel="OK"
         onConfirm={() => setShowCopiedDialog(false)}
         variant="success"

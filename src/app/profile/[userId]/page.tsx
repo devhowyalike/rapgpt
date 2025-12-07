@@ -9,6 +9,7 @@ import { GuestProfileCallout } from "@/components/guest-profile-callout";
 import { ProfileBattlesFilter } from "@/components/profile-battles-filter";
 import { ProfileHeaderMenu } from "@/components/profile-header-menu";
 import { SiteHeader } from "@/components/site-header";
+import { CreateBattleButton } from "@/components/header/CreateBattleButton";
 import { decrypt } from "@/lib/auth/encryption";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { db } from "@/lib/db/client";
@@ -188,14 +189,7 @@ export default async function ProfilePage({
               {isOwnProfile ? "My e-Beefs" : "e-Beefs"}
             </h2>
             {isOwnProfile && !isViewingAsPublic && userBattles.length > 0 && (
-              <Link
-                href="/new-battle"
-                className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-full transition-all hover:scale-105 font-medium text-sm"
-              >
-                <Swords className="w-4 h-4" />
-                <span className="hidden sm:inline">Create Battle</span>
-                <span className="sm:hidden">Create</span>
-              </Link>
+              <CreateBattleButton isSignedIn={true} mobileText="Create" />
             )}
           </div>
 
