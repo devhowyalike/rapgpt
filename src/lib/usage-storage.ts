@@ -177,13 +177,20 @@ export async function getBattleTokenTotalsByModel(
 /**
  * Get aggregate token totals for all time.
  */
-export async function getAllTimeTokenTotals(): Promise<BattleTokenTotals> {
+export interface AllTimeTokenTotals extends BattleTokenTotals {
+  firstUsageDate: Date | null;
+  lastUsageDate: Date | null;
+}
+
+export async function getAllTimeTokenTotals(): Promise<AllTimeTokenTotals> {
   const [result] = await db
     .select({
       inputTokens: sql<number>`coalesce(sum(${battleTokenUsage.inputTokens})::float8, 0)`,
       outputTokens: sql<number>`coalesce(sum(${battleTokenUsage.outputTokens})::float8, 0)`,
       totalTokens: sql<number>`coalesce(sum(${battleTokenUsage.totalTokens})::float8, 0)`,
       cachedInputTokens: sql<number>`coalesce(sum(${battleTokenUsage.cachedInputTokens})::float8, 0)`,
+      firstUsageDate: sql<Date>`min(${battleTokenUsage.createdAt})`,
+      lastUsageDate: sql<Date>`max(${battleTokenUsage.createdAt})`,
     })
     .from(battleTokenUsage);
 
@@ -192,6 +199,12 @@ export async function getAllTimeTokenTotals(): Promise<BattleTokenTotals> {
     outputTokens: Number(result?.outputTokens ?? 0),
     totalTokens: Number(result?.totalTokens ?? 0),
     cachedInputTokens: Number(result?.cachedInputTokens ?? 0),
+    firstUsageDate: result?.firstUsageDate
+      ? new Date(result.firstUsageDate)
+      : null,
+    lastUsageDate: result?.lastUsageDate
+      ? new Date(result.lastUsageDate)
+      : null,
   };
 }
 

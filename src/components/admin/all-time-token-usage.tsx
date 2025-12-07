@@ -1,26 +1,36 @@
 "use client";
 
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  Coins,
-  Zap,
-} from "lucide-react";
-import type { BattleTokenTotals, BattleTokenTotalsByModel } from "@/lib/usage-storage";
+import { ArrowDownRight, ArrowUpRight, Coins, Zap } from "lucide-react";
+import type {
+  AllTimeTokenTotals,
+  BattleTokenTotalsByModel,
+} from "@/lib/usage-storage";
 
 interface AllTimeTokenUsageProps {
-  totals: BattleTokenTotals;
+  totals: AllTimeTokenTotals;
   byModel: BattleTokenTotalsByModel[];
 }
 
-export function AllTimeTokenUsage({
-  totals,
-  byModel,
-}: AllTimeTokenUsageProps) {
+export function AllTimeTokenUsage({ totals, byModel }: AllTimeTokenUsageProps) {
   // Format numbers with commas
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat("en-US").format(num);
   };
+
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(date);
+  };
+
+  const dateRange =
+    totals.firstUsageDate && totals.lastUsageDate
+      ? `${formatDate(totals.firstUsageDate)} - ${formatDate(
+          totals.lastUsageDate
+        )}`
+      : "since the beginning";
 
   const stats = [
     {
@@ -66,7 +76,7 @@ export function AllTimeTokenUsage({
             All Time Token Usage
           </h2>
           <p className="text-gray-400 text-sm mt-1">
-            Total tokens consumed across all battles since the beginning
+            Total tokens consumed across all battles ({dateRange})
           </p>
         </div>
 
@@ -111,37 +121,50 @@ export function AllTimeTokenUsage({
       </div>
 
       <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6">
-        <h2 className="font-bebas text-2xl text-white mb-4">
-          Usage by Model
-        </h2>
+        <h2 className="font-bebas text-2xl text-white mb-4">Usage by Model</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-gray-700">
                 <th className="pb-3 text-gray-400 font-medium">Model</th>
                 <th className="pb-3 text-gray-400 font-medium">Provider</th>
-                <th className="pb-3 text-gray-400 font-medium text-right">Input</th>
-                <th className="pb-3 text-gray-400 font-medium text-right">Output</th>
-                <th className="pb-3 text-gray-400 font-medium text-right">Total</th>
+                <th className="pb-3 text-gray-400 font-medium text-right">
+                  Input
+                </th>
+                <th className="pb-3 text-gray-400 font-medium text-right">
+                  Output
+                </th>
+                <th className="pb-3 text-gray-400 font-medium text-right">
+                  Total
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700">
               {byModel.map((model) => (
-                <tr key={`${model.provider}-${model.model}`} className="hover:bg-gray-700/30">
+                <tr
+                  key={`${model.provider}-${model.model}`}
+                  className="hover:bg-gray-700/30"
+                >
                   <td className="py-3 text-white font-mono">{model.model}</td>
                   <td className="py-3 text-gray-400">{model.provider}</td>
-                  <td className="py-3 text-gray-300 text-right font-mono">{formatNumber(model.inputTokens)}</td>
-                  <td className="py-3 text-gray-300 text-right font-mono">{formatNumber(model.outputTokens)}</td>
-                  <td className="py-3 text-purple-300 text-right font-mono font-bold">{formatNumber(model.totalTokens)}</td>
+                  <td className="py-3 text-gray-300 text-right font-mono">
+                    {formatNumber(model.inputTokens)}
+                  </td>
+                  <td className="py-3 text-gray-300 text-right font-mono">
+                    {formatNumber(model.outputTokens)}
+                  </td>
+                  <td className="py-3 text-purple-300 text-right font-mono font-bold">
+                    {formatNumber(model.totalTokens)}
+                  </td>
                 </tr>
               ))}
               {byModel.length === 0 && (
-                 <tr>
-                   <td colSpan={5} className="py-8 text-center text-gray-500">
-                     No model usage data available
-                   </td>
-                 </tr>
-               )}
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-gray-500">
+                    No model usage data available
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
