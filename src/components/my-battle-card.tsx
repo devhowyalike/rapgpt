@@ -73,6 +73,7 @@ export function MyBattleCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPublic, setIsPublic] = useState(battle.isPublic || false);
   const [isTogglingPublic, setIsTogglingPublic] = useState(false);
+  const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [showCopiedDialog, setShowCopiedDialog] = useState(false);
 
   const personas = {
@@ -101,15 +102,19 @@ export function MyBattleCard({
       const data = await response.json();
       if (data.success) {
         setIsPublic(data.isPublic);
+        return true;
       } else if (data.error) {
         alert(data.error);
+        return false;
       }
     } catch (error) {
       console.error("Failed to toggle battle public status:", error);
       alert("Failed to update battle status");
+      return false;
     } finally {
       setIsTogglingPublic(false);
     }
+    return false;
   };
 
   const handleDelete = async () => {
@@ -143,8 +148,7 @@ export function MyBattleCard({
   const isLive = battle.isLive;
   const currentRound = battle.currentRound || 1;
   const versesCount = battle.verses?.length || 0;
-  const cannotPublish =
-    !isPublic && (isPaused || !userIsProfilePublic || isArchived);
+  const cannotPublish = !isPublic && (isPaused || !userIsProfilePublic);
 
   const calculateFinalStats = () => {
     if (!isCompleted || !battle.scores) return null;
@@ -229,7 +233,9 @@ export function MyBattleCard({
                       href={`/battle/${battle.id}`}
                       className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-800 rounded cursor-pointer outline-none"
                     >
-                      {isPaused || isLive ? (
+                      {isLive ? (
+                        <Radio size={14} />
+                      ) : isPaused ? (
                         <Play size={14} />
                       ) : (
                         <Eye size={14} />
@@ -237,7 +243,7 @@ export function MyBattleCard({
                       {isPaused
                         ? "Resume Battle"
                         : isLive
-                        ? "Join Battle"
+                        ? "Join Live Battle"
                         : isCompleted
                         ? "Replay Battle"
                         : "View Battle"}
@@ -262,7 +268,13 @@ export function MyBattleCard({
                     )}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (!cannotPublish) handleTogglePublic();
+                      if (!cannotPublish) {
+                        if (!isPublic) {
+                          setShowPublishDialog(true);
+                        } else {
+                          handleTogglePublic();
+                        }
+                      }
                     }}
                     disabled={isTogglingPublic || cannotPublish}
                   >
@@ -340,8 +352,12 @@ export function MyBattleCard({
                 {/* Feature Icons - Inline */}
                 {(battle.generatedSong?.audioUrl ||
                   battle.votingEnabled ||
-                  battle.commentsEnabled) && (
+                  battle.commentsEnabled ||
+                  isArchived) && (
                   <div className="flex items-center gap-1.5 ml-2 border-l border-white/10 pl-2">
+                    {isArchived && (
+                      <Radio size={10} className="text-gray-400" />
+                    )}
                     {battle.generatedSong?.audioUrl && (
                       <Music2 size={10} className="text-green-400" />
                     )}
@@ -421,6 +437,21 @@ export function MyBattleCard({
       {/* Remove the old footer container entirely */}
 
       {/* Dialogs */}
+      <ConfirmationDialog
+        open={showPublishDialog}
+        onOpenChange={setShowPublishDialog}
+        title="Publish Battle?"
+        description="Publishing this battle will make it visible on your public profile and the community page. Anyone will be able to view and share it."
+        confirmLabel="Publish"
+        onConfirm={async () => {
+          const success = await handleTogglePublic();
+          if (success) setShowPublishDialog(false);
+        }}
+        isLoading={isTogglingPublic}
+        variant="info"
+        icon={Globe}
+      />
+
       <ConfirmationDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
