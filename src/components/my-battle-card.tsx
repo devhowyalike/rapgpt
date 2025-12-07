@@ -321,17 +321,21 @@ export function MyBattleCard({
                   })}
                 </span>
                 {/* Feature Icons - Inline */}
-                <div className="flex items-center gap-1.5 ml-2 border-l border-white/10 pl-2">
-                  {battle.generatedSong?.audioUrl && (
-                    <Music2 size={10} className="text-green-400" />
-                  )}
-                  {battle.votingEnabled && (
-                    <ThumbsUp size={10} className="text-blue-400" />
-                  )}
-                  {battle.commentsEnabled && (
-                    <MessageSquare size={10} className="text-purple-400" />
-                  )}
-                </div>
+                {(battle.generatedSong?.audioUrl ||
+                  battle.votingEnabled ||
+                  battle.commentsEnabled) && (
+                  <div className="flex items-center gap-1.5 ml-2 border-l border-white/10 pl-2">
+                    {battle.generatedSong?.audioUrl && (
+                      <Music2 size={10} className="text-green-400" />
+                    )}
+                    {battle.votingEnabled && (
+                      <ThumbsUp size={10} className="text-blue-400" />
+                    )}
+                    {battle.commentsEnabled && (
+                      <MessageSquare size={10} className="text-purple-400" />
+                    )}
+                  </div>
+                )}
 
                 {isCompleted && (
                   <div className="flex items-center gap-2 ml-2 border-l border-white/10 pl-2 text-xs font-semibold text-gray-400">
