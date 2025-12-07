@@ -70,7 +70,7 @@ export default async function CommunityPage({
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-center">
-          <h1 className="text-5xl md:text-7xl font-(family-name:--font-bebas-neue) mb-6 animate-slide-up flex items-center justify-center gap-4">
+          <h1 className="text-5xl md:text-7xl font-(family-name:--font-bebas-neue) mb-6 animate-slide-up flex flex-col items-center justify-center gap-4">
             <UsersIcon className="w-10 h-10 md:w-16 md:h-16 text-white" />
             Community
           </h1>
@@ -101,7 +101,7 @@ export default async function CommunityPage({
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-4">
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
               {allUsers.map((user) => {
                 const displayName = user.encryptedDisplayName
                   ? decrypt(user.encryptedDisplayName)
@@ -113,7 +113,7 @@ export default async function CommunityPage({
                   <Link
                     key={user.id}
                     href={`/profile/${user.id}`}
-                    className="group bg-gray-900/30 border border-gray-800 rounded-lg p-2 sm:p-4 md:p-6 hover:bg-gray-800/50 hover:border-purple-500/40 transition-all duration-300 hover:-translate-y-1"
+                    className="group bg-gray-900/30 border border-gray-800 rounded-lg p-2 sm:p-4 md:p-6 hover:bg-gray-800/50 hover:border-purple-500/40 transition-all duration-300 hover:-translate-y-1 w-[30%] sm:w-[22%] md:w-[18%] lg:w-[15%]"
                   >
                     <div className="flex flex-col items-center justify-center text-center gap-2 sm:gap-3 md:gap-4 h-full">
                       {user.imageUrl ? (
