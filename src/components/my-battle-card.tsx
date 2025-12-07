@@ -74,6 +74,7 @@ export function MyBattleCard({
   const [isPublic, setIsPublic] = useState(battle.isPublic || false);
   const [isTogglingPublic, setIsTogglingPublic] = useState(false);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const [showUnpublishDialog, setShowUnpublishDialog] = useState(false);
   const [showCopiedDialog, setShowCopiedDialog] = useState(false);
 
   const personas = {
@@ -102,6 +103,9 @@ export function MyBattleCard({
       const data = await response.json();
       if (data.success) {
         setIsPublic(data.isPublic);
+        startTransition(() => {
+          router.refresh();
+        });
         return true;
       } else if (data.error) {
         alert(data.error);
@@ -272,7 +276,7 @@ export function MyBattleCard({
                         if (!isPublic) {
                           setShowPublishDialog(true);
                         } else {
-                          handleTogglePublic();
+                          setShowUnpublishDialog(true);
                         }
                       }
                     }}
@@ -450,6 +454,21 @@ export function MyBattleCard({
         isLoading={isTogglingPublic}
         variant="info"
         icon={Globe}
+      />
+
+      <ConfirmationDialog
+        open={showUnpublishDialog}
+        onOpenChange={setShowUnpublishDialog}
+        title="Unpublish Battle?"
+        description="Unpublishing this battle will make it private. It will only be visible to you."
+        confirmLabel="Unpublish"
+        onConfirm={async () => {
+          const success = await handleTogglePublic();
+          if (success) setShowUnpublishDialog(false);
+        }}
+        isLoading={isTogglingPublic}
+        variant="info"
+        icon={Lock}
       />
 
       <ConfirmationDialog

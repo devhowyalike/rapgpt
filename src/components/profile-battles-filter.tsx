@@ -70,7 +70,7 @@ interface ProfileBattlesFilterProps {
 }
 
 interface Filters {
-  public: boolean;
+  published: boolean;
   private: boolean;
   paused: boolean;
   completed: boolean;
@@ -86,10 +86,11 @@ export function ProfileBattlesFilter({
   userIsProfilePublic,
 }: ProfileBattlesFilterProps) {
   const [showFilters, setShowFilters] = useState(false);
+  const [isPublishedOpen, setIsPublishedOpen] = useState(true);
   const [isPausedOpen, setIsPausedOpen] = useState(true);
   const [isCompletedOpen, setIsCompletedOpen] = useState(true);
   const [filters, setFilters] = useState<Filters>({
-    public: false,
+    published: false,
     private: false,
     paused: false,
     completed: false,
@@ -101,8 +102,8 @@ export function ProfileBattlesFilter({
   // Apply filters to battles
   const filteredBattles = useMemo(() => {
     return battles.filter((battle) => {
-      // Public filter - if checked, show only public battles
-      if (filters.public && !battle.isPublic) return false;
+      // Published filter - if checked, show only public battles
+      if (filters.published && !battle.isPublic) return false;
 
       // Private filter - if checked, show only private battles
       if (filters.private && battle.isPublic) return false;
@@ -126,12 +127,13 @@ export function ProfileBattlesFilter({
     });
   }, [battles, filters]);
 
-  // Separate paused and completed battles
+  // Group battles
+  const publishedBattles = filteredBattles.filter((battle) => battle.isPublic);
   const pausedBattles = filteredBattles.filter(
-    (battle) => battle.status === "paused"
+    (battle) => !battle.isPublic && battle.status === "paused"
   );
   const completedBattles = filteredBattles.filter(
-    (battle) => battle.status !== "paused"
+    (battle) => !battle.isPublic && battle.status !== "paused"
   );
 
   // Check if any filters are active
@@ -142,7 +144,7 @@ export function ProfileBattlesFilter({
   // Clear all filters
   const clearFilters = () => {
     setFilters({
-      public: false,
+      published: false,
       private: false,
       paused: false,
       completed: false,
@@ -198,13 +200,13 @@ export function ProfileBattlesFilter({
       {showFilters && (
         <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6">
           <div className="flex flex-wrap gap-6">
-            {/* Public Filter */}
+            {/* Published Filter */}
             {isOwnProfile && (
               <FilterCheckbox
-                id="public"
-                label="Public"
-                checked={filters.public}
-                onCheckedChange={() => toggleFilter("public")}
+                id="published"
+                label="Published"
+                checked={filters.published}
+                onCheckedChange={() => toggleFilter("published")}
               />
             )}
 
@@ -277,6 +279,17 @@ export function ProfileBattlesFilter({
         </div>
       ) : (
         <div className="space-y-8">
+          {/* Published Battles Section */}
+          <CollapsibleBattleSection
+            title="Published Battles"
+            battles={publishedBattles}
+            isOpen={isPublishedOpen}
+            onOpenChange={setIsPublishedOpen}
+            shareUrl={shareUrl}
+            isOwnProfile={isOwnProfile}
+            userIsProfilePublic={userIsProfilePublic}
+          />
+
           {/* Paused Battles Section */}
           <CollapsibleBattleSection
             title="Paused Battles"
