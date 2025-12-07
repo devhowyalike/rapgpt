@@ -318,7 +318,7 @@ export function MyBattleCard({
         >
           <div className="flex flex-col gap-1">
             {/* Matchup Title */}
-            <div className="flex flex-col md:flex-row md:flex-wrap md:items-baseline gap-x-2 text-lg md:text-xl font-bebas tracking-wide leading-none md:leading-none">
+            <div className="flex flex-col md:flex-row md:flex-wrap md:items-baseline gap-x-2 text-lg md:text-xl font-bebas tracking-wide leading-tight">
               <div className="flex items-center gap-2 truncate">
                 <span className="text-blue-400">{personas.player1.name}</span>
                 {isCompleted && winnerPosition === "player1" && (
