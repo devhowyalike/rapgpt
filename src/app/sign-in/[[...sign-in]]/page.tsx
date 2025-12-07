@@ -1,5 +1,6 @@
 import { SignIn } from "@clerk/nextjs";
 import { SiteHeader } from "@/components/site-header";
+import { APP_TITLE } from "@/lib/constants";
 
 interface SignInPageProps {
   searchParams: Promise<{ redirect_url?: string }>;
@@ -14,7 +15,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
       <div className="min-h-dvh flex items-center justify-center bg-linear-to-br from-gray-900 via-purple-900 to-black p-4 pt-20">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="font-bebas text-6xl text-white mb-2">RapGPT</h1>
+            <h1 className="font-bebas text-6xl text-white mb-2">{APP_TITLE}</h1>
             <p className="text-gray-400 text-lg">
               Sign in to vote, comment, and create e-Beef battles
             </p>

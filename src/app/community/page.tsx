@@ -8,6 +8,7 @@ import { SiteHeader } from "@/components/site-header";
 import { decrypt } from "@/lib/auth/encryption";
 import { db } from "@/lib/db/client";
 import { users } from "@/lib/db/schema";
+import { APP_TITLE } from "@/lib/constants";
 
 // Revalidate every 5 minutes
 export const revalidate = 300;
@@ -76,7 +77,7 @@ export default async function CommunityPage({
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto leading-relaxed animate-slide-up [animation-delay:100ms] px-4">
-            Meet the RapGPT community and check out their battles
+            Meet the {APP_TITLE} community and check out their battles.
           </p>
         </div>
       </section>

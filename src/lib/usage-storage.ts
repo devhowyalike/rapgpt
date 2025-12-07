@@ -2,7 +2,7 @@
  * Token usage storage and aggregation helpers
  */
 
-import { eq, inArray, sql } from "drizzle-orm";
+import { desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { battleTokenUsage } from "@/lib/db/schema";
 
@@ -184,15 +184,14 @@ export interface MonthlyTokenTotals {
 }
 
 /**
- * Get aggregate token totals for the current month.
- * Returns totals for all usage events in the current calendar month.
+ * Get aggregate token totals for a specific month.
+ * month is 1-indexed (1 = January)
  */
-export async function getCurrentMonthTokenTotals(): Promise<MonthlyTokenTotals> {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1; // JS months are 0-indexed
-
-  // Get first day of current month
+export async function getMonthlyTokenTotals(
+  month: number,
+  year: number,
+): Promise<MonthlyTokenTotals> {
+  // Get first day of target month
   const startOfMonth = new Date(year, month - 1, 1);
 
   // Get first day of next month
@@ -210,12 +209,60 @@ export async function getCurrentMonthTokenTotals(): Promise<MonthlyTokenTotals> 
       sql`${battleTokenUsage.createdAt} >= ${startOfMonth} AND ${battleTokenUsage.createdAt} < ${startOfNextMonth}`,
     );
 
+  // Format month name
+  const monthName = new Date(year, month - 1, 1).toLocaleString("en-US", {
+    month: "long",
+  });
+
   return {
     inputTokens: Number(result?.inputTokens ?? 0),
     outputTokens: Number(result?.outputTokens ?? 0),
     totalTokens: Number(result?.totalTokens ?? 0),
     cachedInputTokens: Number(result?.cachedInputTokens ?? 0),
-    month: now.toLocaleString("en-US", { month: "long" }),
+    month: monthName,
     year,
   };
+}
+
+/**
+ * Get aggregate token totals for the current month.
+ * Returns totals for all usage events in the current calendar month.
+ */
+export async function getCurrentMonthTokenTotals(): Promise<MonthlyTokenTotals> {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1; // JS months are 0-indexed
+  return getMonthlyTokenTotals(month, year);
+}
+
+/**
+ * Get list of months that have token usage data
+ */
+export async function getAvailableMonths(): Promise<
+  { month: number; year: number; label: string }[]
+> {
+  // Extract distinct year and month from createdAt
+  const result = await db
+    .select({
+      year: sql<number>`extract(year from ${battleTokenUsage.createdAt})::int`,
+      month: sql<number>`extract(month from ${battleTokenUsage.createdAt})::int`,
+    })
+    .from(battleTokenUsage)
+    .groupBy(
+      sql`extract(year from ${battleTokenUsage.createdAt})`,
+      sql`extract(month from ${battleTokenUsage.createdAt})`,
+    )
+    .orderBy(
+      sql`extract(year from ${battleTokenUsage.createdAt}) desc`,
+      sql`extract(month from ${battleTokenUsage.createdAt}) desc`,
+    );
+
+  return result.map((r) => {
+    const date = new Date(r.year, r.month - 1, 1);
+    return {
+      month: r.month,
+      year: r.year,
+      label: date.toLocaleString("en-US", { month: "long", year: "numeric" }),
+    };
+  });
 }

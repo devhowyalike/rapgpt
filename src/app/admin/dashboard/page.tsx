@@ -10,11 +10,19 @@ import { decrypt } from "@/lib/auth/encryption";
 import { checkRole } from "@/lib/auth/roles";
 import { db } from "@/lib/db/client";
 import { users } from "@/lib/db/schema";
-import { getCurrentMonthTokenTotals } from "@/lib/usage-storage";
+import {
+  getAvailableMonths,
+  getCurrentMonthTokenTotals,
+  getMonthlyTokenTotals,
+} from "@/lib/usage-storage";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminDashboardPage() {
+export default async function AdminDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   try {
     // Check if user is admin
     const isAdmin = await checkRole("admin");
@@ -37,8 +45,23 @@ export default async function AdminDashboardPage() {
       where: eq(users.clerkId, clerkUserId!),
     });
 
-    // Get monthly token totals
-    const monthlyTokens = await getCurrentMonthTokenTotals();
+    // Get available months for selector
+    const availableMonths = await getAvailableMonths();
+
+    // Determine which month to show
+    const resolvedSearchParams = await searchParams;
+    const monthParam = resolvedSearchParams?.month as string | undefined;
+    const yearParam = resolvedSearchParams?.year as string | undefined;
+
+    let monthlyTokens;
+    if (monthParam && yearParam) {
+      monthlyTokens = await getMonthlyTokenTotals(
+        Number.parseInt(monthParam),
+        Number.parseInt(yearParam)
+      );
+    } else {
+      monthlyTokens = await getCurrentMonthTokenTotals();
+    }
 
     // Decrypt user data for display
     const decryptedUsers = allUsers.map((user) => {
@@ -49,8 +72,8 @@ export default async function AdminDashboardPage() {
         displayName = user.encryptedDisplayName
           ? decrypt(user.encryptedDisplayName)
           : user.encryptedName
-            ? decrypt(user.encryptedName)
-            : "Anonymous";
+          ? decrypt(user.encryptedName)
+          : "Anonymous";
 
         email = decrypt(user.encryptedEmail);
       } catch (error) {
@@ -87,7 +110,10 @@ export default async function AdminDashboardPage() {
 
           {/* Monthly Token Usage */}
           <div className="mb-8">
-            <MonthlyTokenUsage totals={monthlyTokens} />
+            <MonthlyTokenUsage
+              totals={monthlyTokens}
+              availableMonths={availableMonths}
+            />
           </div>
 
           <AdminDashboardClient

@@ -150,9 +150,9 @@ export const votes = pgTable(
  */
 export const battleTokenUsage = pgTable("battle_token_usage", {
   id: text("id").primaryKey(),
-  battleId: text("battle_id")
-    .notNull()
-    .references(() => battles.id, { onDelete: "cascade" }),
+  battleId: text("battle_id").references(() => battles.id, {
+    onDelete: "set null",
+  }),
   round: integer("round"),
   personaId: text("persona_id"),
   provider: text("provider").notNull(),
