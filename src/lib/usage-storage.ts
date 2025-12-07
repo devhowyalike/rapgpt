@@ -174,6 +174,55 @@ export async function getBattleTokenTotalsByModel(
   }));
 }
 
+/**
+ * Get aggregate token totals for all time.
+ */
+export async function getAllTimeTokenTotals(): Promise<BattleTokenTotals> {
+  const [result] = await db
+    .select({
+      inputTokens: sql<number>`coalesce(sum(${battleTokenUsage.inputTokens})::float8, 0)`,
+      outputTokens: sql<number>`coalesce(sum(${battleTokenUsage.outputTokens})::float8, 0)`,
+      totalTokens: sql<number>`coalesce(sum(${battleTokenUsage.totalTokens})::float8, 0)`,
+      cachedInputTokens: sql<number>`coalesce(sum(${battleTokenUsage.cachedInputTokens})::float8, 0)`,
+    })
+    .from(battleTokenUsage);
+
+  return {
+    inputTokens: Number(result?.inputTokens ?? 0),
+    outputTokens: Number(result?.outputTokens ?? 0),
+    totalTokens: Number(result?.totalTokens ?? 0),
+    cachedInputTokens: Number(result?.cachedInputTokens ?? 0),
+  };
+}
+
+/**
+ * Get aggregate token totals by model for all time.
+ */
+export async function getAllTimeTokenTotalsByModel(): Promise<
+  BattleTokenTotalsByModel[]
+> {
+  const rows = await db
+    .select({
+      model: battleTokenUsage.model,
+      provider: battleTokenUsage.provider,
+      inputTokens: sql<number>`coalesce(sum(${battleTokenUsage.inputTokens})::float8, 0)`,
+      outputTokens: sql<number>`coalesce(sum(${battleTokenUsage.outputTokens})::float8, 0)`,
+      totalTokens: sql<number>`coalesce(sum(${battleTokenUsage.totalTokens})::float8, 0)`,
+    })
+    .from(battleTokenUsage)
+    .groupBy(battleTokenUsage.model, battleTokenUsage.provider)
+    .orderBy(
+      sql`coalesce(sum(${battleTokenUsage.totalTokens})::float8, 0) desc`,
+    );
+
+  return rows.map((r) => ({
+    ...r,
+    inputTokens: Number(r.inputTokens ?? 0),
+    outputTokens: Number(r.outputTokens ?? 0),
+    totalTokens: Number(r.totalTokens ?? 0),
+  }));
+}
+
 export interface MonthlyTokenTotals {
   inputTokens: number;
   outputTokens: number;
