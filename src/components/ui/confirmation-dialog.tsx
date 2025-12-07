@@ -9,7 +9,7 @@ interface ConfirmationDialogProps {
   title: string;
   description: string;
   confirmLabel?: string;
-  cancelLabel?: string;
+  cancelLabel?: string | null;
   onConfirm: () => void | Promise<void>;
   onCancel?: () => void;
   isLoading?: boolean;
@@ -72,7 +72,10 @@ export function ConfirmationDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] max-w-md bg-gray-900 border border-gray-800 rounded-lg shadow-2xl p-6 animate-in fade-in zoom-in-95">
+        <Dialog.Content
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] max-w-md bg-gray-900 border border-gray-800 rounded-lg shadow-2xl p-6 animate-in fade-in zoom-in-95"
+        >
           <div className="flex items-center gap-4 mb-4">
             <div
               className={`shrink-0 w-12 h-12 rounded-full ${styles.iconBg} flex items-center justify-center`}
@@ -94,7 +97,9 @@ export function ConfirmationDialog({
             </div>
           )}
 
-          <div className="flex gap-3 w-full">
+          <div
+            className={`flex gap-3 w-full ${!cancelLabel ? "justify-end" : ""}`}
+          >
             {cancelLabel && (
               <button
                 onClick={handleCancel}
@@ -107,7 +112,11 @@ export function ConfirmationDialog({
             <button
               onClick={handleConfirm}
               disabled={isLoading}
-              className={`flex-1 px-4 py-2 ${styles.buttonBg} text-white rounded-lg transition-colors disabled:opacity-50`}
+              className={`${
+                cancelLabel ? "flex-1" : "min-w-[100px]"
+              } px-4 py-2 ${
+                styles.buttonBg
+              } text-white rounded-lg transition-colors disabled:opacity-50`}
             >
               {isLoading ? "Processing..." : confirmLabel}
             </button>

@@ -489,6 +489,7 @@ export function MyBattleCard({
         title="Link Copied"
         description="The battle link has been copied to your clipboard and is ready to paste."
         confirmLabel="OK"
+        cancelLabel={null}
         onConfirm={() => setShowCopiedDialog(false)}
         variant="success"
         icon={CheckCircle}
