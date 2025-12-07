@@ -139,12 +139,10 @@ export function ProfileBattlesFilter({
     (battle) => battle.isPublic && !battle.isLive
   );
   const pausedBattles = filteredBattles.filter(
-    (battle) =>
-      !battle.isPublic && battle.status === "paused" && !battle.isLive
+    (battle) => !battle.isPublic && battle.status === "paused" && !battle.isLive
   );
   const completedBattles = filteredBattles.filter(
-    (battle) =>
-      !battle.isPublic && battle.status !== "paused" && !battle.isLive
+    (battle) => !battle.isPublic && battle.status !== "paused" && !battle.isLive
   );
 
   // Check if any filters are active
