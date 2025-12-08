@@ -12,6 +12,7 @@ import {
   Settings,
   StopCircle,
   ThumbsUp,
+  Share2,
 } from "lucide-react";
 import { forwardRef, type ReactNode } from "react";
 import { AnimatedEq } from "@/components/animated-eq";
@@ -354,6 +355,7 @@ interface BuildMobileFanActionsOptions {
   isStartingLive?: boolean;
   isStoppingLive?: boolean;
   onGoLiveClick?: () => void;
+  onShareClick?: () => void;
 }
 
 /**
@@ -376,6 +378,7 @@ export function buildMobileFanActions({
   isStartingLive = false,
   isStoppingLive = false,
   onGoLiveClick,
+  onShareClick,
 }: BuildMobileFanActionsOptions): MobileFanButtonAction[] {
   const actions: MobileFanButtonAction[] = [];
 
@@ -396,6 +399,16 @@ export function buildMobileFanActions({
       disabled: goLiveState.isDisabled,
       // Red when not live, red when live (ending)
       variant: isLive ? "danger" : "danger",
+    });
+  }
+
+  // Share action
+  if (onShareClick) {
+    actions.push({
+      id: "share",
+      label: "Share",
+      icon: <Share2 className="w-5 h-5" />,
+      onClick: onShareClick,
     });
   }
 
