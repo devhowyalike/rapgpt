@@ -12,6 +12,7 @@ interface UseNavigationGuardOptions {
   when: boolean;
   message?: string;
   title?: string;
+  confirmLabel?: string;
   onConfirm?: () => Promise<void> | void;
 }
 
@@ -19,6 +20,7 @@ export function useNavigationGuard({
   when,
   message = "Are you sure you want to leave? Your progress will be lost.",
   title = "Leave page?",
+  confirmLabel = "Pause Match",
   onConfirm,
 }: UseNavigationGuardOptions) {
   const pathname = usePathname();
@@ -104,7 +106,7 @@ export function useNavigationGuard({
         onConfirm={handleConfirmNavigation}
         onCancel={handleCancelNavigation}
         isLoading={isConfirming}
-        confirmLabel="Pause Match"
+        confirmLabel={confirmLabel}
         cancelLabel="Stay on Page"
         variant="danger"
       />
@@ -113,6 +115,7 @@ export function useNavigationGuard({
       showDialog,
       title,
       message,
+      confirmLabel,
       isConfirming,
       handleConfirmNavigation,
       handleCancelNavigation,
