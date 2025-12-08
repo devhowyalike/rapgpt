@@ -170,6 +170,7 @@ export function BattleController({
     startLive,
     stopLive,
     votingTimeRemaining,
+    beginReadingPhase,
     beginVotingPhase,
     BattleEndedDialog,
     hostEndedBattle,
@@ -242,14 +243,16 @@ export function BattleController({
       votingCompletedRound !== battle.currentRound &&
       showVoting
     ) {
-      // Start voting phase with countdown (opens mobile drawer automatically)
-      beginVotingPhase(10);
+      // Start reading phase first (showing "Begin Voting" button)
+      // This gives the host control over when to actually start the voting timer
+      beginReadingPhase(20);
     }
   }, [
     battle,
     isLive,
     isReadingPhase,
     isVotingPhase,
+    beginReadingPhase,
     beginVotingPhase,
     votingCompletedRound,
     showVoting,
