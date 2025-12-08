@@ -215,8 +215,8 @@ export function StageSelect({
                 ) : (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-white/20">
                     <span className="text-6xl mb-4">🏟️</span>
-                    <span className="text-xl font-medium uppercase tracking-widest">
-                      Select a Stage
+                    <span className="text-xl font-medium uppercase tracking-widest hidden md:block">
+                      Let's take it to the stage...
                     </span>
                   </div>
                 )}
@@ -245,7 +245,7 @@ export function StageSelect({
                         "relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 group w-[calc(33.333%-0.5rem)] sm:w-[calc(20%-0.6rem)] md:w-[calc(20%-0.8rem)] lg:w-[calc(12.5%-0.875rem)]",
                         isSelected
                           ? "border-yellow-500 shadow-[0_0_20px_rgba(234,179,8,0.4)] scale-105 z-10"
-                          : "border-white/10 hover:border-white/30 hover:scale-105 hover:z-10",
+                          : "border-white/10 hover:border-white/30 hover:scale-105 hover:z-10"
                       )}
                     >
                       <Image
@@ -331,14 +331,14 @@ export function StageSelect({
                     "w-full sm:w-auto px-16 py-4 rounded-xl font-black text-xl tracking-widest transition-all duration-300 transform shadow-2xl",
                     !selectedStage || isCreating
                       ? "bg-gray-800 text-gray-600 cursor-not-allowed"
-                      : "bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.6)] text-white shadow-orange-500/20",
+                      : "bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.6)] text-white shadow-orange-500/20"
                   )}
                 >
                   {isCreating
                     ? "CREATING BATTLE..."
                     : selectedStage
-                      ? "START BATTLE"
-                      : "SELECT STAGE"}
+                    ? "START BATTLE"
+                    : "SELECT STAGE"}
                 </button>
               </div>
             </div>

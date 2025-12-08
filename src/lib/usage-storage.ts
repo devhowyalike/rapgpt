@@ -80,6 +80,9 @@ export async function getBattleTokenTotals(
 /**
  * Get aggregate token totals for many battles in one query.
  * Returns a map keyed by battleId for efficient lookups in the admin list.
+ *
+ * Note: Orphaned records (where battle has been deleted) are grouped under
+ * the special key "__deleted__" to preserve token usage statistics.
  */
 export async function getAllBattlesTokenTotals(): Promise<
   Record<string, BattleTokenTotals>
@@ -97,7 +100,9 @@ export async function getAllBattlesTokenTotals(): Promise<
 
   const map: Record<string, BattleTokenTotals> = {};
   for (const r of rows) {
-    map[r.battleId] = {
+    // Group orphaned records (null battleId from deleted battles) under special key
+    const key = r.battleId ?? "__deleted__";
+    map[key] = {
       inputTokens: Number(r.inputTokens ?? 0),
       outputTokens: Number(r.outputTokens ?? 0),
       totalTokens: Number(r.totalTokens ?? 0),
