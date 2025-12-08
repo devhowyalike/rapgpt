@@ -62,7 +62,7 @@ export function CharacterSelect({
   } = usePersonaSelection();
 
   const [hoveredPersona, setHoveredPersona] = useState<ClientPersona | null>(
-    null,
+    null
   );
   const [showStageSelect, setShowStageSelect] = useState(false);
   const [createAsLive, setCreateAsLive] = useState(false);
@@ -145,7 +145,7 @@ export function CharacterSelect({
           // This provides visual feedback that the session is being restored
           if (minLoadingDelay > 0) {
             await new Promise((resolve) =>
-              setTimeout(resolve, minLoadingDelay),
+              setTimeout(resolve, minLoadingDelay)
             );
           }
         }
@@ -375,11 +375,11 @@ export function CharacterSelect({
                         {primaryPersonas.map((persona) => {
                           const p1InGroup = isInGroup(
                             player1?.id ?? null,
-                            persona.id,
+                            persona.id
                           );
                           const p2InGroup = isInGroup(
                             player2?.id ?? null,
-                            persona.id,
+                            persona.id
                           );
                           const p1VariantIndex =
                             p1InGroup && player1
@@ -414,8 +414,8 @@ export function CharacterSelect({
                                     persona,
                                     selectionStep,
                                     player1,
-                                    player2,
-                                  ),
+                                    player2
+                                  )
                                 )
                               }
                               onMouseLeave={() => setHoveredPersona(null)}
@@ -453,7 +453,7 @@ export function CharacterSelect({
                                 selections.showStageSelect = true;
                                 sessionStorage.setItem(
                                   SESSION_STORAGE_KEY,
-                                  JSON.stringify(selections),
+                                  JSON.stringify(selections)
                                 );
                                 setSelectionStep("complete");
                                 setShowStageSelect(true);
@@ -470,10 +470,10 @@ export function CharacterSelect({
                       }}
                       disabled={!player1}
                       className={cn(
-                        "w-full px-8 md:px-12 py-4 rounded-lg font-black text-xl tracking-wider transition-all duration-300 transform",
+                        "w-full px-8 md:px-12 py-4 rounded-lg font-black text-lg tracking-wider transition-all duration-300 transform",
                         !player1
                           ? "bg-gray-800 text-gray-600 cursor-not-allowed"
-                          : "bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.8)] text-white shadow-lg shadow-yellow-500/20",
+                          : "bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.8)] text-white shadow-lg shadow-yellow-500/20"
                       )}
                     >
                       CONFIRM PLAYER 1
@@ -505,7 +505,7 @@ export function CharacterSelect({
                                 selections.showStageSelect = true;
                                 sessionStorage.setItem(
                                   SESSION_STORAGE_KEY,
-                                  JSON.stringify(selections),
+                                  JSON.stringify(selections)
                                 );
                                 setSelectionStep("complete");
                                 setShowStageSelect(true);
@@ -522,10 +522,10 @@ export function CharacterSelect({
                       }}
                       disabled={!player2}
                       className={cn(
-                        "w-full px-8 md:px-12 py-4 rounded-lg font-black text-xl tracking-wider transition-all duration-300 transform",
+                        "w-full px-8 md:px-12 py-4 rounded-lg font-black text-lg tracking-wider transition-all duration-300 transform",
                         !player2
                           ? "bg-gray-800 text-gray-600 cursor-not-allowed"
-                          : "bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.8)] text-white shadow-lg shadow-yellow-500/20",
+                          : "bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.8)] text-white shadow-lg shadow-yellow-500/20"
                       )}
                     >
                       CONFIRM PLAYER 2
