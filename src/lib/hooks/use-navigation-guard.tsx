@@ -4,16 +4,15 @@
 
 "use client";
 
-import * as Dialog from "@radix-ui/react-dialog";
-import { AlertTriangle } from "lucide-react";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface UseNavigationGuardOptions {
   when: boolean;
   message?: string;
   title?: string;
+  confirmLabel?: string;
   onConfirm?: () => Promise<void> | void;
 }
 
@@ -21,13 +20,14 @@ export function useNavigationGuard({
   when,
   message = "Are you sure you want to leave? Your progress will be lost.",
   title = "Leave page?",
+  confirmLabel = "Pause Match",
   onConfirm,
 }: UseNavigationGuardOptions) {
   const pathname = usePathname();
   const [showDialog, setShowDialog] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(
-    null,
+    null
   );
   const [navigationConfirmed, setNavigationConfirmed] = useState(false);
 
@@ -98,61 +98,28 @@ export function useNavigationGuard({
 
   const NavigationDialog = useCallback(
     () => (
-      <Dialog.Root open={showDialog} onOpenChange={setShowDialog}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-gray-900 border border-gray-800 rounded-lg shadow-2xl p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-start gap-4">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-red-500" />
-              </div>
-              <div className="flex-1">
-                <Dialog.Title className="text-xl font-bold text-white mb-2">
-                  {title}
-                </Dialog.Title>
-                <Dialog.Description className="text-gray-400 mb-4">
-                  {message}
-                </Dialog.Description>
-
-                <div className="flex gap-3 justify-end">
-                  <button
-                    type="button"
-                    onClick={handleCancelNavigation}
-                    disabled={isConfirming}
-                    className="px-4 py-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-medium transition-colors"
-                  >
-                    Stay on Page
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleConfirmNavigation}
-                    disabled={isConfirming}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-800 disabled:cursor-not-allowed rounded-lg text-white font-medium flex items-center gap-2 transition-colors"
-                  >
-                    {isConfirming ? (
-                      <>
-                        <LoadingSpinner size="sm" />
-                        Leaving...
-                      </>
-                    ) : (
-                      "Leave Page"
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+      <ConfirmationDialog
+        open={showDialog}
+        onOpenChange={setShowDialog}
+        title={title}
+        description={message}
+        onConfirm={handleConfirmNavigation}
+        onCancel={handleCancelNavigation}
+        isLoading={isConfirming}
+        confirmLabel={confirmLabel}
+        cancelLabel="Stay on Page"
+        variant="danger"
+      />
     ),
     [
       showDialog,
       title,
       message,
+      confirmLabel,
       isConfirming,
       handleConfirmNavigation,
       handleCancelNavigation,
-    ],
+    ]
   );
 
   return {

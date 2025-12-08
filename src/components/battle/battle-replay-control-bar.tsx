@@ -6,6 +6,9 @@
 "use client";
 
 import type { Battle } from "@/lib/shared";
+import { CheckCircle } from "lucide-react";
+import { useState } from "react";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { BattleOptionsDropdown } from "./battle-options-dropdown";
 import {
   buildMobileFanActions,
@@ -44,6 +47,7 @@ interface BattleReplayControlBarProps {
 }
 
 export function BattleReplayControlBar({
+  battle,
   activeTab,
   isDrawerOpen,
   showSongGenerator,
@@ -63,9 +67,16 @@ export function BattleReplayControlBar({
   isMobileDrawerOpen = false,
   canManage = false,
 }: BattleReplayControlBarProps) {
+  const [showCopiedDialog, setShowCopiedDialog] = useState(false);
   const showSongButton = showSongGenerator || showSongPlayer;
   const isScoresActive = activeTab === "scores" && isDrawerOpen;
   const isSongActive = activeTab === "song" && isDrawerOpen;
+
+  const handleShare = () => {
+    const url = `${window.location.origin}/battle/${battle.id}`;
+    navigator.clipboard.writeText(url);
+    setShowCopiedDialog(true);
+  };
 
   const mobileFanActions = buildMobileFanActions({
     showCommenting,
@@ -77,13 +88,18 @@ export function BattleReplayControlBar({
     mobileActiveTab,
     isMobileDrawerOpen,
     settingsActive,
+    onShareClick: handleShare,
   });
 
   return (
     <ControlBarContainer>
       {/* Scores Button */}
       {/* Desktop */}
-      <div className={`hidden md:flex flex-1 ${!showSongButton ? "justify-center" : ""}`}>
+      <div
+        className={`hidden md:flex flex-1 ${
+          !showSongButton ? "justify-center" : ""
+        }`}
+      >
         <ScoresButton
           isActive={isScoresActive}
           onClick={onScoresClick}
@@ -92,7 +108,11 @@ export function BattleReplayControlBar({
         />
       </div>
       {/* Mobile - Render directly */}
-      <div className={`md:hidden flex-1 ${!showSongButton ? "flex justify-center" : ""}`}>
+      <div
+        className={`md:hidden flex-1 ${
+          !showSongButton ? "flex justify-center" : ""
+        }`}
+      >
         <ScoresButton
           isActive={isScoresActive}
           onClick={onScoresClick}
@@ -135,6 +155,7 @@ export function BattleReplayControlBar({
             showVoting={showVoting}
             onToggleCommenting={onToggleCommenting}
             onToggleVoting={onToggleVoting}
+            battleId={battle.id}
             customTrigger={<OptionsButton />}
           />
         </div>
@@ -144,6 +165,18 @@ export function BattleReplayControlBar({
           <MobileFanButton actions={mobileFanActions} />
         </div>
       )}
+
+      <ConfirmationDialog
+        open={showCopiedDialog}
+        onOpenChange={setShowCopiedDialog}
+        title="Link Copied"
+        description="The battle link has been copied to your clipboard and is ready to paste."
+        confirmLabel="OK"
+        cancelLabel={null}
+        onConfirm={() => setShowCopiedDialog(false)}
+        variant="success"
+        icon={CheckCircle}
+      />
     </ControlBarContainer>
   );
 }

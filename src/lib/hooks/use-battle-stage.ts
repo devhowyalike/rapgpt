@@ -254,13 +254,8 @@ export function useBattleStage({
     }
   }
 
-  // Enable sticky personas only at end of round (voting/scores) or end of battle
-  // NOT during active verse generation/streaming
-  const enableStickyPersonas =
-    isReadingPhase ||
-    isVotingPhase ||
-    !!scoresAvailable ||
-    battle.status === "completed";
+  // Enable sticky personas always to keep profiles visible during streaming
+  const enableStickyPersonas = true;
 
   // When scores become visible on mobile, scroll them into view
   useEffect(() => {

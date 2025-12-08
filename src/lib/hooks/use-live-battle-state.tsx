@@ -6,7 +6,7 @@
 
 "use client";
 
-import * as Dialog from "@radix-ui/react-dialog";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Radio } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -463,40 +463,17 @@ export function useLiveBattleState({
   // Battle ended dialog component for viewers
   const BattleEndedDialog = useCallback(
     () => (
-      <Dialog.Root
+      <ConfirmationDialog
         open={showBattleEndedDialog}
         onOpenChange={setShowBattleEndedDialog}
-      >
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in" />
-          <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-gray-900 border border-gray-800 rounded-lg shadow-2xl p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-start gap-4">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-gray-700/50 flex items-center justify-center">
-                <Radio className="w-6 h-6 text-gray-400" />
-              </div>
-              <div className="flex-1">
-                <Dialog.Title className="text-xl font-bold text-white mb-2">
-                  Live Broadcast Ended
-                </Dialog.Title>
-                <Dialog.Description className="text-gray-400 mb-4">
-                  The host has ended this live battle. You can still view the
-                  battle results and replay the verses.
-                </Dialog.Description>
-
-                <div className="flex gap-3 justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setShowBattleEndedDialog(false)}
-                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white font-medium transition-colors"
-                  >
-                    Got it
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
+        title="Live Broadcast Ended"
+        description="The host has ended this live battle. You can still view the battle results and replay the verses."
+        confirmLabel="Got it"
+        cancelLabel={null}
+        onConfirm={() => setShowBattleEndedDialog(false)}
+        variant="default"
+        icon={Radio}
+      />
     ),
     [showBattleEndedDialog]
   );

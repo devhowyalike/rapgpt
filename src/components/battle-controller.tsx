@@ -209,6 +209,7 @@ export function BattleController({
       : battle?.status === "paused"
       ? "Leave now? We'll pause your match."
       : "Are you sure you want to leave?",
+    confirmLabel: isLive ? "End Battle" : "Pause Match",
     onConfirm: async () => {
       if (isLive) {
         await stopLive();

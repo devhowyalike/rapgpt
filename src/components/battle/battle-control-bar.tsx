@@ -4,7 +4,7 @@
 
 "use client";
 
-import { Radio } from "lucide-react";
+import { Radio, CheckCircle } from "lucide-react";
 import { useState } from "react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import type { Battle } from "@/lib/shared";
@@ -95,6 +95,13 @@ export function BattleControlBar({
   pauseLabel,
 }: BattleControlBarProps) {
   const [showGoLiveConfirmation, setShowGoLiveConfirmation] = useState(false);
+  const [showCopiedDialog, setShowCopiedDialog] = useState(false);
+
+  const handleShare = () => {
+    const url = `${window.location.origin}/battle/${battle.id}`;
+    navigator.clipboard.writeText(url);
+    setShowCopiedDialog(true);
+  };
 
   const handleGoLiveClick = () => {
     if (isLive) {
@@ -122,6 +129,7 @@ export function BattleControlBar({
     isStartingLive,
     isStoppingLive,
     onGoLiveClick: handleGoLiveClick,
+    onShareClick: handleShare,
   });
 
   // Show special message when host ended the battle (for viewers only)
@@ -172,6 +180,7 @@ export function BattleControlBar({
             isPausing={isCanceling || isGenerating}
             pauseLabel={pauseLabel}
             isLive={isLive}
+            battleId={battle.id}
             customTrigger={<OptionsButton />}
           />
         </div>
@@ -210,6 +219,18 @@ export function BattleControlBar({
         }}
         variant="danger"
         icon={Radio}
+      />
+
+      <ConfirmationDialog
+        open={showCopiedDialog}
+        onOpenChange={setShowCopiedDialog}
+        title="Link Copied"
+        description="The battle link has been copied to your clipboard and is ready to paste."
+        confirmLabel="OK"
+        cancelLabel={null}
+        onConfirm={() => setShowCopiedDialog(false)}
+        variant="success"
+        icon={CheckCircle}
       />
     </ControlBarContainer>
   );

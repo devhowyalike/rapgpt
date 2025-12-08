@@ -243,14 +243,14 @@ export function MainActionButton({
           ) : canAdvance ? (
             <div className="flex items-center justify-center gap-2 h-full">
               <ArrowRight className="w-5 h-5" />
-              <span className="leading-none pt-0.5">
+              <span className="leading-none">
                 {getAdvanceRoundButtonText(battle)}
               </span>
             </div>
           ) : (
             <div className="flex items-center justify-center gap-2 h-full">
               <Play className="w-5 h-5 shrink-0" />
-              <span className="whitespace-nowrap leading-none pt-0.5">
+              <span className="whitespace-nowrap leading-none">
                 {battle.verses.length === 0 ? "First:" : "Next:"}{" "}
                 {nextPerformerName}
               </span>
