@@ -203,7 +203,19 @@ export function BattleControlBar({
 
       {mobileFanActions.length > 0 && (
         <div className="xl:hidden ml-auto">
-          <MobileFanButton actions={mobileFanActions} />
+          <MobileFanButton
+            actions={mobileFanActions}
+            hint={
+              canManageLive &&
+              !isLive &&
+              !isStartingLive &&
+              !isStoppingLive &&
+              battle.verses.length === 0 &&
+              !isGenerating
+                ? "Tap to Go Live!"
+                : undefined
+            }
+          />
         </div>
       )}
 
