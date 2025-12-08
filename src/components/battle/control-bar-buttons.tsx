@@ -241,25 +241,36 @@ export function SongButton({
 }: SongButtonProps) {
   const getButtonState = () => {
     if (isSongPlaying) return "playing";
-    if (isActive) return "active";
+    // Prioritize generator state to ensure the CTA is visible and animated
     if (showSongGenerator) return "generator";
+    if (isActive) return "active";
     return "default";
   };
 
   const state = getButtonState();
 
+  const pulseAnimation = {
+    opacity: [1, 0.6, 1],
+    transition: {
+      duration: 2,
+      repeat: Infinity,
+      ease: "easeInOut",
+    },
+  };
+
   if (variant === "mobile") {
     return (
-      <button
+      <motion.button
         onClick={onClick}
+        animate={state === "generator" ? pulseAnimation : { opacity: 1 }}
         className={`
           flex-1 px-3 py-3 font-bold text-sm h-12
-          rounded-lg border-2 transition-all duration-200 flex items-center justify-center gap-2 w-full
+          rounded-lg border-2 transition-colors duration-200 flex items-center justify-center gap-2 w-full
           ${
             state === "playing" || state === "active"
               ? "bg-green-600 text-white border-green-500 shadow-lg shadow-green-500/30"
               : state === "generator"
-              ? "bg-green-900/40 border-green-600 text-green-400 animate-pulse"
+              ? "bg-green-900/40 border-green-600 text-green-400"
               : "bg-gray-800/80 border-gray-700/50 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
           }
         `}
@@ -285,7 +296,7 @@ export function SongButton({
             <span>Song</span>
           </>
         )}
-      </button>
+      </motion.button>
     );
   }
 
@@ -293,14 +304,15 @@ export function SongButton({
   return (
     <motion.button
       onClick={onClick}
+      animate={state === "generator" ? pulseAnimation : { opacity: 1 }}
       className={`
         flex-1 px-4 py-2.5 font-bold text-sm
-        rounded-lg border-2 transition-all duration-200 flex items-center justify-center gap-2
+        rounded-lg border-2 transition-colors duration-200 flex items-center justify-center gap-2
         ${
           state === "playing" || state === "active"
             ? "bg-linear-to-r from-green-600 to-emerald-600 border-green-500 text-white shadow-lg shadow-green-500/30"
             : state === "generator"
-            ? "bg-linear-to-r from-green-700/40 to-emerald-700/40 border-green-600 text-green-300 hover:from-green-700/60 hover:to-emerald-700/60 hover:border-green-500 animate-pulse"
+            ? "bg-linear-to-r from-green-700/40 to-emerald-700/40 border-green-600 text-green-300 hover:from-green-700/60 hover:to-emerald-700/60 hover:border-green-500"
             : "bg-gray-800/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
         }
       `}
