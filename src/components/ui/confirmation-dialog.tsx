@@ -13,7 +13,7 @@ interface ConfirmationDialogProps {
   onConfirm: () => void | Promise<void>;
   onCancel?: () => void;
   isLoading?: boolean;
-  variant?: "danger" | "warning" | "info" | "success";
+  variant?: "danger" | "warning" | "info" | "success" | "default";
   icon?: LucideIcon;
   errorMessage?: string;
 }
@@ -62,6 +62,11 @@ export function ConfirmationDialog({
       iconBg: "bg-green-500/20",
       iconColor: "text-green-500",
       buttonBg: "bg-green-600 hover:bg-green-700",
+    },
+    default: {
+      iconBg: "bg-gray-700/50",
+      iconColor: "text-gray-400",
+      buttonBg: "bg-purple-600 hover:bg-purple-700",
     },
   };
 
