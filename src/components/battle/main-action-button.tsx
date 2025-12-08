@@ -105,7 +105,7 @@ export function MainActionButton({
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-2xl font-bebas-neue leading-none pt-1">
+                <span className="text-2xl font-bebas-neue leading-none pt-1 xl:hidden">
                   {votingTimeRemaining}s
                 </span>
                 <span className="hidden md:inline text-sm text-white/80 whitespace-nowrap">
@@ -243,7 +243,7 @@ export function MainActionButton({
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-2xl font-bebas-neue leading-none pt-1">
+                <span className="text-2xl font-bebas-neue leading-none pt-1 xl:hidden">
                   {votingTimeRemaining}s
                 </span>
                 <span className="hidden md:inline text-sm text-white/80 whitespace-nowrap">
