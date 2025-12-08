@@ -4,7 +4,8 @@
 
 "use client";
 
-import { MessageSquare, Pause, Settings, Vote } from "lucide-react";
+import { MessageSquare, Pause, Settings, Vote, X } from "lucide-react";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,8 +40,10 @@ export function BattleOptionsDropdown({
   customTrigger,
   isLive = false,
 }: BattleOptionsDropdownProps) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         {customTrigger || (
           <button
@@ -51,7 +54,16 @@ export function BattleOptionsDropdown({
           </button>
         )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-64">
+      <DropdownMenuContent align="start" className="w-64 relative">
+        {/* Close button - only visible on xl screens */}
+        <button
+          onClick={() => setOpen(false)}
+          className="hidden xl:flex absolute top-2 right-2 items-center justify-center w-6 h-6 rounded-sm hover:bg-gray-700 transition-colors text-gray-400 hover:text-gray-100 z-10"
+          aria-label="Close menu"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
         <DropdownMenuLabel>Battle Options</DropdownMenuLabel>
         <DropdownMenuSeparator />
 
