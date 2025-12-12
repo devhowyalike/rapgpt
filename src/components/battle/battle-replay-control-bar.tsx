@@ -6,9 +6,8 @@
 "use client";
 
 import type { Battle } from "@/lib/shared";
-import { CheckCircle } from "lucide-react";
 import { useState } from "react";
-import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { useBattleShare } from "@/hooks/use-battle-share";
 import { BattleOptionsDropdown } from "./battle-options-dropdown";
 import {
   buildMobileFanActions,
@@ -67,15 +66,14 @@ export function BattleReplayControlBar({
   isMobileDrawerOpen = false,
   canManage = false,
 }: BattleReplayControlBarProps) {
-  const [showCopiedDialog, setShowCopiedDialog] = useState(false);
+  const { shareBattle, ShareDialog } = useBattleShare();
   const showSongButton = showSongGenerator || showSongPlayer;
   const isScoresActive = activeTab === "scores" && isDrawerOpen;
   const isSongActive = activeTab === "song" && isDrawerOpen;
 
-  const handleShare = () => {
+  const handleShare = async () => {
     const url = `${window.location.origin}/battle/${battle.id}`;
-    navigator.clipboard.writeText(url);
-    setShowCopiedDialog(true);
+    await shareBattle(url);
   };
 
   const mobileFanActions = buildMobileFanActions({
@@ -166,17 +164,7 @@ export function BattleReplayControlBar({
         </div>
       )}
 
-      <ConfirmationDialog
-        open={showCopiedDialog}
-        onOpenChange={setShowCopiedDialog}
-        title="Link Copied"
-        description="The battle link has been copied to your clipboard and is ready to paste."
-        confirmLabel="OK"
-        cancelLabel={null}
-        onConfirm={() => setShowCopiedDialog(false)}
-        variant="success"
-        icon={CheckCircle}
-      />
+      <ShareDialog />
     </ControlBarContainer>
   );
 }

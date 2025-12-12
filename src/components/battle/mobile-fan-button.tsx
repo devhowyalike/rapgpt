@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { type ReactNode, useMemo, useState } from "react";
+import { MobileFanHint } from "./mobile-fan-hint";
 
 export interface MobileFanButtonAction {
   id: string;
@@ -20,6 +21,7 @@ interface MobileFanButtonProps {
   className?: string;
   variant?: "floating" | "inline";
   bottomOffset?: string;
+  hint?: string;
 }
 
 /**
@@ -32,8 +34,10 @@ export function MobileFanButton({
   className = "",
   variant = "inline",
   bottomOffset,
+  hint,
 }: MobileFanButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const enabledActions = useMemo(
     () => actions.filter((action) => !action.disabled),
     [actions]
@@ -116,7 +120,10 @@ export function MobileFanButton({
 
           <button
             type="button"
-            onClick={() => setIsOpen((prev) => !prev)}
+            onClick={() => {
+              setIsOpen((prev) => !prev);
+              setHasInteracted(true);
+            }}
             className={`w-(--control-button-height) h-(--control-button-height) rounded-full border-2 border-gray-700 bg-gray-900 text-white shadow-xl flex items-center justify-center transition-transform ${
               isOpen ? "rotate-45" : "hover:scale-105"
             }`}
@@ -124,6 +131,11 @@ export function MobileFanButton({
           >
             <Plus className="w-6 h-6" strokeWidth={2.5} />
           </button>
+
+          <MobileFanHint
+            text={hint || ""}
+            isVisible={!isOpen && !hasInteracted && !!hint}
+          />
         </div>
       </div>
     </>

@@ -66,48 +66,58 @@ export function CommentsContent({
       {/* Comments List - scrollable */}
       <div
         ref={scrollContainerRef}
-        className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3"
+        className={`flex-1 min-h-0 overflow-y-auto p-4 ${
+          comments.length === 0
+            ? "flex flex-col items-center justify-center"
+            : "space-y-3"
+        }`}
       >
-        <AnimatePresence initial={false}>
-          {comments.map((c) => (
-            <motion.div
-              key={c.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, height: 0 }}
-              className="bg-gray-800 rounded-lg p-3"
-            >
-              <div className="flex items-start gap-2">
-                {c.imageUrl ? (
-                  <img
-                    src={c.imageUrl}
-                    alt={c.username}
-                    className="w-8 h-8 rounded-full shrink-0"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
-                    {c.username.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline gap-2">
-                    <span className="font-medium text-white text-sm">
-                      {c.username}
-                    </span>
-                    {c.round && (
-                      <span className="text-xs text-gray-500">
-                        Round {c.round}
+        {comments.length === 0 ? (
+          <p className="text-center text-gray-400 text-sm">
+            Be the first to start the conversation!
+          </p>
+        ) : (
+          <AnimatePresence initial={false}>
+            {comments.map((c) => (
+              <motion.div
+                key={c.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, height: 0 }}
+                className="bg-gray-800 rounded-lg p-3"
+              >
+                <div className="flex items-start gap-2">
+                  {c.imageUrl ? (
+                    <img
+                      src={c.imageUrl}
+                      alt={c.username}
+                      className="w-8 h-8 rounded-full shrink-0"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                      {c.username.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-medium text-white text-sm">
+                        {c.username}
                       </span>
-                    )}
+                      {c.round && (
+                        <span className="text-xs text-gray-500">
+                          Round {c.round}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-gray-300 text-sm mt-1 wrap-break-word">
+                      {c.content}
+                    </p>
                   </div>
-                  <p className="text-gray-300 text-sm mt-1 wrap-break-word">
-                    {c.content}
-                  </p>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        )}
       </div>
 
       {/* Comment Input - fixed at bottom */}

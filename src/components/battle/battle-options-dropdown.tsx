@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  MessageSquare,
-  Pause,
-  Settings,
-  Vote,
-  X,
-  Share2,
-  CheckCircle,
-} from "lucide-react";
+import { MessageSquare, Pause, Settings, Vote, X, Share2 } from "lucide-react";
 import { useState } from "react";
 import {
   DropdownMenu,
@@ -19,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
-import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { useBattleShare } from "@/hooks/use-battle-share";
 
 interface BattleOptionsDropdownProps {
   showCommenting: boolean;
@@ -48,12 +40,11 @@ export function BattleOptionsDropdown({
   battleId,
 }: BattleOptionsDropdownProps) {
   const [open, setOpen] = useState(false);
-  const [showCopiedDialog, setShowCopiedDialog] = useState(false);
+  const { shareBattle, ShareDialog } = useBattleShare();
 
-  const handleShare = () => {
+  const handleShare = async () => {
     const url = `${window.location.origin}/battle/${battleId}`;
-    navigator.clipboard.writeText(url);
-    setShowCopiedDialog(true);
+    await shareBattle(url);
     setOpen(false);
   };
 
@@ -137,17 +128,7 @@ export function BattleOptionsDropdown({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ConfirmationDialog
-        open={showCopiedDialog}
-        onOpenChange={setShowCopiedDialog}
-        title="Link Copied"
-        description="The battle link has been copied to your clipboard and is ready to paste."
-        confirmLabel="OK"
-        cancelLabel={null}
-        onConfirm={() => setShowCopiedDialog(false)}
-        variant="success"
-        icon={CheckCircle}
-      />
+      <ShareDialog />
     </>
   );
 }

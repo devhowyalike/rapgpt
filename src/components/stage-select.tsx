@@ -328,7 +328,7 @@ export function StageSelect({
                   onClick={handleStartBattle}
                   disabled={!selectedStage || isCreating}
                   className={cn(
-                    "w-full sm:w-auto px-16 py-4 rounded-xl font-black text-xl tracking-widest transition-all duration-300 transform shadow-2xl",
+                    "w-full sm:w-auto px-16 py-4 rounded-xl font-black text-lg tracking-widest transition-all duration-300 transform shadow-2xl",
                     !selectedStage || isCreating
                       ? "bg-gray-800 text-gray-600 cursor-not-allowed"
                       : "bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.6)] text-white shadow-orange-500/20"

@@ -1,29 +1,31 @@
-/**
- * Animated robot for score calculation
- */
-
 "use client";
+
+import { motion } from "framer-motion";
 
 export function ScoreCalcAnimation() {
   return (
-    <div className="flex items-center gap-1.5">
-      {/* Robot head with blinking antenna */}
-      <div className="relative">
-        <span className="text-2xl animate-bounce">🤖</span>
-        <span
-          className="absolute -top-1 left-1/2 -translate-x-1/2 text-xs animate-ping"
-          style={{ animationDuration: "1.5s" }}
-        >
-          💡
-        </span>
-      </div>
-      {/* Animated gears */}
-      <span
-        className="text-lg animate-spin"
-        style={{ animationDuration: "2s" }}
-      >
-        ⚙️
-      </span>
+    <div className="flex items-center gap-1 h-5">
+      {[0, 1, 2].map((i) => (
+        <motion.div
+          key={i}
+          className="w-1.5 bg-white rounded-full"
+          initial={{ height: "40%" }}
+          animate={{
+            height: ["40%", "100%", "40%"],
+            backgroundColor: [
+              "rgba(255, 255, 255, 0.5)",
+              "rgba(255, 255, 255, 1)",
+              "rgba(255, 255, 255, 0.5)",
+            ],
+          }}
+          transition={{
+            duration: 0.8,
+            repeat: Infinity,
+            delay: i * 0.2,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
     </div>
   );
 }

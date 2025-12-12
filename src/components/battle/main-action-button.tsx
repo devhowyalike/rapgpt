@@ -105,7 +105,7 @@ export function MainActionButton({
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-2xl font-bebas-neue leading-none pt-1">
+                <span className="text-2xl font-bebas-neue leading-none pt-1 xl:hidden">
                   {votingTimeRemaining}s
                 </span>
                 <span className="hidden md:inline text-sm text-white/80 whitespace-nowrap">
@@ -155,9 +155,20 @@ export function MainActionButton({
         <motion.button
           key="action"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          animate={{
+            opacity: 1,
+            scale: isVotingPhase || canAdvance ? [1, 1.02, 1] : 1,
+            filter:
+              isVotingPhase || canAdvance
+                ? ["brightness(1)", "brightness(1.1)", "brightness(1)"]
+                : "brightness(1)",
+          }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          transition={{
+            opacity: { duration: 0.3 },
+            scale: { repeat: Infinity, duration: 2, ease: "easeInOut" },
+            filter: { repeat: Infinity, duration: 2, ease: "easeInOut" },
+          }}
           onClick={
             isCalculatingScores
               ? undefined
@@ -186,11 +197,11 @@ export function MainActionButton({
                 : isReadingPhase
                 ? "bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
                 : isVotingPhase
-                ? "bg-linear-to-r from-purple-600 to-pink-600 animate-pulse"
+                ? "bg-linear-to-r from-purple-600 to-pink-600"
                 : canAdvance
-                ? "bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 animate-pulse"
+                ? "bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
                 : canGenerate
-                ? "bg-linear-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg shadow-green-500/50"
+                ? "bg-linear-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-md"
                 : "bg-linear-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"
             }
             ${
@@ -232,7 +243,7 @@ export function MainActionButton({
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-2xl font-bebas-neue leading-none pt-1">
+                <span className="text-2xl font-bebas-neue leading-none pt-1 xl:hidden">
                   {votingTimeRemaining}s
                 </span>
                 <span className="hidden md:inline text-sm text-white/80 whitespace-nowrap">

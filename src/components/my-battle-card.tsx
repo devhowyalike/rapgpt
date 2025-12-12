@@ -3,7 +3,6 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {
   AlertTriangle,
-  CheckCircle,
   Eye,
   Globe,
   Lock,
@@ -19,8 +18,8 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import { BattleStatusButton } from "@/components/battle-status-button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { useBattleShare } from "@/hooks/use-battle-share";
 import { getWinnerPosition } from "@/lib/battle-engine";
 import { calculateTotalScores } from "@/lib/battle-position-utils";
 import { DEFAULT_STAGE, getStage } from "@/lib/shared/stages";
@@ -75,8 +74,8 @@ export function MyBattleCard({
   const [isTogglingPublic, setIsTogglingPublic] = useState(false);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [showUnpublishDialog, setShowUnpublishDialog] = useState(false);
-  const [showCopiedDialog, setShowCopiedDialog] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { shareBattle, ShareDialog } = useBattleShare();
 
   const personas = {
     player1: battle.player1Persona as any,
@@ -90,9 +89,8 @@ export function MyBattleCard({
     setIsPublic(battle.isPublic || false);
   }, [battle.isPublic]);
 
-  const handleShare = () => {
-    navigator.clipboard.writeText(battleUrl);
-    setShowCopiedDialog(true);
+  const handleShare = async () => {
+    await shareBattle(battleUrl);
   };
 
   const handleTogglePublic = async () => {
@@ -494,17 +492,7 @@ export function MyBattleCard({
         icon={AlertTriangle}
       />
 
-      <ConfirmationDialog
-        open={showCopiedDialog}
-        onOpenChange={setShowCopiedDialog}
-        title="Link Copied"
-        description="The battle link has been copied to your clipboard and is ready to paste."
-        confirmLabel="OK"
-        cancelLabel={null}
-        onConfirm={() => setShowCopiedDialog(false)}
-        variant="success"
-        icon={CheckCircle}
-      />
+      <ShareDialog />
     </div>
   );
 }

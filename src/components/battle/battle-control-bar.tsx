@@ -4,8 +4,9 @@
 
 "use client";
 
-import { Radio, CheckCircle } from "lucide-react";
+import { Radio } from "lucide-react";
 import { useState } from "react";
+import { useBattleShare } from "@/hooks/use-battle-share";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import type { Battle } from "@/lib/shared";
 import { BattleOptionsDropdown } from "./battle-options-dropdown";
@@ -95,12 +96,11 @@ export function BattleControlBar({
   pauseLabel,
 }: BattleControlBarProps) {
   const [showGoLiveConfirmation, setShowGoLiveConfirmation] = useState(false);
-  const [showCopiedDialog, setShowCopiedDialog] = useState(false);
+  const { shareBattle, ShareDialog } = useBattleShare();
 
-  const handleShare = () => {
+  const handleShare = async () => {
     const url = `${window.location.origin}/battle/${battle.id}`;
-    navigator.clipboard.writeText(url);
-    setShowCopiedDialog(true);
+    await shareBattle(url);
   };
 
   const handleGoLiveClick = () => {
@@ -203,7 +203,19 @@ export function BattleControlBar({
 
       {mobileFanActions.length > 0 && (
         <div className="xl:hidden ml-auto">
-          <MobileFanButton actions={mobileFanActions} />
+          <MobileFanButton
+            actions={mobileFanActions}
+            hint={
+              canManageLive &&
+              !isLive &&
+              !isStartingLive &&
+              !isStoppingLive &&
+              battle.verses.length === 0 &&
+              !isGenerating
+                ? "Tap to Go Live!"
+                : undefined
+            }
+          />
         </div>
       )}
 
@@ -221,17 +233,7 @@ export function BattleControlBar({
         icon={Radio}
       />
 
-      <ConfirmationDialog
-        open={showCopiedDialog}
-        onOpenChange={setShowCopiedDialog}
-        title="Link Copied"
-        description="The battle link has been copied to your clipboard and is ready to paste."
-        confirmLabel="OK"
-        cancelLabel={null}
-        onConfirm={() => setShowCopiedDialog(false)}
-        variant="success"
-        icon={CheckCircle}
-      />
+      <ShareDialog />
     </ControlBarContainer>
   );
 }

@@ -65,7 +65,6 @@ export function useBattleStage({
   mode,
   isReadingPhase,
   isVotingPhase,
-  votingCompletedRound,
   scoreDelaySeconds,
 }: UseBattleStageOptions): BattleStageState {
   const isReplayMode = mode === "replay";
@@ -116,17 +115,10 @@ export function useBattleStage({
 
   // Show round winner badge when:
   // 1. Replay mode: always show if score exists
-  // 2. Voting is enabled (true or undefined/default) AND voting has been completed for the current round, OR
-  // 3. Voting is explicitly disabled (false) AND the round has scores (is complete)
+  // 2. Active mode: show when scores are revealed (after delay)
   const shouldShowRoundWinner = isReplayMode
     ? !!currentRoundScore
-    : !!(
-        currentRoundScore &&
-        ((battle.votingEnabled !== false &&
-          votingCompletedRound !== null &&
-          votingCompletedRound >= battle.currentRound) ||
-          (battle.votingEnabled === false && !isReadingPhase && !isVotingPhase))
-      );
+    : shouldShowScores;
 
   // Track scroll position to collapse header on mobile (replay mode)
   useEffect(() => {

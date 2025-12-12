@@ -156,9 +156,11 @@ export function VotingContent({
           battle.scores.length > 0 && (
             <div className="bg-gray-800 rounded-lg p-3 mb-4">
               <p className="text-center text-white text-sm">
-                {battle.currentRound === ROUNDS_PER_BATTLE
-                  ? "Voting has ended"
-                  : "Voting will begin at the end of the round"}
+                {battle.status === "completed" ||
+                (battle.currentRound === ROUNDS_PER_BATTLE &&
+                  votingCompletedRound === ROUNDS_PER_BATTLE)
+                  ? "Voting complete"
+                  : "Voting will resume at the end of the round"}
               </p>
             </div>
           )}
