@@ -8,7 +8,7 @@ import {
   getFirstVerseMessage,
 } from "@/lib/context-overrides";
 import type { Verse } from "@/lib/shared";
-import { getPersona } from "@/lib/shared";
+import { getPersona } from "@/lib/shared/personas";
 import { recordBattleTokenUsage } from "@/lib/usage-storage";
 import { broadcastEvent } from "@/lib/websocket/broadcast-helper";
 import type {
