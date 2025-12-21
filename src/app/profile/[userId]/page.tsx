@@ -184,14 +184,9 @@ export default async function ProfilePage({
       {/* Battles Section */}
       <div className="bg-linear-to-b from-stage-darker to-stage-dark min-h-[30vh] flex flex-col items-center p-6 pt-6 pb-12">
         <div className="max-w-6xl mx-auto w-full">
-          {isOwnProfile && (
-            <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
-              <h2 className="font-bebas text-3xl md:text-4xl text-white">
-                My e-Beefs
-              </h2>
-              {!isViewingAsPublic && userBattles.length > 0 && (
-                <CreateBattleButton isSignedIn={true} mobileText="Create" />
-              )}
+          {isOwnProfile && !isViewingAsPublic && userBattles.length > 0 && (
+            <div className="flex items-center justify-end mb-8 pb-4 border-b border-white/5">
+              <CreateBattleButton isSignedIn={true} mobileText="Create" />
             </div>
           )}
 
