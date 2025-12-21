@@ -5,7 +5,7 @@ import { Sparkles } from "lucide-react";
 
 export function GuestProfileCallout() {
   return (
-    <div className="bg-linear-to-r from-purple-900/30 via-pink-900/30 to-purple-900/30 backdrop-blur-sm border border-purple-500/30 rounded-lg p-6 mt-8">
+    <div className="bg-linear-to-r from-purple-900/30 via-pink-900/30 to-purple-900/30 backdrop-blur-sm border border-purple-500/30 rounded-lg p-6">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="text-center sm:text-left">
           <h3 className="font-bebas text-xl sm:text-2xl text-white mb-1 text-pretty">

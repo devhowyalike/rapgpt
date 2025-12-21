@@ -100,7 +100,7 @@ export default async function ProfilePage({
       <SiteHeader />
 
       {/* Hero Section - Matches Homepage Design */}
-      <section className="relative pt-24 pb-12 md:pt-32 md:pb-12 overflow-hidden bg-black text-white selection:bg-yellow-500/30">
+      <section className="relative pt-24 pb-0 md:pt-32 md:pb-0 overflow-hidden bg-black text-white selection:bg-yellow-500/30">
         {/* Background Effects */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl z-0 pointer-events-none">
@@ -182,16 +182,18 @@ export default async function ProfilePage({
       </section>
 
       {/* Battles Section */}
-      <div className="bg-linear-to-b from-stage-darker to-stage-dark min-h-[60vh] flex flex-col items-center p-6 pt-12 pb-24">
+      <div className="bg-linear-to-b from-stage-darker to-stage-dark min-h-[30vh] flex flex-col items-center p-6 pt-6 pb-12">
         <div className="max-w-6xl mx-auto w-full">
-          <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
-            <h2 className="font-bebas text-3xl md:text-4xl text-white">
-              {isOwnProfile ? "My e-Beefs" : "e-Beefs"}
-            </h2>
-            {isOwnProfile && !isViewingAsPublic && userBattles.length > 0 && (
-              <CreateBattleButton isSignedIn={true} mobileText="Create" />
-            )}
-          </div>
+          {isOwnProfile && (
+            <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
+              <h2 className="font-bebas text-3xl md:text-4xl text-white">
+                My e-Beefs
+              </h2>
+              {!isViewingAsPublic && userBattles.length > 0 && (
+                <CreateBattleButton isSignedIn={true} mobileText="Create" />
+              )}
+            </div>
+          )}
 
           {!profileUser.isProfilePublic && !isOwnProfile ? (
             <div className="bg-gray-900/50 border border-white/10 rounded-xl p-12 text-center max-w-2xl mx-auto mt-8">
@@ -240,7 +242,7 @@ export default async function ProfilePage({
 
       {/* Guest Callout - Show to non-signed-in users */}
       {!clerkUserId && (
-        <div className="bg-stage-dark border-t border-white/5 py-12">
+        <div className="bg-stage-dark border-t border-white/5 pt-12 pb-24">
           <div className="max-w-4xl mx-auto px-4">
             <GuestProfileCallout />
           </div>

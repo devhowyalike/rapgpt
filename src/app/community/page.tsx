@@ -83,7 +83,7 @@ export default async function CommunityPage({
       </section>
 
       {/* Main Content */}
-      <div className="bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center pt-2 pb-4 px-4 md:pt-4 md:pb-6 md:px-6 min-h-[50vh]">
+      <div className="bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center pt-2 pb-12 px-4 md:pt-4 md:pb-16 md:px-6 min-h-[50vh]">
         <div className="max-w-7xl mx-auto w-full">
           {allUsers.length === 0 ? (
             <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-12 text-center max-w-2xl mx-auto mt-8">
@@ -138,7 +138,7 @@ export default async function CommunityPage({
           )}
 
           {!isAuthenticated && (
-            <div className="mt-12">
+            <div className="mt-16">
               <GuestProfileCallout />
             </div>
           )}
