@@ -10,6 +10,7 @@ import {
   Shield,
   User,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BattleRoundsDisplay } from "@/components/admin/battle-rounds-display";
@@ -161,12 +162,15 @@ export default async function AdminBattleDetailsPage({
             <h2 className="text-white text-2xl font-bebas mb-4">Matchup</h2>
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-gray-700/50 rounded-lg">
-                <img
-                  src={battle.personas.player1.avatar}
-                  alt={battle.personas.player1.name}
-                  className="w-16 h-16 rounded-full border-2"
-                  style={{ borderColor: battle.personas.player1.accentColor }}
-                />
+                <div className="relative w-16 h-16 shrink-0">
+                  <Image
+                    src={battle.personas.player1.avatar}
+                    alt={battle.personas.player1.name}
+                    fill
+                    className="rounded-full border-2 object-cover"
+                    style={{ borderColor: battle.personas.player1.accentColor }}
+                  />
+                </div>
                 <div>
                   <h3
                     className="text-xl font-bold"
@@ -181,12 +185,15 @@ export default async function AdminBattleDetailsPage({
               </div>
               <div className="text-center text-gray-500 font-bold">VS</div>
               <div className="flex items-center gap-4 p-4 bg-gray-700/50 rounded-lg">
-                <img
-                  src={battle.personas.player2.avatar}
-                  alt={battle.personas.player2.name}
-                  className="w-16 h-16 rounded-full border-2"
-                  style={{ borderColor: battle.personas.player2.accentColor }}
-                />
+                <div className="relative w-16 h-16 shrink-0">
+                  <Image
+                    src={battle.personas.player2.avatar}
+                    alt={battle.personas.player2.name}
+                    fill
+                    className="rounded-full border-2 object-cover"
+                    style={{ borderColor: battle.personas.player2.accentColor }}
+                  />
+                </div>
                 <div>
                   <h3
                     className="text-xl font-bold"

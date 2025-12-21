@@ -15,6 +15,7 @@ import {
   ThumbsUp,
   Trash2,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
@@ -329,20 +330,36 @@ export function MyBattleCard({
         >
           <div className="flex flex-col gap-1">
             {/* Matchup Title */}
-            <div className="flex flex-col md:flex-row md:flex-wrap md:items-baseline gap-x-2 text-lg md:text-xl font-bebas tracking-wide leading-tight">
-              <div className="flex items-center gap-2 truncate">
-                <span className="text-blue-400">{personas.player1.name}</span>
+            <div className="flex flex-col md:flex-row md:flex-wrap md:items-center gap-x-3 gap-y-1 text-lg md:text-xl font-bebas tracking-wide leading-tight">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="relative w-8 h-8 rounded-full overflow-hidden border border-blue-400/30 shrink-0">
+                  <Image
+                    src={personas.player1.avatar}
+                    alt={personas.player1.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <span className="text-blue-400 truncate">{personas.player1.name}</span>
                 {isCompleted && winnerPosition === "player1" && (
-                  <span title="Winner">🏆</span>
+                  <span title="Winner" className="shrink-0 text-base">🏆</span>
                 )}
-                <span className="text-gray-600 text-sm font-sans italic font-bold">
+                <span className="text-gray-600 text-sm font-sans italic font-bold ml-1">
                   vs
                 </span>
               </div>
-              <div className="flex items-center gap-2 truncate">
-                <span className="text-red-400">{personas.player2.name}</span>
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="relative w-8 h-8 rounded-full overflow-hidden border border-red-400/30 shrink-0">
+                  <Image
+                    src={personas.player2.avatar}
+                    alt={personas.player2.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <span className="text-red-400 truncate">{personas.player2.name}</span>
                 {isCompleted && winnerPosition === "player2" && (
-                  <span title="Winner">🏆</span>
+                  <span title="Winner" className="shrink-0 text-base">🏆</span>
                 )}
               </div>
             </div>

@@ -8,6 +8,7 @@ import {
   useUser,
 } from "@clerk/nextjs";
 import { ChevronDown, LogOut, Settings, User } from "lucide-react";
+import Image from "next/image";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,11 +53,14 @@ export function UserButton() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors text-white">
-          <img
-            src={user?.imageUrl}
-            alt={displayName}
-            className="w-8 h-8 rounded-full border-2 border-purple-500"
-          />
+          <div className="relative w-8 h-8 shrink-0">
+            <Image
+              src={user?.imageUrl || ""}
+              alt={displayName}
+              fill
+              className="rounded-full border-2 border-purple-500 object-cover"
+            />
+          </div>
           <span className="hidden sm:inline text-sm font-medium">
             {displayName}
           </span>

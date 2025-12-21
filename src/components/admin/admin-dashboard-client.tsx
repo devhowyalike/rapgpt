@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye, EyeOff, Music, Shield, Star, User } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
 import { DeleteBattleButton } from "@/components/admin/delete-battle-button";
@@ -18,7 +19,7 @@ export function AdminDashboardClient({
   currentUserId,
 }: AdminDashboardClientProps) {
   const [selectedUserId, setSelectedUserId] = React.useState<string | null>(
-    null,
+    null
   );
   const [userBattles, setUserBattles] = React.useState<BattleDB[]>([]);
   const [isLoadingBattles, setIsLoadingBattles] = React.useState(false);
@@ -76,11 +77,14 @@ export function AdminDashboardClient({
                     className="flex items-center gap-3 flex-1 hover:opacity-80 transition-opacity"
                   >
                     {user.imageUrl && (
-                      <img
-                        src={user.imageUrl}
-                        alt={user.displayName}
-                        className="w-10 h-10 rounded-full"
-                      />
+                      <div className="relative w-10 h-10 shrink-0">
+                        <Image
+                          src={user.imageUrl}
+                          alt={user.displayName}
+                          fill
+                          className="rounded-full object-cover"
+                        />
+                      </div>
                     )}
                     <div className="text-left">
                       <div className="text-white font-semibold">
@@ -191,8 +195,26 @@ export function AdminDashboardClient({
                           {battle.title}
                         </Link>
                       </div>
-                      <div className="text-gray-400 text-sm mt-1">
-                        {personas.player1.name} vs. {personas.player2.name}
+                      <div className="text-gray-400 text-sm mt-1 flex items-center gap-2">
+                        <div className="relative w-5 h-5 shrink-0">
+                          <Image
+                            src={personas.player1.avatar}
+                            alt={personas.player1.name}
+                            fill
+                            className="rounded-full object-cover"
+                          />
+                        </div>
+                        {personas.player1.name}
+                        <span className="text-gray-500 mx-1">vs.</span>
+                        <div className="relative w-5 h-5 shrink-0">
+                          <Image
+                            src={personas.player2.avatar}
+                            alt={personas.player2.name}
+                            fill
+                            className="rounded-full object-cover"
+                          />
+                        </div>
+                        {personas.player2.name}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
