@@ -73,9 +73,11 @@ export function CommentsContent({
         }`}
       >
         {comments.length === 0 ? (
-          <p className="text-center text-gray-400 text-sm">
-            Be the first to start the conversation!
-          </p>
+          !isArchived && (
+            <p className="text-center text-gray-400 text-sm">
+              Be the first to start the conversation!
+            </p>
+          )
         ) : (
           <AnimatePresence initial={false}>
             {comments.map((c) => (
