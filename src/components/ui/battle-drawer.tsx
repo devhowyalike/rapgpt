@@ -62,18 +62,19 @@ export function BattleDrawer({
 
   return (
     <>
-      {/* Animated Overlay */}
+      {/* Animated Overlay - starts below header to keep header clickable */}
       <AnimatePresence>
         {open && (
           <motion.div
-            className={`fixed top-0 left-0 right-0 bg-black/60 backdrop-blur-sm z-30 ${
+            className={`fixed left-0 right-0 bg-black/60 backdrop-blur-sm z-30 ${
               mobileOnly ? "xl:hidden" : ""
             }`}
-            style={
-              excludeBottomControls
+            style={{
+              top: "var(--header-height)",
+              ...(excludeBottomControls
                 ? { bottom: "var(--bottom-controls-height)" }
-                : { bottom: 0 }
-            }
+                : { bottom: 0 }),
+            }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
