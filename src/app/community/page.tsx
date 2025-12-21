@@ -62,7 +62,7 @@ export default async function CommunityPage({
       <SiteHeader />
 
       {/* Hero Section */}
-      <section className="relative pt-20 pb-12 md:pt-32 md:pb-16 overflow-hidden bg-black text-white selection:bg-yellow-500/30">
+      <section className="relative pt-20 pb-6 md:pt-32 md:pb-8 overflow-hidden bg-black text-white selection:bg-yellow-500/30">
         {/* Background Effects */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl z-0 pointer-events-none">
@@ -77,21 +77,14 @@ export default async function CommunityPage({
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto leading-relaxed animate-slide-up [animation-delay:100ms] px-4">
-            Meet the {APP_TITLE} community and check out their battles.
+            See what others have been cooking.
           </p>
         </div>
       </section>
 
       {/* Main Content */}
-      <div className="bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center p-4 md:p-6 min-h-[50vh]">
+      <div className="bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center pt-2 pb-4 px-4 md:pt-4 md:pb-6 md:px-6 min-h-[50vh]">
         <div className="max-w-7xl mx-auto w-full">
-          <div className="flex items-center justify-between mb-6 border-b border-white/5 pb-4">
-            <h2 className="text-xl font-semibold text-white/90">All Members</h2>
-            <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm text-yellow-400/90 font-medium">
-              {totalUsers} {totalUsers === 1 ? "Member" : "Members"}
-            </div>
-          </div>
-
           {allUsers.length === 0 ? (
             <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-12 text-center max-w-2xl mx-auto mt-8">
               <h2 className="font-(family-name:--font-bebas-neue) text-3xl text-white mb-4">
@@ -136,16 +129,6 @@ export default async function CommunityPage({
                         <h3 className="font-semibold text-white text-xs sm:text-base md:text-lg line-clamp-1 group-hover:text-yellow-400 transition-colors truncate w-full">
                           {displayName}
                         </h3>
-                        <p className="text-[10px] sm:text-xs text-gray-500 mt-1 hidden sm:block">
-                          Joined{" "}
-                          {new Date(user.createdAt).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              year: "numeric",
-                            }
-                          )}
-                        </p>
                       </div>
                     </div>
                   </Link>
