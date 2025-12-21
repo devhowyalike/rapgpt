@@ -9,7 +9,6 @@ import { GuestProfileCallout } from "@/components/guest-profile-callout";
 import { ProfileBattlesFilter } from "@/components/profile-battles-filter";
 import { ProfileHeaderMenu } from "@/components/profile-header-menu";
 import { SiteHeader } from "@/components/site-header";
-import { CreateBattleButton } from "@/components/header/CreateBattleButton";
 import { decrypt } from "@/lib/auth/encryption";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { db } from "@/lib/db/client";
@@ -188,12 +187,6 @@ export default async function ProfilePage({
         }`}
       >
         <div className="max-w-6xl mx-auto w-full">
-          {isOwnProfile && !isViewingAsPublic && userBattles.length > 0 && (
-            <div className="flex items-center justify-end mb-8 pb-4 border-b border-white/5">
-              <CreateBattleButton isSignedIn={true} mobileText="Create" />
-            </div>
-          )}
-
           {!profileUser.isProfilePublic && !isOwnProfile ? (
             <div className="bg-gray-900/50 border border-white/10 rounded-xl p-12 text-center max-w-2xl mx-auto mt-8">
               <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">

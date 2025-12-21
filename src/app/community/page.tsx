@@ -77,13 +77,17 @@ export default async function CommunityPage({
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto leading-relaxed animate-slide-up [animation-delay:100ms] px-4">
-            See what others have been cooking.
+            See what e-beef others have been cooking.
           </p>
         </div>
       </section>
 
       {/* Main Content */}
-      <div className={`bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center pt-2 pb-12 px-4 md:pt-4 md:pb-16 md:px-6 ${isAuthenticated ? "flex-1" : "min-h-[50vh]"}`}>
+      <div
+        className={`bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center pt-2 pb-12 px-4 md:pt-4 md:pb-16 md:px-6 ${
+          isAuthenticated ? "flex-1" : "min-h-[50vh]"
+        }`}
+      >
         <div className="max-w-7xl mx-auto w-full">
           {allUsers.length === 0 ? (
             <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-12 text-center max-w-2xl mx-auto mt-8">
