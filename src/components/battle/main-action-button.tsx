@@ -355,7 +355,7 @@ export function MainActionButton({
   };
 
   // Should the button pulse/animate attention?
-  const shouldPulse = isVotingPhase || canAdvance;
+  const shouldPulse = canAdvance;
 
   return (
     <AnimatePresence mode="wait">
