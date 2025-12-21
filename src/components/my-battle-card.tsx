@@ -154,7 +154,7 @@ export function MyBattleCard({
   const versesCount = battle.verses?.length || 0;
   const cannotPublish = !isPublic && (isPaused || !userIsProfilePublic);
 
-  const hasMenu = showManagement && !isPaused;
+  const hasMenu = showManagement;
   const hasAction = isLive || isPaused || isCompleted || isPublic;
 
   const handleCardClick = () => {
@@ -423,7 +423,12 @@ export function MyBattleCard({
         </div>
 
         {/* Middle/Right: Status & Outcome & Actions */}
-        <div className="flex flex-col md:flex-row items-end md:items-center gap-3 md:gap-4 md:ml-auto">
+        <div
+          className={cn(
+            "flex flex-col md:flex-row items-end md:items-center gap-3 md:gap-4 md:ml-auto",
+            hasMenu && "md:pr-12"
+          )}
+        >
           <div className="flex flex-row md:flex-col md:items-end gap-3 md:gap-1 min-w-[140px] md:text-right">
             {isLive ? (
               <>
@@ -442,9 +447,7 @@ export function MyBattleCard({
           {(isLive || isPaused) && (
             <div
               className={cn(
-                "flex items-center gap-2 mt-2 md:mt-0",
-                isPaused &&
-                  "absolute top-3 right-3 md:static md:top-auto md:right-auto"
+                "flex items-center gap-2 mt-2 md:mt-0"
               )}
             >
               <Link
