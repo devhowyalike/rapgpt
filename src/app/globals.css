@@ -232,3 +232,29 @@ body {
   color: white !important;
   text-wrap: pretty;
 }
+
+/* Sonner close button */
+[data-sonner-toast] [data-close-button] {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  left: auto !important;
+  transform: none !important;
+  background: transparent !important;
+  border: none !important;
+  color: white !important;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+  padding: 4px !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  opacity: 1;
+}
+
+[data-sonner-toast] [data-close-button] svg {
+  width: 16px;
+  height: 16px;
+}

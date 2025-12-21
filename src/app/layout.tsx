@@ -1,7 +1,7 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Bebas_Neue, Inter } from "next/font/google";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { APP_TITLE } from "@/lib/constants";
 
@@ -33,7 +33,6 @@ export default function RootLayout({
         <body className={`${inter.variable} ${bebasNeue.variable} antialiased`}>
           {children}
           <Toaster
-            theme="dark"
             position="bottom-center"
             richColors
             toastOptions={{
