@@ -182,7 +182,11 @@ export default async function ProfilePage({
       </section>
 
       {/* Battles Section */}
-      <div className={`bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center p-6 pt-6 pb-12 ${!clerkUserId ? "min-h-[30vh]" : "flex-1"}`}>
+      <div
+        className={`bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center p-6 pt-6 pb-12 ${
+          !clerkUserId ? "min-h-[30vh]" : "flex-1"
+        }`}
+      >
         <div className="max-w-6xl mx-auto w-full">
           {isOwnProfile && !isViewingAsPublic && userBattles.length > 0 && (
             <div className="flex items-center justify-end mb-8 pb-4 border-b border-white/5">
