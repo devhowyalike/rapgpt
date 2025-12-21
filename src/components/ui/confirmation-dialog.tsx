@@ -76,10 +76,10 @@ export function ConfirmationDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in" />
+        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-120 animate-in fade-in" />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] max-w-md bg-gray-900 border border-gray-800 rounded-lg shadow-2xl p-6 animate-in fade-in zoom-in-95"
+          className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-120 w-[90vw] max-w-md bg-gray-900 border border-gray-800 rounded-lg shadow-2xl p-6 animate-in fade-in zoom-in-95"
         >
           <div className="flex items-center gap-4 mb-4">
             <div
