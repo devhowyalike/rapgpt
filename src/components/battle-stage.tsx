@@ -49,11 +49,12 @@ interface ReplayModeProps {
   isVotingPhase?: never;
   votingCompletedRound?: never;
   scoreDelaySeconds?: never;
-  isLive?: never;
-  liveConnectionStatus?: never;
-  liveViewerCount?: never;
-  canManageLive?: never;
-  onDisconnect?: never;
+  // Live props are allowed in replay mode for completed battles still broadcasting
+  isLive?: boolean;
+  liveConnectionStatus?: ConnectionStatus;
+  liveViewerCount?: number;
+  canManageLive?: boolean;
+  onDisconnect?: () => void;
 }
 
 interface BaseBattleStageProps {
@@ -80,15 +81,14 @@ export function BattleStage(props: BattleStageProps) {
     mode === "active" ? props.votingCompletedRound ?? null : null;
   const scoreDelaySeconds =
     mode === "active" ? props.scoreDelaySeconds ?? 5 : 0;
-  const isLive = mode === "active" ? props.isLive ?? false : false;
-  const liveConnectionStatus =
-    mode === "active"
-      ? props.liveConnectionStatus ?? "disconnected"
-      : "disconnected";
-  const liveViewerCount = mode === "active" ? props.liveViewerCount ?? 0 : 0;
-  const canManageLive =
-    mode === "active" ? props.canManageLive ?? false : false;
-  const onDisconnect = mode === "active" ? props.onDisconnect : undefined;
+
+  // Live props are supported in both active and replay mode
+  // (for completed battles still broadcasting)
+  const isLive = props.isLive ?? false;
+  const liveConnectionStatus = props.liveConnectionStatus ?? "disconnected";
+  const liveViewerCount = props.liveViewerCount ?? 0;
+  const canManageLive = props.canManageLive ?? false;
+  const onDisconnect = props.onDisconnect;
 
   const isReplayMode = mode === "replay";
 

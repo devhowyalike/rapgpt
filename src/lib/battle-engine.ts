@@ -175,11 +175,12 @@ export function isBattleComplete(battle: Battle): boolean {
 }
 
 /**
- * Determine if a battle is archived (completed)
+ * Determine if a battle is archived (completed and not live)
  * Archived battles should not accept new comments or votes
+ * Live battles remain interactive even after completion
  */
 export function isBattleArchived(battle: Battle): boolean {
-  return battle.status === "completed";
+  return battle.status === "completed" && !battle.isLive;
 }
 
 /**

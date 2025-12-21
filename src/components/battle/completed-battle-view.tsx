@@ -16,6 +16,7 @@ import { useExclusiveDrawer } from "@/lib/hooks/use-exclusive-drawer";
 import { useRoundData } from "@/lib/hooks/use-round-data";
 import { useRoundNavigation } from "@/lib/hooks/use-round-navigation";
 import type { Battle } from "@/lib/shared";
+import type { ConnectionStatus } from "@/lib/websocket/types";
 import { BattleStage } from "../battle-stage";
 import { SiteHeader } from "../site-header";
 
@@ -35,6 +36,13 @@ interface CompletedBattleViewProps {
   onComment: (content: string) => void;
   onToggleCommenting: (enabled: boolean) => void;
   onToggleVoting: (enabled: boolean) => void;
+  // Live broadcast state (for completed battles still broadcasting)
+  isLive?: boolean;
+  wsStatus?: ConnectionStatus;
+  viewerCount?: number;
+  canManageLive?: boolean;
+  isStoppingLive?: boolean;
+  onEndLive?: () => Promise<void>;
 }
 
 export function CompletedBattleView({
@@ -53,6 +61,13 @@ export function CompletedBattleView({
   onComment,
   onToggleCommenting,
   onToggleVoting,
+  // Live broadcast props
+  isLive = false,
+  wsStatus,
+  viewerCount = 0,
+  canManageLive = false,
+  isStoppingLive = false,
+  onEndLive,
 }: CompletedBattleViewProps) {
   const router = useRouter();
 
@@ -134,12 +149,32 @@ export function CompletedBattleView({
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader
+        activeBattleState={
+          isLive && wsStatus
+            ? {
+                isLive: true,
+                viewerCount,
+                connectionStatus: wsStatus,
+                canManageLive,
+                onDisconnect: onEndLive,
+              }
+            : undefined
+        }
+      />
       <div style={{ height: "var(--header-height)" }} />
       <div className="px-0 md:px-6">
         <div className="max-w-7xl mx-auto flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row">
           <div className="flex-1 flex flex-col min-h-0 relative">
-            <BattleStage battle={battle} mode="replay" />
+            <BattleStage
+              battle={battle}
+              mode="replay"
+              isLive={isLive}
+              liveConnectionStatus={wsStatus}
+              liveViewerCount={viewerCount}
+              canManageLive={canManageLive}
+              onDisconnect={onEndLive}
+            />
 
             {/* Control Bar with Scores, Song, and Options */}
             <BattleReplayControlBar
@@ -170,6 +205,11 @@ export function CompletedBattleView({
               }
               settingsActive={showSettingsDrawer}
               canManage={isCreator || isAdmin}
+              // Live broadcast props
+              isLive={isLive}
+              canManageLive={canManageLive}
+              isStoppingLive={isStoppingLive}
+              onEndLive={onEndLive}
             />
 
             {/* Scores/Song Drawer */}
@@ -246,7 +286,7 @@ export function CompletedBattleView({
             onComment={onComment}
             showCommenting={showCommenting}
             showVoting={showVoting}
-            isArchived={true}
+            isArchived={!isLive}
             votingCompletedRound={votingCompletedRound}
             showMobileDrawer={showMobileDrawer}
             onMobileDrawerChange={setShowMobileDrawer}
@@ -265,6 +305,9 @@ export function CompletedBattleView({
           showVoting={showVoting}
           onToggleCommenting={onToggleCommenting}
           onToggleVoting={onToggleVoting}
+          isLive={isLive}
+          onEndLive={onEndLive}
+          isStoppingLive={isStoppingLive}
         />
       )}
     </>

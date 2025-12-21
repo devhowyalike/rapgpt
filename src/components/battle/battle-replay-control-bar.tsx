@@ -43,6 +43,11 @@ interface BattleReplayControlBarProps {
   isMobileDrawerOpen?: boolean;
   /** Whether the current user can manage the battle (owner or admin) */
   canManage?: boolean;
+  // Live broadcast props (for completed battles still broadcasting)
+  isLive?: boolean;
+  canManageLive?: boolean;
+  isStoppingLive?: boolean;
+  onEndLive?: () => void;
 }
 
 export function BattleReplayControlBar({
@@ -65,6 +70,11 @@ export function BattleReplayControlBar({
   settingsActive = false,
   isMobileDrawerOpen = false,
   canManage = false,
+  // Live broadcast props
+  isLive = false,
+  canManageLive = false,
+  isStoppingLive = false,
+  onEndLive,
 }: BattleReplayControlBarProps) {
   const { shareBattle, ShareDialog } = useBattleShare();
   const showSongButton = showSongGenerator || showSongPlayer;
@@ -76,16 +86,25 @@ export function BattleReplayControlBar({
     await shareBattle(url);
   };
 
+  const handleEndLiveClick = () => {
+    onEndLive?.();
+  };
+
   const mobileFanActions = buildMobileFanActions({
     showCommenting,
     showVoting,
     requireLiveForVoting: false, // Replay mode shows voting without requiring live
+    isLive,
     onCommentsClick,
     onVotingClick,
     onSettingsClick: canManage ? onSettingsClick : undefined, // Only show settings to battle manager
     mobileActiveTab,
     isMobileDrawerOpen,
     settingsActive,
+    // End Live in mobile fan (only show for battle manager when live)
+    showGoLive: canManageLive && isLive,
+    isStoppingLive,
+    onGoLiveClick: handleEndLiveClick,
     onShareClick: handleShare,
   });
 

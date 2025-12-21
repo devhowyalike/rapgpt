@@ -97,24 +97,9 @@ export async function PUT(
       );
     }
 
-    // If battle is completed and was live, automatically stop live mode
-    if (battle.status === "completed" && battle.isLive) {
-      console.log(
-        `[Battle ${id}] Auto-stopping live mode because battle completed`,
-      );
-      battle.isLive = false;
-
-      // Broadcast live ended event
-      const { broadcastEvent } = await import(
-        "@/lib/websocket/broadcast-helper"
-      );
-      await broadcastEvent(id, {
-        type: "battle:live_ended",
-        battleId: id,
-        timestamp: Date.now(),
-        battle,
-      });
-    }
+    // NOTE: Live broadcast intentionally stays active after battle completion
+    // This allows viewers to continue commenting. The creator must manually
+    // end the broadcast via the "End Broadcast" button.
 
     // Persist main battle fields
     await saveBattle(battle);

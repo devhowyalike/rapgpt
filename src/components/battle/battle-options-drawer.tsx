@@ -4,7 +4,7 @@
 
 "use client";
 
-import { MessageSquare, Pause, Vote } from "lucide-react";
+import { MessageSquare, Pause, Radio, Vote } from "lucide-react";
 import { BattleDrawer } from "@/components/ui/battle-drawer";
 import { DrawerScrollContent } from "@/components/ui/drawer-scroll-content";
 import { Switch } from "@/components/ui/switch";
@@ -20,6 +20,9 @@ interface BattleOptionsDrawerProps {
   isPausing?: boolean;
   pauseLabel?: string;
   isLive?: boolean;
+  // End broadcast controls for live battles
+  onEndLive?: () => Promise<void>;
+  isStoppingLive?: boolean;
 }
 
 export function BattleOptionsDrawer({
@@ -33,6 +36,8 @@ export function BattleOptionsDrawer({
   isPausing,
   pauseLabel,
   isLive = false,
+  onEndLive,
+  isStoppingLive = false,
 }: BattleOptionsDrawerProps) {
   return (
     <BattleDrawer
@@ -87,32 +92,57 @@ export function BattleOptionsDrawer({
         </div>
 
         {/* Actions Section */}
-        {onPauseBattle && (
+        {(onPauseBattle || (isLive && onEndLive)) && (
           <div className="space-y-3 pt-2 border-t border-gray-800">
             <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
               Actions
             </h3>
 
-            <button
-              onClick={() => {
-                onPauseBattle();
-                onOpenChange(false);
-              }}
-              disabled={isPausing}
-              className="w-full flex items-center gap-3 p-3 bg-gray-800/50 hover:bg-gray-700/50 rounded-lg transition-colors group text-left"
-            >
-              <div className="p-2 bg-orange-500/20 rounded-full group-hover:bg-orange-500/30 transition-colors">
-                <Pause className="w-5 h-5 text-orange-400" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-medium text-white">
-                  {isPausing ? pauseLabel || "Pausing..." : "Pause Battle"}
-                </span>
-                <span className="text-sm text-gray-400">
-                  Stop the battle temporarily
-                </span>
-              </div>
-            </button>
+            {onPauseBattle && (
+              <button
+                onClick={() => {
+                  onPauseBattle();
+                  onOpenChange(false);
+                }}
+                disabled={isPausing}
+                className="w-full flex items-center gap-3 p-3 bg-gray-800/50 hover:bg-gray-700/50 rounded-lg transition-colors group text-left"
+              >
+                <div className="p-2 bg-orange-500/20 rounded-full group-hover:bg-orange-500/30 transition-colors">
+                  <Pause className="w-5 h-5 text-orange-400" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-medium text-white">
+                    {isPausing ? pauseLabel || "Pausing..." : "Pause Battle"}
+                  </span>
+                  <span className="text-sm text-gray-400">
+                    Stop the battle temporarily
+                  </span>
+                </div>
+              </button>
+            )}
+
+            {isLive && onEndLive && (
+              <button
+                onClick={async () => {
+                  await onEndLive();
+                  onOpenChange(false);
+                }}
+                disabled={isStoppingLive}
+                className="w-full flex items-center gap-3 p-3 bg-gray-800/50 hover:bg-red-900/30 rounded-lg transition-colors group text-left"
+              >
+                <div className="p-2 bg-red-500/20 rounded-full group-hover:bg-red-500/30 transition-colors">
+                  <Radio className="w-5 h-5 text-red-400" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-medium text-white">
+                    {isStoppingLive ? "Ending..." : "End Broadcast"}
+                  </span>
+                  <span className="text-sm text-gray-400">
+                    Stop live streaming to viewers
+                  </span>
+                </div>
+              </button>
+            )}
           </div>
         )}
       </DrawerScrollContent>
