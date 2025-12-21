@@ -365,7 +365,7 @@ export function MyBattleCard({
             </div>
 
             {/* Subtext: Stage • Date */}
-            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 text-xs text-gray-500 uppercase tracking-wider mt-1">
+            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 text-sm text-gray-500 uppercase tracking-wider mt-1">
               <div className="flex items-center gap-2 truncate max-w-full">
                 <span className="truncate">
                   {stage.flag} {stage.name}
@@ -388,16 +388,16 @@ export function MyBattleCard({
                   isArchived) && (
                   <div className="flex items-center gap-1.5 ml-2 border-l border-white/10 pl-2">
                     {isArchived && (
-                      <Radio size={10} className="text-gray-400" />
+                      <Radio size={12} className="text-gray-400" />
                     )}
                     {battle.generatedSong?.audioUrl && (
-                      <Music2 size={10} className="text-green-400" />
+                      <Music2 size={12} className="text-green-400" />
                     )}
                     {battle.votingEnabled && (
-                      <ThumbsUp size={10} className="text-blue-400" />
+                      <ThumbsUp size={12} className="text-blue-400" />
                     )}
                     {battle.commentsEnabled && (
-                      <MessageSquare size={10} className="text-purple-400" />
+                      <MessageSquare size={12} className="text-purple-400" />
                     )}
                   </div>
                 )}
@@ -410,7 +410,7 @@ export function MyBattleCard({
                 )}
 
                 {isCompleted && (
-                  <div className="flex items-center gap-2 ml-2 border-l border-white/10 pl-2 text-xs font-semibold text-gray-400">
+                  <div className="flex items-center gap-2 ml-2 border-l border-white/10 pl-2 text-sm font-semibold text-gray-400">
                     <span>
                       {finalStats?.player1TotalScore}-
                       {finalStats?.player2TotalScore}
@@ -432,7 +432,7 @@ export function MyBattleCard({
           <div className="flex flex-row md:flex-col md:items-end gap-3 md:gap-1 min-w-[140px] md:text-right">
             {isLive ? (
               <>
-                <span className="flex items-center gap-1.5 text-xs font-bold text-red-400 animate-pulse uppercase tracking-wide">
+                <span className="flex items-center gap-1.5 text-sm font-bold text-red-400 animate-pulse uppercase tracking-wide">
                   <Radio size={12} className="fill-current" />
                   Live Now
                 </span>
