@@ -225,23 +225,9 @@ export function useBattleStage({
     } else if (!currentRoundVerses.player1 && !currentRoundVerses.player2) {
       // New round just started; show the current turn on mobile immediately
       mobileActiveSide = battle.currentTurn ?? null;
-    } else if (bothVersesComplete && !scoresAvailable) {
-      // Both verses complete but scores not revealed - keep showing the last performer
-      // Determine who performed second
-      const player1VerseId = currentRoundVerses.player1?.id;
-      const player2VerseId = currentRoundVerses.player2?.id;
-      if (player1VerseId && player2VerseId) {
-        const player1VerseIndex = battle.verses.findIndex(
-          (v) => v.id === player1VerseId,
-        );
-        const player2VerseIndex = battle.verses.findIndex(
-          (v) => v.id === player2VerseId,
-        );
-        mobileActiveSide =
-          player2VerseIndex > player1VerseIndex ? "player2" : "player1";
-      }
-    } else if (bothVersesComplete && scoresAvailable) {
-      // Scores revealed - show both personas for comparison
+    } else if (bothVersesComplete) {
+      // Both verses complete - show both personas for comparison
+      // This applies during reading phase, voting phase, and score reveal
       mobileActiveSide = null;
     }
   }
