@@ -138,7 +138,7 @@ export default async function CommunityPage({
           )}
 
           {!isAuthenticated && (
-            <div className="mt-16">
+            <div className="mt-16 max-w-4xl mx-auto">
               <GuestProfileCallout />
             </div>
           )}

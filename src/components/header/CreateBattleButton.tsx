@@ -14,7 +14,7 @@ export function CreateBattleButton({
   mobileText = "Battle",
 }: CreateBattleButtonProps) {
   const classes =
-    "flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium";
+    "flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium cursor-pointer";
 
   const Content = () => (
     <>
