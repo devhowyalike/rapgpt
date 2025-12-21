@@ -42,6 +42,8 @@ export function useScoreRevealDelay(
   });
   const [isDelaying, setIsDelaying] = useState(false);
   const timerRef = useRef<number | null>(null);
+  // Track the round we're currently delaying for to prevent race conditions
+  const delayingForRoundRef = useRef<number | null>(null);
 
   // Update revealed round and persist to localStorage
   const updateRevealedRound = (round: number | null) => {
@@ -53,6 +55,7 @@ export function useScoreRevealDelay(
     // If no scores are available, reset state and clear any timers
     if (scoresAvailableRound == null) {
       setIsDelaying(false);
+      delayingForRoundRef.current = null;
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
@@ -60,26 +63,30 @@ export function useScoreRevealDelay(
       return;
     }
 
-    // Already revealed for this round (check both state and localStorage)
-    const storedRound = getStoredRevealedRound(battleId ?? null);
-    if (revealedRound === scoresAvailableRound || storedRound === scoresAvailableRound) {
+    // Already revealed for this round (only check React state, not localStorage)
+    // This prevents race conditions between multiple hook instances sharing localStorage
+    if (revealedRound === scoresAvailableRound) {
       setIsDelaying(false);
-      // Sync state with localStorage if needed
-      if (revealedRound !== storedRound && storedRound !== null) {
-        setRevealedRound(storedRound);
-      }
+      delayingForRoundRef.current = null;
+      return;
+    }
+
+    // Already in the process of delaying for this round - don't restart
+    if (delayingForRoundRef.current === scoresAvailableRound && timerRef.current) {
       return;
     }
 
     // Immediate reveal if delay is zero
     if ((delaySeconds ?? 0) <= 0) {
       setIsDelaying(false);
+      delayingForRoundRef.current = null;
       updateRevealedRound(scoresAvailableRound);
       return;
     }
 
     // Start delay for this round
     setIsDelaying(true);
+    delayingForRoundRef.current = scoresAvailableRound;
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
@@ -88,6 +95,7 @@ export function useScoreRevealDelay(
       () => {
         updateRevealedRound(scoresAvailableRound);
         setIsDelaying(false);
+        delayingForRoundRef.current = null;
         timerRef.current = null;
       },
       Math.max(0, (delaySeconds ?? 0) * 1000),
@@ -99,7 +107,11 @@ export function useScoreRevealDelay(
         timerRef.current = null;
       }
     };
-  }, [scoresAvailableRound, delaySeconds, revealedRound, battleId]);
+    // Note: we intentionally exclude revealedRound from deps to prevent 
+    // the effect from re-running when the timer completes and updates revealedRound.
+    // The delayingForRoundRef prevents re-starting the timer if the effect runs again.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scoresAvailableRound, delaySeconds, battleId]);
 
   return { revealedRound, isDelaying };
 }
