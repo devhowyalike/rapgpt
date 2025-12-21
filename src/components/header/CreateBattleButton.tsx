@@ -1,7 +1,7 @@
 "use client";
 
 import { SignInButton } from "@clerk/nextjs";
-import { Mic2 } from "lucide-react";
+import { Mic2, User } from "lucide-react";
 import Link from "next/link";
 
 interface CreateBattleButtonProps {
@@ -18,9 +18,11 @@ export function CreateBattleButton({
 
   const Content = () => (
     <>
-      <Mic2 size={16} />
-      <span className="hidden sm:inline">Create Battle</span>
-      <span className="sm:hidden">{mobileText}</span>
+      {isSignedIn ? <Mic2 size={16} /> : <User size={16} />}
+      <span className="hidden sm:inline">
+        {isSignedIn ? "Create Battle" : "Sign In"}
+      </span>
+      <span className="sm:hidden">{isSignedIn ? mobileText : "Sign In"}</span>
     </>
   );
 
