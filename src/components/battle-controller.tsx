@@ -506,7 +506,20 @@ export function BattleController({
           viewerCount={viewerCount}
           canManageLive={canManageBattle}
           isStoppingLive={isStoppingLive}
-          onEndLive={stopLive}
+          onEndLive={handleEndLiveClick}
+        />
+        {/* End Live Confirmation Dialog - needed for completed battles still broadcasting */}
+        <ConfirmationDialog
+          open={showEndLiveDialog}
+          onOpenChange={setShowEndLiveDialog}
+          title="End Live Broadcast?"
+          description="This will end the live broadcast for all viewers. The battle will continue but won't be streamed."
+          confirmLabel="End Live"
+          cancelLabel="Keep Broadcasting"
+          onConfirm={confirmEndLive}
+          isLoading={isStoppingLive}
+          variant="warning"
+          icon={AlertTriangle}
         />
         {/* Navigation Guard Dialog - needed for completed battles still broadcasting */}
         <NavigationDialog />
