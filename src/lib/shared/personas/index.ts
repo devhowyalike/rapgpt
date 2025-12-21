@@ -1,102 +1,46 @@
 /**
- * Persona configuration and management
+ * Persona configuration and management (SERVER-ONLY)
  *
  * IMPORTANT:
  * - Client components should import from './client' for lightweight UI data
  * - Server components/API routes should import from this file for full persona data
  * - Persona objects are assembled at runtime by combining client data + systemPrompts
+ *
+ * When adding a new persona:
+ * 1. Add the client persona to client.ts (with its ID as the export name)
+ * 2. Create the system prompt file (e.g., newPersona.ts)
+ * 3. Import and add the system prompt to systemPrompts.ts
+ * That's it! The persona will be automatically assembled below.
  */
 
 import { HOOPLA_MODE } from "../../constants";
 import type { Persona } from "../battle-types";
-import * as clientPersonas from "./client";
-import { dawnSystemPrompt } from "./dawn";
-import { humptyHumpSystemPrompt } from "./humptyHump";
-import { igorSystemPrompt } from "./igor";
-import { kennyKSystemPrompt } from "./kennyK";
-import { ladyMuseSystemPrompt } from "./ladyMuse";
-import { mrAkronSystemPrompt } from "./mrAkron";
-import { parappaSystemPrompt } from "./parappa";
-import { raygunSystemPrompt } from "./raygun";
-import { shockGSystemPrompt } from "./shockG";
-import { timDogSystemPrompt } from "./timDog";
-import { tylerSystemPrompt } from "./tyler";
+import { CLIENT_PERSONAS } from "./client";
+import { SYSTEM_PROMPTS } from "./systemPrompts";
 
-// Map of persona IDs to their system prompts
-const SYSTEM_PROMPTS: Record<string, string> = {
-  kennyK: kennyKSystemPrompt,
-  ladyMuse: ladyMuseSystemPrompt,
-  raygun: raygunSystemPrompt,
-  timDog: timDogSystemPrompt,
-  dawn: dawnSystemPrompt,
-  mrAkron: mrAkronSystemPrompt,
-  humptyHump: humptyHumpSystemPrompt,
-  shockG: shockGSystemPrompt,
-  parappa: parappaSystemPrompt,
-  tyler: tylerSystemPrompt,
-  igor: igorSystemPrompt,
-};
+/**
+ * Automatically assemble full Persona objects by combining client data + system prompts
+ */
+function buildPersonas(): Record<string, Persona> {
+  const personas: Record<string, Persona> = {};
 
-// Assemble full Persona objects at runtime by combining client data + systemPrompts
-const kennyK: Persona = {
-  ...clientPersonas.kennyK,
-  systemPrompt: kennyKSystemPrompt,
-};
-const ladyMuse: Persona = {
-  ...clientPersonas.ladyMuse,
-  systemPrompt: ladyMuseSystemPrompt,
-};
-const raygun: Persona = {
-  ...clientPersonas.raygun,
-  systemPrompt: raygunSystemPrompt,
-};
-const timDog: Persona = {
-  ...clientPersonas.timDog,
-  systemPrompt: timDogSystemPrompt,
-};
-const dawn: Persona = {
-  ...clientPersonas.dawn,
-  systemPrompt: dawnSystemPrompt,
-};
-const mrAkron: Persona = {
-  ...clientPersonas.mrAkron,
-  systemPrompt: mrAkronSystemPrompt,
-};
-const humptyHump: Persona = {
-  ...clientPersonas.humptyHump,
-  systemPrompt: humptyHumpSystemPrompt,
-};
-const shockG: Persona = {
-  ...clientPersonas.shockG,
-  systemPrompt: shockGSystemPrompt,
-};
-const parappa: Persona = {
-  ...clientPersonas.parappa,
-  systemPrompt: parappaSystemPrompt,
-};
-const tyler: Persona = {
-  ...clientPersonas.tyler,
-  systemPrompt: tylerSystemPrompt,
-};
-const igor: Persona = {
-  ...clientPersonas.igor,
-  systemPrompt: igorSystemPrompt,
-};
+  for (const [id, clientPersona] of Object.entries(CLIENT_PERSONAS)) {
+    const systemPrompt = SYSTEM_PROMPTS[id];
+    if (!systemPrompt) {
+      console.warn(`Missing system prompt for persona: ${id}`);
+      continue;
+    }
+    personas[id] = {
+      ...clientPersona,
+      systemPrompt,
+    };
+  }
+
+  return personas;
+}
 
 // Server-side: Full persona data with systemPrompts
-export const AVAILABLE_PERSONAS: Record<string, Persona> = {
-  kennyK,
-  ladyMuse,
-  raygun,
-  timDog,
-  dawn,
-  mrAkron,
-  humptyHump,
-  shockG,
-  parappa,
-  tyler,
-  igor,
-};
+export const AVAILABLE_PERSONAS: Record<string, Persona> = buildPersonas();
 
 export function getPersona(id: string): Persona | null {
   return AVAILABLE_PERSONAS[id] || null;
@@ -107,19 +51,6 @@ export function getAllPersonas(): Persona[] {
   if (HOOPLA_MODE) return personas;
   return personas.filter((p) => !p.isHoopla);
 }
-
-export {
-  kennyK,
-  ladyMuse,
-  raygun,
-  timDog,
-  dawn,
-  humptyHump,
-  shockG,
-  parappa,
-  tyler,
-  igor,
-};
 
 // Re-export battle rules for use in other files
 export {

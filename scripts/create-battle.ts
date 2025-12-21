@@ -14,7 +14,7 @@ import { dirname, join } from "path";
 import { createInterface } from "readline";
 import { fileURLToPath } from "url";
 import type { Battle, Persona, Stage } from "../src/lib/shared";
-import { getAllPersonas } from "../src/lib/shared";
+import { getAllPersonas } from "../src/lib/shared/personas";
 import { getAllStages } from "../src/lib/shared/stages";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
