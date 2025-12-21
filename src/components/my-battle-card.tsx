@@ -154,7 +154,7 @@ export function MyBattleCard({
   const cannotPublish = !isPublic && (isPaused || !userIsProfilePublic);
 
   const hasMenu = showManagement && !isPaused;
-  const hasAction = isLive || isPaused;
+  const hasAction = isLive || isPaused || isCompleted || isPublic;
 
   const handleCardClick = () => {
     if (hasMenu) {
