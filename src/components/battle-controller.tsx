@@ -43,7 +43,7 @@ interface BattleControllerProps {
 
 export function BattleController({
   initialBattle,
-  scoreDelaySeconds = 5,
+  scoreDelaySeconds = 2.5,
 }: BattleControllerProps) {
   const {
     battle,
