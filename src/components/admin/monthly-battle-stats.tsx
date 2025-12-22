@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Activity,
-  ChevronDown,
-  Radio,
-  Swords,
-  Trophy,
-} from "lucide-react";
+import { Activity, ChevronDown, Radio, Swords, Trophy } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { MonthlyBattleStats } from "@/lib/usage-storage";
 
@@ -163,4 +157,3 @@ export function MonthlyBattleStatsComponent({
     </div>
   );
 }
-

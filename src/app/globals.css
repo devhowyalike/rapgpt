@@ -219,11 +219,30 @@ body {
   transform: translateZ(0);
 }
 
-/* Promote animated elements to their own compositor layer */
+/* PROMOTE animated elements to their own compositor layer */
 .gpu-accel {
   will-change: transform, opacity;
   transform: translateZ(0);
   backface-visibility: hidden;
+}
+
+/* Custom scrollbar for admin dashboard and other lists */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3); /* purple-500/30 */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.5); /* purple-500/50 */
 }
 
 /* Sonner toast overrides - force white text */
