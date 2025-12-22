@@ -193,24 +193,27 @@ export function BattleController({
   // Navigation guard - prevent leaving page during active battle
   // Guard is active when:
   // 1. Battle is paused (in progress)
-  // 2. Battle is currently live
-  // 3. Battle was recently live (completed but user manages it) - give them a moment
+  // 2. Battle is currently live (including completed battles still broadcasting)
   const guardCondition =
-    battle?.status === "paused" ||
-    isLive ||
-    (battle?.status === "completed" &&
-      canManageBattle &&
-      initialBattle.isLive === true);
+    canManageBattle && (battle?.status === "paused" || isLive);
+
+  // Determine messaging based on battle state
+  const isCompletedAndLive = battle?.status === "completed" && isLive;
+  const guardTitle = isLive ? "End Live Broadcast?" : "Leave Battle?";
+  const guardMessage = isCompletedAndLive
+    ? "This battle is complete but still broadcasting. Leaving will end the broadcast for all viewers."
+    : isLive
+    ? "This battle is currently live. Leaving will end the broadcast for all viewers."
+    : battle?.status === "paused"
+    ? "Leave now? We'll pause your match."
+    : "Are you sure you want to leave?";
+  const guardConfirmLabel = isLive ? "End Broadcast" : "Pause Match";
 
   const { NavigationDialog } = useNavigationGuard({
     when: guardCondition,
-    title: isLive ? "End Live Battle?" : "Leave Battle?",
-    message: isLive
-      ? "This battle is currently live. Leaving will end the broadcast for all viewers."
-      : battle?.status === "paused"
-      ? "Leave now? We'll pause your match."
-      : "Are you sure you want to leave?",
-    confirmLabel: isLive ? "End Battle" : "Pause Match",
+    title: guardTitle,
+    message: guardMessage,
+    confirmLabel: guardConfirmLabel,
     onConfirm: async () => {
       if (isLive) {
         await stopLive();
@@ -497,9 +500,31 @@ export function BattleController({
           onComment={handleCommentSubmit}
           onToggleCommenting={handleToggleCommenting}
           onToggleVoting={handleToggleVoting}
+          // Live broadcast state for completed battles
+          isLive={isLive}
+          wsStatus={wsStatus}
+          viewerCount={viewerCount}
+          canManageLive={canManageBattle}
+          isStoppingLive={isStoppingLive}
+          onEndLive={handleEndLiveClick}
         />
-        {/* Navigation Guard Dialog - needed even for completed battles that were live */}
+        {/* End Live Confirmation Dialog - needed for completed battles still broadcasting */}
+        <ConfirmationDialog
+          open={showEndLiveDialog}
+          onOpenChange={setShowEndLiveDialog}
+          title="End Live Broadcast?"
+          description="This will end the live broadcast for all viewers. The battle will continue but won't be streamed."
+          confirmLabel="End Live"
+          cancelLabel="Keep Broadcasting"
+          onConfirm={confirmEndLive}
+          isLoading={isStoppingLive}
+          variant="warning"
+          icon={AlertTriangle}
+        />
+        {/* Navigation Guard Dialog - needed for completed battles still broadcasting */}
         <NavigationDialog />
+        {/* Battle Ended Dialog (for viewers) */}
+        <BattleEndedDialog />
       </>
     );
   }

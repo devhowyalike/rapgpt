@@ -53,13 +53,19 @@ export function useBattleComment({
     async (content: string) => {
       if (!battle) return;
 
+      // For completed battles, currentRound is 4 which is invalid
+      // Cap at 3 or omit for completed battles
+      const round = battle.status === "completed" 
+        ? undefined 
+        : Math.min(battle.currentRound, 3);
+
       try {
         const response = await fetch(`/api/battle/${battle.id}/comment`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             content,
-            round: battle.currentRound,
+            round,
           }),
         });
 
