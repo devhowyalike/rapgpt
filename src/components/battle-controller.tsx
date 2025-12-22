@@ -429,7 +429,7 @@ export function BattleController({
   };
 
   // Handler to show end live confirmation dialog
-  const handleEndLiveClick = () => {
+  const handleEndLiveClick = async () => {
     setShowEndLiveDialog(true);
   };
 
