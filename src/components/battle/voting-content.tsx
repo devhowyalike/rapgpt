@@ -1,13 +1,15 @@
 /**
  * Voting content - used in both desktop sidebar and mobile drawer
+ * Uses Zustand store for vote state to ensure consistency across breakpoints
  */
 
 "use client";
 
 import { SignInPrompt } from "@/components/auth/sign-in-prompt";
+import { useBattleStore } from "@/lib/battle-store";
 import { useUser } from "@clerk/nextjs";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Battle } from "@/lib/shared";
 import { ROUNDS_PER_BATTLE } from "@/lib/shared";
 
@@ -31,21 +33,11 @@ export function VotingContent({
   const { user, isLoaded } = useUser();
   const [isSubmittingVote, setIsSubmittingVote] = useState(false);
   const [optimisticVote, setOptimisticVote] = useState<string | null>(null);
-  const [userVotes, setUserVotes] = useState<Set<string>>(() => {
-    // Load votes from localStorage on mount
-    if (typeof window !== "undefined") {
-      const storageKey = `battle-votes-${battle.id}`;
-      const stored = localStorage.getItem(storageKey);
-      if (stored) {
-        try {
-          return new Set(JSON.parse(stored));
-        } catch {
-          return new Set();
-        }
-      }
-    }
-    return new Set();
-  });
+  
+  // Use Zustand store for votes - shared across mobile and desktop
+  const userVotes = useBattleStore((state) => state.userVotes);
+  const setUserVote = useBattleStore((state) => state.setUserVote);
+  const revertUserVote = useBattleStore((state) => state.revertUserVote);
 
   const handleVote = async (round: number, personaId: string) => {
     if (isSubmittingVote) return; // Prevent double-clicks
@@ -62,27 +54,8 @@ export function VotingContent({
     // Determine if this is an undo (clicking same persona again)
     const isUndo = currentVoteInRound === voteKey;
 
-    // Optimistically update local state
-    setUserVotes((prev) => {
-      const newVotes = new Set(prev);
-      if (isUndo) {
-        // Remove the vote
-        newVotes.delete(voteKey);
-      } else {
-        // Remove any existing vote in this round and add new one
-        if (currentVoteInRound) {
-          newVotes.delete(currentVoteInRound);
-        }
-        newVotes.add(voteKey);
-      }
-
-      // Persist to localStorage
-      if (typeof window !== "undefined") {
-        const storageKey = `battle-votes-${battle.id}`;
-        localStorage.setItem(storageKey, JSON.stringify(Array.from(newVotes)));
-      }
-      return newVotes;
-    });
+    // Optimistically update store (shared across mobile/desktop)
+    setUserVote(battle.id, round, personaId, isUndo, currentVoteInRound ?? null);
 
     // Submit to server
     try {
@@ -90,28 +63,7 @@ export function VotingContent({
 
       if (!success) {
         // Revert optimistic update on failure
-        setUserVotes((prev) => {
-          const newVotes = new Set(prev);
-          if (isUndo) {
-            // Restore the vote
-            newVotes.add(voteKey);
-          } else {
-            // Restore previous state
-            newVotes.delete(voteKey);
-            if (currentVoteInRound) {
-              newVotes.add(currentVoteInRound);
-            }
-          }
-
-          if (typeof window !== "undefined") {
-            const storageKey = `battle-votes-${battle.id}`;
-            localStorage.setItem(
-              storageKey,
-              JSON.stringify(Array.from(newVotes))
-            );
-          }
-          return newVotes;
-        });
+        revertUserVote(voteKey, isUndo, currentVoteInRound ?? null);
       }
     } finally {
       setIsSubmittingVote(false);
