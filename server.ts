@@ -219,7 +219,32 @@ function broadcast(
         }
       });
       console.log(
-        `[WS] Broadcasted homepage:battle_progress to ${homepageSentCount} homepage clients`,
+        `[WS] Broadcasted homepage:battle_progress (verse) to ${homepageSentCount} homepage clients`,
+      );
+    }
+  }
+
+  // Send lightweight progress update to homepage when comment is added
+  if (battleId !== "__homepage__" && event.type === "comment:added") {
+    const homepageRoom = battleRooms.get("__homepage__");
+    if (homepageRoom && homepageRoom.size > 0) {
+      const commentEvent = event as { comment: { round?: number } };
+      const progressEvent = JSON.stringify({
+        type: "homepage:battle_progress",
+        battleId,
+        timestamp: Date.now(),
+        currentRound: commentEvent.comment.round || 0,
+        commentCount: 1, // Increment by 1
+      });
+      let homepageSentCount = 0;
+      homepageRoom.forEach((client) => {
+        if (client.ws.readyState === WebSocket.OPEN) {
+          client.ws.send(progressEvent);
+          homepageSentCount++;
+        }
+      });
+      console.log(
+        `[WS] Broadcasted homepage:battle_progress (comment) to ${homepageSentCount} homepage clients`,
       );
     }
   }

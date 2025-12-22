@@ -18,9 +18,9 @@ import { getDisplayRound, ROUNDS_PER_BATTLE } from "@/lib/shared";
 import type { WebSocketEvent } from "@/lib/websocket/types";
 import { generateClientId, isWebSocketActive } from "@/lib/websocket/utils";
 
-// Extended Battle type with optional wsVerseCount for live tracking
-// This avoids creating placeholder verses that accumulate
-type LiveBattle = Battle & { wsVerseCount?: number };
+// Extended Battle type with optional ws counts for live tracking
+// This avoids creating placeholder verses/comments that accumulate
+type LiveBattle = Battle & { wsVerseCount?: number; wsCommentCount?: number };
 
 interface LiveBattlesDisplayProps {
   initialBattles: Battle[];
@@ -121,18 +121,28 @@ export function LiveBattlesDisplay({
             }
 
             case "homepage:battle_progress": {
-              // Lightweight update: update round and increment wsVerseCount
-              // wsVerseCount tracks verses from live updates without creating placeholders
+              // Lightweight update: update round and increment wsVerseCount or wsCommentCount
+              // These track live counts without creating placeholders
               setLiveBattles((prev) =>
                 prev.map((b) => {
                   if (b.id !== wsEvent.battleId) return b;
 
-                  return {
-                    ...b,
+                  const updates: Partial<LiveBattle> = {
                     currentRound: wsEvent.currentRound,
-                    // Track live verse count separately - increments on each progress event
-                    wsVerseCount: (b.wsVerseCount ?? b.verses.length) + 1,
                   };
+
+                  // If commentCount is present, increment comment count
+                  if (wsEvent.commentCount !== undefined) {
+                    updates.wsCommentCount =
+                      (b.wsCommentCount ?? b.comments.length) +
+                      wsEvent.commentCount;
+                  } else {
+                    // Otherwise, increment verse count (default behavior)
+                    updates.wsVerseCount =
+                      (b.wsVerseCount ?? b.verses.length) + 1;
+                  }
+
+                  return { ...b, ...updates };
                 })
               );
               break;
@@ -261,7 +271,9 @@ export function LiveBattlesDisplay({
                   </div>
                   <div className="flex items-center gap-1">
                     <MessageSquare className="w-3 h-3" />
-                    <span>{battle.comments.length} comments</span>
+                    <span>
+                      {battle.wsCommentCount ?? battle.comments.length} comments
+                    </span>
                   </div>
                 </div>
               </TableCell>

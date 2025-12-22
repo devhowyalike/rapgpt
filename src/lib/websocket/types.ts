@@ -137,11 +137,12 @@ export interface ServerShutdownEvent extends BaseWebSocketEvent {
 
 /**
  * Lightweight event for homepage to track battle progress
- * Sent when a verse completes - homepage increments verse count locally
+ * Sent when a verse completes or comment is added - homepage increments counts locally
  */
 export interface HomepageBattleProgressEvent extends BaseWebSocketEvent {
   type: "homepage:battle_progress";
   currentRound: number;
+  commentCount?: number; // Optional: set when a comment is added
 }
 
 export type WebSocketEvent =
