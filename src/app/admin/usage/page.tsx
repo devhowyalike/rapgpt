@@ -4,10 +4,7 @@ import { redirect } from "next/navigation";
 import { AllTimeTokenUsage } from "@/components/admin/all-time-token-usage";
 import { SiteHeader } from "@/components/site-header";
 import { checkRole } from "@/lib/auth/roles";
-import {
-  getAllTimeTokenTotals,
-  getAllTimeTokenTotalsByModel,
-} from "@/lib/usage-storage";
+import { getAllTimeBattleStats, getAllTimeTokenTotals, getAllTimeTokenTotalsByModel } from "@/lib/usage-storage";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +18,7 @@ export default async function AdminUsagePage() {
 
   const totals = await getAllTimeTokenTotals();
   const byModel = await getAllTimeTokenTotalsByModel();
+  const battleStats = await getAllTimeBattleStats();
 
   return (
     <div className="min-h-dvh bg-linear-to-br from-gray-900 via-purple-900 to-black">
@@ -36,14 +34,14 @@ export default async function AdminUsagePage() {
           </Link>
           <h1 className="font-bebas text-6xl text-white mb-2 flex items-center gap-3">
             <Shield className="text-purple-400" size={48} />
-            Token Usage Analytics
+            Usage & Generation Analytics
           </h1>
           <p className="text-gray-400 text-lg">
-            Detailed breakdown of all-time token consumption
+            Detailed breakdown of all-time token consumption and song generation
           </p>
         </div>
 
-        <AllTimeTokenUsage totals={totals} byModel={byModel} />
+        <AllTimeTokenUsage totals={totals} byModel={byModel} battleStats={battleStats} />
       </div>
     </div>
   );

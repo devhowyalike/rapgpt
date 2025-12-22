@@ -343,6 +343,7 @@ export interface MonthlyBattleStats {
   liveBattles: number;
   completedBattles: number;
   featuredBattles: number;
+  totalSongs: number;
   month: string;
   year: number;
 }
@@ -369,6 +370,7 @@ export async function getMonthlyBattleStats(
       liveBattles: sql<number>`count(*) filter (where ${battles.liveStartedAt} is not null)::int`,
       completedBattles: sql<number>`count(*) filter (where ${battles.status} = 'completed')::int`,
       featuredBattles: sql<number>`count(*) filter (where ${battles.isFeatured} = true)::int`,
+      totalSongs: sql<number>`count(*) filter (where ${battles.generatedSong}->>'audioUrl' is not null)::int`,
     })
     .from(battles)
     .where(
@@ -385,6 +387,7 @@ export async function getMonthlyBattleStats(
     liveBattles: Number(result?.liveBattles ?? 0),
     completedBattles: Number(result?.completedBattles ?? 0),
     featuredBattles: Number(result?.featuredBattles ?? 0),
+    totalSongs: Number(result?.totalSongs ?? 0),
     month: monthName,
     year,
   };
@@ -440,6 +443,7 @@ export interface AllTimeBattleStats {
   liveBattles: number;
   completedBattles: number;
   featuredBattles: number;
+  totalSongs: number;
   firstBattleDate: Date | null;
   lastBattleDate: Date | null;
 }
@@ -451,6 +455,7 @@ export async function getAllTimeBattleStats(): Promise<AllTimeBattleStats> {
       liveBattles: sql<number>`count(*) filter (where ${battles.liveStartedAt} is not null)::int`,
       completedBattles: sql<number>`count(*) filter (where ${battles.status} = 'completed')::int`,
       featuredBattles: sql<number>`count(*) filter (where ${battles.isFeatured} = true)::int`,
+      totalSongs: sql<number>`count(*) filter (where ${battles.generatedSong}->>'audioUrl' is not null)::int`,
       firstBattleDate: sql<Date>`min(${battles.createdAt})`,
       lastBattleDate: sql<Date>`max(${battles.createdAt})`,
     })
@@ -461,6 +466,7 @@ export async function getAllTimeBattleStats(): Promise<AllTimeBattleStats> {
     liveBattles: Number(result?.liveBattles ?? 0),
     completedBattles: Number(result?.completedBattles ?? 0),
     featuredBattles: Number(result?.featuredBattles ?? 0),
+    totalSongs: Number(result?.totalSongs ?? 0),
     firstBattleDate: result?.firstBattleDate
       ? new Date(result.firstBattleDate)
       : null,

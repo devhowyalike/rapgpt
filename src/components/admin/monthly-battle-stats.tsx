@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, ChevronDown, Radio, Swords, Trophy } from "lucide-react";
+import { Activity, ChevronDown, Music, Radio, Swords, Trophy } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { MonthlyBattleStats } from "@/lib/usage-storage";
 
@@ -46,6 +46,15 @@ export function MonthlyBattleStatsComponent({
       bgColor: "bg-amber-500/20",
       borderColor: "border-amber-500/30",
     },
+    {
+      label: "AI Songs",
+      value: stats.totalSongs,
+      icon: Music,
+      color: "text-pink-400",
+      bgColor: "bg-pink-500/20",
+      borderColor: "border-pink-500/30",
+      description: "Suno MP3 generations",
+    },
   ];
 
   const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -65,10 +74,10 @@ export function MonthlyBattleStatsComponent({
         <div>
           <h2 className="font-bebas text-3xl text-white flex items-center gap-2">
             <Activity size={24} className="text-cyan-400" />
-            WebSocket Stats - {stats.month} {stats.year}
+            Battle Stats - {stats.month} {stats.year}
           </h2>
           <p className="text-gray-400 text-sm mt-1">
-            Battle activity and live broadcast usage this month
+            Battle activity, live broadcasts, and AI song generations this month
           </p>
         </div>
 
@@ -130,7 +139,11 @@ export function MonthlyBattleStatsComponent({
               <span className="text-white font-semibold">
                 {formatNumber(stats.liveBattles)}
               </span>{" "}
-              live WebSocket broadcasts out of{" "}
+              live broadcasts and{" "}
+              <span className="text-pink-400 font-semibold">
+                {formatNumber(stats.totalSongs)}
+              </span>{" "}
+              AI songs from{" "}
               <span className="text-white font-semibold">
                 {formatNumber(stats.totalBattles)}
               </span>{" "}

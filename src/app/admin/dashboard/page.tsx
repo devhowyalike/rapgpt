@@ -126,7 +126,7 @@ export default async function AdminDashboardPage({
             />
           </div>
 
-          {/* Monthly WebSocket / Battle Stats */}
+          {/* Monthly Battle Stats */}
           <div className="mb-8">
             <MonthlyBattleStatsComponent
               stats={monthlyBattleStats}
