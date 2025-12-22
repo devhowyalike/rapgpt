@@ -73,6 +73,9 @@ const clients = new Map<WebSocket, ClientConnection>();
 // Track if shutdown is in progress
 let isShuttingDown = false;
 
+// Track server start time for stats
+const serverStartedAt = Date.now();
+
 function joinBattleRoom(battleId: string, client: ClientConnection) {
   const now = Date.now();
 
@@ -207,6 +210,52 @@ function broadcastViewerCount(battleId: string) {
     timestamp: Date.now(),
     count,
   });
+}
+
+/**
+ * Get WebSocket server statistics for admin dashboard
+ */
+function getStats() {
+  const rooms: Array<{
+    battleId: string;
+    viewerCount: number;
+    adminConnected: boolean;
+    createdAt: number;
+    lastActivityAt: number;
+    adminDisconnectedAt: number | null;
+  }> = [];
+
+  battleRoomMetadata.forEach((metadata, battleId) => {
+    const room = battleRooms.get(battleId);
+    const viewerCount = room
+      ? Array.from(room).filter((c) => !c.isAdmin).length
+      : 0;
+    const adminConnected = room
+      ? Array.from(room).some((c) => c.isAdmin)
+      : false;
+
+    rooms.push({
+      battleId,
+      viewerCount,
+      adminConnected,
+      createdAt: metadata.createdAt,
+      lastActivityAt: metadata.lastActivityAt,
+      adminDisconnectedAt: metadata.adminDisconnectedAt,
+    });
+  });
+
+  return {
+    totalConnections: clients.size,
+    totalRooms: battleRooms.size,
+    rooms,
+    serverStartedAt,
+    config: {
+      heartbeatInterval: WS_HEARTBEAT_INTERVAL,
+      roomInactivityTimeout: WS_ROOM_INACTIVITY_TIMEOUT,
+      adminGracePeriod: WS_ADMIN_GRACE_PERIOD,
+      maxRoomLifetime: WS_MAX_ROOM_LIFETIME,
+    },
+  };
 }
 
 /**
@@ -439,6 +488,28 @@ app.prepare().then(async () => {
       return;
     }
 
+    // Internal endpoint for fetching WebSocket stats from API routes
+    if (url.startsWith("/__internal/ws-stats") && req.method === "GET") {
+      // Verify internal secret
+      const secret = req.headers["x-internal-secret"];
+      if (secret !== INTERNAL_BROADCAST_SECRET) {
+        res.writeHead(403, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Forbidden" }));
+        return;
+      }
+
+      try {
+        const stats = getStats();
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(stats));
+      } catch (error) {
+        console.error("[Internal Stats] Error:", error);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Internal error" }));
+      }
+      return;
+    }
+
     // Pass everything else to Next.js
     const parsedUrl = parse(req.url || "", true);
     await handle(req, res, parsedUrl);
@@ -455,6 +526,7 @@ app.prepare().then(async () => {
     clients: new Set(),
     broadcast,
     getViewerCount,
+    getStats,
   });
 
   // Handle WebSocket upgrade

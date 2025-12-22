@@ -8,7 +8,7 @@
 
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Radio } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useBattleStore } from "@/lib/battle-store";
 import type { Battle } from "@/lib/shared";
@@ -93,7 +93,6 @@ export function useLiveBattleState({
 
   const [isStartingLive, setIsStartingLive] = useState(false);
   const [isStoppingLive, setIsStoppingLive] = useState(false);
-  const [hasInitiallyConnected, setHasInitiallyConnected] = useState(false);
   const [showBattleEndedDialog, setShowBattleEndedDialog] = useState(false);
   const [hostEndedBattle, setHostEndedBattle] = useState(false);
   // Track if we were ever live - keeps WebSocket connected for restart notifications
@@ -116,8 +115,6 @@ export function useLiveBattleState({
           if (hostEndedBattle) {
             setHostEndedBattle(false);
             setShowBattleEndedDialog(false);
-            // Allow a fresh sync to happen when the host restarts
-            setHasInitiallyConnected(false);
             // Show toast notification that battle is live again
             toast.success("Battle is back live!", {
               description: "The host has restarted the broadcast.",
@@ -268,13 +265,23 @@ export function useLiveBattleState({
     });
   }, [warning]);
 
-  // Fetch latest battle state when WebSocket connects for the first time
+  // Track previous connection status to detect reconnections
+  const prevWsStatusRef = useRef<ConnectionStatus>(wsStatus);
+
+  // Fetch latest battle state when WebSocket connects (initial or reconnection)
   useEffect(() => {
-    if (wsStatus === "connected" && !hasInitiallyConnected && battle?.isLive) {
+    const wasDisconnected = prevWsStatusRef.current === "disconnected" || 
+                            prevWsStatusRef.current === "error";
+    const justConnected = wsStatus === "connected" && wasDisconnected;
+    
+    // Update ref for next comparison
+    prevWsStatusRef.current = wsStatus;
+
+    // Sync on initial connection OR reconnection when battle is/was live
+    if (justConnected && (battle?.isLive || wasEverLive)) {
       console.log(
-        "[LiveBattleState] Initial connection - fetching latest battle state"
+        "[LiveBattleState] Connection established - fetching latest battle state"
       );
-      setHasInitiallyConnected(true);
       fetch(`/api/battle/${initialBattle.id}/sync`)
         .then((res) => res.json())
         .then((data) => {
@@ -282,7 +289,8 @@ export function useLiveBattleState({
             console.log(
               "[LiveBattleState] Received synced state with",
               data.battle.comments.length,
-              "comments"
+              "comments, isLive:",
+              data.battle.isLive
             );
             setBattle(data.battle);
           }
@@ -293,10 +301,10 @@ export function useLiveBattleState({
     }
   }, [
     wsStatus,
-    hasInitiallyConnected,
     initialBattle.id,
     setBattle,
     battle?.isLive,
+    wasEverLive,
   ]);
 
   // Reading phase countdown
@@ -380,9 +388,6 @@ export function useLiveBattleState({
 
       // Notify header to refresh live battles
       window.dispatchEvent(new CustomEvent("battle:status-changed"));
-
-      // Reset connection state for fresh sync
-      setHasInitiallyConnected(false);
 
       // Show voting enabled toast once per battle for the host
       const toastKey = `voting-toast-shown-${battle.id}`;

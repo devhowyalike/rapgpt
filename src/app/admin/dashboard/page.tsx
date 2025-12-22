@@ -5,6 +5,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminDashboardClient } from "@/components/admin/admin-dashboard-client";
 import { MonthlyTokenUsage } from "@/components/admin/monthly-token-usage";
+import { WebSocketStats } from "@/components/admin/websocket-stats";
 import { SiteHeader } from "@/components/site-header";
 import { decrypt } from "@/lib/auth/encryption";
 import { checkRole } from "@/lib/auth/roles";
@@ -116,6 +117,11 @@ export default async function AdminDashboardPage({
               totals={monthlyTokens}
               availableMonths={availableMonths}
             />
+          </div>
+
+          {/* WebSocket & Live Battle Stats */}
+          <div className="mb-8">
+            <WebSocketStats />
           </div>
 
           <AdminDashboardClient
