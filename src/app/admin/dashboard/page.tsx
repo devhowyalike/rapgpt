@@ -4,6 +4,7 @@ import { Shield, Star } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminDashboardClient } from "@/components/admin/admin-dashboard-client";
+import { MonthlyBattleStatsComponent } from "@/components/admin/monthly-battle-stats";
 import { MonthlyTokenUsage } from "@/components/admin/monthly-token-usage";
 import { WebSocketStats } from "@/components/admin/websocket-stats";
 import { SiteHeader } from "@/components/site-header";
@@ -12,8 +13,11 @@ import { checkRole } from "@/lib/auth/roles";
 import { db } from "@/lib/db/client";
 import { users } from "@/lib/db/schema";
 import {
+  getAvailableBattleMonths,
   getAvailableMonths,
+  getCurrentMonthBattleStats,
   getCurrentMonthTokenTotals,
+  getMonthlyBattleStats,
   getMonthlyTokenTotals,
 } from "@/lib/usage-storage";
 
@@ -46,8 +50,9 @@ export default async function AdminDashboardPage({
       where: eq(users.clerkId, clerkUserId!),
     });
 
-    // Get available months for selector
-    const availableMonths = await getAvailableMonths();
+    // Get available months for selectors
+    const availableTokenMonths = await getAvailableMonths();
+    const availableBattleMonths = await getAvailableBattleMonths();
 
     // Determine which month to show
     const resolvedSearchParams = await searchParams;
@@ -55,13 +60,15 @@ export default async function AdminDashboardPage({
     const yearParam = resolvedSearchParams?.year as string | undefined;
 
     let monthlyTokens;
+    let monthlyBattleStats;
     if (monthParam && yearParam) {
-      monthlyTokens = await getMonthlyTokenTotals(
-        Number.parseInt(monthParam),
-        Number.parseInt(yearParam)
-      );
+      const month = Number.parseInt(monthParam);
+      const year = Number.parseInt(yearParam);
+      monthlyTokens = await getMonthlyTokenTotals(month, year);
+      monthlyBattleStats = await getMonthlyBattleStats(month, year);
     } else {
       monthlyTokens = await getCurrentMonthTokenTotals();
+      monthlyBattleStats = await getCurrentMonthBattleStats();
     }
 
     // Decrypt user data for display
@@ -111,15 +118,23 @@ export default async function AdminDashboardPage({
             </div>
           </div>
 
+          {/* Monthly WebSocket / Battle Stats */}
+          <div className="mb-8">
+            <MonthlyBattleStatsComponent
+              stats={monthlyBattleStats}
+              availableMonths={availableBattleMonths}
+            />
+          </div>
+
           {/* Monthly Token Usage */}
           <div className="mb-8">
             <MonthlyTokenUsage
               totals={monthlyTokens}
-              availableMonths={availableMonths}
+              availableMonths={availableTokenMonths}
             />
           </div>
 
-          {/* WebSocket & Live Battle Stats */}
+          {/* Live WebSocket Stats */}
           <div className="mb-8">
             <WebSocketStats />
           </div>
