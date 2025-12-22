@@ -8,12 +8,13 @@ import { parse } from "url";
 import { WebSocket, WebSocketServer } from "ws";
 import { setWebSocketServer } from "./src/lib/websocket/server";
 import {
-  checkRoomTimeouts,
-  cleanupOrphanedLiveBattles,
   cleanupStaleLiveBattles,
+  initializeCleanup,
+  startCleanupIntervalIfNeeded,
+  stopCleanupIntervalIfEmpty,
+  stopCleanupInterval,
   type BattleRoomMetadata,
   type ClientConnection,
-  type CleanupContext,
 } from "./src/lib/websocket/cleanup";
 import type { ClientMessage, WebSocketEvent } from "./src/lib/websocket/types";
 
@@ -65,8 +66,9 @@ const serverStartedAt = Date.now();
 
 function joinBattleRoom(battleId: string, client: ClientConnection) {
   const now = Date.now();
+  const isNewRoom = !battleRooms.has(battleId);
 
-  if (!battleRooms.has(battleId)) {
+  if (isNewRoom) {
     battleRooms.set(battleId, new Set());
     // Initialize metadata for new room
     battleRoomMetadata.set(battleId, {
@@ -96,6 +98,11 @@ function joinBattleRoom(battleId: string, client: ClientConnection) {
   console.log(
     `[WS] Client ${client.clientId} joined battle ${battleId}. Room size: ${battleRooms.get(battleId)?.size}`,
   );
+  
+  // Start cleanup interval when first battle room is created
+  if (isNewRoom && !battleId.startsWith("__")) {
+    startCleanupIntervalIfNeeded();
+  }
 }
 
 function leaveBattleRoom(battleId: string, client: ClientConnection) {
@@ -119,6 +126,11 @@ function leaveBattleRoom(battleId: string, client: ClientConnection) {
       battleRooms.delete(battleId);
       battleRoomMetadata.delete(battleId);
       console.log(`[WS] Room ${battleId} is empty, removed (including metadata)`);
+      
+      // Stop cleanup interval if no active battle rooms remain
+      if (!battleId.startsWith("__")) {
+        stopCleanupIntervalIfEmpty();
+      }
     }
   }
 }
@@ -516,8 +528,8 @@ app.prepare().then(async () => {
     });
   }, WS_HEARTBEAT_INTERVAL);
 
-  // Create cleanup context for room timeout and orphaned battle checks
-  const cleanupContext: CleanupContext = {
+  // Initialize cleanup module (on-demand - interval starts when battles are active)
+  initializeCleanup({
     battleRooms,
     battleRoomMetadata,
     broadcast,
@@ -527,17 +539,11 @@ app.prepare().then(async () => {
       maxRoomLifetime: WS_MAX_ROOM_LIFETIME,
       warningBeforeClose: WS_WARNING_BEFORE_CLOSE,
     },
-  };
-
-  // Room cleanup interval - check every minute for timeouts and orphaned battles
-  const roomCleanupInterval = setInterval(() => {
-    checkRoomTimeouts(cleanupContext);
-    cleanupOrphanedLiveBattles(cleanupContext);
-  }, 60000);
+  });
 
   wss.on("close", () => {
     clearInterval(pingInterval);
-    clearInterval(roomCleanupInterval);
+    stopCleanupInterval();
   });
 
   // Register shutdown handlers
@@ -552,5 +558,6 @@ app.prepare().then(async () => {
     console.log(`>   - Room inactivity timeout: ${WS_ROOM_INACTIVITY_TIMEOUT / 60000}min`);
     console.log(`>   - Admin grace period: ${WS_ADMIN_GRACE_PERIOD / 60000}min`);
     console.log(`>   - Max room lifetime: ${WS_MAX_ROOM_LIFETIME > 0 ? `${WS_MAX_ROOM_LIFETIME / 3600000}h` : "disabled"}`);
+    console.log(`>   - Room cleanup: on-demand (only runs when battles are active)`);
   });
 });

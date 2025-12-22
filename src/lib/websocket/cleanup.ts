@@ -41,6 +41,76 @@ export interface CleanupContext {
   };
 }
 
+// Module-level state for on-demand cleanup interval
+let cleanupInterval: ReturnType<typeof setInterval> | null = null;
+let cleanupContext: CleanupContext | null = null;
+
+/**
+ * Initialize the cleanup context. Called once on server startup.
+ * Does NOT start the cleanup interval - that happens on-demand when battles are active.
+ */
+export function initializeCleanup(ctx: CleanupContext): void {
+  cleanupContext = ctx;
+  console.log("[Cleanup] Initialized (on-demand mode - starts when battles are active)");
+}
+
+/**
+ * Start the cleanup interval if not already running.
+ * Only starts when there are active battle rooms to clean up.
+ * Call this when a new battle room is created.
+ */
+export function startCleanupIntervalIfNeeded(): void {
+  // Don't start if already running or no cleanup context
+  if (cleanupInterval || !cleanupContext) return;
+  
+  // Only start if there are non-special rooms
+  const hasActiveRooms = Array.from(cleanupContext.battleRooms.keys()).some(
+    id => !id.startsWith("__")
+  );
+  if (!hasActiveRooms) return;
+  
+  console.log("[Cleanup] Starting interval (active battles detected)");
+  cleanupInterval = setInterval(() => {
+    if (!cleanupContext) return;
+    checkRoomTimeouts(cleanupContext);
+    cleanupOrphanedLiveBattles(cleanupContext);
+  }, 60000);
+  
+  // Run an immediate check when first battle room is created
+  checkRoomTimeouts(cleanupContext);
+}
+
+/**
+ * Stop the cleanup interval if no active battle rooms remain.
+ * Call this when a battle room is deleted.
+ */
+export function stopCleanupIntervalIfEmpty(): void {
+  if (!cleanupInterval || !cleanupContext) return;
+  
+  // Check if there are any non-special rooms left
+  const hasActiveRooms = Array.from(cleanupContext.battleRooms.keys()).some(
+    id => !id.startsWith("__")
+  );
+  if (hasActiveRooms) return;
+  
+  console.log("[Cleanup] Stopping interval (no active battles)");
+  clearInterval(cleanupInterval);
+  cleanupInterval = null;
+  
+  // Run one final orphaned battle cleanup
+  cleanupOrphanedLiveBattles(cleanupContext);
+}
+
+/**
+ * Stop the cleanup interval (used on server shutdown).
+ */
+export function stopCleanupInterval(): void {
+  if (cleanupInterval) {
+    clearInterval(cleanupInterval);
+    cleanupInterval = null;
+  }
+}
+
 /**
  * Reset all live battles in database (used on server startup/shutdown)
  */
