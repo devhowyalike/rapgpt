@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { desc, eq } from "drizzle-orm";
-import { Shield, Star } from "lucide-react";
+import { Shield, Swords } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminDashboardClient } from "@/components/admin/admin-dashboard-client";
@@ -112,7 +112,7 @@ export default async function AdminDashboardPage({
                 href="/admin/battles-list"
                 className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center gap-2"
               >
-                <Star size={20} />
+                <Swords size={20} />
                 View All Battles
               </Link>
             </div>

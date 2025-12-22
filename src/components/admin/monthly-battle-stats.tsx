@@ -6,7 +6,6 @@ import {
   Radio,
   Swords,
   Trophy,
-  Star,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { MonthlyBattleStats } from "@/lib/usage-storage";
@@ -52,14 +51,6 @@ export function MonthlyBattleStatsComponent({
       color: "text-amber-400",
       bgColor: "bg-amber-500/20",
       borderColor: "border-amber-500/30",
-    },
-    {
-      label: "Featured",
-      value: stats.featuredBattles,
-      icon: Star,
-      color: "text-purple-400",
-      bgColor: "bg-purple-500/20",
-      borderColor: "border-purple-500/30",
     },
   ];
 

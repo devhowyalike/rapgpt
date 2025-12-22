@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, EyeOff, Music, Shield, Star, User } from "lucide-react";
+import { Eye, EyeOff, Music, Shield, Swords, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
@@ -25,6 +25,7 @@ export function AdminDashboardClient({
   const [isLoadingBattles, setIsLoadingBattles] = React.useState(false);
 
   const selectedUser = users.find((u) => u.id === selectedUserId);
+  const filteredBattles = userBattles.filter((battle) => !battle.isFeatured);
 
   const handleUserClick = async (userId: string) => {
     setSelectedUserId(userId);
@@ -124,10 +125,10 @@ export function AdminDashboardClient({
       <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bebas text-3xl text-white flex items-center gap-2">
-            <Star size={24} />
+            <Swords size={24} />
             {selectedUser ? (
               <>
-                {selectedUser.displayName}'s Battles ({userBattles.length})
+                {selectedUser.displayName}'s Battles ({filteredBattles.length})
               </>
             ) : (
               <>Select a User</>
@@ -153,16 +154,16 @@ export function AdminDashboardClient({
               <p>Loading battles...</p>
             </div>
           </div>
-        ) : userBattles.length === 0 ? (
+        ) : filteredBattles.length === 0 ? (
           <div className="flex items-center justify-center h-[400px] text-gray-400">
             <div className="text-center">
-              <Star size={48} className="mx-auto mb-4 opacity-50" />
+              <Swords size={48} className="mx-auto mb-4 opacity-50" />
               <p>This user has no battles yet</p>
             </div>
           </div>
         ) : (
           <div className="space-y-3 max-h-[600px] overflow-y-auto">
-            {userBattles.map((battle) => {
+            {filteredBattles.map((battle) => {
               const personas = {
                 player1: battle.player1Persona as any,
                 player2: battle.player2Persona as any,
@@ -233,14 +234,8 @@ export function AdminDashboardClient({
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-sm flex-wrap">
-                    <span
-                      className={`px-2 py-1 rounded text-xs ${
-                        battle.isFeatured
-                          ? "bg-purple-600/30 text-purple-300"
-                          : "bg-gray-600/30 text-gray-400"
-                      }`}
-                    >
-                      {battle.isFeatured ? "Featured" : "User Battle"}
+                    <span className="px-2 py-1 rounded text-xs bg-gray-600/30 text-gray-400">
+                      User Battle
                     </span>
                     <span
                       className={`px-2 py-1 rounded text-xs flex items-center gap-1 ${
