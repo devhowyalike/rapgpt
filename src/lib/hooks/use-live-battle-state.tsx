@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useBattleStore } from "@/lib/battle-store";
 import type { Battle } from "@/lib/shared";
-import { useWebSocket } from "@/lib/websocket/client";
+import { type BattleWarning, useWebSocket } from "@/lib/websocket/client";
 import type { ConnectionStatus, WebSocketEvent } from "@/lib/websocket/types";
 
 interface UseLiveBattleStateOptions {
@@ -33,6 +33,7 @@ interface UseLiveBattleStateReturn {
   wsStatus: ConnectionStatus;
   viewerCount: number;
   reconnect: () => void;
+  warning: BattleWarning | null;
 
   // Live mode controls
   isLive: boolean;
@@ -228,6 +229,7 @@ export function useLiveBattleState({
   const {
     status: wsStatus,
     viewerCount,
+    warning,
     reconnect,
   } = useWebSocket({
     battleId: initialBattle.id,
@@ -235,6 +237,36 @@ export function useLiveBattleState({
     enabled: wasEverLive,
     onEvent: handleWebSocketEvent,
   });
+
+  // Show toast when warning is received
+  useEffect(() => {
+    if (!warning) return;
+
+    const reasonMessages: Record<BattleWarning["reason"], { title: string; description: string }> = {
+      inactivity: {
+        title: "Battle ending soon",
+        description: `This live battle will end in ${warning.secondsRemaining}s due to inactivity.`,
+      },
+      admin_timeout: {
+        title: "Host disconnected",
+        description: `Battle will end in ${warning.secondsRemaining}s unless the host reconnects.`,
+      },
+      server_shutdown: {
+        title: "Server maintenance",
+        description: "The server is shutting down. Please reconnect shortly.",
+      },
+      max_lifetime: {
+        title: "Battle time limit",
+        description: `This battle has reached its maximum duration. Ending in ${warning.secondsRemaining}s.`,
+      },
+    };
+
+    const msg = reasonMessages[warning.reason];
+    toast.warning(msg.title, {
+      description: msg.description,
+      duration: warning.reason === "server_shutdown" ? 10000 : 5000,
+    });
+  }, [warning]);
 
   // Fetch latest battle state when WebSocket connects for the first time
   useEffect(() => {
@@ -483,6 +515,7 @@ export function useLiveBattleState({
     wsStatus,
     viewerCount,
     reconnect,
+    warning,
 
     // Live mode controls
     isLive: battle?.isLive ?? false,

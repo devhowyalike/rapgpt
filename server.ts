@@ -2,16 +2,42 @@
  * Custom Next.js server with WebSocket support
  */
 
+import { eq } from "drizzle-orm";
 import { createServer } from "http";
 import next from "next";
 import { parse } from "url";
 import { WebSocket, WebSocketServer } from "ws";
+import { db } from "./src/lib/db/client";
+import { battles } from "./src/lib/db/schema";
 import { setWebSocketServer } from "./src/lib/websocket/server";
-import type { ClientMessage, WebSocketEvent } from "./src/lib/websocket/types";
+import type {
+  BattleEndingReason,
+  ClientMessage,
+  WebSocketEvent,
+} from "./src/lib/websocket/types";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = process.env.HOSTNAME || "localhost";
 const port = parseInt(process.env.PORT || "3000", 10);
+
+// Timeout configuration (configurable via environment variables)
+const WS_ROOM_INACTIVITY_TIMEOUT = parseInt(
+  process.env.WS_ROOM_INACTIVITY_TIMEOUT || "1800000",
+  10,
+); // 30 min default
+const WS_ADMIN_GRACE_PERIOD = parseInt(
+  process.env.WS_ADMIN_GRACE_PERIOD || "300000",
+  10,
+); // 5 min default
+const WS_HEARTBEAT_INTERVAL = parseInt(
+  process.env.WS_HEARTBEAT_INTERVAL || "30000",
+  10,
+); // 30 sec default
+const WS_MAX_ROOM_LIFETIME = parseInt(
+  process.env.WS_MAX_ROOM_LIFETIME || "7200000",
+  10,
+); // 2 hours default (0 = disabled)
+const WS_WARNING_BEFORE_CLOSE = 60000; // 1 minute warning before auto-close
 
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
@@ -27,17 +53,56 @@ interface ClientConnection {
   isAlive: boolean;
 }
 
+interface BattleRoomMetadata {
+  createdAt: number;
+  lastActivityAt: number;
+  adminClientId: string | null;
+  adminDisconnectedAt: number | null;
+  warningBroadcastedAt: number | null; // Track if we've sent a warning
+}
+
 // Battle rooms: Map<battleId, Set<ClientConnection>>
 const battleRooms = new Map<string, Set<ClientConnection>>();
+
+// Battle room metadata: Map<battleId, BattleRoomMetadata>
+const battleRoomMetadata = new Map<string, BattleRoomMetadata>();
 
 // Client tracking: Map<WebSocket, ClientConnection>
 const clients = new Map<WebSocket, ClientConnection>();
 
+// Track if shutdown is in progress
+let isShuttingDown = false;
+
 function joinBattleRoom(battleId: string, client: ClientConnection) {
+  const now = Date.now();
+
   if (!battleRooms.has(battleId)) {
     battleRooms.set(battleId, new Set());
+    // Initialize metadata for new room
+    battleRoomMetadata.set(battleId, {
+      createdAt: now,
+      lastActivityAt: now,
+      adminClientId: null,
+      adminDisconnectedAt: null,
+      warningBroadcastedAt: null,
+    });
   }
+
   battleRooms.get(battleId)?.add(client);
+
+  // Update metadata
+  const metadata = battleRoomMetadata.get(battleId);
+  if (metadata) {
+    metadata.lastActivityAt = now;
+
+    // Track admin connection and clear any grace period
+    if (client.isAdmin) {
+      metadata.adminClientId = client.clientId;
+      metadata.adminDisconnectedAt = null; // Admin reconnected, clear timeout
+      metadata.warningBroadcastedAt = null; // Clear any pending warning
+    }
+  }
+
   console.log(
     `[WS] Client ${client.clientId} joined battle ${battleId}. Room size: ${battleRooms.get(battleId)?.size}`,
   );
@@ -51,9 +116,19 @@ function leaveBattleRoom(battleId: string, client: ClientConnection) {
       `[WS] Client ${client.clientId} left battle ${battleId}. Room size: ${room.size}`,
     );
 
+    // Track admin disconnection for grace period
+    const metadata = battleRoomMetadata.get(battleId);
+    if (metadata && client.isAdmin && metadata.adminClientId === client.clientId) {
+      metadata.adminDisconnectedAt = Date.now();
+      console.log(
+        `[WS] Admin ${client.clientId} disconnected from battle ${battleId}. Grace period started.`,
+      );
+    }
+
     if (room.size === 0) {
       battleRooms.delete(battleId);
-      console.log(`[WS] Room ${battleId} is empty, removed`);
+      battleRoomMetadata.delete(battleId);
+      console.log(`[WS] Room ${battleId} is empty, removed (including metadata)`);
     }
   }
 }
@@ -67,6 +142,12 @@ function broadcast(
   if (!room) {
     console.warn(`[WS] No room found for battle ${battleId}`);
     return;
+  }
+
+  // Update room activity timestamp (except for internal events)
+  const metadata = battleRoomMetadata.get(battleId);
+  if (metadata && !event.type.startsWith("server:") && event.type !== "battle:ending_soon") {
+    metadata.lastActivityAt = Date.now();
   }
 
   const message = JSON.stringify(event);
@@ -128,7 +209,189 @@ function broadcastViewerCount(battleId: string) {
   });
 }
 
-app.prepare().then(() => {
+/**
+ * Reset stale live battles in database on server startup
+ */
+async function cleanupStaleLiveBattles() {
+  try {
+    const result = await db
+      .update(battles)
+      .set({ isLive: false, liveStartedAt: null })
+      .where(eq(battles.isLive, true));
+    console.log("[Startup] Reset stale live battles in database");
+    return result;
+  } catch (error) {
+    console.error("[Startup] Error resetting stale live battles:", error);
+  }
+}
+
+/**
+ * Broadcast warning before closing a battle
+ */
+function broadcastWarningBeforeClose(
+  battleId: string,
+  reason: BattleEndingReason,
+  secondsRemaining: number,
+) {
+  const metadata = battleRoomMetadata.get(battleId);
+  if (metadata) {
+    metadata.warningBroadcastedAt = Date.now();
+  }
+
+  broadcast(battleId, {
+    type: "battle:ending_soon",
+    battleId,
+    timestamp: Date.now(),
+    reason,
+    secondsRemaining,
+  });
+
+  console.log(
+    `[WS Cleanup] Warning broadcasted to battle ${battleId}: ending in ${secondsRemaining}s due to ${reason}`,
+  );
+}
+
+/**
+ * End a live battle and clean up the room
+ */
+async function endLiveBattleAndCleanup(
+  battleId: string,
+  reason: BattleEndingReason,
+) {
+  // Skip special rooms like __homepage__
+  if (battleId.startsWith("__")) {
+    return;
+  }
+
+  console.log(`[WS Cleanup] Ending live battle ${battleId} due to ${reason}`);
+
+  // Update database to mark battle as no longer live
+  try {
+    await db
+      .update(battles)
+      .set({ isLive: false, liveStartedAt: null })
+      .where(eq(battles.id, battleId));
+    console.log(`[WS Cleanup] Updated database for battle ${battleId}`);
+  } catch (error) {
+    console.error(`[WS Cleanup] Error updating database for ${battleId}:`, error);
+  }
+
+  // Broadcast battle:live_ended event to notify clients
+  const room = battleRooms.get(battleId);
+  if (room) {
+    const message = JSON.stringify({
+      type: "battle:live_ended",
+      battleId,
+      timestamp: Date.now(),
+      battle: { id: battleId }, // Minimal battle object; clients should refetch
+    });
+
+    room.forEach((client) => {
+      if (client.ws.readyState === WebSocket.OPEN) {
+        client.ws.send(message);
+      }
+    });
+
+    // Also notify homepage
+    const homepageRoom = battleRooms.get("__homepage__");
+    if (homepageRoom) {
+      homepageRoom.forEach((client) => {
+        if (client.ws.readyState === WebSocket.OPEN) {
+          client.ws.send(message);
+        }
+      });
+    }
+  }
+
+  // Clean up room metadata (keep the room itself for viewers who want to stay)
+  const metadata = battleRoomMetadata.get(battleId);
+  if (metadata) {
+    metadata.adminClientId = null;
+    metadata.adminDisconnectedAt = null;
+    metadata.warningBroadcastedAt = null;
+    // Reset activity timestamp so inactivity checks continue fresh
+    metadata.lastActivityAt = Date.now();
+  }
+}
+
+/**
+ * Check rooms for inactivity, admin timeouts, and max lifetime
+ */
+function checkRoomTimeouts() {
+  const now = Date.now();
+
+  battleRoomMetadata.forEach((metadata, battleId) => {
+    // Skip special rooms
+    if (battleId.startsWith("__")) return;
+
+    const timeSinceActivity = now - metadata.lastActivityAt;
+    const timeSinceCreation = now - metadata.createdAt;
+    const warningThreshold = WS_WARNING_BEFORE_CLOSE;
+
+    // Check for max room lifetime
+    if (WS_MAX_ROOM_LIFETIME > 0 && timeSinceCreation > WS_MAX_ROOM_LIFETIME) {
+      if (!metadata.warningBroadcastedAt) {
+        broadcastWarningBeforeClose(battleId, "max_lifetime", warningThreshold / 1000);
+      } else if (now - metadata.warningBroadcastedAt > warningThreshold) {
+        endLiveBattleAndCleanup(battleId, "max_lifetime");
+      }
+      return;
+    }
+
+    // Check for admin disconnect grace period
+    if (metadata.adminDisconnectedAt) {
+      const timeSinceAdminLeft = now - metadata.adminDisconnectedAt;
+
+      if (timeSinceAdminLeft > WS_ADMIN_GRACE_PERIOD) {
+        if (!metadata.warningBroadcastedAt) {
+          broadcastWarningBeforeClose(battleId, "admin_timeout", warningThreshold / 1000);
+        } else if (now - metadata.warningBroadcastedAt > warningThreshold) {
+          endLiveBattleAndCleanup(battleId, "admin_timeout");
+        }
+        return;
+      }
+    }
+
+    // Check for room inactivity
+    if (timeSinceActivity > WS_ROOM_INACTIVITY_TIMEOUT) {
+      if (!metadata.warningBroadcastedAt) {
+        broadcastWarningBeforeClose(battleId, "inactivity", warningThreshold / 1000);
+      } else if (now - metadata.warningBroadcastedAt > warningThreshold) {
+        endLiveBattleAndCleanup(battleId, "inactivity");
+      }
+    }
+  });
+}
+
+/**
+ * Graceful shutdown handler
+ */
+async function gracefulShutdown(signal: string) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+
+  console.log(`[Server] Received ${signal}. Starting graceful shutdown...`);
+
+  // Broadcast shutdown warning to all rooms
+  battleRooms.forEach((_, battleId) => {
+    broadcast(battleId, {
+      type: "server:shutdown",
+      battleId,
+      timestamp: Date.now(),
+      message: "Server is shutting down. Please reconnect shortly.",
+    });
+  });
+
+  // End all live battles in database
+  await cleanupStaleLiveBattles();
+
+  console.log("[Server] Graceful shutdown complete");
+  process.exit(0);
+}
+
+app.prepare().then(async () => {
+  // Cleanup stale live battles from previous server runs
+  await cleanupStaleLiveBattles();
   const server = createServer(async (req, res) => {
     // Only log non-internal Next.js requests
     const url = req.url || "";
@@ -330,7 +593,7 @@ app.prepare().then(() => {
     });
   });
 
-  // Ping clients every 30 seconds to keep connections alive
+  // Ping clients to keep connections alive (configurable interval)
   const pingInterval = setInterval(() => {
     clients.forEach((connection, ws) => {
       if (!connection.isAlive) {
@@ -344,14 +607,29 @@ app.prepare().then(() => {
       connection.isAlive = false;
       ws.ping();
     });
-  }, 30000);
+  }, WS_HEARTBEAT_INTERVAL);
+
+  // Room cleanup interval - check every minute for timeouts
+  const roomCleanupInterval = setInterval(() => {
+    checkRoomTimeouts();
+  }, 60000);
 
   wss.on("close", () => {
     clearInterval(pingInterval);
+    clearInterval(roomCleanupInterval);
   });
+
+  // Register shutdown handlers
+  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
   server.listen(port, () => {
     console.log(`> Ready on http://${hostname}:${port}`);
     console.log(`> WebSocket server ready on ws://${hostname}:${port}/ws`);
+    console.log(`> WebSocket cleanup config:`);
+    console.log(`>   - Heartbeat interval: ${WS_HEARTBEAT_INTERVAL / 1000}s`);
+    console.log(`>   - Room inactivity timeout: ${WS_ROOM_INACTIVITY_TIMEOUT / 60000}min`);
+    console.log(`>   - Admin grace period: ${WS_ADMIN_GRACE_PERIOD / 60000}min`);
+    console.log(`>   - Max room lifetime: ${WS_MAX_ROOM_LIFETIME > 0 ? `${WS_MAX_ROOM_LIFETIME / 3600000}h` : "disabled"}`);
   });
 });

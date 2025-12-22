@@ -14,9 +14,16 @@ interface UseWebSocketOptions {
   onEvent?: (event: WebSocketEvent) => void;
 }
 
+export interface BattleWarning {
+  reason: "inactivity" | "admin_timeout" | "server_shutdown" | "max_lifetime";
+  secondsRemaining: number;
+  timestamp: number;
+}
+
 interface UseWebSocketReturn {
   status: ConnectionStatus;
   viewerCount: number;
+  warning: BattleWarning | null;
   sendMessage: (message: ClientMessage) => void;
   reconnect: () => void;
 }
@@ -33,9 +40,11 @@ export function useWebSocket({
 }: UseWebSocketOptions): UseWebSocketReturn {
   const [status, setStatus] = useState<ConnectionStatus>("disconnected");
   const [viewerCount, setViewerCount] = useState(0);
+  const [warning, setWarning] = useState<BattleWarning | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const warningTimerRef = useRef<NodeJS.Timeout | null>(null);
   const clientIdRef = useRef<string>(
     `${isAdmin ? "admin" : "viewer"}-${Date.now()}-${Math.random()}`,
   );
@@ -103,6 +112,40 @@ export function useWebSocket({
             setViewerCount(wsEvent.count);
           } else if (wsEvent.type === "connection:acknowledged") {
             setViewerCount(wsEvent.viewerCount);
+          }
+
+          // Handle warning events
+          if (wsEvent.type === "battle:ending_soon") {
+            const warningData: BattleWarning = {
+              reason: wsEvent.reason,
+              secondsRemaining: wsEvent.secondsRemaining,
+              timestamp: wsEvent.timestamp,
+            };
+            setWarning(warningData);
+
+            // Clear warning after countdown expires
+            if (warningTimerRef.current) {
+              clearTimeout(warningTimerRef.current);
+            }
+            warningTimerRef.current = setTimeout(() => {
+              if (isMountedRef.current) {
+                setWarning(null);
+              }
+            }, wsEvent.secondsRemaining * 1000 + 5000); // Extra 5s buffer
+          } else if (wsEvent.type === "server:shutdown") {
+            // Set a special warning for server shutdown
+            setWarning({
+              reason: "server_shutdown",
+              secondsRemaining: 0,
+              timestamp: wsEvent.timestamp,
+            });
+          } else if (wsEvent.type === "battle:live_ended") {
+            // Clear any active warnings when battle ends
+            setWarning(null);
+            if (warningTimerRef.current) {
+              clearTimeout(warningTimerRef.current);
+              warningTimerRef.current = null;
+            }
           }
 
           // Call the event handler
@@ -176,6 +219,12 @@ export function useWebSocket({
         reconnectTimeoutRef.current = null;
       }
 
+      // Clear warning timer
+      if (warningTimerRef.current) {
+        clearTimeout(warningTimerRef.current);
+        warningTimerRef.current = null;
+      }
+
       // Close WebSocket connection
       if (wsRef.current) {
         console.log("[WS Client] Cleaning up connection");
@@ -199,6 +248,7 @@ export function useWebSocket({
   return {
     status,
     viewerCount,
+    warning,
     sendMessage,
     reconnect,
   };

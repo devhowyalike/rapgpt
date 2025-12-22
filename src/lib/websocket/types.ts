@@ -7,6 +7,7 @@ import type { Battle, Comment } from "@/lib/shared";
 export type WebSocketEventType =
   | "battle:live_started"
   | "battle:live_ended"
+  | "battle:ending_soon"
   | "verse:streaming"
   | "verse:complete"
   | "phase:reading"
@@ -19,7 +20,14 @@ export type WebSocketEventType =
   | "viewers:count"
   | "admin:connected"
   | "admin:disconnected"
-  | "connection:acknowledged";
+  | "connection:acknowledged"
+  | "server:shutdown";
+
+export type BattleEndingReason =
+  | "inactivity"
+  | "admin_timeout"
+  | "server_shutdown"
+  | "max_lifetime";
 
 export interface BaseWebSocketEvent {
   type: WebSocketEventType;
@@ -115,9 +123,21 @@ export interface ConnectionAcknowledgedEvent extends BaseWebSocketEvent {
   viewerCount: number;
 }
 
+export interface BattleEndingSoonEvent extends BaseWebSocketEvent {
+  type: "battle:ending_soon";
+  reason: BattleEndingReason;
+  secondsRemaining: number;
+}
+
+export interface ServerShutdownEvent extends BaseWebSocketEvent {
+  type: "server:shutdown";
+  message: string;
+}
+
 export type WebSocketEvent =
   | BattleLiveStartedEvent
   | BattleLiveEndedEvent
+  | BattleEndingSoonEvent
   | VerseStreamingEvent
   | VerseCompleteEvent
   | PhaseReadingEvent
@@ -130,7 +150,8 @@ export type WebSocketEvent =
   | ViewersCountEvent
   | AdminConnectedEvent
   | AdminDisconnectedEvent
-  | ConnectionAcknowledgedEvent;
+  | ConnectionAcknowledgedEvent
+  | ServerShutdownEvent;
 
 export interface ClientMessage {
   type: "join" | "leave" | "sync_request";
