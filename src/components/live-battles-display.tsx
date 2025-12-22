@@ -16,6 +16,11 @@ import {
 import type { Battle } from "@/lib/shared";
 import { getDisplayRound, ROUNDS_PER_BATTLE } from "@/lib/shared";
 import type { WebSocketEvent } from "@/lib/websocket/types";
+import { generateClientId, isWebSocketActive } from "@/lib/websocket/utils";
+
+// Extended Battle type with optional wsVerseCount for live tracking
+// This avoids creating placeholder verses that accumulate
+type LiveBattle = Battle & { wsVerseCount?: number };
 
 interface LiveBattlesDisplayProps {
   initialBattles: Battle[];
@@ -26,10 +31,12 @@ export function LiveBattlesDisplay({
   initialBattles,
   currentUserId,
 }: LiveBattlesDisplayProps) {
-  const [liveBattles, setLiveBattles] = useState<Battle[]>(initialBattles);
+  const [liveBattles, setLiveBattles] = useState<LiveBattle[]>(initialBattles);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMountedRef = useRef(true);
+  // Stable client ID that persists across reconnections
+  const clientIdRef = useRef(generateClientId("homepage"));
 
   const getWebSocketUrl = useCallback(() => {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -42,9 +49,9 @@ export function LiveBattlesDisplay({
 
     // Connect to WebSocket for global homepage updates
     const connectWebSocket = () => {
-      // Don't connect if unmounted or already connected
+      // Don't connect if unmounted or already connected/connecting
       if (!isMountedRef.current) return;
-      if (wsRef.current?.readyState === WebSocket.OPEN) return;
+      if (isWebSocketActive(wsRef.current)) return;
 
       const ws = new WebSocket(getWebSocketUrl());
       wsRef.current = ws;
@@ -56,12 +63,12 @@ export function LiveBattlesDisplay({
         }
         console.log("[Homepage WS] Connected");
 
-        // Join the global homepage room
+        // Join the global homepage room with stable client ID
         ws.send(
           JSON.stringify({
             type: "join",
             battleId: "__homepage__",
-            clientId: `homepage-${Date.now()}`,
+            clientId: clientIdRef.current,
             isAdmin: false,
           })
         );
@@ -110,6 +117,24 @@ export function LiveBattlesDisplay({
                   return [wsEvent.battle, ...prev];
                 });
               }
+              break;
+            }
+
+            case "homepage:battle_progress": {
+              // Lightweight update: update round and increment wsVerseCount
+              // wsVerseCount tracks verses from live updates without creating placeholders
+              setLiveBattles((prev) =>
+                prev.map((b) => {
+                  if (b.id !== wsEvent.battleId) return b;
+                  
+                  return {
+                    ...b,
+                    currentRound: wsEvent.currentRound,
+                    // Track live verse count separately - increments on each progress event
+                    wsVerseCount: (b.wsVerseCount ?? b.verses.length) + 1,
+                  };
+                })
+              );
               break;
             }
           }
@@ -230,7 +255,7 @@ export function LiveBattlesDisplay({
                 <div className="flex flex-col items-center gap-1 text-xs text-gray-400">
                   <div className="flex items-center gap-1">
                     <Users className="w-3 h-3" />
-                    <span>{battle.verses.length} verses</span>
+                    <span>{battle.wsVerseCount ?? battle.verses.length} verses</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <MessageSquare className="w-3 h-3" />

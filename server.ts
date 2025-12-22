@@ -80,7 +80,19 @@ function joinBattleRoom(battleId: string, client: ClientConnection) {
     });
   }
 
-  battleRooms.get(battleId)?.add(client);
+  const room = battleRooms.get(battleId);
+  if (room) {
+    // Deduplicate: Remove any existing connection with the same clientId
+    // This handles reconnections and prevents double-counting
+    const existingClient = Array.from(room).find(c => c.clientId === client.clientId);
+    if (existingClient) {
+      room.delete(existingClient);
+      console.log(
+        `[WS] Removed stale connection for client ${client.clientId} in battle ${battleId}`,
+      );
+    }
+    room.add(client);
+  }
 
   // Update metadata
   const metadata = battleRoomMetadata.get(battleId);
@@ -188,6 +200,29 @@ function broadcast(
       );
     }
   }
+
+  // Send lightweight progress update to homepage when verse completes
+  if (battleId !== "__homepage__" && event.type === "verse:complete") {
+    const homepageRoom = battleRooms.get("__homepage__");
+    if (homepageRoom && homepageRoom.size > 0) {
+      const progressEvent = JSON.stringify({
+        type: "homepage:battle_progress",
+        battleId,
+        timestamp: Date.now(),
+        currentRound: (event as { round: number }).round,
+      });
+      let homepageSentCount = 0;
+      homepageRoom.forEach((client) => {
+        if (client.ws.readyState === WebSocket.OPEN) {
+          client.ws.send(progressEvent);
+          homepageSentCount++;
+        }
+      });
+      console.log(
+        `[WS] Broadcasted homepage:battle_progress to ${homepageSentCount} homepage clients`,
+      );
+    }
+  }
 }
 
 function getViewerCount(battleId: string): number {
@@ -274,7 +309,7 @@ async function gracefulShutdown(signal: string) {
       type: "server:shutdown",
       battleId,
       timestamp: Date.now(),
-      message: "Server is shutting down. Please reconnect shortly.",
+      message: "Attempting to reconnect...",
     });
   });
 

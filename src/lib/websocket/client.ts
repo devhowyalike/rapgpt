@@ -6,6 +6,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ClientMessage, ConnectionStatus, WebSocketEvent } from "./types";
+import { generateClientId, isWebSocketActive, isWebSocketConnected } from "./utils";
 
 interface UseWebSocketOptions {
   battleId: string;
@@ -18,6 +19,7 @@ export interface BattleWarning {
   reason: "inactivity" | "admin_timeout" | "server_shutdown" | "max_lifetime";
   secondsRemaining: number;
   timestamp: number;
+  message?: string;
 }
 
 interface UseWebSocketReturn {
@@ -45,8 +47,10 @@ export function useWebSocket({
   const reconnectAttemptsRef = useRef(0);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const warningTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const statusDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const isReconnectingRef = useRef(false);
   const clientIdRef = useRef<string>(
-    `${isAdmin ? "admin" : "viewer"}-${Date.now()}-${Math.random()}`,
+    generateClientId(isAdmin ? "admin" : "viewer"),
   );
   const isMountedRef = useRef(true);
   const onEventRef = useRef(onEvent);
@@ -62,22 +66,68 @@ export function useWebSocket({
     return `${protocol}//${host}/ws`;
   }, []);
 
+  // Debounced status setter to prevent flickering during rapid reconnection attempts
+  const setStatusDebounced = useCallback(
+    (newStatus: ConnectionStatus, immediate = false) => {
+      // Clear any pending status update
+      if (statusDebounceRef.current) {
+        clearTimeout(statusDebounceRef.current);
+        statusDebounceRef.current = null;
+      }
+
+      // Immediate updates for successful connections and user-initiated disconnects
+      if (immediate || newStatus === "connected") {
+        setStatus(newStatus);
+        isReconnectingRef.current = false;
+        return;
+      }
+
+      // For disconnections during reconnect attempts, delay the status update
+      // to avoid flickering between "connecting" and "disconnected"
+      if (isReconnectingRef.current && newStatus === "connecting") {
+        // Don't update to "connecting" if we're already reconnecting
+        // Just stay in the current state to avoid flicker
+        return;
+      }
+
+      if (newStatus === "disconnected" || newStatus === "error") {
+        // Mark that we're in reconnection mode
+        isReconnectingRef.current = true;
+        
+        // Debounce disconnection status to avoid flickering
+        // Only update if we stay disconnected for a bit
+        statusDebounceRef.current = setTimeout(() => {
+          setStatus(newStatus);
+        }, 300);
+      } else {
+        setStatus(newStatus);
+      }
+    },
+    []
+  );
+
   const sendMessage = useCallback((message: ClientMessage) => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify(message));
+    if (isWebSocketConnected(wsRef.current)) {
+      wsRef.current!.send(JSON.stringify(message));
     }
   }, []);
 
   const connect = useCallback(() => {
     if (!enabled || !isMountedRef.current) return;
 
-    // Clean up existing connection
+    // Prevent duplicate connection attempts - check if already connecting or connected
+    if (isWebSocketActive(wsRef.current)) {
+      console.log("[WS Client] Connection already in progress or open, skipping");
+      return;
+    }
+    
+    // Clean up any existing connection that isn't active
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
     }
 
-    setStatus("connecting");
+    setStatusDebounced("connecting");
     console.log("[WS Client] Connecting to WebSocket server...");
 
     try {
@@ -88,7 +138,7 @@ export function useWebSocket({
         if (!isMountedRef.current) return;
 
         console.log("[WS Client] Connected");
-        setStatus("connected");
+        setStatusDebounced("connected", true);
         reconnectAttemptsRef.current = 0;
 
         // Join the battle room
@@ -138,6 +188,7 @@ export function useWebSocket({
               reason: "server_shutdown",
               secondsRemaining: 0,
               timestamp: wsEvent.timestamp,
+              message: wsEvent.message,
             });
           } else if (wsEvent.type === "battle:live_ended") {
             // Clear any active warnings when battle ends
@@ -164,7 +215,7 @@ export function useWebSocket({
            // Use console.debug instead of error to avoid cluttering production logs
            // for expected disconnections
            console.debug("[WS Client] Connection warning:", error);
-           setStatus("error");
+           setStatusDebounced("error");
         }
       };
 
@@ -172,7 +223,7 @@ export function useWebSocket({
         if (!isMountedRef.current) return;
 
         console.log("[WS Client] Disconnected");
-        setStatus("disconnected");
+        setStatusDebounced("disconnected");
         wsRef.current = null;
 
         // Attempt to reconnect
@@ -194,9 +245,9 @@ export function useWebSocket({
       };
     } catch (error) {
       console.error("[WS Client] Failed to connect:", error);
-      setStatus("error");
+      setStatusDebounced("error");
     }
-  }, [enabled, battleId, isAdmin, getWebSocketUrl, sendMessage]);
+  }, [enabled, battleId, isAdmin, getWebSocketUrl, sendMessage, setStatusDebounced]);
 
   const reconnect = useCallback(() => {
     reconnectAttemptsRef.current = 0;
@@ -210,13 +261,47 @@ export function useWebSocket({
       connect();
     }
 
+    // Retry connection when page becomes visible or gains focus
+    // This handles the case where reconnect attempts were exhausted while server was down
+    const retryConnectionOnActivity = (reason: string) => {
+      // Skip if disabled, unmounted, or already connected
+      if (!enabled || !isMountedRef.current) return;
+      if (isWebSocketConnected(wsRef.current)) return;
+      
+      console.log(`[WS Client] ${reason} - retrying connection`);
+      reconnectAttemptsRef.current = 0; // Reset attempts
+      connect();
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        retryConnectionOnActivity("Page visible");
+      }
+    };
+
+    const handleFocus = () => {
+      retryConnectionOnActivity("Window focused");
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
+
     return () => {
       isMountedRef.current = false;
+
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
 
       // Clear reconnect timeout
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
+      }
+
+      // Clear status debounce timeout
+      if (statusDebounceRef.current) {
+        clearTimeout(statusDebounceRef.current);
+        statusDebounceRef.current = null;
       }
 
       // Clear warning timer
@@ -230,7 +315,7 @@ export function useWebSocket({
         console.log("[WS Client] Cleaning up connection");
 
         // Send leave message before closing
-        if (wsRef.current.readyState === WebSocket.OPEN) {
+        if (isWebSocketConnected(wsRef.current)) {
           wsRef.current.send(
             JSON.stringify({
               type: "leave",

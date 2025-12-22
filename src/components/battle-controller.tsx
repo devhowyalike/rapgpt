@@ -177,6 +177,7 @@ export function BattleController({
   } = useLiveBattleState({
     initialBattle,
     canManage: canManageBattle,
+    isLoadingPermissions,
     onMobileTabChange: setMobileActiveTab,
     onMobileDrawerOpen: () => setShowMobileDrawer(true),
     onMobileDrawerClose: () => setShowMobileDrawer(false),

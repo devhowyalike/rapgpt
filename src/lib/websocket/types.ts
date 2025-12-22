@@ -21,7 +21,8 @@ export type WebSocketEventType =
   | "admin:connected"
   | "admin:disconnected"
   | "connection:acknowledged"
-  | "server:shutdown";
+  | "server:shutdown"
+  | "homepage:battle_progress";
 
 export type BattleEndingReason =
   | "inactivity"
@@ -134,6 +135,15 @@ export interface ServerShutdownEvent extends BaseWebSocketEvent {
   message: string;
 }
 
+/**
+ * Lightweight event for homepage to track battle progress
+ * Sent when a verse completes - homepage increments verse count locally
+ */
+export interface HomepageBattleProgressEvent extends BaseWebSocketEvent {
+  type: "homepage:battle_progress";
+  currentRound: number;
+}
+
 export type WebSocketEvent =
   | BattleLiveStartedEvent
   | BattleLiveEndedEvent
@@ -151,7 +161,8 @@ export type WebSocketEvent =
   | AdminConnectedEvent
   | AdminDisconnectedEvent
   | ConnectionAcknowledgedEvent
-  | ServerShutdownEvent;
+  | ServerShutdownEvent
+  | HomepageBattleProgressEvent;
 
 export interface ClientMessage {
   type: "join" | "leave" | "sync_request";
