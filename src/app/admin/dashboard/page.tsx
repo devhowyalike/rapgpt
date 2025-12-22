@@ -118,19 +118,19 @@ export default async function AdminDashboardPage({
             </div>
           </div>
 
-          {/* Monthly WebSocket / Battle Stats */}
-          <div className="mb-8">
-            <MonthlyBattleStatsComponent
-              stats={monthlyBattleStats}
-              availableMonths={availableBattleMonths}
-            />
-          </div>
-
           {/* Monthly Token Usage */}
           <div className="mb-8">
             <MonthlyTokenUsage
               totals={monthlyTokens}
               availableMonths={availableTokenMonths}
+            />
+          </div>
+
+          {/* Monthly WebSocket / Battle Stats */}
+          <div className="mb-8">
+            <MonthlyBattleStatsComponent
+              stats={monthlyBattleStats}
+              availableMonths={availableBattleMonths}
             />
           </div>
 
