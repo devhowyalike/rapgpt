@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { desc, eq } from "drizzle-orm";
 import { Shield, Swords } from "lucide-react";
+import { isRedirectError } from "next/dist/client/components/redirect";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminDashboardClient } from "@/components/admin/admin-dashboard-client";
@@ -147,6 +148,10 @@ export default async function AdminDashboardPage({
       </div>
     );
   } catch (error) {
+    // Re-throw redirect errors so Next.js can handle them
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error("Admin dashboard error:", error);
     return (
       <div className="min-h-screen bg-linear-to-br from-gray-900 via-purple-900 to-black flex items-center justify-center">
