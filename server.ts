@@ -2,19 +2,20 @@
  * Custom Next.js server with WebSocket support
  */
 
-import { eq } from "drizzle-orm";
 import { createServer } from "http";
 import next from "next";
 import { parse } from "url";
 import { WebSocket, WebSocketServer } from "ws";
-import { db } from "./src/lib/db/client";
-import { battles } from "./src/lib/db/schema";
 import { setWebSocketServer } from "./src/lib/websocket/server";
-import type {
-  BattleEndingReason,
-  ClientMessage,
-  WebSocketEvent,
-} from "./src/lib/websocket/types";
+import {
+  checkRoomTimeouts,
+  cleanupOrphanedLiveBattles,
+  cleanupStaleLiveBattles,
+  type BattleRoomMetadata,
+  type ClientConnection,
+  type CleanupContext,
+} from "./src/lib/websocket/cleanup";
+import type { ClientMessage, WebSocketEvent } from "./src/lib/websocket/types";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = process.env.HOSTNAME || "localhost";
@@ -45,21 +46,7 @@ const handle = app.getRequestHandler();
 const INTERNAL_BROADCAST_SECRET =
   process.env.INTERNAL_BROADCAST_SECRET || "dev-secret";
 
-interface ClientConnection {
-  ws: WebSocket;
-  battleId: string;
-  clientId: string;
-  isAdmin: boolean;
-  isAlive: boolean;
-}
-
-interface BattleRoomMetadata {
-  createdAt: number;
-  lastActivityAt: number;
-  adminClientId: string | null;
-  adminDisconnectedAt: number | null;
-  warningBroadcastedAt: number | null; // Track if we've sent a warning
-}
+// Types imported from ./src/lib/websocket/cleanup
 
 // Battle rooms: Map<battleId, Set<ClientConnection>>
 const battleRooms = new Map<string, Set<ClientConnection>>();
@@ -258,159 +245,7 @@ function getStats() {
   };
 }
 
-/**
- * Reset stale live battles in database on server startup
- */
-async function cleanupStaleLiveBattles() {
-  try {
-    const result = await db
-      .update(battles)
-      .set({ isLive: false, liveStartedAt: null })
-      .where(eq(battles.isLive, true));
-    console.log("[Startup] Reset stale live battles in database");
-    return result;
-  } catch (error) {
-    console.error("[Startup] Error resetting stale live battles:", error);
-  }
-}
-
-/**
- * Broadcast warning before closing a battle
- */
-function broadcastWarningBeforeClose(
-  battleId: string,
-  reason: BattleEndingReason,
-  secondsRemaining: number,
-) {
-  const metadata = battleRoomMetadata.get(battleId);
-  if (metadata) {
-    metadata.warningBroadcastedAt = Date.now();
-  }
-
-  broadcast(battleId, {
-    type: "battle:ending_soon",
-    battleId,
-    timestamp: Date.now(),
-    reason,
-    secondsRemaining,
-  });
-
-  console.log(
-    `[WS Cleanup] Warning broadcasted to battle ${battleId}: ending in ${secondsRemaining}s due to ${reason}`,
-  );
-}
-
-/**
- * End a live battle and clean up the room
- */
-async function endLiveBattleAndCleanup(
-  battleId: string,
-  reason: BattleEndingReason,
-) {
-  // Skip special rooms like __homepage__
-  if (battleId.startsWith("__")) {
-    return;
-  }
-
-  console.log(`[WS Cleanup] Ending live battle ${battleId} due to ${reason}`);
-
-  // Update database to mark battle as no longer live
-  try {
-    await db
-      .update(battles)
-      .set({ isLive: false, liveStartedAt: null })
-      .where(eq(battles.id, battleId));
-    console.log(`[WS Cleanup] Updated database for battle ${battleId}`);
-  } catch (error) {
-    console.error(`[WS Cleanup] Error updating database for ${battleId}:`, error);
-  }
-
-  // Broadcast battle:live_ended event to notify clients
-  const room = battleRooms.get(battleId);
-  if (room) {
-    const message = JSON.stringify({
-      type: "battle:live_ended",
-      battleId,
-      timestamp: Date.now(),
-      battle: { id: battleId }, // Minimal battle object; clients should refetch
-    });
-
-    room.forEach((client) => {
-      if (client.ws.readyState === WebSocket.OPEN) {
-        client.ws.send(message);
-      }
-    });
-
-    // Also notify homepage
-    const homepageRoom = battleRooms.get("__homepage__");
-    if (homepageRoom) {
-      homepageRoom.forEach((client) => {
-        if (client.ws.readyState === WebSocket.OPEN) {
-          client.ws.send(message);
-        }
-      });
-    }
-  }
-
-  // Clean up room metadata (keep the room itself for viewers who want to stay)
-  const metadata = battleRoomMetadata.get(battleId);
-  if (metadata) {
-    metadata.adminClientId = null;
-    metadata.adminDisconnectedAt = null;
-    metadata.warningBroadcastedAt = null;
-    // Reset activity timestamp so inactivity checks continue fresh
-    metadata.lastActivityAt = Date.now();
-  }
-}
-
-/**
- * Check rooms for inactivity, admin timeouts, and max lifetime
- */
-function checkRoomTimeouts() {
-  const now = Date.now();
-
-  battleRoomMetadata.forEach((metadata, battleId) => {
-    // Skip special rooms
-    if (battleId.startsWith("__")) return;
-
-    const timeSinceActivity = now - metadata.lastActivityAt;
-    const timeSinceCreation = now - metadata.createdAt;
-    const warningThreshold = WS_WARNING_BEFORE_CLOSE;
-
-    // Check for max room lifetime
-    if (WS_MAX_ROOM_LIFETIME > 0 && timeSinceCreation > WS_MAX_ROOM_LIFETIME) {
-      if (!metadata.warningBroadcastedAt) {
-        broadcastWarningBeforeClose(battleId, "max_lifetime", warningThreshold / 1000);
-      } else if (now - metadata.warningBroadcastedAt > warningThreshold) {
-        endLiveBattleAndCleanup(battleId, "max_lifetime");
-      }
-      return;
-    }
-
-    // Check for admin disconnect grace period
-    if (metadata.adminDisconnectedAt) {
-      const timeSinceAdminLeft = now - metadata.adminDisconnectedAt;
-
-      if (timeSinceAdminLeft > WS_ADMIN_GRACE_PERIOD) {
-        if (!metadata.warningBroadcastedAt) {
-          broadcastWarningBeforeClose(battleId, "admin_timeout", warningThreshold / 1000);
-        } else if (now - metadata.warningBroadcastedAt > warningThreshold) {
-          endLiveBattleAndCleanup(battleId, "admin_timeout");
-        }
-        return;
-      }
-    }
-
-    // Check for room inactivity
-    if (timeSinceActivity > WS_ROOM_INACTIVITY_TIMEOUT) {
-      if (!metadata.warningBroadcastedAt) {
-        broadcastWarningBeforeClose(battleId, "inactivity", warningThreshold / 1000);
-      } else if (now - metadata.warningBroadcastedAt > warningThreshold) {
-        endLiveBattleAndCleanup(battleId, "inactivity");
-      }
-    }
-  });
-}
+// Cleanup functions imported from ./src/lib/websocket/cleanup
 
 /**
  * Graceful shutdown handler
@@ -681,9 +516,23 @@ app.prepare().then(async () => {
     });
   }, WS_HEARTBEAT_INTERVAL);
 
-  // Room cleanup interval - check every minute for timeouts
+  // Create cleanup context for room timeout and orphaned battle checks
+  const cleanupContext: CleanupContext = {
+    battleRooms,
+    battleRoomMetadata,
+    broadcast,
+    config: {
+      roomInactivityTimeout: WS_ROOM_INACTIVITY_TIMEOUT,
+      adminGracePeriod: WS_ADMIN_GRACE_PERIOD,
+      maxRoomLifetime: WS_MAX_ROOM_LIFETIME,
+      warningBeforeClose: WS_WARNING_BEFORE_CLOSE,
+    },
+  };
+
+  // Room cleanup interval - check every minute for timeouts and orphaned battles
   const roomCleanupInterval = setInterval(() => {
-    checkRoomTimeouts();
+    checkRoomTimeouts(cleanupContext);
+    cleanupOrphanedLiveBattles(cleanupContext);
   }, 60000);
 
   wss.on("close", () => {
