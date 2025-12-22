@@ -63,7 +63,7 @@ export function VotingContent({
 
       if (!success) {
         // Revert optimistic update on failure
-        revertUserVote(voteKey, isUndo, currentVoteInRound ?? null);
+        revertUserVote(battle.id, voteKey, isUndo, currentVoteInRound ?? null);
       }
     } finally {
       setIsSubmittingVote(false);

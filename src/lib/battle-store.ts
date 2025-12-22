@@ -36,7 +36,7 @@ interface BattleStore {
   setReadingTimeRemaining: (time: number | null) => void;
   setIsReadingPhase: (isReading: boolean) => void;
   setUserVote: (battleId: string, round: number, personaId: string, isUndo: boolean, previousVoteKey: string | null) => void;
-  revertUserVote: (voteKey: string, isUndo: boolean, previousVoteKey: string | null) => void;
+  revertUserVote: (battleId: string, voteKey: string, isUndo: boolean, previousVoteKey: string | null) => void;
 
   addVerse: (personaId: string, verse: string) => void;
   advanceRound: () => void;
@@ -156,8 +156,7 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
       return { userVotes: newVotes };
     });
   },
-  revertUserVote: (voteKey, isUndo, previousVoteKey) => {
-    const { battle } = get();
+  revertUserVote: (battleId, voteKey, isUndo, previousVoteKey) => {
     set((state) => {
       const newVotes = new Set(state.userVotes);
       if (isUndo) {
@@ -170,7 +169,7 @@ export const useBattleStore = create<BattleStore>((set, get) => ({
           newVotes.add(previousVoteKey);
         }
       }
-      storeUserVotes(battle?.id ?? null, newVotes);
+      storeUserVotes(battleId, newVotes);
       return { userVotes: newVotes };
     });
   },
