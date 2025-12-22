@@ -232,7 +232,7 @@ export function WebSocketStats() {
                 <Server className="text-purple-400" size={18} />
                 <span className="text-sm">Active Rooms</span>
               </div>
-              <InfoTooltip text="Battle rooms in server memory. A room is created when anyone visits a battle page, even if not live." />
+              <InfoTooltip text="WebSocket rooms in server memory. Created when someone visits a battle page and deleted when everyone leaves. Can be 0 even with live battles if no one is viewing." />
             </div>
             <p className="text-2xl font-bold text-white">
               {ws?.totalRooms ?? 0}
@@ -247,7 +247,7 @@ export function WebSocketStats() {
                 <Radio className="text-red-400 animate-pulse" size={18} />
                 <span className="text-sm">Live Battles</span>
               </div>
-              <InfoTooltip text="Battles marked as live in the database. Set when an admin clicks 'Go Live' on the battle control panel." />
+              <InfoTooltip text="Battles with isLive=true in the database. This can differ from Active Rooms—a battle stays 'live' until explicitly ended or cleaned up, even if no one is connected." />
             </div>
             <p className="text-2xl font-bold text-white">
               {liveBattles?.count ?? 0}
@@ -416,9 +416,16 @@ export function WebSocketStats() {
                       <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
                       LIVE
                     </span>
-                    <span className="px-2 py-0.5 bg-orange-900/50 text-orange-400 rounded text-xs">
-                      No Viewers
-                    </span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="px-2 py-0.5 bg-orange-900/50 text-orange-400 rounded text-xs cursor-help">
+                          No Viewers
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="left" className="max-w-xs text-sm">
+                        This battle is marked live in the database but has no WebSocket connections. The admin may have closed their browser or lost connection.
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
               ))}
