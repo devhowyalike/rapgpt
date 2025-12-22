@@ -297,35 +297,36 @@ export function VotingContent({
                             ${isSubmittingVote ? "opacity-50" : ""}
                           `}
                           >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0 flex-1">
                                 <span
-                                  className="font-medium"
+                                  className="font-medium truncate"
                                   style={{ color: playerColor }}
+                                  title={persona.name}
                                 >
                                   {persona.name}
                                 </span>
                                 {isVoted && (
-                                  <span className="text-yellow-400 text-xs">
-                                    ✓ Your vote
+                                  <span className="text-yellow-400 text-[10px] font-bold px-1.5 py-0.5 bg-yellow-400/10 border border-yellow-400/20 rounded-sm shrink-0 uppercase tracking-tight">
+                                    Your Vote
                                   </span>
                                 )}
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 shrink-0">
                                 <span className="text-sm text-gray-400">
                                   {optimisticVotes}{" "}
                                   {optimisticVotes === 1 ? "vote" : "votes"}
                                 </span>
                                 {roundScore.winner === position && (
-                                  <span>🏆</span>
+                                  <span className="shrink-0">🏆</span>
                                 )}
                               </div>
                             </div>
-                            <div className="text-sm text-gray-400 mt-1">
-                              Score: {score?.totalScore.toFixed(1)}
+                            <div className="text-sm text-gray-400 mt-1 flex items-center justify-between">
+                              <span>Score: {score?.totalScore.toFixed(1)}</span>
                               {isVoted && canVote && (
-                                <span className="ml-2 text-xs text-yellow-400">
-                                  (click to undo)
+                                <span className="text-[10px] text-yellow-400 opacity-80 uppercase font-medium">
+                                  click to undo
                                 </span>
                               )}
                             </div>
