@@ -9,6 +9,7 @@ import { SignInPrompt } from "@/components/auth/sign-in-prompt";
 import { useUser } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
 import { Send } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { Comment } from "@/lib/shared";
 
@@ -73,9 +74,11 @@ export function CommentsContent({
         }`}
       >
         {comments.length === 0 ? (
-          <p className="text-center text-gray-400 text-sm">
-            Be the first to start the conversation!
-          </p>
+          !isArchived && (
+            <p className="text-center text-gray-400 text-sm">
+              Be the first to start the conversation!
+            </p>
+          )
         ) : (
           <AnimatePresence initial={false}>
             {comments.map((c) => (
@@ -88,11 +91,14 @@ export function CommentsContent({
               >
                 <div className="flex items-start gap-2">
                   {c.imageUrl ? (
-                    <img
-                      src={c.imageUrl}
-                      alt={c.username}
-                      className="w-8 h-8 rounded-full shrink-0"
-                    />
+                    <div className="relative w-8 h-8 shrink-0">
+                      <Image
+                        src={c.imageUrl}
+                        alt={c.username}
+                        fill
+                        className="rounded-full object-cover"
+                      />
+                    </div>
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
                       {c.username.charAt(0).toUpperCase()}

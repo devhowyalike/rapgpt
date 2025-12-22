@@ -15,6 +15,7 @@ import {
   ThumbsUp,
   Trash2,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
@@ -153,8 +154,8 @@ export function MyBattleCard({
   const versesCount = battle.verses?.length || 0;
   const cannotPublish = !isPublic && (isPaused || !userIsProfilePublic);
 
-  const hasMenu = showManagement && !isPaused;
-  const hasAction = isLive || isPaused;
+  const hasMenu = showManagement;
+  const hasAction = isLive || isPaused || isCompleted || isPublic;
 
   const handleCardClick = () => {
     if (hasMenu) {
@@ -329,26 +330,42 @@ export function MyBattleCard({
         >
           <div className="flex flex-col gap-1">
             {/* Matchup Title */}
-            <div className="flex flex-col md:flex-row md:flex-wrap md:items-baseline gap-x-2 text-lg md:text-xl font-bebas tracking-wide leading-tight">
-              <div className="flex items-center gap-2 truncate">
-                <span className="text-blue-400">{personas.player1.name}</span>
+            <div className="flex flex-col md:flex-row md:flex-wrap md:items-center gap-x-3 gap-y-1 text-lg md:text-xl font-bebas tracking-wide leading-tight">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="relative w-8 h-8 rounded-full overflow-hidden border border-blue-400/30 shrink-0">
+                  <Image
+                    src={personas.player1.avatar}
+                    alt={personas.player1.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <span className="text-blue-400 truncate">{personas.player1.name}</span>
                 {isCompleted && winnerPosition === "player1" && (
-                  <span title="Winner">🏆</span>
+                  <span title="Winner" className="shrink-0 text-base">🏆</span>
                 )}
-                <span className="text-gray-600 text-sm font-sans italic font-bold">
+                <span className="text-gray-600 text-sm font-sans italic font-bold ml-1">
                   vs
                 </span>
               </div>
-              <div className="flex items-center gap-2 truncate">
-                <span className="text-red-400">{personas.player2.name}</span>
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="relative w-8 h-8 rounded-full overflow-hidden border border-red-400/30 shrink-0">
+                  <Image
+                    src={personas.player2.avatar}
+                    alt={personas.player2.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <span className="text-red-400 truncate">{personas.player2.name}</span>
                 {isCompleted && winnerPosition === "player2" && (
-                  <span title="Winner">🏆</span>
+                  <span title="Winner" className="shrink-0 text-base">🏆</span>
                 )}
               </div>
             </div>
 
             {/* Subtext: Stage • Date */}
-            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 text-xs text-gray-500 uppercase tracking-wider mt-1">
+            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 text-sm text-gray-500 uppercase tracking-wider mt-1">
               <div className="flex items-center gap-2 truncate max-w-full">
                 <span className="truncate">
                   {stage.flag} {stage.name}
@@ -371,16 +388,16 @@ export function MyBattleCard({
                   isArchived) && (
                   <div className="flex items-center gap-1.5 ml-2 border-l border-white/10 pl-2">
                     {isArchived && (
-                      <Radio size={10} className="text-gray-400" />
+                      <Radio size={12} className="text-gray-400" />
                     )}
                     {battle.generatedSong?.audioUrl && (
-                      <Music2 size={10} className="text-green-400" />
+                      <Music2 size={12} className="text-green-400" />
                     )}
                     {battle.votingEnabled && (
-                      <ThumbsUp size={10} className="text-blue-400" />
+                      <ThumbsUp size={12} className="text-blue-400" />
                     )}
                     {battle.commentsEnabled && (
-                      <MessageSquare size={10} className="text-purple-400" />
+                      <MessageSquare size={12} className="text-purple-400" />
                     )}
                   </div>
                 )}
@@ -393,7 +410,7 @@ export function MyBattleCard({
                 )}
 
                 {isCompleted && (
-                  <div className="flex items-center gap-2 ml-2 border-l border-white/10 pl-2 text-xs font-semibold text-gray-400">
+                  <div className="flex items-center gap-2 ml-2 border-l border-white/10 pl-2 text-sm font-semibold text-gray-400">
                     <span>
                       {finalStats?.player1TotalScore}-
                       {finalStats?.player2TotalScore}
@@ -406,11 +423,16 @@ export function MyBattleCard({
         </div>
 
         {/* Middle/Right: Status & Outcome & Actions */}
-        <div className="flex flex-col md:flex-row items-end md:items-center gap-3 md:gap-4 md:ml-auto">
+        <div
+          className={cn(
+            "flex flex-col md:flex-row items-end md:items-center gap-3 md:gap-4 md:ml-auto",
+            hasMenu && "md:pr-12"
+          )}
+        >
           <div className="flex flex-row md:flex-col md:items-end gap-3 md:gap-1 min-w-[140px] md:text-right">
             {isLive ? (
               <>
-                <span className="flex items-center gap-1.5 text-xs font-bold text-red-400 animate-pulse uppercase tracking-wide">
+                <span className="flex items-center gap-1.5 text-sm font-bold text-red-400 animate-pulse uppercase tracking-wide">
                   <Radio size={12} className="fill-current" />
                   Live Now
                 </span>
@@ -425,9 +447,7 @@ export function MyBattleCard({
           {(isLive || isPaused) && (
             <div
               className={cn(
-                "flex items-center gap-2 mt-2 md:mt-0",
-                isPaused &&
-                  "absolute top-3 right-3 md:static md:top-auto md:right-auto"
+                "flex items-center gap-2 mt-2 md:mt-0"
               )}
             >
               <Link

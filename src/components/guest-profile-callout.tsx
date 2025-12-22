@@ -15,7 +15,11 @@ export function GuestProfileCallout() {
           </p>
         </div>
 
-        <CreateBattleButton isSignedIn={false} />
+        <CreateBattleButton
+          isSignedIn={false}
+          guestText="Sign Up"
+          isSignUp={true}
+        />
       </div>
     </div>
   );

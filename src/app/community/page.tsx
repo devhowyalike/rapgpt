@@ -58,11 +58,11 @@ export default async function CommunityPage({
   const hasNextPage = pageNumber < totalPages;
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <SiteHeader />
 
       {/* Hero Section */}
-      <section className="relative pt-20 pb-6 md:pt-32 md:pb-8 overflow-hidden bg-black text-white selection:bg-yellow-500/30">
+      <section className="relative pt-20 pb-6 md:pt-32 md:pb-8 overflow-hidden bg-black text-white selection:bg-yellow-500/30 shrink-0">
         {/* Background Effects */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl z-0 pointer-events-none">
@@ -77,13 +77,17 @@ export default async function CommunityPage({
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto leading-relaxed animate-slide-up [animation-delay:100ms] px-4">
-            See what others have been cooking.
+            See what e-beef others have been cooking.
           </p>
         </div>
       </section>
 
       {/* Main Content */}
-      <div className="bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center pt-2 pb-12 px-4 md:pt-4 md:pb-16 md:px-6 min-h-[50vh]">
+      <div
+        className={`bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center pt-2 pb-12 px-4 md:pt-4 md:pb-16 md:px-6 ${
+          isAuthenticated ? "flex-1" : "min-h-[50vh]"
+        }`}
+      >
         <div className="max-w-7xl mx-auto w-full">
           {allUsers.length === 0 ? (
             <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-12 text-center max-w-2xl mx-auto mt-8">
@@ -138,7 +142,7 @@ export default async function CommunityPage({
           )}
 
           {!isAuthenticated && (
-            <div className="mt-16 max-w-4xl mx-auto">
+            <div className="mt-16 max-w-4xl mx-auto flex-1">
               <GuestProfileCallout />
             </div>
           )}
@@ -177,6 +181,6 @@ export default async function CommunityPage({
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }

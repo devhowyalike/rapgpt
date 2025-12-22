@@ -137,7 +137,7 @@ export function SiteHeader({ activeBattleState }: SiteHeaderProps) {
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 z-30 p-3 bg-gray-900/95 border-b border-gray-800 backdrop-blur-sm"
+      className="fixed top-0 left-0 right-0 z-70 p-3 bg-gray-900/95 border-b border-gray-800 backdrop-blur-sm"
       style={{ height: "var(--header-height)" }}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between h-full gap-4">

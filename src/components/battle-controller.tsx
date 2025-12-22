@@ -43,7 +43,7 @@ interface BattleControllerProps {
 
 export function BattleController({
   initialBattle,
-  scoreDelaySeconds = 5,
+  scoreDelaySeconds = 2.5,
 }: BattleControllerProps) {
   const {
     battle,
@@ -480,23 +480,27 @@ export function BattleController({
   // Completed battle - show replay mode
   if (battle.status === "completed") {
     return (
-      <CompletedBattleView
-        battle={battle}
-        isAdmin={isAdmin}
-        dbUserId={permissionState.dbId}
-        showCommenting={showCommenting}
-        showVoting={showVoting}
-        votingCompletedRound={votingCompletedRound}
-        showMobileDrawer={showMobileDrawer}
-        setShowMobileDrawer={setShowMobileDrawer}
-        mobileActiveTab={mobileActiveTab}
-        openCommentsDrawer={openCommentsDrawer}
-        openVotingDrawer={openVotingDrawer}
-        onVote={handleVote}
-        onComment={handleCommentSubmit}
-        onToggleCommenting={handleToggleCommenting}
-        onToggleVoting={handleToggleVoting}
-      />
+      <>
+        <CompletedBattleView
+          battle={battle}
+          isAdmin={isAdmin}
+          dbUserId={permissionState.dbId}
+          showCommenting={showCommenting}
+          showVoting={showVoting}
+          votingCompletedRound={votingCompletedRound}
+          showMobileDrawer={showMobileDrawer}
+          setShowMobileDrawer={setShowMobileDrawer}
+          mobileActiveTab={mobileActiveTab}
+          openCommentsDrawer={openCommentsDrawer}
+          openVotingDrawer={openVotingDrawer}
+          onVote={handleVote}
+          onComment={handleCommentSubmit}
+          onToggleCommenting={handleToggleCommenting}
+          onToggleVoting={handleToggleVoting}
+        />
+        {/* Navigation Guard Dialog - needed even for completed battles that were live */}
+        <NavigationDialog />
+      </>
     );
   }
 

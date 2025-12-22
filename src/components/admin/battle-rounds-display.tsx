@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronRight, Crown } from "lucide-react";
+import Image from "next/image";
 import * as React from "react";
 import { getWinnerPersonaId } from "@/lib/battle-position-utils";
 import type { Battle, Persona, Verse } from "@/lib/shared";
@@ -119,11 +120,14 @@ export function BattleRoundsDisplay({ battle }: BattleRoundsDisplayProps) {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-3">
-                          <img
-                            src={persona.avatar}
-                            alt={persona.name}
-                            className="w-8 h-8 rounded-full"
-                          />
+                          <div className="relative w-8 h-8 shrink-0">
+                            <Image
+                              src={persona.avatar}
+                              alt={persona.name}
+                              fill
+                              className="rounded-full object-cover"
+                            />
+                          </div>
                           <span
                             className="font-semibold flex items-center gap-2"
                             style={{ color: persona.accentColor }}

@@ -221,7 +221,7 @@ export function VictoryConfetti({ trigger, origin }: VictoryConfettiProps) {
   if (!active || !mounted) return null;
 
   const confettiElement = (
-    <div ref={wrapperRef} className="fixed inset-0 pointer-events-none z-50">
+    <div ref={wrapperRef} className="fixed inset-0 pointer-events-none z-200">
       <canvas ref={canvasRef} className="w-full h-full" />
     </div>
   );

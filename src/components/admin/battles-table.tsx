@@ -13,6 +13,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -63,12 +64,12 @@ export function BattlesTable({
     React.useState<SortDirection>("desc");
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   const [battleToDelete, setBattleToDelete] = React.useState<Battle | null>(
-    null,
+    null
   );
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [selectedBattles, setSelectedBattles] = React.useState<Set<string>>(
-    new Set(),
+    new Set()
   );
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = React.useState(false);
 
@@ -120,7 +121,7 @@ export function BattlesTable({
       const deletePromises = Array.from(selectedBattles).map((battleId) =>
         fetch(`/api/battle/${battleId}/delete`, {
           method: "DELETE",
-        }),
+        })
       );
 
       const responses = await Promise.all(deletePromises);
@@ -128,7 +129,7 @@ export function BattlesTable({
 
       if (failedDeletes.length > 0) {
         setErrorMessage(
-          `Failed to delete ${failedDeletes.length} of ${selectedBattles.size} battles`,
+          `Failed to delete ${failedDeletes.length} of ${selectedBattles.size} battles`
         );
         setIsDeleting(false);
       } else {
@@ -322,20 +323,42 @@ export function BattlesTable({
                         <Radio className="w-4 h-4 text-red-400" />
                       </div>
                     )}
-                    <div className="flex items-center gap-1 text-sm">
-                      <span
-                        className="font-medium truncate max-w-[80px]"
-                        style={{ color: battle.personas.player1.accentColor }}
-                      >
-                        {battle.personas.player1.name}
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <div className="relative w-5 h-5 shrink-0">
+                          <Image
+                            src={battle.personas.player1.avatar}
+                            alt={battle.personas.player1.name}
+                            fill
+                            className="rounded-full object-cover border border-white/10"
+                          />
+                        </div>
+                        <span
+                          className="font-medium truncate max-w-[80px]"
+                          style={{ color: battle.personas.player1.accentColor }}
+                        >
+                          {battle.personas.player1.name}
+                        </span>
+                      </div>
+                      <span className="text-gray-500 text-xs italic font-bold">
+                        vs
                       </span>
-                      <span className="text-gray-500">vs</span>
-                      <span
-                        className="font-medium truncate max-w-[80px]"
-                        style={{ color: battle.personas.player2.accentColor }}
-                      >
-                        {battle.personas.player2.name}
-                      </span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <div className="relative w-5 h-5 shrink-0">
+                          <Image
+                            src={battle.personas.player2.avatar}
+                            alt={battle.personas.player2.name}
+                            fill
+                            className="rounded-full object-cover border border-white/10"
+                          />
+                        </div>
+                        <span
+                          className="font-medium truncate max-w-[80px]"
+                          style={{ color: battle.personas.player2.accentColor }}
+                        >
+                          {battle.personas.player2.name}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </Link>
@@ -346,10 +369,10 @@ export function BattlesTable({
                     battle.status === "completed"
                       ? "bg-green-900/30 text-green-400 border border-green-500/30"
                       : battle.status === "paused"
-                        ? "bg-orange-900/30 text-orange-400 border border-orange-500/30"
-                        : battle.status === "upcoming"
-                          ? "bg-yellow-900/30 text-yellow-400 border border-yellow-500/30"
-                          : "bg-gray-700/50 text-gray-400 border border-gray-600/30"
+                      ? "bg-orange-900/30 text-orange-400 border border-orange-500/30"
+                      : battle.status === "upcoming"
+                      ? "bg-yellow-900/30 text-yellow-400 border border-yellow-500/30"
+                      : "bg-gray-700/50 text-gray-400 border border-gray-600/30"
                   }`}
                 >
                   {battle.status}

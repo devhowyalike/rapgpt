@@ -12,6 +12,7 @@ import {
   User,
   Users,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -84,11 +85,14 @@ export function MobileMenu({
                     }}
                   >
                     <div className="flex items-center gap-3 w-full py-2">
-                      <img
-                        src={userImageUrl}
-                        alt={displayName}
-                        className="w-10 h-10 rounded-full border-2 border-purple-500"
-                      />
+                      <div className="relative w-10 h-10 shrink-0">
+                        <Image
+                          src={userImageUrl || ""}
+                          alt={displayName}
+                          fill
+                          className="rounded-full border-2 border-purple-500 object-cover"
+                        />
+                      </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium text-white truncate">
                           {displayName}

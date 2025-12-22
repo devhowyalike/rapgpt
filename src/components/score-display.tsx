@@ -135,21 +135,19 @@ export function ScoreDisplay({
   votingEnabled = true,
 }: ScoreDisplayProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const expandedRef = useRef<HTMLDivElement | null>(null);
-  const toggleRef = useRef<HTMLButtonElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const player1Score = roundScore.positionScores.player1;
   const player2Score = roundScore.positionScores.player2;
 
-  // When expanding, scroll the expanded details block into view and focus the toggle,
-  // mirroring the Battle Options behavior.
+  // Scroll the entire score section into view when expanded
   useEffect(() => {
     if (!isExpanded) return;
+    // Small delay to let the expansion animation start
     const id = window.requestAnimationFrame(() => {
-      expandedRef.current?.scrollIntoView({
+      containerRef.current?.scrollIntoView({
         behavior: "smooth",
-        block: "center",
+        block: "start",
       });
-      toggleRef.current?.focus();
     });
     return () => window.cancelAnimationFrame(id);
   }, [isExpanded]);
@@ -157,8 +155,9 @@ export function ScoreDisplay({
   if (!player1Score || !player2Score) return null;
 
   return (
-    <div className={className}>
-      <div ref={expandedRef} className="grid grid-cols-2 gap-2 md:gap-4">
+    <div ref={containerRef} className={className}>
+      {/* Score Cards */}
+      <div className="grid grid-cols-2 gap-2 md:gap-4">
         <PersonaScoreCard
           persona={player1Persona}
           score={player1Score}
@@ -181,11 +180,10 @@ export function ScoreDisplay({
         />
       </div>
 
-      {/* Collapse Toggle Button */}
+      {/* Toggle Button - placed after cards, always visible */}
       <button
-        ref={toggleRef}
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-center gap-2 mt-2 md:mt-3 mb-4 md:mb-0 text-gray-400 hover:text-white transition-colors group outline-none"
+        className="w-full flex items-center justify-center gap-2 py-3 mt-2 text-gray-400 hover:text-white transition-colors group outline-none"
       >
         <span className="text-sm font-medium">
           {isExpanded ? "Hide Details" : "Show Details"}
