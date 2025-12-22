@@ -126,7 +126,7 @@ export function LiveBattlesDisplay({
               setLiveBattles((prev) =>
                 prev.map((b) => {
                   if (b.id !== wsEvent.battleId) return b;
-                  
+
                   return {
                     ...b,
                     currentRound: wsEvent.currentRound,
@@ -255,7 +255,9 @@ export function LiveBattlesDisplay({
                 <div className="flex flex-col items-center gap-1 text-xs text-gray-400">
                   <div className="flex items-center gap-1">
                     <Users className="w-3 h-3" />
-                    <span>{battle.wsVerseCount ?? battle.verses.length} verses</span>
+                    <span>
+                      {battle.wsVerseCount ?? battle.verses.length} verses
+                    </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <MessageSquare className="w-3 h-3" />
