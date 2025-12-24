@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BattleOptionsDrawer,
   BattleReplayControlBar,
@@ -90,6 +90,9 @@ export function CompletedBattleView({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSongPlaying, setIsSongPlaying] = useState(false);
   const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
+  // Audio ref for persistent playback (lives outside drawer to survive close/open)
+  const audioRef = useRef<HTMLAudioElement>(null);
+
   // Ensure only one drawer is open at a time
   useExclusiveDrawer("replay-scores-song", isDrawerOpen, setIsDrawerOpen);
   useExclusiveDrawer(
@@ -109,6 +112,31 @@ export function CompletedBattleView({
   const showSongPlayer =
     battle.status === "completed" && battle.generatedSong?.audioUrl;
 
+  // Handle audio ended event at parent level (in case drawer is closed when song ends)
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleEnded = () => {
+      setIsSongPlaying(false);
+    };
+
+    audio.addEventListener("ended", handleEnded);
+    return () => audio.removeEventListener("ended", handleEnded);
+  }, [showSongPlayer]);
+
+  // Sync audio play state when isSongPlaying changes (handles case when drawer is closed)
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isSongPlaying) {
+      audio.play().catch(console.error);
+    } else {
+      audio.pause();
+    }
+  }, [isSongPlaying]);
+
   const handleTabClick = (tab: "scores" | "song") => {
     // If clicking the same tab while open, close it
     if (activeTab === tab && isDrawerOpen) {
@@ -117,13 +145,10 @@ export function CompletedBattleView({
       return;
     }
 
-    // If switching tabs while the drawer is open, animate close then open
+    // If switching tabs while the drawer is open, just change the tab
+    // (don't close/reopen to avoid unmounting SongPlayer and restarting audio)
     if (activeTab !== tab && isDrawerOpen) {
-      setIsDrawerOpen(false);
-      window.setTimeout(() => {
-        setActiveTab(tab);
-        setIsDrawerOpen(true);
-      }, 320);
+      setActiveTab(tab);
       return;
     }
 
@@ -271,6 +296,7 @@ export function CompletedBattleView({
                             setIsSongPlaying(playing)
                           }
                           onTogglePlay={() => setIsSongPlaying(!isSongPlaying)}
+                          audioRef={audioRef}
                         />
                       )}
                     </div>
@@ -308,6 +334,15 @@ export function CompletedBattleView({
           isLive={isLive}
           onEndLive={onEndLive}
           isStoppingLive={isStoppingLive}
+        />
+      )}
+
+      {/* Persistent audio element - lives outside drawer so playback continues when drawer closes */}
+      {showSongPlayer && battle.generatedSong && (
+        <audio
+          ref={audioRef}
+          src={battle.generatedSong.audioUrl}
+          preload="metadata"
         />
       )}
     </>
