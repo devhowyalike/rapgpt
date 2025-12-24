@@ -151,6 +151,16 @@ export default async function AdminDashboardPage({
             </div>
           </div>
 
+          {/* Monthly Token Usage */}
+          <div className="mb-8">
+            <MonthlyTokenUsage
+              totals={monthlyTokens}
+              availableMonths={availableTokenMonths}
+              monthParam="tokens_month"
+              yearParam="tokens_year"
+            />
+          </div>
+
           {/* Song Creation Credits (Monthly) */}
           <div className="mb-8">
             <SongCreationUsage
@@ -161,16 +171,6 @@ export default async function AdminDashboardPage({
               availableMonths={availableTokenMonths}
               monthParam="songs_month"
               yearParam="songs_year"
-            />
-          </div>
-
-          {/* Monthly Token Usage */}
-          <div className="mb-8">
-            <MonthlyTokenUsage
-              totals={monthlyTokens}
-              availableMonths={availableTokenMonths}
-              monthParam="tokens_month"
-              yearParam="tokens_year"
             />
           </div>
 

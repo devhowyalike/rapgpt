@@ -59,7 +59,9 @@ export function MonthSelector({
       <select
         className={`appearance-none bg-gray-900 border ${borderClass} text-white text-sm rounded-lg ${focusRingClass} ${focusBorderClass} block p-2.5 pr-8 cursor-pointer`}
         onChange={handleMonthChange}
-        value={selectedValue ? `${selectedValue.year}-${selectedValue.month}` : ""}
+        value={
+          selectedValue ? `${selectedValue.year}-${selectedValue.month}` : ""
+        }
       >
         {availableMonths.map((m) => (
           <option key={`${m.year}-${m.month}`} value={`${m.year}-${m.month}`}>
@@ -71,4 +73,3 @@ export function MonthSelector({
     </div>
   );
 }
-

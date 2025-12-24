@@ -101,7 +101,7 @@ export function MonthlyTokenUsage({
         </p>
 
         <Link
-          href="/admin/usage"
+          href="/admin/usage/tokens"
           className="px-3 py-1.5 bg-purple-900/30 hover:bg-purple-900/50 text-purple-300 text-xs rounded-md transition-colors flex items-center gap-2 border border-purple-500/20"
         >
           <Shield size={14} />

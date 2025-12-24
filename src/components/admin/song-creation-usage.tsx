@@ -1,6 +1,14 @@
 "use client";
 
-import { Music, Coins, CreditCard, Wallet, AlertCircle } from "lucide-react";
+import {
+  Music,
+  Coins,
+  CreditCard,
+  Wallet,
+  AlertCircle,
+  Shield,
+} from "lucide-react";
+import Link from "next/link";
 import { formatNumber, formatCurrency } from "@/lib/format";
 import type { SongCreationTotals } from "@/lib/usage-storage";
 import { MonthSelector, type MonthOption } from "./month-selector";
@@ -100,7 +108,7 @@ export function SongCreationUsage({
       <StatCardGrid stats={songStats} />
 
       {/* Status messages */}
-      <div className="mt-4 pt-4 border-t border-gray-700">
+      <div className="mt-4 pt-4 border-t border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
         {hasError ? (
           <p className="text-amber-400 text-sm flex items-center gap-2">
             <AlertCircle size={16} />
@@ -124,6 +132,16 @@ export function SongCreationUsage({
               </>
             )}
           </p>
+        )}
+
+        {isMonthlyView && (
+          <Link
+            href="/admin/usage/songs"
+            className="px-3 py-1.5 bg-pink-900/30 hover:bg-pink-900/50 text-pink-300 text-xs rounded-md transition-colors flex items-center gap-2 border border-pink-500/20"
+          >
+            <Shield size={14} />
+            All Time Usage
+          </Link>
         )}
       </div>
     </div>

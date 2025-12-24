@@ -1,6 +1,7 @@
 "use client";
 
-import { Activity, Music, Radio, Swords, Trophy } from "lucide-react";
+import { Activity, Music, Radio, Shield, Swords, Trophy } from "lucide-react";
+import Link from "next/link";
 import { formatNumber } from "@/lib/format";
 import type { MonthlyBattleStats } from "@/lib/usage-storage";
 import { MonthSelector, type MonthOption } from "./month-selector";
@@ -82,7 +83,7 @@ export function MonthlyBattleStatsComponent({
       <StatCardGrid stats={statCards} />
 
       {/* Summary text */}
-      <div className="mt-4 pt-4 border-t border-gray-700">
+      <div className="mt-4 pt-4 border-t border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-gray-400 text-sm">
           {stats.totalBattles > 0 ? (
             <>
@@ -116,6 +117,14 @@ export function MonthlyBattleStatsComponent({
             "No battles recorded for this month yet."
           )}
         </p>
+
+        <Link
+          href="/admin/usage/battles"
+          className="px-3 py-1.5 bg-cyan-900/30 hover:bg-cyan-900/50 text-cyan-300 text-xs rounded-md transition-colors flex items-center gap-2 border border-cyan-500/20"
+        >
+          <Shield size={14} />
+          All Time Usage
+        </Link>
       </div>
     </div>
   );
