@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { AdminDashboardClient } from "@/components/admin/admin-dashboard-client";
 import { MonthlyBattleStatsComponent } from "@/components/admin/monthly-battle-stats";
 import { MonthlyTokenUsage } from "@/components/admin/monthly-token-usage";
+import { SongCreationUsage } from "@/components/admin/song-creation-usage";
 import { WebSocketStats } from "@/components/admin/websocket-stats";
 import { SiteHeader } from "@/components/site-header";
 import { decrypt } from "@/lib/auth/encryption";
@@ -20,7 +21,10 @@ import {
   getCurrentMonthTokenTotals,
   getMonthlyBattleStats,
   getMonthlyTokenTotals,
+  getMonthlySongCreationTotals,
+  getCurrentMonthSongCreationTotals,
 } from "@/lib/usage-storage";
+import { getSunoCredits } from "@/lib/suno/client";
 
 export const dynamic = "force-dynamic";
 
@@ -62,15 +66,21 @@ export default async function AdminDashboardPage({
 
     let monthlyTokens;
     let monthlyBattleStats;
+    let monthlySongTotals;
     if (monthParam && yearParam) {
       const month = Number.parseInt(monthParam);
       const year = Number.parseInt(yearParam);
       monthlyTokens = await getMonthlyTokenTotals(month, year);
       monthlyBattleStats = await getMonthlyBattleStats(month, year);
+      monthlySongTotals = await getMonthlySongCreationTotals(month, year);
     } else {
       monthlyTokens = await getCurrentMonthTokenTotals();
       monthlyBattleStats = await getCurrentMonthBattleStats();
+      monthlySongTotals = await getCurrentMonthSongCreationTotals();
     }
+
+    // Fetch live Suno API credits
+    const sunoCredits = await getSunoCredits();
 
     // Decrypt user data for display
     const decryptedUsers = allUsers.map((user) => {
@@ -117,6 +127,17 @@ export default async function AdminDashboardPage({
                 View All Battles
               </Link>
             </div>
+          </div>
+
+          {/* Song Creation Credits (Monthly) */}
+          <div className="mb-8">
+            <SongCreationUsage
+              totals={monthlySongTotals}
+              sunoCredits={sunoCredits}
+              month={monthlyTokens.month}
+              year={monthlyTokens.year}
+              availableMonths={availableTokenMonths}
+            />
           </div>
 
           {/* Monthly Token Usage */}

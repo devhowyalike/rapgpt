@@ -166,6 +166,20 @@ export const battleTokenUsage = pgTable("battle_token_usage", {
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
 });
 
+/**
+ * Song creation usage - tracks credits consumed for AI song generation
+ */
+export const songCreationUsage = pgTable("song_creation_usage", {
+  id: text("id").primaryKey(),
+  battleId: text("battle_id").references(() => battles.id, {
+    onDelete: "set null",
+  }),
+  provider: text("provider").notNull(), // e.g., 'suno'
+  credits: integer("credits").notNull(), // Credits consumed
+  status: text("status").notNull().default("completed"), // 'completed' | 'error'
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+});
+
 // Type inference for TypeScript
 export type UserDB = typeof users.$inferSelect;
 export type UserInsert = typeof users.$inferInsert;
@@ -177,3 +191,5 @@ export type VoteDB = typeof votes.$inferSelect;
 export type VoteInsert = typeof votes.$inferInsert;
 export type BattleTokenUsageDB = typeof battleTokenUsage.$inferSelect;
 export type BattleTokenUsageInsert = typeof battleTokenUsage.$inferInsert;
+export type SongCreationUsageDB = typeof songCreationUsage.$inferSelect;
+export type SongCreationUsageInsert = typeof songCreationUsage.$inferInsert;

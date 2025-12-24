@@ -2,9 +2,16 @@ import { ChevronLeft, Shield } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AllTimeTokenUsage } from "@/components/admin/all-time-token-usage";
+import { SongCreationUsage } from "@/components/admin/song-creation-usage";
 import { SiteHeader } from "@/components/site-header";
 import { checkRole } from "@/lib/auth/roles";
-import { getAllTimeBattleStats, getAllTimeTokenTotals, getAllTimeTokenTotalsByModel } from "@/lib/usage-storage";
+import { getSunoCredits } from "@/lib/suno/client";
+import {
+  getAllTimeBattleStats,
+  getAllTimeTokenTotals,
+  getAllTimeTokenTotalsByModel,
+  getAllTimeSongCreationTotals,
+} from "@/lib/usage-storage";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +26,8 @@ export default async function AdminUsagePage() {
   const totals = await getAllTimeTokenTotals();
   const byModel = await getAllTimeTokenTotalsByModel();
   const battleStats = await getAllTimeBattleStats();
+  const songTotals = await getAllTimeSongCreationTotals();
+  const sunoCredits = await getSunoCredits();
 
   return (
     <div className="min-h-dvh bg-linear-to-br from-gray-900 via-purple-900 to-black">
@@ -41,7 +50,10 @@ export default async function AdminUsagePage() {
           </p>
         </div>
 
-        <AllTimeTokenUsage totals={totals} byModel={byModel} battleStats={battleStats} />
+        <div className="space-y-8">
+          <SongCreationUsage totals={songTotals} sunoCredits={sunoCredits} />
+          <AllTimeTokenUsage totals={totals} byModel={byModel} battleStats={battleStats} />
+        </div>
       </div>
     </div>
   );

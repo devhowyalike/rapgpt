@@ -8,6 +8,7 @@ import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { getBattleById, saveBattle } from "@/lib/battle-storage";
 import type { SongGenerationBeatStyle } from "@/lib/shared/battle-types";
 import { generateSong } from "@/lib/suno/client";
+import { recordSongCreationUsage } from "@/lib/usage-storage";
 
 export async function POST(
   request: Request,
@@ -119,6 +120,22 @@ export async function POST(
         "[API] Song generation started successfully. TaskId:",
         taskId,
       );
+
+      // Record song creation usage (Suno credits)
+      // Standard Suno generation typically costs 10 credits
+      try {
+        await recordSongCreationUsage({
+          id: crypto.randomUUID(),
+          battleId: id,
+          provider: "suno",
+          credits: 10,
+          status: "completed",
+        });
+        console.log("[API] Recorded song creation usage for battle:", id);
+      } catch (usageError) {
+        // Log but don't fail the request if usage recording fails
+        console.error("[API] Failed to record song creation usage:", usageError);
+      }
     } catch (error) {
       console.error("[API] Error initiating song generation:", error);
       console.error("[API] Error details:", {
