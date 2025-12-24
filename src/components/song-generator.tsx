@@ -67,15 +67,46 @@ export function SongGenerator({
   const [error, setError] = useState<string | null>(null);
   const [isResuming, setIsResuming] = useState(false);
   const [showManualComplete, setShowManualComplete] = useState(false);
+  const [isLoadingStatus, setIsLoadingStatus] = useState(true);
+  
+  // Local song state - starts with battle prop, but updated by fresh fetch
+  const [currentSong, setCurrentSong] = useState(battle?.generatedSong);
 
   // Check if user is admin (manual completion is admin-only)
   const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
 
-  // Check if there's an incomplete song on mount
-  const incompleteSong = battle?.generatedSong;
+  // Check if there's an incomplete song - use local state that's kept fresh
+  const incompleteSong = currentSong;
   const hasIncompleteSong = !!(
     incompleteSong?.sunoTaskId && !incompleteSong?.audioUrl
   );
+  
+  // Fetch latest battle state on mount to check for in-progress song generation
+  useEffect(() => {
+    let isMounted = true;
+    
+    async function fetchLatestSongStatus() {
+      try {
+        const response = await fetch(`/api/battle/${battleId}`);
+        if (response.ok && isMounted) {
+          const latestBattle = await response.json();
+          setCurrentSong(latestBattle.generatedSong);
+        }
+      } catch (err) {
+        console.error("[SongGenerator] Failed to fetch latest song status:", err);
+      } finally {
+        if (isMounted) {
+          setIsLoadingStatus(false);
+        }
+      }
+    }
+    
+    fetchLatestSongStatus();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [battleId]);
 
   // Shared function to poll song status
   const pollSongStatus = async (taskId: string): Promise<boolean> => {
@@ -168,8 +199,11 @@ export function SongGenerator({
     }
   };
 
-  // Auto-resume polling on mount if there's an incomplete song
+  // Auto-resume polling after loading if there's an incomplete song
   useEffect(() => {
+    // Wait until we've fetched the latest status
+    if (isLoadingStatus) return;
+    
     if (
       hasIncompleteSong &&
       incompleteSong?.sunoTaskId &&
@@ -201,7 +235,23 @@ export function SongGenerator({
           setIsResuming(false);
         });
     }
-  }, [hasIncompleteSong, incompleteSong?.sunoTaskId]);
+  }, [isLoadingStatus, hasIncompleteSong, incompleteSong?.sunoTaskId]);
+
+  // Show loading state while fetching latest status
+  if (isLoadingStatus) {
+    return (
+      <Card className="border-gray-800 bg-gray-900/50 backdrop-blur-sm">
+        <CardHeader>
+          <CardDescription className="text-gray-400 text-center">
+            Checking song status...
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex justify-center py-8">
+          <LoadingSpinner />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-gray-800 bg-gray-900/50 backdrop-blur-sm">
