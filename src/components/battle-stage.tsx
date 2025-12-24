@@ -5,6 +5,8 @@
 
 "use client";
 
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useBattleStage } from "@/lib/hooks/use-battle-stage";
 import type { Battle, PersonaPosition } from "@/lib/shared";
 import type { ConnectionStatus } from "@/lib/websocket/types";
@@ -121,6 +123,14 @@ export function BattleStage(props: BattleStageProps) {
     scoreDelaySeconds,
   });
 
+  // Track direction for round transitions
+  const [prevRound, setPrevRound] = useState(selectedRound);
+  const direction = selectedRound > prevRound ? 1 : -1;
+
+  useEffect(() => {
+    setPrevRound(selectedRound);
+  }, [selectedRound]);
+
   // Override mobileActiveSide with streaming position when active
   const effectiveMobileActiveSide = streamingPosition || mobileActiveSide;
 
@@ -153,27 +163,39 @@ export function BattleStage(props: BattleStageProps) {
         />
       )}
 
-      {/* Split Screen Stage */}
       <div
         className={`flex-1 ${isReplayMode ? "overflow-y-auto" : ""}`}
         {...(isReplayMode ? { "data-scroll-container": true } : {})}
       >
-        <BattleSplitView
-          battle={battle}
-          verses={currentRoundVerses}
-          roundScore={currentRoundScore}
-          showRoundWinner={!!shouldShowRoundWinner}
-          mobileActiveSide={
-            isReplayMode ? undefined : effectiveMobileActiveSide
-          }
-          streamingPersonaId={streamingPersonaId}
-          streamingText={streamingText}
-          streamingPosition={streamingPosition}
-          mobileTopOffset={isMobile && !isReplayMode ? personaTopMargin : 0}
-          enableStickyPersonas={isReplayMode ? true : enableStickyPersonas}
-          isBattleEnd={isReplayMode}
-          cardPadding={isReplayMode ? "px-3 py-2 md:p-4" : undefined}
-        />
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={selectedRound}
+            initial={
+              isReplayMode ? { opacity: 0, x: direction * 50 } : undefined
+            }
+            animate={{ opacity: 1, x: 0 }}
+            exit={isReplayMode ? { opacity: 0, x: -direction * 50 } : undefined}
+            transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+            className="h-full"
+          >
+            <BattleSplitView
+              battle={battle}
+              verses={currentRoundVerses}
+              roundScore={currentRoundScore}
+              showRoundWinner={!!shouldShowRoundWinner}
+              mobileActiveSide={
+                isReplayMode ? undefined : effectiveMobileActiveSide
+              }
+              streamingPersonaId={streamingPersonaId}
+              streamingText={streamingText}
+              streamingPosition={streamingPosition}
+              mobileTopOffset={isMobile && !isReplayMode ? personaTopMargin : 0}
+              enableStickyPersonas={isReplayMode ? true : enableStickyPersonas}
+              isBattleEnd={isReplayMode}
+              cardPadding={isReplayMode ? "px-3 py-2 md:p-4" : undefined}
+            />
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Score Display (when scores are available) - only in active mode */}

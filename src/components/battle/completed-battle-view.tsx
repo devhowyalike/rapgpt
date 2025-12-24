@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   BattleOptionsDrawer,
   BattleReplayControlBar,
@@ -79,6 +80,14 @@ export function CompletedBattleView({
     handlePrevRound,
     handleNextRound,
   } = useRoundNavigation();
+
+  // Track direction for animations
+  const [prevRound, setPrevRound] = useState(selectedRound);
+  const direction = selectedRound > prevRound ? 1 : -1;
+
+  useEffect(() => {
+    setPrevRound(selectedRound);
+  }, [selectedRound]);
 
   const { verses: roundVerses, score: roundScore } = useRoundData(
     battle,
@@ -269,10 +278,23 @@ export function CompletedBattleView({
                             />
                           </div>
 
-                          <BattleScoreSection
-                            battle={battle}
-                            roundScore={roundScore}
-                          />
+                          <AnimatePresence mode="wait" initial={false}>
+                            <motion.div
+                              key={selectedRound}
+                              initial={{ opacity: 0, x: direction * 20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -direction * 20 }}
+                              transition={{
+                                duration: 0.2,
+                                ease: [0.23, 1, 0.32, 1],
+                              }}
+                            >
+                              <BattleScoreSection
+                                battle={battle}
+                                roundScore={roundScore}
+                              />
+                            </motion.div>
+                          </AnimatePresence>
                         </div>
                       )}
                     </div>
