@@ -467,7 +467,11 @@ export function BattleController({
   };
 
   if (!battle || isLeaving) {
-    return <BattleLoading message={isLeaving ? "Saving..." : "Get ready for the next battle!"} />;
+    return (
+      <BattleLoading
+        message={isLeaving ? "Saving..." : "Get ready for the next battle!"}
+      />
+    );
   }
 
   const nextPerformer = getNextPerformer(battle);
