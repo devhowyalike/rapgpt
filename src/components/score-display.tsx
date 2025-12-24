@@ -37,14 +37,11 @@ function PersonaScoreCard({
       ? "rgb(var(--player1-color))"
       : "rgb(var(--player2-color))";
 
-  // Subtle gray color for both boxes
-  const borderColor = "rgba(107, 114, 128, 0.3)";
-
   if (isExpanded) {
     return (
       <motion.div
-        className="bg-gray-900 rounded-lg p-2 md:p-4 border-2 shadow-sm"
-        style={{ borderColor }}
+        className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2"
+        style={{ borderColor: `${playerColor}40` }}
         initial={{ opacity: 0, x: animationDirection }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.4, delay: animationDelay }}
@@ -96,10 +93,11 @@ function PersonaScoreCard({
     );
   }
 
+  // Collapsed view
   return (
     <motion.div
-      className="bg-gray-900 rounded-lg p-2 md:p-4 border-2 shadow-sm flex flex-col items-center justify-center"
-      style={{ borderColor }}
+      className="bg-gray-900/50 rounded-lg p-2 md:p-4 border-2 flex flex-col items-center justify-center"
+      style={{ borderColor: `${playerColor}40` }}
       initial={{ opacity: 0, x: animationDirection }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4, delay: animationDelay }}
