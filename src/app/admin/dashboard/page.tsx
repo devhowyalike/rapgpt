@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { AdminDashboardClient } from "@/components/admin/admin-dashboard-client";
 import { MonthlyBattleStatsComponent } from "@/components/admin/monthly-battle-stats";
 import { MonthlyTokenUsage } from "@/components/admin/monthly-token-usage";
+import { SongCreationUsage } from "@/components/admin/song-creation-usage";
 import { WebSocketStats } from "@/components/admin/websocket-stats";
 import { SiteHeader } from "@/components/site-header";
 import { decrypt } from "@/lib/auth/encryption";
@@ -20,7 +21,10 @@ import {
   getCurrentMonthTokenTotals,
   getMonthlyBattleStats,
   getMonthlyTokenTotals,
+  getMonthlySongCreationTotals,
+  getCurrentMonthSongCreationTotals,
 } from "@/lib/usage-storage";
+import { getSunoCredits } from "@/lib/suno/client";
 
 export const dynamic = "force-dynamic";
 
@@ -55,22 +59,50 @@ export default async function AdminDashboardPage({
     const availableTokenMonths = await getAvailableMonths();
     const availableBattleMonths = await getAvailableBattleMonths();
 
-    // Determine which month to show
+    // Determine which month to show for each section
     const resolvedSearchParams = await searchParams;
-    const monthParam = resolvedSearchParams?.month as string | undefined;
-    const yearParam = resolvedSearchParams?.year as string | undefined;
 
-    let monthlyTokens;
-    let monthlyBattleStats;
-    if (monthParam && yearParam) {
-      const month = Number.parseInt(monthParam);
-      const year = Number.parseInt(yearParam);
-      monthlyTokens = await getMonthlyTokenTotals(month, year);
-      monthlyBattleStats = await getMonthlyBattleStats(month, year);
-    } else {
-      monthlyTokens = await getCurrentMonthTokenTotals();
-      monthlyBattleStats = await getCurrentMonthBattleStats();
-    }
+    // Song Creation Section
+    const songMonthParam = (resolvedSearchParams?.songs_month ||
+      resolvedSearchParams?.month) as string | undefined;
+    const songYearParam = (resolvedSearchParams?.songs_year ||
+      resolvedSearchParams?.year) as string | undefined;
+    const monthlySongTotals =
+      songMonthParam && songYearParam
+        ? await getMonthlySongCreationTotals(
+            Number.parseInt(songMonthParam),
+            Number.parseInt(songYearParam)
+          )
+        : await getCurrentMonthSongCreationTotals();
+
+    // Token Usage Section
+    const tokenMonthParam = (resolvedSearchParams?.tokens_month ||
+      resolvedSearchParams?.month) as string | undefined;
+    const tokenYearParam = (resolvedSearchParams?.tokens_year ||
+      resolvedSearchParams?.year) as string | undefined;
+    const monthlyTokens =
+      tokenMonthParam && tokenYearParam
+        ? await getMonthlyTokenTotals(
+            Number.parseInt(tokenMonthParam),
+            Number.parseInt(tokenYearParam)
+          )
+        : await getCurrentMonthTokenTotals();
+
+    // Battle Stats Section
+    const battleMonthParam = (resolvedSearchParams?.battles_month ||
+      resolvedSearchParams?.month) as string | undefined;
+    const battleYearParam = (resolvedSearchParams?.battles_year ||
+      resolvedSearchParams?.year) as string | undefined;
+    const monthlyBattleStats =
+      battleMonthParam && battleYearParam
+        ? await getMonthlyBattleStats(
+            Number.parseInt(battleMonthParam),
+            Number.parseInt(battleYearParam)
+          )
+        : await getCurrentMonthBattleStats();
+
+    // Fetch live Suno API credits
+    const sunoCredits = await getSunoCredits();
 
     // Decrypt user data for display
     const decryptedUsers = allUsers.map((user) => {
@@ -124,6 +156,21 @@ export default async function AdminDashboardPage({
             <MonthlyTokenUsage
               totals={monthlyTokens}
               availableMonths={availableTokenMonths}
+              monthParam="tokens_month"
+              yearParam="tokens_year"
+            />
+          </div>
+
+          {/* Song Creation Credits (Monthly) */}
+          <div className="mb-8">
+            <SongCreationUsage
+              totals={monthlySongTotals}
+              sunoCredits={sunoCredits}
+              month={monthlySongTotals.month}
+              year={monthlySongTotals.year}
+              availableMonths={availableTokenMonths}
+              monthParam="songs_month"
+              yearParam="songs_year"
             />
           </div>
 
@@ -132,6 +179,8 @@ export default async function AdminDashboardPage({
             <MonthlyBattleStatsComponent
               stats={monthlyBattleStats}
               availableMonths={availableBattleMonths}
+              monthParam="battles_month"
+              yearParam="battles_year"
             />
           </div>
 

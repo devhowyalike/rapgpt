@@ -67,15 +67,49 @@ export function SongGenerator({
   const [error, setError] = useState<string | null>(null);
   const [isResuming, setIsResuming] = useState(false);
   const [showManualComplete, setShowManualComplete] = useState(false);
+  const [isLoadingStatus, setIsLoadingStatus] = useState(true);
+
+  // Local song state - starts with battle prop, but updated by fresh fetch
+  const [currentSong, setCurrentSong] = useState(battle?.generatedSong);
 
   // Check if user is admin (manual completion is admin-only)
   const isAdmin = isLoaded && sessionClaims?.metadata?.role === "admin";
 
-  // Check if there's an incomplete song on mount
-  const incompleteSong = battle?.generatedSong;
+  // Check if there's an incomplete song - use local state that's kept fresh
+  const incompleteSong = currentSong;
   const hasIncompleteSong = !!(
     incompleteSong?.sunoTaskId && !incompleteSong?.audioUrl
   );
+
+  // Fetch latest battle state on mount to check for in-progress song generation
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchLatestSongStatus() {
+      try {
+        const response = await fetch(`/api/battle/${battleId}`);
+        if (response.ok && isMounted) {
+          const latestBattle = await response.json();
+          setCurrentSong(latestBattle.generatedSong);
+        }
+      } catch (err) {
+        console.error(
+          "[SongGenerator] Failed to fetch latest song status:",
+          err
+        );
+      } finally {
+        if (isMounted) {
+          setIsLoadingStatus(false);
+        }
+      }
+    }
+
+    fetchLatestSongStatus();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [battleId]);
 
   // Shared function to poll song status
   const pollSongStatus = async (taskId: string): Promise<boolean> => {
@@ -87,7 +121,7 @@ export function SongGenerator({
       setProgress(Math.round(Math.min(20 + (attempts / maxAttempts) * 70, 90)));
 
       const statusResponse = await fetch(
-        `/api/battle/${battleId}/song-status?taskId=${taskId}`,
+        `/api/battle/${battleId}/song-status?taskId=${taskId}`
       );
 
       if (!statusResponse.ok) {
@@ -105,7 +139,7 @@ export function SongGenerator({
         // Show manual complete option after timeout
         setShowManualComplete(true);
         throw new Error(
-          "Song generation timed out. The song may still be processing. You can manually complete it using the form below or refresh later.",
+          "Song generation timed out. The song may still be processing. You can manually complete it using the form below or refresh later."
         );
       }
 
@@ -159,7 +193,7 @@ export function SongGenerator({
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "An unexpected error occurred",
+        err instanceof Error ? err.message : "An unexpected error occurred"
       );
       setProgress(0);
     } finally {
@@ -168,8 +202,11 @@ export function SongGenerator({
     }
   };
 
-  // Auto-resume polling on mount if there's an incomplete song
+  // Auto-resume polling after loading if there's an incomplete song
   useEffect(() => {
+    // Wait until we've fetched the latest status
+    if (isLoadingStatus) return;
+
     if (
       hasIncompleteSong &&
       incompleteSong?.sunoTaskId &&
@@ -177,7 +214,7 @@ export function SongGenerator({
       !isResuming
     ) {
       console.log(
-        "[SongGenerator] Found incomplete song, auto-resuming polling...",
+        "[SongGenerator] Found incomplete song, auto-resuming polling..."
       );
       setIsResuming(true);
       setIsGenerating(true);
@@ -192,7 +229,7 @@ export function SongGenerator({
         })
         .catch((err) => {
           setError(
-            err instanceof Error ? err.message : "An unexpected error occurred",
+            err instanceof Error ? err.message : "An unexpected error occurred"
           );
           setProgress(0);
         })
@@ -201,7 +238,23 @@ export function SongGenerator({
           setIsResuming(false);
         });
     }
-  }, [hasIncompleteSong, incompleteSong?.sunoTaskId]);
+  }, [isLoadingStatus, hasIncompleteSong, incompleteSong?.sunoTaskId]);
+
+  // Show loading state while fetching latest status
+  if (isLoadingStatus) {
+    return (
+      <Card className="border-gray-800 bg-gray-900/50 backdrop-blur-sm">
+        <CardHeader>
+          <CardDescription className="text-gray-400 text-center">
+            Checking song status...
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex justify-center py-8">
+          <LoadingSpinner />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-gray-800 bg-gray-900/50 backdrop-blur-sm">
@@ -210,8 +263,8 @@ export function SongGenerator({
           {hasIncompleteSong && isResuming
             ? "Checking song generation status..."
             : hasIncompleteSong
-              ? "Your song is still being generated. Click below to check its status."
-              : `Turn this battle into a full song! Choose your beat style and let ${APP_TITLE} create the track.`}
+            ? "Your song is still being generated. Click below to check its status."
+            : `Turn this battle into a full song! Choose your beat style and let ${APP_TITLE} create the track.`}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -294,10 +347,10 @@ export function SongGenerator({
                 hasIncompleteSong
                   ? "bg-linear-to-r from-blue-600 to-cyan-600 hover:opacity-90"
                   : selectedStyle
-                    ? `bg-linear-to-r ${
-                        BEAT_STYLES.find((s) => s.id === selectedStyle)?.color
-                      } hover:opacity-90`
-                    : "bg-gray-700"
+                  ? `bg-linear-to-r ${
+                      BEAT_STYLES.find((s) => s.id === selectedStyle)?.color
+                    } hover:opacity-90`
+                  : "bg-gray-700"
               }
             `}
           >

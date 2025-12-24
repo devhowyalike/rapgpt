@@ -25,6 +25,8 @@ interface SongPlayerProps {
   onPlayStateChange?: (isPlaying: boolean) => void;
   externalIsPlaying?: boolean;
   onTogglePlay?: () => void;
+  /** Optional external audio ref - when provided, SongPlayer won't render its own audio element */
+  audioRef?: React.RefObject<HTMLAudioElement | null>;
 }
 
 function formatTime(seconds: number): string {
@@ -38,8 +40,10 @@ export function SongPlayer({
   onPlayStateChange,
   externalIsPlaying,
   onTogglePlay,
+  audioRef: externalAudioRef,
 }: SongPlayerProps) {
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const internalAudioRef = useRef<HTMLAudioElement>(null);
+  const audioRef = externalAudioRef || internalAudioRef;
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -190,8 +194,10 @@ export function SongPlayer({
           </div>
         </div>
 
-        {/* Audio Element */}
-        <audio ref={audioRef} src={song.audioUrl} preload="metadata" />
+        {/* Audio Element - only render if using internal ref */}
+        {!externalAudioRef && (
+          <audio ref={internalAudioRef} src={song.audioUrl} preload="metadata" />
+        )}
 
         {/* Play/Pause Button */}
         <div className="flex items-center gap-3">

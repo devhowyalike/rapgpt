@@ -42,7 +42,7 @@ export default async function Home() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-center">
-          <div className="inline-block mb-6 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm animate-slide-up">
+          <div className="inline-block mb-4 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm animate-slide-up">
             <span className="text-sm font-medium text-yellow-400 tracking-wide uppercase">
               AI Powered Freestyle Battles
             </span>
@@ -50,17 +50,17 @@ export default async function Home() {
 
           <div className="relative w-fit mx-auto">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 animate-slide-up [animation-delay:100ms]">
-              <span className="text-[250px] md:text-[450px] opacity-15 rotate-12 block select-none pointer-events-none grayscale-0">
+              <span className="text-[200px] md:text-[300px] opacity-15 rotate-12 block select-none pointer-events-none grayscale-0">
                 🎤
               </span>
             </div>
             <RapGPTLogo
-              size="xl"
+              size="lg"
               className="animate-slide-up [animation-delay:100ms] relative z-10"
             />
           </div>
 
-          <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up [animation-delay:200ms]">
+          <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-8 leading-relaxed animate-slide-up [animation-delay:200ms]">
             {TAGLINE_2}&trade;
           </p>
 
@@ -137,20 +137,22 @@ export default async function Home() {
 
           {/* Live Battles or Coming Soon */}
           {liveBattles.length === 0 && (
-            <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-8 mt-8">
+            <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-6 max-w-md mx-auto mt-8">
               {/* Calendar Display */}
-              <div className="flex justify-center mb-6">
-                <Calendar
-                  className="text-yellow-400"
-                  size={120}
-                  strokeWidth={1.5}
-                />
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center">
+                  <Calendar
+                    className="text-yellow-400"
+                    size={32}
+                    strokeWidth={1.5}
+                  />
+                </div>
               </div>
 
-              <h2 className="text-3xl font-(family-name:--font-bebas-neue) text-yellow-400 mb-4">
-                Upcoming Live Battles — Stay Tuned!
+              <h2 className="text-2xl font-(family-name:--font-bebas-neue) text-yellow-400 mb-2">
+                Upcoming Live Battles
               </h2>
-              <p className="text-gray-400 mb-6">
+              <p className="text-gray-400 text-sm mb-4">
                 Participate in a live AI battle arena featuring surprise guests
                 and new roster additions.
               </p>

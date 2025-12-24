@@ -71,12 +71,12 @@ export default async function CommunityPage({
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-center">
-          <h1 className="text-5xl md:text-7xl font-(family-name:--font-bebas-neue) mb-6 animate-slide-up flex flex-col items-center justify-center gap-4">
-            <UsersIcon className="w-10 h-10 md:w-16 md:h-16 text-white" />
+          <h1 className="text-4xl md:text-6xl font-(family-name:--font-bebas-neue) mb-4 animate-slide-up flex flex-col items-center justify-center gap-3">
+            <UsersIcon className="w-8 h-8 md:w-12 md:h-12 text-white" />
             Community
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto leading-relaxed animate-slide-up [animation-delay:100ms] px-4">
+          <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed animate-slide-up [animation-delay:100ms] px-4 text-pretty">
             See what e-beef others have been cooking.
           </p>
         </div>
@@ -90,11 +90,11 @@ export default async function CommunityPage({
       >
         <div className="max-w-7xl mx-auto w-full">
           {allUsers.length === 0 ? (
-            <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-12 text-center max-w-2xl mx-auto mt-8">
-              <h2 className="font-(family-name:--font-bebas-neue) text-3xl text-white mb-4">
+            <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-8 text-center max-w-md mx-auto mt-8">
+              <h2 className="font-(family-name:--font-bebas-neue) text-2xl text-white mb-3">
                 No Users Yet
               </h2>
-              <p className="text-gray-400">
+              <p className="text-gray-400 text-sm">
                 Be the first to join the community!
               </p>
             </div>

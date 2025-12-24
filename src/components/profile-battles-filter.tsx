@@ -292,7 +292,7 @@ export function ProfileBattlesFilter({
 
       {/* Battles Display */}
       {filteredBattles.length === 0 ? (
-        <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-12 text-center">
+        <div className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 rounded-lg p-8 text-center">
           <p className="text-gray-400">No battles match the selected filters</p>
         </div>
       ) : (

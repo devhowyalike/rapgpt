@@ -14,6 +14,49 @@ const SUNO_API_BASE_URL =
   process.env.SUNO_API_BASE_URL || "https://api.sunoapi.org";
 const SUNO_API_KEY = process.env.SUNO_API_KEY;
 
+interface SunoCreditsResponse {
+  code: number;
+  msg: string;
+  data: number; // Credits remaining
+}
+
+/**
+ * Get remaining credits from Suno API account
+ * Documentation: https://docs.sunoapi.org/suno-api/get-remaining-credits
+ */
+export async function getSunoCredits(): Promise<{ credits: number; error?: string }> {
+  if (!SUNO_API_KEY) {
+    return { credits: 0, error: "SUNO_API_KEY is not configured" };
+  }
+
+  try {
+    const response = await fetch(`${SUNO_API_BASE_URL}/api/v1/generate/credit`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${SUNO_API_KEY}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error("[Suno] Error fetching credits:", error);
+      return { credits: 0, error: `API error: ${response.status}` };
+    }
+
+    const data = (await response.json()) as SunoCreditsResponse;
+    
+    if (data.code !== 200) {
+      return { credits: 0, error: data.msg };
+    }
+
+    console.log("[Suno] Credits remaining:", data.data);
+    return { credits: data.data };
+  } catch (error) {
+    console.error("[Suno] Error fetching credits:", error);
+    return { credits: 0, error: error instanceof Error ? error.message : "Unknown error" };
+  }
+}
+
 interface SunoGenerateRequest {
   prompt: string;
   style: string;

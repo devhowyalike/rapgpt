@@ -4,7 +4,7 @@
 
 import { desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { battles, battleTokenUsage } from "@/lib/db/schema";
+import { battles, battleTokenUsage, songCreationUsage } from "@/lib/db/schema";
 
 export interface BattleTokenUsageEvent {
   id: string;
@@ -474,4 +474,137 @@ export async function getAllTimeBattleStats(): Promise<AllTimeBattleStats> {
       ? new Date(result.lastBattleDate)
       : null,
   };
+}
+
+// ============================================================================
+// Song Creation Usage
+// ============================================================================
+
+export interface SongCreationUsageEvent {
+  id: string;
+  battleId: string;
+  provider: string;
+  credits: number;
+  status?: "completed" | "error";
+  createdAt?: Date;
+}
+
+/**
+ * Record a song creation usage event.
+ */
+export async function recordSongCreationUsage(
+  event: SongCreationUsageEvent,
+): Promise<void> {
+  const row = {
+    id: event.id,
+    battleId: event.battleId,
+    provider: event.provider,
+    credits: event.credits,
+    status: event.status ?? "completed",
+    createdAt: event.createdAt ?? new Date(),
+  };
+
+  await db.insert(songCreationUsage).values(row);
+}
+
+export interface SongCreationTotals {
+  totalCredits: number;
+  totalSongs: number;
+  month?: string;
+  year?: number;
+}
+
+/**
+ * Get aggregate song creation totals for all time.
+ */
+export async function getAllTimeSongCreationTotals(): Promise<SongCreationTotals> {
+  // 1. Get usage from the tracking table
+  const [usageResult] = await db
+    .select({
+      totalCredits: sql<number>`coalesce(sum(${songCreationUsage.credits})::float8, 0)`,
+      totalSongs: sql<number>`count(*)::int`,
+    })
+    .from(songCreationUsage);
+
+  // 2. Get total songs from battles table (which includes historical data)
+  const [battleResult] = await db
+    .select({
+      totalSongs: sql<number>`count(*) filter (where ${battles.generatedSong}->>'audioUrl' is not null)::int`,
+    })
+    .from(battles);
+
+  const usageSongs = Number(usageResult?.totalSongs ?? 0);
+  const totalSongsFromBattles = Number(battleResult?.totalSongs ?? 0);
+
+  // Use the higher number for total songs to ensure historical ones are counted
+  const displayTotalSongs = Math.max(usageSongs, totalSongsFromBattles);
+  
+  // For credits, add 10 for each "historical" song not in the usage table
+  const historicalSongsCount = Math.max(0, totalSongsFromBattles - usageSongs);
+  const historicalCredits = historicalSongsCount * 10;
+
+  return {
+    totalCredits: Number(usageResult?.totalCredits ?? 0) + historicalCredits,
+    totalSongs: displayTotalSongs,
+  };
+}
+
+/**
+ * Get aggregate song creation totals for a specific month.
+ */
+export async function getMonthlySongCreationTotals(
+  month: number,
+  year: number,
+): Promise<SongCreationTotals> {
+  const startOfMonth = new Date(year, month - 1, 1);
+  const startOfNextMonth = new Date(year, month, 1);
+
+  // 1. Get usage from the tracking table for this month
+  const [usageResult] = await db
+    .select({
+      totalCredits: sql<number>`coalesce(sum(${songCreationUsage.credits})::float8, 0)`,
+      totalSongs: sql<number>`count(*)::int`,
+    })
+    .from(songCreationUsage)
+    .where(
+      sql`${songCreationUsage.createdAt} >= ${startOfMonth} AND ${songCreationUsage.createdAt} < ${startOfNextMonth}`,
+    );
+
+  // 2. Get songs from battles table for this month (historical fallback)
+  const [battleResult] = await db
+    .select({
+      totalSongs: sql<number>`count(*) filter (where ${battles.generatedSong}->>'audioUrl' is not null 
+          AND to_timestamp((${battles.generatedSong}->>'generatedAt')::bigint / 1000) >= ${startOfMonth}
+          AND to_timestamp((${battles.generatedSong}->>'generatedAt')::bigint / 1000) < ${startOfNextMonth})::int`,
+    })
+    .from(battles);
+
+  const usageSongs = Number(usageResult?.totalSongs ?? 0);
+  const battleSongs = Number(battleResult?.totalSongs ?? 0);
+
+  const displayTotalSongs = Math.max(usageSongs, battleSongs);
+  const historicalSongsCount = Math.max(0, battleSongs - usageSongs);
+  const historicalCredits = historicalSongsCount * 10;
+
+  // Format month name
+  const monthName = new Date(year, month - 1, 1).toLocaleString("en-US", {
+    month: "long",
+  });
+
+  return {
+    totalCredits: Number(usageResult?.totalCredits ?? 0) + historicalCredits,
+    totalSongs: displayTotalSongs,
+    month: monthName,
+    year,
+  };
+}
+
+/**
+ * Get aggregate song creation totals for the current month.
+ */
+export async function getCurrentMonthSongCreationTotals(): Promise<SongCreationTotals> {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  return getMonthlySongCreationTotals(month, year);
 }
