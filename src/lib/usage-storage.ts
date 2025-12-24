@@ -510,6 +510,8 @@ export async function recordSongCreationUsage(
 export interface SongCreationTotals {
   totalCredits: number;
   totalSongs: number;
+  month?: string;
+  year?: number;
 }
 
 /**
@@ -584,9 +586,16 @@ export async function getMonthlySongCreationTotals(
   const historicalSongsCount = Math.max(0, battleSongs - usageSongs);
   const historicalCredits = historicalSongsCount * 10;
 
+  // Format month name
+  const monthName = new Date(year, month - 1, 1).toLocaleString("en-US", {
+    month: "long",
+  });
+
   return {
     totalCredits: Number(usageResult?.totalCredits ?? 0) + historicalCredits,
     totalSongs: displayTotalSongs,
+    month: monthName,
+    year,
   };
 }
 

@@ -13,6 +13,8 @@ interface SongCreationUsageProps {
   month?: string;
   year?: number;
   availableMonths?: MonthOption[];
+  monthParam?: string;
+  yearParam?: string;
 }
 
 export function SongCreationUsage({
@@ -21,6 +23,8 @@ export function SongCreationUsage({
   month,
   year,
   availableMonths = [],
+  monthParam = "month",
+  yearParam = "year",
 }: SongCreationUsageProps) {
   const hasError = !!sunoCredits.error;
   const isMonthlyView = !!month && !!year;
@@ -87,6 +91,8 @@ export function SongCreationUsage({
             selectedMonth={month}
             selectedYear={year}
             accentColor="pink"
+            monthParam={monthParam}
+            yearParam={yearParam}
           />
         )}
       </div>

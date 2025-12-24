@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 export interface MonthOption {
   month: number;
@@ -14,6 +14,8 @@ interface MonthSelectorProps {
   selectedMonth: string; // Month name like "December"
   selectedYear: number;
   accentColor?: string; // e.g., "purple", "pink"
+  monthParam?: string;
+  yearParam?: string;
 }
 
 export function MonthSelector({
@@ -21,8 +23,12 @@ export function MonthSelector({
   selectedMonth,
   selectedYear,
   accentColor = "purple",
+  monthParam = "month",
+  yearParam = "year",
 }: MonthSelectorProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   if (availableMonths.length === 0) return null;
 
@@ -30,7 +36,13 @@ export function MonthSelector({
     const value = e.target.value;
     if (!value) return;
     const [year, month] = value.split("-");
-    router.push(`/admin/dashboard?year=${year}&month=${month}`);
+
+    // Use URLSearchParams to preserve other filters
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(yearParam, year);
+    params.set(monthParam, month);
+
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   // Find the currently selected option

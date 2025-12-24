@@ -9,11 +9,15 @@ import { StatCardGrid, type StatCardData } from "./stat-card";
 interface MonthlyBattleStatsProps {
   stats: MonthlyBattleStats;
   availableMonths?: MonthOption[];
+  monthParam?: string;
+  yearParam?: string;
 }
 
 export function MonthlyBattleStatsComponent({
   stats,
   availableMonths = [],
+  monthParam = "month",
+  yearParam = "year",
 }: MonthlyBattleStatsProps) {
   const statCards: StatCardData[] = [
     {
@@ -70,6 +74,8 @@ export function MonthlyBattleStatsComponent({
           selectedMonth={stats.month}
           selectedYear={stats.year}
           accentColor="cyan"
+          monthParam={monthParam}
+          yearParam={yearParam}
         />
       </div>
 

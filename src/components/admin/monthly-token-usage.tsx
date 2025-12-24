@@ -10,11 +10,15 @@ import { StatCardGrid, type StatCardData } from "./stat-card";
 interface MonthlyTokenUsageProps {
   totals: MonthlyTokenTotals;
   availableMonths?: MonthOption[];
+  monthParam?: string;
+  yearParam?: string;
 }
 
 export function MonthlyTokenUsage({
   totals,
   availableMonths = [],
+  monthParam = "month",
+  yearParam = "year",
 }: MonthlyTokenUsageProps) {
   const stats: StatCardData[] = [
     {
@@ -69,6 +73,8 @@ export function MonthlyTokenUsage({
           selectedMonth={totals.month}
           selectedYear={totals.year}
           accentColor="purple"
+          monthParam={monthParam}
+          yearParam={yearParam}
         />
       </div>
 
