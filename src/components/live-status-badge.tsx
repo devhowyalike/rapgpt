@@ -160,7 +160,7 @@ export function LiveStatusBadge({
   const isClickable = canToggle && onToggle;
 
   const badgeClasses = cn(
-    "flex items-center px-2.5 py-1.5 rounded-full font-bold transition-colors",
+    "flex items-center px-2.5 py-1.5 rounded-full font-bold transition-all duration-500",
     styles.bg,
     styles.border,
     styles.text,

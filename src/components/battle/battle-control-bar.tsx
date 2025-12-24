@@ -207,6 +207,7 @@ export function BattleControlBar({
             actions={mobileFanActions}
             hint={
               canManageLive &&
+              !isLoadingPermissions &&
               !isLive &&
               !isStartingLive &&
               !isStoppingLive &&

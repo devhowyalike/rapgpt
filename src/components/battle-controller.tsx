@@ -177,6 +177,7 @@ export function BattleController({
   } = useLiveBattleState({
     initialBattle,
     canManage: canManageBattle,
+    isLoadingPermissions,
     onMobileTabChange: setMobileActiveTab,
     onMobileDrawerOpen: () => setShowMobileDrawer(true),
     onMobileDrawerClose: () => setShowMobileDrawer(false),
@@ -429,7 +430,7 @@ export function BattleController({
   };
 
   // Handler to show end live confirmation dialog
-  const handleEndLiveClick = () => {
+  const handleEndLiveClick = async () => {
     setShowEndLiveDialog(true);
   };
 

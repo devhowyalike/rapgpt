@@ -7,6 +7,7 @@ import type { Battle, Comment } from "@/lib/shared";
 export type WebSocketEventType =
   | "battle:live_started"
   | "battle:live_ended"
+  | "battle:ending_soon"
   | "verse:streaming"
   | "verse:complete"
   | "phase:reading"
@@ -19,7 +20,15 @@ export type WebSocketEventType =
   | "viewers:count"
   | "admin:connected"
   | "admin:disconnected"
-  | "connection:acknowledged";
+  | "connection:acknowledged"
+  | "server:shutdown"
+  | "homepage:battle_progress";
+
+export type BattleEndingReason =
+  | "inactivity"
+  | "admin_timeout"
+  | "server_shutdown"
+  | "max_lifetime";
 
 export interface BaseWebSocketEvent {
   type: WebSocketEventType;
@@ -115,9 +124,31 @@ export interface ConnectionAcknowledgedEvent extends BaseWebSocketEvent {
   viewerCount: number;
 }
 
+export interface BattleEndingSoonEvent extends BaseWebSocketEvent {
+  type: "battle:ending_soon";
+  reason: BattleEndingReason;
+  secondsRemaining: number;
+}
+
+export interface ServerShutdownEvent extends BaseWebSocketEvent {
+  type: "server:shutdown";
+  message: string;
+}
+
+/**
+ * Lightweight event for homepage to track battle progress
+ * Sent when a verse completes or comment is added - homepage increments counts locally
+ */
+export interface HomepageBattleProgressEvent extends BaseWebSocketEvent {
+  type: "homepage:battle_progress";
+  currentRound: number;
+  commentCount?: number; // Optional: set when a comment is added
+}
+
 export type WebSocketEvent =
   | BattleLiveStartedEvent
   | BattleLiveEndedEvent
+  | BattleEndingSoonEvent
   | VerseStreamingEvent
   | VerseCompleteEvent
   | PhaseReadingEvent
@@ -130,7 +161,9 @@ export type WebSocketEvent =
   | ViewersCountEvent
   | AdminConnectedEvent
   | AdminDisconnectedEvent
-  | ConnectionAcknowledgedEvent;
+  | ConnectionAcknowledgedEvent
+  | ServerShutdownEvent
+  | HomepageBattleProgressEvent;
 
 export interface ClientMessage {
   type: "join" | "leave" | "sync_request";

@@ -30,8 +30,16 @@ export function useLiveBattles({ enabled = true }: UseLiveBattlesOptions = {}) {
           setError("Failed to fetch live battles");
         }
       } catch (err) {
-        console.error("[useLiveBattles] Error fetching live battles:", err);
-        setError(err instanceof Error ? err.message : "Unknown error");
+        // Network errors (server down, etc.) are expected during restarts
+        // Don't show error state - the hook will retry on visibility/focus
+        const isNetworkError =
+          err instanceof TypeError && err.message.includes("fetch");
+        if (isNetworkError) {
+          console.debug("[useLiveBattles] Network unavailable, will retry on focus");
+        } else {
+          console.error("[useLiveBattles] Error fetching live battles:", err);
+          setError(err instanceof Error ? err.message : "Unknown error");
+        }
       } finally {
         setIsLoading(false);
       }

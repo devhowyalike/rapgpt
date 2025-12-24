@@ -8,11 +8,11 @@
 
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Radio } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useBattleStore } from "@/lib/battle-store";
 import type { Battle } from "@/lib/shared";
-import { useWebSocket } from "@/lib/websocket/client";
+import { type BattleWarning, useWebSocket } from "@/lib/websocket/client";
 import type { ConnectionStatus, WebSocketEvent } from "@/lib/websocket/types";
 
 interface UseLiveBattleStateOptions {
@@ -20,6 +20,8 @@ interface UseLiveBattleStateOptions {
   initialBattle: Battle;
   /** Whether the current user can manage (admin/owner) this battle */
   canManage: boolean;
+  /** Whether permissions are still being loaded - delays WebSocket until resolved */
+  isLoadingPermissions?: boolean;
   /** Callback when mobile drawer tab should change */
   onMobileTabChange?: (tab: "comments" | "voting") => void;
   /** Callback when mobile drawer should open */
@@ -33,6 +35,7 @@ interface UseLiveBattleStateReturn {
   wsStatus: ConnectionStatus;
   viewerCount: number;
   reconnect: () => void;
+  warning: BattleWarning | null;
 
   // Live mode controls
   isLive: boolean;
@@ -69,6 +72,7 @@ interface UseLiveBattleStateReturn {
 export function useLiveBattleState({
   initialBattle,
   canManage,
+  isLoadingPermissions = false,
   onMobileTabChange,
   onMobileDrawerOpen,
   onMobileDrawerClose,
@@ -92,7 +96,6 @@ export function useLiveBattleState({
 
   const [isStartingLive, setIsStartingLive] = useState(false);
   const [isStoppingLive, setIsStoppingLive] = useState(false);
-  const [hasInitiallyConnected, setHasInitiallyConnected] = useState(false);
   const [showBattleEndedDialog, setShowBattleEndedDialog] = useState(false);
   const [hostEndedBattle, setHostEndedBattle] = useState(false);
   // Track if we were ever live - keeps WebSocket connected for restart notifications
@@ -115,8 +118,6 @@ export function useLiveBattleState({
           if (hostEndedBattle) {
             setHostEndedBattle(false);
             setShowBattleEndedDialog(false);
-            // Allow a fresh sync to happen when the host restarts
-            setHasInitiallyConnected(false);
             // Show toast notification that battle is live again
             toast.success("Battle is back live!", {
               description: "The host has restarted the broadcast.",
@@ -222,27 +223,109 @@ export function useLiveBattleState({
     }
   }, [battle?.isLive]);
 
-  // Keep WebSocket connected as long as viewer is on a battle page that was/is live
-  // This ensures they receive restart notifications if host ends and restarts
+  // Keep WebSocket connected:
+  // - Always for admins/managers (so they can go live)
+  // - For viewers if battle is/was live (so they receive updates)
   // Connection naturally closes when they navigate away (component unmount)
+  // IMPORTANT: Wait for permissions to load so we know the correct isAdmin status
+  // Otherwise, admins might connect as viewers and be counted incorrectly
   const {
     status: wsStatus,
     viewerCount,
+    warning,
     reconnect,
   } = useWebSocket({
     battleId: initialBattle.id,
     isAdmin: canManage,
-    enabled: wasEverLive,
+    enabled: !isLoadingPermissions && (canManage || wasEverLive),
     onEvent: handleWebSocketEvent,
   });
 
-  // Fetch latest battle state when WebSocket connects for the first time
+  // Show toast when warning is received
   useEffect(() => {
-    if (wsStatus === "connected" && !hasInitiallyConnected && battle?.isLive) {
+    if (!warning) return;
+
+    const reasonMessages: Record<
+      BattleWarning["reason"],
+      { title: string; description: string }
+    > = {
+      inactivity: {
+        title: "Battle ending soon",
+        description: `This live battle will end in ${warning.secondsRemaining}s due to inactivity.`,
+      },
+      admin_timeout: {
+        title: "Host disconnected",
+        description: `Battle will end in ${warning.secondsRemaining}s unless the host reconnects.`,
+      },
+      server_shutdown: {
+        title: "Network Connection",
+        description:
+          warning.message ||
+          "The connection was interrupted. We're reconnecting you now.",
+      },
+      max_lifetime: {
+        title: "Battle time limit",
+        description: `This battle has reached its maximum duration. Ending in ${warning.secondsRemaining}s.`,
+      },
+    };
+
+    const msg = reasonMessages[warning.reason];
+    toast.warning(msg.title, {
+      description: msg.description,
+      duration: warning.reason === "server_shutdown" ? 10000 : 5000,
+    });
+  }, [warning]);
+
+  // Consolidated connection tracking state
+  // - prevStableStatus: tracks stable states (connected, disconnected, error) - not transitional "connecting"
+  // - hasConnectedOnce: distinguishes initial connection from reconnections
+  // - autoResumeAttempted: prevents multiple auto-resume attempts
+  const connectionTrackingRef = useRef<{
+    prevStableStatus: ConnectionStatus | null;
+    hasConnectedOnce: boolean;
+    autoResumeAttempted: boolean;
+  }>({
+    prevStableStatus: null,
+    hasConnectedOnce: false,
+    autoResumeAttempted: false,
+  });
+
+  // Fetch latest battle state when WebSocket connects (initial or reconnection)
+  useEffect(() => {
+    const tracking = connectionTrackingRef.current;
+
+    // Only update ref and check for reconnection on stable states
+    const isStableState =
+      wsStatus === "connected" ||
+      wsStatus === "disconnected" ||
+      wsStatus === "error";
+
+    if (!isStableState) return; // Skip transitional "connecting" state
+
+    const wasDisconnected =
+      tracking.prevStableStatus === "disconnected" ||
+      tracking.prevStableStatus === "error" ||
+      tracking.prevStableStatus === null; // Initial connection
+    const justConnected = wsStatus === "connected" && wasDisconnected;
+    const isReconnection = tracking.hasConnectedOnce && justConnected;
+
+    // Update tracking state for next comparison
+    tracking.prevStableStatus = wsStatus;
+    if (justConnected) {
+      tracking.hasConnectedOnce = true;
+    }
+
+    // Reset auto-resume flag when disconnected (so we can try again on next reconnect)
+    if (wsStatus === "disconnected" || wsStatus === "error") {
+      tracking.autoResumeAttempted = false;
+    }
+
+    // Sync on reconnection when battle is/was live (skip initial - we have initialBattle)
+    // Note: We DO sync on initial if wasEverLive because state might have changed
+    if (justConnected && wasEverLive) {
       console.log(
-        "[LiveBattleState] Initial connection - fetching latest battle state"
+        "[LiveBattleState] Connection established - fetching latest battle state"
       );
-      setHasInitiallyConnected(true);
       fetch(`/api/battle/${initialBattle.id}/sync`)
         .then((res) => res.json())
         .then((data) => {
@@ -250,22 +333,52 @@ export function useLiveBattleState({
             console.log(
               "[LiveBattleState] Received synced state with",
               data.battle.comments.length,
-              "comments"
+              "comments, isLive:",
+              data.battle.isLive
             );
             setBattle(data.battle);
+
+            // Auto-resume live mode for admins after reconnection
+            // (e.g., after server restart while running a live battle)
+            if (
+              isReconnection &&
+              canManage &&
+              !data.battle.isLive &&
+              wasEverLive &&
+              !tracking.autoResumeAttempted
+            ) {
+              tracking.autoResumeAttempted = true; // Prevent multiple attempts
+              console.log(
+                "[LiveBattleState] Auto-resuming live mode after reconnection"
+              );
+              fetch(`/api/battle/${initialBattle.id}/live/start`, {
+                method: "POST",
+              })
+                .then((res) => res.json())
+                .then((startData) => {
+                  if (startData.battle) {
+                    setBattle(startData.battle);
+                    toast.success("Live session resumed", {
+                      description:
+                        "Your broadcast has been automatically restored.",
+                      duration: 3000,
+                    });
+                  }
+                })
+                .catch((err) => {
+                  console.error(
+                    "[LiveBattleState] Failed to auto-resume:",
+                    err
+                  );
+                });
+            }
           }
         })
         .catch((error) => {
           console.error("[LiveBattleState] Failed to sync state:", error);
         });
     }
-  }, [
-    wsStatus,
-    hasInitiallyConnected,
-    initialBattle.id,
-    setBattle,
-    battle?.isLive,
-  ]);
+  }, [wsStatus, initialBattle.id, setBattle, wasEverLive, canManage]);
 
   // Reading phase countdown
   useEffect(() => {
@@ -348,9 +461,6 @@ export function useLiveBattleState({
 
       // Notify header to refresh live battles
       window.dispatchEvent(new CustomEvent("battle:status-changed"));
-
-      // Reset connection state for fresh sync
-      setHasInitiallyConnected(false);
 
       // Show voting enabled toast once per battle for the host
       const toastKey = `voting-toast-shown-${battle.id}`;
@@ -483,9 +593,11 @@ export function useLiveBattleState({
     wsStatus,
     viewerCount,
     reconnect,
+    warning,
 
     // Live mode controls
-    isLive: battle?.isLive ?? false,
+    // Use initialBattle as fallback until store is hydrated to avoid flash of "Go Live" button
+    isLive: battle?.isLive ?? initialBattle.isLive ?? false,
     isStartingLive,
     isStoppingLive,
     startLive,

@@ -1,18 +1,24 @@
 import { auth } from "@clerk/nextjs/server";
 import { desc, eq } from "drizzle-orm";
-import { Shield, Star } from "lucide-react";
+import { Shield, Swords } from "lucide-react";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminDashboardClient } from "@/components/admin/admin-dashboard-client";
+import { MonthlyBattleStatsComponent } from "@/components/admin/monthly-battle-stats";
 import { MonthlyTokenUsage } from "@/components/admin/monthly-token-usage";
+import { WebSocketStats } from "@/components/admin/websocket-stats";
 import { SiteHeader } from "@/components/site-header";
 import { decrypt } from "@/lib/auth/encryption";
 import { checkRole } from "@/lib/auth/roles";
 import { db } from "@/lib/db/client";
 import { users } from "@/lib/db/schema";
 import {
+  getAvailableBattleMonths,
   getAvailableMonths,
+  getCurrentMonthBattleStats,
   getCurrentMonthTokenTotals,
+  getMonthlyBattleStats,
   getMonthlyTokenTotals,
 } from "@/lib/usage-storage";
 
@@ -45,8 +51,9 @@ export default async function AdminDashboardPage({
       where: eq(users.clerkId, clerkUserId!),
     });
 
-    // Get available months for selector
-    const availableMonths = await getAvailableMonths();
+    // Get available months for selectors
+    const availableTokenMonths = await getAvailableMonths();
+    const availableBattleMonths = await getAvailableBattleMonths();
 
     // Determine which month to show
     const resolvedSearchParams = await searchParams;
@@ -54,13 +61,15 @@ export default async function AdminDashboardPage({
     const yearParam = resolvedSearchParams?.year as string | undefined;
 
     let monthlyTokens;
+    let monthlyBattleStats;
     if (monthParam && yearParam) {
-      monthlyTokens = await getMonthlyTokenTotals(
-        Number.parseInt(monthParam),
-        Number.parseInt(yearParam)
-      );
+      const month = Number.parseInt(monthParam);
+      const year = Number.parseInt(yearParam);
+      monthlyTokens = await getMonthlyTokenTotals(month, year);
+      monthlyBattleStats = await getMonthlyBattleStats(month, year);
     } else {
       monthlyTokens = await getCurrentMonthTokenTotals();
+      monthlyBattleStats = await getCurrentMonthBattleStats();
     }
 
     // Decrypt user data for display
@@ -104,7 +113,7 @@ export default async function AdminDashboardPage({
                 href="/admin/battles-list"
                 className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center gap-2"
               >
-                <Star size={20} />
+                <Swords size={20} />
                 View All Battles
               </Link>
             </div>
@@ -114,8 +123,21 @@ export default async function AdminDashboardPage({
           <div className="mb-8">
             <MonthlyTokenUsage
               totals={monthlyTokens}
-              availableMonths={availableMonths}
+              availableMonths={availableTokenMonths}
             />
+          </div>
+
+          {/* Monthly Battle Stats */}
+          <div className="mb-8">
+            <MonthlyBattleStatsComponent
+              stats={monthlyBattleStats}
+              availableMonths={availableBattleMonths}
+            />
+          </div>
+
+          {/* Live WebSocket Stats */}
+          <div className="mb-8">
+            <WebSocketStats />
           </div>
 
           <AdminDashboardClient
@@ -126,6 +148,10 @@ export default async function AdminDashboardPage({
       </div>
     );
   } catch (error) {
+    // Re-throw redirect errors so Next.js can handle them
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error("Admin dashboard error:", error);
     return (
       <div className="min-h-screen bg-linear-to-br from-gray-900 via-purple-900 to-black flex items-center justify-center">

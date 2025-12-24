@@ -4,7 +4,7 @@
 
 import { desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { battleTokenUsage } from "@/lib/db/schema";
+import { battles, battleTokenUsage } from "@/lib/db/schema";
 
 export interface BattleTokenUsageEvent {
   id: string;
@@ -332,4 +332,146 @@ export async function getAvailableMonths(): Promise<
       label: date.toLocaleString("en-US", { month: "long", year: "numeric" }),
     };
   });
+}
+
+// ============================================================================
+// Monthly Battle / WebSocket Stats
+// ============================================================================
+
+export interface MonthlyBattleStats {
+  totalBattles: number;
+  liveBattles: number;
+  completedBattles: number;
+  featuredBattles: number;
+  totalSongs: number;
+  month: string;
+  year: number;
+}
+
+/**
+ * Get aggregate battle stats for a specific month.
+ * This represents WebSocket activity (live battles = WebSocket usage).
+ * month is 1-indexed (1 = January)
+ */
+export async function getMonthlyBattleStats(
+  month: number,
+  year: number
+): Promise<MonthlyBattleStats> {
+  // Get first day of target month
+  const startOfMonth = new Date(year, month - 1, 1);
+
+  // Get first day of next month
+  const startOfNextMonth = new Date(year, month, 1);
+
+  // Get battle counts for the month
+  const [result] = await db
+    .select({
+      totalBattles: sql<number>`count(*)::int`,
+      liveBattles: sql<number>`count(*) filter (where ${battles.liveStartedAt} is not null)::int`,
+      completedBattles: sql<number>`count(*) filter (where ${battles.status} = 'completed')::int`,
+      featuredBattles: sql<number>`count(*) filter (where ${battles.isFeatured} = true)::int`,
+      totalSongs: sql<number>`count(*) filter (where ${battles.generatedSong}->>'audioUrl' is not null)::int`,
+    })
+    .from(battles)
+    .where(
+      sql`${battles.createdAt} >= ${startOfMonth} AND ${battles.createdAt} < ${startOfNextMonth}`
+    );
+
+  // Format month name
+  const monthName = new Date(year, month - 1, 1).toLocaleString("en-US", {
+    month: "long",
+  });
+
+  return {
+    totalBattles: Number(result?.totalBattles ?? 0),
+    liveBattles: Number(result?.liveBattles ?? 0),
+    completedBattles: Number(result?.completedBattles ?? 0),
+    featuredBattles: Number(result?.featuredBattles ?? 0),
+    totalSongs: Number(result?.totalSongs ?? 0),
+    month: monthName,
+    year,
+  };
+}
+
+/**
+ * Get aggregate battle stats for the current month.
+ */
+export async function getCurrentMonthBattleStats(): Promise<MonthlyBattleStats> {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1; // JS months are 0-indexed
+  return getMonthlyBattleStats(month, year);
+}
+
+/**
+ * Get list of months that have battle data
+ */
+export async function getAvailableBattleMonths(): Promise<
+  { month: number; year: number; label: string }[]
+> {
+  // Extract distinct year and month from createdAt
+  const result = await db
+    .select({
+      year: sql<number>`extract(year from ${battles.createdAt})::int`,
+      month: sql<number>`extract(month from ${battles.createdAt})::int`,
+    })
+    .from(battles)
+    .groupBy(
+      sql`extract(year from ${battles.createdAt})`,
+      sql`extract(month from ${battles.createdAt})`
+    )
+    .orderBy(
+      sql`extract(year from ${battles.createdAt}) desc`,
+      sql`extract(month from ${battles.createdAt}) desc`
+    );
+
+  return result.map((r) => {
+    const date = new Date(r.year, r.month - 1, 1);
+    return {
+      month: r.month,
+      year: r.year,
+      label: date.toLocaleString("en-US", { month: "long", year: "numeric" }),
+    };
+  });
+}
+
+/**
+ * Get all-time battle totals
+ */
+export interface AllTimeBattleStats {
+  totalBattles: number;
+  liveBattles: number;
+  completedBattles: number;
+  featuredBattles: number;
+  totalSongs: number;
+  firstBattleDate: Date | null;
+  lastBattleDate: Date | null;
+}
+
+export async function getAllTimeBattleStats(): Promise<AllTimeBattleStats> {
+  const [result] = await db
+    .select({
+      totalBattles: sql<number>`count(*)::int`,
+      liveBattles: sql<number>`count(*) filter (where ${battles.liveStartedAt} is not null)::int`,
+      completedBattles: sql<number>`count(*) filter (where ${battles.status} = 'completed')::int`,
+      featuredBattles: sql<number>`count(*) filter (where ${battles.isFeatured} = true)::int`,
+      totalSongs: sql<number>`count(*) filter (where ${battles.generatedSong}->>'audioUrl' is not null)::int`,
+      firstBattleDate: sql<Date>`min(${battles.createdAt})`,
+      lastBattleDate: sql<Date>`max(${battles.createdAt})`,
+    })
+    .from(battles);
+
+  return {
+    totalBattles: Number(result?.totalBattles ?? 0),
+    liveBattles: Number(result?.liveBattles ?? 0),
+    completedBattles: Number(result?.completedBattles ?? 0),
+    featuredBattles: Number(result?.featuredBattles ?? 0),
+    totalSongs: Number(result?.totalSongs ?? 0),
+    firstBattleDate: result?.firstBattleDate
+      ? new Date(result.firstBattleDate)
+      : null,
+    lastBattleDate: result?.lastBattleDate
+      ? new Date(result.lastBattleDate)
+      : null,
+  };
 }
