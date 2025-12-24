@@ -292,8 +292,8 @@ export function StageSelect({
         </div>
 
         {/* Bottom Actions Bar - Floating */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-linear-to-t from-black via-black/90 to-transparent pt-12">
-          <div className="container mx-auto max-w-4xl">
+        <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-linear-to-t from-black via-black/90 to-transparent pt-12 pointer-events-none">
+          <div className="container mx-auto max-w-4xl pointer-events-auto">
             <div className="flex flex-col gap-4 items-center">
               {/* Edit Characters & Start Battle */}
               <div className="flex flex-col gap-6 items-center w-full">
@@ -346,7 +346,7 @@ export function StageSelect({
         </div>
 
         {/* Spacer for bottom bar */}
-        <div className="h-48" />
+        <div className="h-64" />
       </div>
     </>
   );

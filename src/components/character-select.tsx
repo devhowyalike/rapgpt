@@ -430,8 +430,8 @@ export function CharacterSelect({
               </div>
 
               {/* Floating Bottom Bar */}
-              <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-linear-to-t from-black via-black/90 to-transparent pt-12">
-                <div className="container mx-auto max-w-xl">
+              <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-linear-to-t from-black via-black/90 to-transparent pt-12 pointer-events-none">
+                <div className="container mx-auto max-w-xl pointer-events-auto">
                   {selectionStep === "player1" ? (
                     <button
                       onClick={() => {
@@ -535,7 +535,7 @@ export function CharacterSelect({
               </div>
 
               {/* Spacer for bottom bar */}
-              <div className="h-24" />
+              <div className="h-48" />
             </div>
           </motion.div>
         )}
