@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { desc, eq } from "drizzle-orm";
 import { Shield, Swords } from "lucide-react";
-import { isRedirectError } from "next/dist/client/components/redirect";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminDashboardClient } from "@/components/admin/admin-dashboard-client";
