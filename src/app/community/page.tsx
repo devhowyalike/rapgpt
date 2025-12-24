@@ -76,7 +76,7 @@ export default async function CommunityPage({
             Community
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto leading-relaxed animate-slide-up [animation-delay:100ms] px-4">
+          <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto leading-relaxed animate-slide-up [animation-delay:100ms] px-4 text-pretty">
             See what e-beef others have been cooking.
           </p>
         </div>
