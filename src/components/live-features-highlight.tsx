@@ -96,14 +96,16 @@ export function LiveFeaturesHighlight({
               transition={{ delay: 0.1 * index }}
               className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors group"
             >
-              <div
-                className={`p-3 rounded-xl ${feature.bg} ${feature.color} w-fit mb-6 group-hover:scale-110 transition-transform`}
-              >
-                {feature.icon}
+              <div className="flex items-center gap-4 mb-4">
+                <div
+                  className={`p-2.5 rounded-xl ${feature.bg} ${feature.color} shrink-0 group-hover:scale-110 transition-transform`}
+                >
+                  {feature.icon}
+                </div>
+                <h3 className="text-xl font-bold text-white font-(family-name:--font-bebas-neue) tracking-wide uppercase">
+                  {feature.title}
+                </h3>
               </div>
-              <h3 className="text-xl font-bold text-white mb-3 font-(family-name:--font-bebas-neue) tracking-wide">
-                {feature.title}
-              </h3>
               <p className="text-gray-400 leading-relaxed text-pretty">
                 {feature.description}
               </p>
