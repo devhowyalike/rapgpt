@@ -52,8 +52,8 @@ interface UseLiveBattleStateReturn {
   votingCompletedRound: number | null;
 
   // Phase controls (for admins triggering phases)
-  beginReadingPhase: (duration?: number) => void;
-  beginVotingPhase: (duration?: number) => void;
+  beginReadingPhase: (duration?: number) => Promise<void>;
+  beginVotingPhase: (duration?: number) => Promise<void>;
   completeVotingPhase: (round: number) => void;
 
   // Config controls
@@ -172,12 +172,21 @@ export function useLiveBattleState({
           setReadingTimeRemaining(null);
           setVotingTimeRemaining(null);
           setBattle(event.battle);
+          // Close mobile drawer when round advances so viewers see the battle stage
+          // xl breakpoint is 1280px - drawer is used below this
+          if (typeof window !== "undefined" && window.innerWidth < 1280) {
+            onMobileDrawerClose?.();
+          }
           break;
 
         case "battle:completed":
           setIsReadingPhase(false);
           setIsVotingPhase(false);
           setBattle(event.battle);
+          // Close mobile drawer when battle completes
+          if (typeof window !== "undefined" && window.innerWidth < 1280) {
+            onMobileDrawerClose?.();
+          }
           break;
 
         case "vote:cast":
@@ -211,6 +220,7 @@ export function useLiveBattleState({
       setVotingTimeRemaining,
       onMobileTabChange,
       onMobileDrawerOpen,
+      onMobileDrawerClose,
       canManage,
       hostEndedBattle,
     ]
@@ -422,8 +432,9 @@ export function useLiveBattleState({
       setVotingTimeRemaining(next);
       if (next <= 0 && battle) {
         storeCompleteVotingPhase(battle.currentRound);
-        // On mobile, close the drawer when voting ends
-        if (typeof window !== "undefined" && window.innerWidth < 768) {
+        // Close drawer when voting ends on viewports below xl (1280px)
+        // This ensures viewers see the battle stage after voting
+        if (typeof window !== "undefined" && window.innerWidth < 1280) {
           onMobileDrawerClose?.();
         }
       }
@@ -510,26 +521,55 @@ export function useLiveBattleState({
 
   // Begin reading phase
   const beginReadingPhase = useCallback(
-    (duration = 20) => {
+    async (duration = 20) => {
+      // Update local state immediately for the admin
       setIsReadingPhase(true);
       setReadingTimeRemaining(duration);
+
+      // Broadcast to viewers if battle is live
+      if (battle?.isLive) {
+        try {
+          await fetch(`/api/battle/${battle.id}/phase`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phase: "reading", duration }),
+          });
+        } catch (error) {
+          console.error("[LiveBattleState] Failed to broadcast reading phase:", error);
+        }
+      }
     },
-    [setIsReadingPhase, setReadingTimeRemaining]
+    [setIsReadingPhase, setReadingTimeRemaining, battle]
   );
 
   // Begin voting phase
   const beginVotingPhase = useCallback(
-    (duration = 10) => {
+    async (duration = 10) => {
+      // Update local state immediately for the admin
       setIsReadingPhase(false);
       setReadingTimeRemaining(null);
       setIsVotingPhase(true);
       setVotingTimeRemaining(duration);
+
+      // Broadcast to viewers if battle is live
+      if (battle?.isLive) {
+        try {
+          await fetch(`/api/battle/${battle.id}/phase`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phase: "voting", duration }),
+          });
+        } catch (error) {
+          console.error("[LiveBattleState] Failed to broadcast voting phase:", error);
+        }
+      }
     },
     [
       setIsReadingPhase,
       setReadingTimeRemaining,
       setIsVotingPhase,
       setVotingTimeRemaining,
+      battle,
     ]
   );
 
