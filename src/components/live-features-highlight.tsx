@@ -14,8 +14,8 @@ export function LiveFeaturesHighlight({
   const features = [
     {
       icon: <Radio className="w-6 h-6" />,
-      title: "Real-time Streaming",
-      description: "Watch verses appear word-by-word as the battle unfolds.",
+      title: "Watch Together",
+      description: "Verses appear word-by-word as the battle unfolds.",
       color: "text-red-400",
       bg: "bg-red-500/10",
     },
@@ -82,7 +82,7 @@ export function LiveFeaturesHighlight({
             transition={{ delay: 0.2 }}
             className="text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto text-pretty"
           >
-            Create your own battles and broadcast them live for anyone to join.
+            Stream your battles in real-time for anyone to join.
           </motion.p>
         </div>
 
