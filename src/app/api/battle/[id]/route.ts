@@ -7,6 +7,8 @@ import { getBattleById, saveBattle } from "@/lib/battle-storage";
 import { db } from "@/lib/db/client";
 import { battles } from "@/lib/db/schema";
 import type { Battle } from "@/lib/shared";
+import { broadcastEvent } from "@/lib/websocket/broadcast-helper";
+import type { StateSyncEvent, RoundAdvancedEvent, BattleCompletedEvent } from "@/lib/websocket/types";
 
 export async function GET(
   request: NextRequest,
@@ -115,12 +117,46 @@ export async function PUT(
         .where(eq(battles.id, id));
     }
 
+    // Broadcast state changes to WebSocket viewers if battle is live
+    if (battle.isLive) {
+      // Detect specific state changes for semantic events
+      // Note: existingBattle contains the pre-update state from database
+      if (battle.status === "completed" && existingBattle.status !== "completed") {
+        // Battle just completed
+        await broadcastEvent(id, {
+          type: "battle:completed",
+          battleId: id,
+          timestamp: Date.now(),
+          battle,
+          winner: battle.winner || null,
+        } as BattleCompletedEvent);
+      } else if (battle.currentRound !== existingBattle.currentRound) {
+        // Round advanced
+        await broadcastEvent(id, {
+          type: "round:advanced",
+          battleId: id,
+          timestamp: Date.now(),
+          newRound: battle.currentRound,
+          battle,
+        } as RoundAdvancedEvent);
+      } else {
+        // Generic state sync for other changes (config updates, etc.)
+        await broadcastEvent(id, {
+          type: "state:sync",
+          battleId: id,
+          timestamp: Date.now(),
+          battle,
+          viewerCount: 0, // Will be populated by client if needed
+        } as StateSyncEvent);
+      }
+    }
+
     // Revalidate pages to show fresh data
     revalidatePath("/community");
     revalidatePath(`/battle/${id}`);
     revalidatePath(`/profile/${existingBattle.createdBy}`);
 
-    return new Response(JSON.stringify(battle), {
+    return new Response(JSON.stringify({ battle }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });

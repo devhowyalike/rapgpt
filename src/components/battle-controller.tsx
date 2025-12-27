@@ -336,6 +336,8 @@ export function BattleController({
 
     const personaId = latestBattle.personas[nextPerformer].id;
     const position = nextPerformer;
+    // Use isLive from fresh store state, not stale closure
+    const battleIsLive = latestBattle.isLive ?? false;
 
     setIsPreGenerating(false);
     setIsGenerating(true);
@@ -348,14 +350,15 @@ export function BattleController({
         body: JSON.stringify({
           battle: latestBattle,
           personaId,
-          isLive: isLive, // Pass live flag to enable WebSocket broadcasting
+          isLive: battleIsLive, // Pass live flag to enable WebSocket broadcasting
         }),
       });
 
       if (!response.ok) throw new Error("Failed to generate verse");
 
-      if (isLive) {
+      if (battleIsLive) {
         // For live mode, just wait for server to finish - WebSocket handles UI updates
+        // The server broadcasts verse:streaming and verse:complete events to all viewers
         await response.text();
       } else {
         // For non-live mode, handle local streaming display
@@ -395,12 +398,18 @@ export function BattleController({
     } finally {
       setIsGenerating(false);
     }
-  }, [isGenerating, setStreamingVerse, addVerse, saveBattle, isLive]);
+  }, [isGenerating, setStreamingVerse, addVerse, saveBattle]);
 
   const handleAdvanceRound = useCallback(async () => {
     setIsReadingPhase(false);
     setReadingTimeRemaining(null);
     setIsVotingPhase(false);
+
+    // Close mobile drawer when advancing round/revealing winner
+    // xl breakpoint is 1280px - drawer is used below this
+    if (typeof window !== "undefined" && window.innerWidth < 1280) {
+      setShowMobileDrawer(false);
+    }
 
     const willAutoStart =
       (useBattleStore.getState().battle?.autoStartOnAdvance ?? true) !== false;
@@ -422,6 +431,7 @@ export function BattleController({
     setIsReadingPhase,
     setReadingTimeRemaining,
     setIsVotingPhase,
+    setShowMobileDrawer,
   ]);
 
   const handleCancelBattle = () => {
