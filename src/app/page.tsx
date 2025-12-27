@@ -3,6 +3,7 @@ import { Calendar } from "lucide-react";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { FeatureCard } from "@/components/feature-card";
 import { LiveBattlesDisplay } from "@/components/live-battles-display";
+import { LiveFeaturesHighlight } from "@/components/live-features-highlight";
 import { MakeSongHighlight } from "@/components/make-song-highlight";
 import { PersonaGallery } from "@/components/persona-gallery";
 import { RapGPTLogo } from "@/components/rapgpt-logo";
@@ -71,7 +72,7 @@ export default async function Home() {
       </section>
 
       {/* Reverted Original Content - Split for Full Width Highlight */}
-      <div className="bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center justify-center p-6 pt-0 pb-12">
+      <div className="bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center justify-center p-6 pt-0 pb-6">
         <div className="max-w-6xl mx-auto text-center space-y-8 w-full">
           {/* Original Features Grid */}
           <div className="flex flex-wrap justify-center gap-6 mt-6">
@@ -113,6 +114,9 @@ export default async function Home() {
           />
         </div>
       </div>
+
+      {/* Live Experience Highlight */}
+      <LiveFeaturesHighlight isAuthenticated={isAuthenticated} />
 
       {/* Make Song Highlight */}
       <MakeSongHighlight isAuthenticated={isAuthenticated} />
