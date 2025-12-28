@@ -122,18 +122,20 @@ export function ScreenshotShowcase({
               className="space-y-6 flex flex-col items-center"
             >
               <div className="space-y-4 flex flex-col items-center">
-                <div className="relative w-fit mx-auto">
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10">
-                    <span className="text-[200px] md:text-[300px] opacity-15 rotate-12 block select-none pointer-events-none grayscale-0">
+                <div className="flex flex-col items-center">
+                  <div className="relative w-fit mx-auto">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10">
+                    <span className="text-[200px] md:text-[300px] opacity-10 rotate-12 block select-none pointer-events-none grayscale-0">
                       🎤
                     </span>
+                    </div>
+                    <RapGPTLogo size="xl" className="relative z-10" />
                   </div>
-                  <RapGPTLogo size="xl" className="relative z-10" />
-                </div>
 
-                <p className="text-lg md:text-xl text-gray-400 leading-relaxed">
-                  {TAGLINE_2}&trade;
-                </p>
+                  <p className="text-lg md:text-xl text-gray-400 leading-relaxed -mt-1 mb-2">
+                    {TAGLINE_2}&trade;
+                  </p>
+                </div>
 
                 <div className="pt-1 flex justify-center">
                   <CreateBattleCTA isAuthenticated={isAuthenticated} />
