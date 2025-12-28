@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { GuestProfileCallout } from "@/components/guest-profile-callout";
 import { SiteHeader } from "@/components/site-header";
+import { PageHero } from "@/components/page-hero";
 import { decrypt } from "@/lib/auth/encryption";
 import { db } from "@/lib/db/client";
 import { users } from "@/lib/db/schema";
@@ -62,25 +63,16 @@ export default async function CommunityPage({
       <SiteHeader />
 
       {/* Hero Section */}
-      <section className="relative pt-20 pb-6 md:pt-32 md:pb-8 overflow-hidden bg-black text-white selection:bg-yellow-500/30 shrink-0">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl z-0 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
-        </div>
+      <PageHero>
+        <h1 className="text-4xl md:text-6xl font-bebas mb-4 animate-slide-up flex flex-col items-center justify-center gap-3">
+          <UsersIcon className="w-8 h-8 md:w-12 md:h-12 text-white" />
+          Community
+        </h1>
 
-        <div className="container mx-auto px-4 relative z-10 text-center">
-          <h1 className="text-4xl md:text-6xl font-(family-name:--font-bebas-neue) mb-4 animate-slide-up flex flex-col items-center justify-center gap-3">
-            <UsersIcon className="w-8 h-8 md:w-12 md:h-12 text-white" />
-            Community
-          </h1>
-
-          <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed animate-slide-up [animation-delay:100ms] px-4 text-pretty">
-            See what e-beef others have been cooking.
-          </p>
-        </div>
-      </section>
+        <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed animate-slide-up [animation-delay:100ms] px-4 text-pretty">
+          See what e-beef others have been cooking.
+        </p>
+      </PageHero>
 
       {/* Main Content */}
       <div

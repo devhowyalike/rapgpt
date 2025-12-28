@@ -9,6 +9,7 @@ import { GuestProfileCallout } from "@/components/guest-profile-callout";
 import { ProfileBattlesFilter } from "@/components/profile-battles-filter";
 import { ProfileHeaderMenu } from "@/components/profile-header-menu";
 import { SiteHeader } from "@/components/site-header";
+import { PageHero } from "@/components/page-hero";
 import { decrypt } from "@/lib/auth/encryption";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { db } from "@/lib/db/client";
@@ -99,86 +100,80 @@ export default async function ProfilePage({
       <SiteHeader />
 
       {/* Hero Section - Matches Homepage Design */}
-      <section className="relative pt-24 pb-0 md:pt-32 md:pb-0 overflow-hidden bg-black text-white selection:bg-yellow-500/30 shrink-0">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl z-0 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
+      <PageHero 
+        className="pt-24 pb-0 md:pt-32 md:pb-0"
+        containerClassName="flex flex-col items-center"
+      >
+        {/* Avatar */}
+        <div className="mb-4 animate-slide-up">
+          {profileUser.imageUrl ? (
+            <div className="relative">
+              <div className="absolute -inset-1 rounded-full bg-linear-to-r from-purple-600 to-blue-600 opacity-75 blur-sm" />
+              <Image
+                src={profileUser.imageUrl}
+                alt={displayName}
+                width={96}
+                height={96}
+                className="relative rounded-full border-2 border-white/20 w-20 h-20 md:w-24 md:h-24 object-cover"
+              />
+            </div>
+          ) : (
+            <div className="relative">
+              <div className="absolute -inset-1 rounded-full bg-linear-to-r from-purple-600 to-blue-600 opacity-75 blur-sm" />
+              <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full bg-black border-2 border-white/20 flex items-center justify-center">
+                <UserIcon className="text-gray-400 w-10 h-10 md:w-12 md:h-12" />
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="container mx-auto px-4 relative z-10 flex flex-col items-center text-center">
-          {/* Avatar */}
-          <div className="mb-4 animate-slide-up">
-            {profileUser.imageUrl ? (
-              <div className="relative">
-                <div className="absolute -inset-1 rounded-full bg-linear-to-r from-purple-600 to-blue-600 opacity-75 blur-sm" />
-                <Image
-                  src={profileUser.imageUrl}
-                  alt={displayName}
-                  width={96}
-                  height={96}
-                  className="relative rounded-full border-2 border-white/20 w-20 h-20 md:w-24 md:h-24 object-cover"
-                />
-              </div>
-            ) : (
-              <div className="relative">
-                <div className="absolute -inset-1 rounded-full bg-linear-to-r from-purple-600 to-blue-600 opacity-75 blur-sm" />
-                <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full bg-black border-2 border-white/20 flex items-center justify-center">
-                  <UserIcon className="text-gray-400 w-10 h-10 md:w-12 md:h-12" />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Name & Menu */}
-          <div className="flex items-center gap-4 justify-center mb-3 animate-slide-up [animation-delay:100ms]">
-            <h1 className="font-bebas text-3xl md:text-5xl text-white tracking-wide wrap-break-word max-w-[80vw] text-center">
-              {displayName}
-            </h1>
-            {isOwnProfile && (
-              <div className="shrink-0">
-                <ProfileHeaderMenu
-                  initialIsPublic={profileUser.isProfilePublic}
-                  userId={profileUserId}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Info & Badges */}
-          <div className="flex flex-col items-center gap-3 animate-slide-up [animation-delay:200ms]">
-            <p className="text-gray-400 text-lg">
-              Member since{" "}
-              {new Date(profileUser.createdAt).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-              })}
-            </p>
-
-            {isOwnProfile && (
-              <div className="flex items-center gap-2 justify-center flex-wrap">
-                {isViewingAsPublic ? (
-                  <span className="px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 flex items-center gap-1.5 text-sm">
-                    <UserIcon className="w-3.5 h-3.5" />
-                    Viewing as Public
-                  </span>
-                ) : profileUser.isProfilePublic ? (
-                  <span className="px-3 py-1 rounded-full border border-green-500/30 bg-green-500/10 text-green-300 flex items-center gap-1.5 text-sm">
-                    <Globe className="w-3.5 h-3.5" />
-                    Public Profile
-                  </span>
-                ) : (
-                  <span className="px-3 py-1 rounded-full border border-gray-500/30 bg-gray-500/10 text-gray-300 flex items-center gap-1.5 text-sm">
-                    <Lock className="w-3.5 h-3.5" />
-                    Private Profile
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
+        {/* Name & Menu */}
+        <div className="flex items-center gap-4 justify-center mb-3 animate-slide-up [animation-delay:100ms]">
+          <h1 className="font-bebas text-3xl md:text-5xl text-white tracking-wide wrap-break-word max-w-[80vw] text-center">
+            {displayName}
+          </h1>
+          {isOwnProfile && (
+            <div className="shrink-0">
+              <ProfileHeaderMenu
+                initialIsPublic={profileUser.isProfilePublic}
+                userId={profileUserId}
+              />
+            </div>
+          )}
         </div>
-      </section>
+
+        {/* Info & Badges */}
+        <div className="flex flex-col items-center gap-3 animate-slide-up [animation-delay:200ms]">
+          <p className="text-gray-400 text-lg">
+            Member since{" "}
+            {new Date(profileUser.createdAt).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "short",
+            })}
+          </p>
+
+          {isOwnProfile && (
+            <div className="flex items-center gap-2 justify-center flex-wrap">
+              {isViewingAsPublic ? (
+                <span className="px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 flex items-center gap-1.5 text-sm">
+                  <UserIcon className="w-3.5 h-3.5" />
+                  Viewing as Public
+                </span>
+              ) : profileUser.isProfilePublic ? (
+                <span className="px-3 py-1 rounded-full border border-green-500/30 bg-green-500/10 text-green-300 flex items-center gap-1.5 text-sm">
+                  <Globe className="w-3.5 h-3.5" />
+                  Public Profile
+                </span>
+              ) : (
+                <span className="px-3 py-1 rounded-full border border-gray-500/30 bg-gray-500/10 text-gray-300 flex items-center gap-1.5 text-sm">
+                  <Lock className="w-3.5 h-3.5" />
+                  Private Profile
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      </PageHero>
 
       {/* Battles Section */}
       <div
