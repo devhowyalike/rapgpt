@@ -56,24 +56,16 @@ export function LiveFeaturesHighlight({
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium mb-6"
+            className="inline-flex items-center gap-4 px-6 pt-3 pb-2 md:px-8 md:pt-4 md:pb-3 rounded-full bg-red-500/10 border border-red-500/20 mb-8 group hover:bg-red-500/20 transition-colors"
           >
-            <span className="relative flex h-2 w-2">
+            <span className="relative flex h-3 w-3 md:h-4 md:w-4">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 md:h-4 md:w-4 bg-red-500"></span>
             </span>
-            <span>Stream Live</span>
+            <h2 className="text-3xl md:text-6xl font-bold font-(family-name:--font-bebas-neue) text-white leading-none tracking-tight uppercase">
+              Take the Battle <span className="text-red-500">Live</span>
+            </h2>
           </motion.div>
-
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl md:text-6xl font-bold font-(family-name:--font-bebas-neue) text-white leading-tight mb-6"
-          >
-            Take the Battle <span className="text-red-500">Live</span>
-          </motion.h2>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
