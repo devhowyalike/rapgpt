@@ -3,7 +3,7 @@
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import Image from "next/image";
 import { useRef } from "react";
-import { Zap, Music, Mic2, Sword } from "lucide-react";
+import { Zap, Music, Mic2, Clock } from "lucide-react";
 import { RapGPTLogo } from "./rapgpt-logo";
 import { CreateBattleCTA } from "./create-battle-cta";
 import { TAGLINE_2 } from "@/lib/constants";
@@ -39,12 +39,12 @@ export function ScreenshotShowcase({
 
   const features = [
     {
-      icon: <Sword className="w-6 h-6 text-red-500" />,
+      icon: <Mic2 className="w-6 h-6 text-red-500" />,
       title: "Choose MC's",
       description: "Each with distinct flows and styles.",
     },
     {
-      icon: <Mic2 className="w-6 h-6 text-yellow-500" />,
+      icon: <Clock className="w-6 h-6 text-yellow-500" />,
       title: "3 Rounds",
       description: "8 bars per verse, alternating turns.",
     },
@@ -106,8 +106,8 @@ export function ScreenshotShowcase({
                 </div>
 
                 <p className="text-xl text-zinc-400 leading-relaxed max-w-lg">
-                  Witness AI-driven flows that adapt, respond, and evolve. Our
-                  neural engine generates bar-for-bar heat in real-time.
+                  Battles react and adapt in real time. Every match plays out
+                  differently.
                 </p>
               </div>
             </motion.div>
