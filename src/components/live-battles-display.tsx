@@ -195,8 +195,11 @@ export function LiveBattlesDisplay({
   }
 
   return (
-    <div className="w-full bg-gray-900/50 border border-white/10 rounded-xl overflow-hidden backdrop-blur-md">
-      <div className="p-6 border-b border-white/10 flex items-center gap-3">
+    <div className="w-full bg-gray-900/50 border border-white/10 rounded-xl overflow-hidden backdrop-blur-md relative">
+      {/* Grid Background */}
+      <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-10 pointer-events-none" />
+
+      <div className="p-6 border-b border-white/10 flex items-center gap-3 relative z-10">
         <div className="relative flex h-3 w-3">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
           <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
@@ -209,128 +212,133 @@ export function LiveBattlesDisplay({
         </h2>
       </div>
 
-      <Table>
-        <TableHeader className="bg-white/5">
-          <TableRow className="border-white/10 hover:bg-transparent">
-            <TableHead className="text-gray-400 w-[40%]">Matchup</TableHead>
-            <TableHead className="text-gray-400 text-center">Round</TableHead>
-            <TableHead className="text-gray-400 text-center">Stats</TableHead>
-            <TableHead className="text-gray-400 text-center">Creator</TableHead>
-            <TableHead className="text-gray-400 text-right"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {liveBattles.map((battle) => (
-            <TableRow
-              key={battle.id}
-              className="border-white/10 hover:bg-white/5 transition-colors"
-            >
-              <TableCell>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-[rgb(var(--player1-color))]">
-                      <Image
-                        src={battle.personas.player1.avatar}
-                        alt={battle.personas.player1.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <span className="font-bold text-white truncate max-w-[100px] sm:max-w-[150px]">
-                      {battle.personas.player1.name}
-                    </span>
-                  </div>
-                  <span className="text-gray-500 font-bold text-sm">VS</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-white truncate max-w-[100px] sm:max-w-[150px] text-right">
-                      {battle.personas.player2.name}
-                    </span>
-                    <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-[rgb(var(--player2-color))]">
-                      <Image
-                        src={battle.personas.player2.avatar}
-                        alt={battle.personas.player2.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell className="text-center">
-                <span className="inline-flex items-center rounded-full border border-white/10 bg-black/20 px-2.5 py-0.5 text-xs font-semibold text-white transition-colors focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2">
-                  {getDisplayRound(battle)} / {ROUNDS_PER_BATTLE}
-                </span>
-              </TableCell>
-              <TableCell>
-                <div className="flex flex-col items-center gap-1 text-xs text-gray-400">
-                  <div className="flex items-center gap-1">
-                    <Users className="w-3 h-3" />
-                    <span>
-                      {battle.wsVerseCount ?? battle.verses.length} verses
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <MessageSquare className="w-3 h-3" />
-                    <span>
-                      {battle.wsCommentCount ?? battle.comments.length} comments
-                    </span>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell className="text-center">
-                {battle.creator ? (
-                  <div className="flex flex-col items-center gap-1">
-                    {battle.creator.imageUrl && (
-                      <div className="relative w-6 h-6 rounded-full overflow-hidden border border-white/10">
+      <div className="relative z-10">
+        <Table>
+          <TableHeader className="bg-white/5">
+            <TableRow className="border-white/10 hover:bg-transparent">
+              <TableHead className="text-gray-400 w-[40%]">Matchup</TableHead>
+              <TableHead className="text-gray-400 text-center">Round</TableHead>
+              <TableHead className="text-gray-400 text-center">Stats</TableHead>
+              <TableHead className="text-gray-400 text-center">
+                Creator
+              </TableHead>
+              <TableHead className="text-gray-400 text-right"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {liveBattles.map((battle) => (
+              <TableRow
+                key={battle.id}
+                className="border-white/10 hover:bg-white/5 transition-colors"
+              >
+                <TableCell>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-[rgb(var(--player1-color))]">
                         <Image
-                          src={battle.creator.imageUrl}
-                          alt={battle.creator.displayName}
+                          src={battle.personas.player1.avatar}
+                          alt={battle.personas.player1.name}
                           fill
                           className="object-cover"
                         />
                       </div>
-                    )}
-                    <span className="text-xs text-gray-400 max-w-[100px] truncate">
-                      {battle.creator.displayName}
-                    </span>
+                      <span className="font-bold text-white truncate max-w-[100px] sm:max-w-[150px]">
+                        {battle.personas.player1.name}
+                      </span>
+                    </div>
+                    <span className="text-gray-500 font-bold text-sm">VS</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white truncate max-w-[100px] sm:max-w-[150px] text-right">
+                        {battle.personas.player2.name}
+                      </span>
+                      <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-[rgb(var(--player2-color))]">
+                        <Image
+                          src={battle.personas.player2.avatar}
+                          alt={battle.personas.player2.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    </div>
                   </div>
-                ) : (
-                  <span className="text-xs text-gray-500 italic">
-                    Anonymous
+                </TableCell>
+                <TableCell className="text-center">
+                  <span className="inline-flex items-center rounded-full border border-white/10 bg-black/20 px-2.5 py-0.5 text-xs font-semibold text-white transition-colors focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                    {getDisplayRound(battle)} / {ROUNDS_PER_BATTLE}
                   </span>
-                )}
-              </TableCell>
-              <TableCell className="text-right">
-                {currentUserId &&
-                (battle.creator?.userId === currentUserId ||
-                  currentUserId === "user_2oE8sL5Z2Yx4X9Z9Z9Z9Z9Z9Z9") ? (
-                  <Button
-                    asChild
-                    size="sm"
-                    className="bg-yellow-600 hover:bg-yellow-700 text-white"
-                  >
-                    <Link href={`/battle/${battle.id}`}>
-                      <Play className="w-3 h-3 mr-2 fill-current" />
-                      Control
-                    </Link>
-                  </Button>
-                ) : (
-                  <Button
-                    asChild
-                    size="sm"
-                    className="bg-red-600 hover:bg-red-700 text-white"
-                  >
-                    <Link href={`/battle/${battle.id}`}>
-                      <Play className="w-3 h-3 mr-2 fill-current" />
-                      Watch
-                    </Link>
-                  </Button>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-col items-center gap-1 text-xs text-gray-400">
+                    <div className="flex items-center gap-1">
+                      <Users className="w-3 h-3" />
+                      <span>
+                        {battle.wsVerseCount ?? battle.verses.length} verses
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <MessageSquare className="w-3 h-3" />
+                      <span>
+                        {battle.wsCommentCount ?? battle.comments.length}{" "}
+                        comments
+                      </span>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="text-center">
+                  {battle.creator ? (
+                    <div className="flex flex-col items-center gap-1">
+                      {battle.creator.imageUrl && (
+                        <div className="relative w-6 h-6 rounded-full overflow-hidden border border-white/10">
+                          <Image
+                            src={battle.creator.imageUrl}
+                            alt={battle.creator.displayName}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
+                      <span className="text-xs text-gray-400 max-w-[100px] truncate">
+                        {battle.creator.displayName}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-gray-500 italic">
+                      Anonymous
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell className="text-right">
+                  {currentUserId &&
+                  (battle.creator?.userId === currentUserId ||
+                    currentUserId === "user_2oE8sL5Z2Yx4X9Z9Z9Z9Z9Z9Z9") ? (
+                    <Button
+                      asChild
+                      size="sm"
+                      className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                    >
+                      <Link href={`/battle/${battle.id}`}>
+                        <Play className="w-3 h-3 mr-2 fill-current" />
+                        Control
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      asChild
+                      size="sm"
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      <Link href={`/battle/${battle.id}`}>
+                        <Play className="w-3 h-3 mr-2 fill-current" />
+                        Watch
+                      </Link>
+                    </Button>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

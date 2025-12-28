@@ -23,7 +23,7 @@
   --radius: 0.5rem;
 
   /* Layout heights - centralized for scalability */
-  --header-height: 52px;
+  --header-height: 56px;
   --battle-header-height: 89px; /* battle header with round tracker and stage info */
   --live-banner-height: 60px;
   --bottom-controls-height: 72px; /* drawer offset for bottom buttons */

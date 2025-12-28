@@ -94,9 +94,12 @@ export function LiveFeaturesHighlight({
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 * index }}
-              className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors group"
+              className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors group flex flex-col items-center text-center md:items-start md:text-left relative overflow-hidden"
             >
-              <div className="flex items-center gap-4 mb-4">
+              {/* Grid Background */}
+              <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-10 pointer-events-none" />
+
+              <div className="flex flex-col md:flex-row items-center gap-4 mb-4 relative z-10">
                 <div
                   className={`p-2.5 rounded-xl ${feature.bg} ${feature.color} shrink-0 group-hover:scale-110 transition-transform`}
                 >
@@ -106,7 +109,7 @@ export function LiveFeaturesHighlight({
                   {feature.title}
                 </h3>
               </div>
-              <p className="text-gray-400 leading-relaxed text-pretty">
+              <p className="text-gray-400 leading-relaxed text-pretty relative z-10">
                 {feature.description}
               </p>
             </motion.div>
@@ -120,8 +123,11 @@ export function LiveFeaturesHighlight({
           transition={{ delay: 0.5 }}
           className="mt-16 text-center"
         >
-          <div className="inline-flex flex-col sm:flex-row items-center gap-6 p-8 rounded-3xl bg-linear-to-r from-red-500/10 via-purple-500/10 to-blue-500/10 border border-white/10">
-            <div className="flex -space-x-4">
+          <div className="inline-flex flex-col sm:flex-row items-center gap-6 p-8 rounded-3xl bg-linear-to-r from-red-500/10 via-purple-500/10 to-blue-500/10 border border-white/10 relative overflow-hidden">
+            {/* Grid Background */}
+            <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-10 pointer-events-none" />
+
+            <div className="flex -space-x-4 relative z-10">
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
@@ -136,16 +142,18 @@ export function LiveFeaturesHighlight({
                 +84
               </div>
             </div>
-            <div className="text-left">
+            <div className="text-left relative z-10">
               <div className="text-white font-bold text-lg">
                 Step in the Arena
               </div>
               <div className="text-gray-400 text-sm">Try it out for free</div>
             </div>
-            <CreateBattleCTA
-              isAuthenticated={isAuthenticated}
-              title="Start Live Battle"
-            />
+            <div className="relative z-10">
+              <CreateBattleCTA
+                isAuthenticated={isAuthenticated}
+                title="Start Live Battle"
+              />
+            </div>
           </div>
         </motion.div>
       </div>

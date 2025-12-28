@@ -58,7 +58,7 @@ export function ScreenshotShowcase({
   return (
     <section
       ref={containerRef}
-      className="relative pt-24 md:pt-32 pb-12 bg-black overflow-hidden"
+      className="relative pt-28 md:pt-32 pb-12 bg-black overflow-hidden"
     >
       {/* Dynamic Background Atmosphere */}
       <div className="absolute inset-0 z-0">
@@ -66,7 +66,7 @@ export function ScreenshotShowcase({
         <div className="absolute bottom-0 left-0 w-2/3 h-2/3 bg-blue-600/10 rounded-full blur-[150px] pointer-events-none" />
 
         {/* Grid Pattern with smoother fade */}
-        <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-10 pointer-events-none" />
+        <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-20 pointer-events-none" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 relative z-10">
@@ -122,13 +122,10 @@ export function ScreenshotShowcase({
                 scale,
                 opacity,
               }}
-              className="relative group"
+              className="relative"
             >
               {/* Main Screenshot with Reflection Effect */}
               <div className="relative">
-                {/* Ambient Shadow/Glow */}
-                <div className="absolute -inset-4 bg-linear-to-r from-red-500/20 via-purple-500/20 to-blue-500/20 rounded-[2.5rem] blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-
                 {/* The "Device" Frame */}
                 <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-stage-dark">
                   {/* Fake Browser Header */}
@@ -137,12 +134,6 @@ export function ScreenshotShowcase({
                       <div className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
                       <div className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
                       <div className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
-                    </div>
-                    <div className="mx-auto flex items-center gap-2 px-3 py-1 rounded-full bg-black/40 border border-white/5">
-                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                      <span className="text-[10px] text-zinc-500 font-mono">
-                        rapgpt.io/battle/live
-                      </span>
                     </div>
                   </div>
 
@@ -153,7 +144,7 @@ export function ScreenshotShowcase({
                       alt="RapGPT Platform Screenshot"
                       width={1200}
                       height={800}
-                      className="w-full h-auto transition-transform duration-1000 group-hover:scale-[1.02]"
+                      className="w-full h-auto"
                       priority
                     />
 
@@ -194,7 +185,7 @@ export function ScreenshotShowcase({
 
         {/* Horizontal Features Row */}
         <div className="mt-8 pt-4 border-none">
-          <div className="flex flex-col md:flex-row flex-wrap justify-center items-start gap-x-16 gap-y-8">
+          <div className="flex flex-col md:flex-row flex-wrap justify-center items-center md:items-start gap-x-16 gap-y-10">
             {features.map((feature, i) => (
               <motion.div
                 key={i}
@@ -202,9 +193,9 @@ export function ScreenshotShowcase({
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="flex items-start gap-4 group max-w-sm"
+                className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-4 group max-w-sm"
               >
-                <div className="inline-flex p-3 rounded-xl bg-white/5 border border-white/10 group-hover:border-white/20 group-hover:bg-white/10 transition-all shrink-0 mt-0.5">
+                <div className="inline-flex p-3 rounded-xl bg-white/5 border border-white/10 group-hover:border-white/20 group-hover:bg-white/10 transition-all shrink-0">
                   {feature.icon}
                 </div>
                 <div className="space-y-1.5">
