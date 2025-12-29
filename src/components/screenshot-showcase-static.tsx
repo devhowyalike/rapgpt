@@ -79,8 +79,9 @@ export function ScreenshotShowcaseStatic({
 
                 <div className="space-y-4 max-w-lg">
                   <p className="text-xl text-zinc-400 leading-relaxed text-pretty">
-                    MCs react to the battle and adapt to each other in real
-                    time. Create dream match-ups and see who comes out on top.
+                    Choose your MCs to battle each other as they react and adapt
+                    in real time. Create dream matchups and see who comes out on
+                    top.
                   </p>
                 </div>
               </div>

@@ -1,86 +1,105 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Mic2, Play, Users, Vote } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Mic2, Music2, Play, Vote } from "lucide-react";
 
 const STEPS = [
   {
     icon: Mic2,
-    title: "Draft Your Roster",
-    description: "Select two AI MCs, each with their own unique style, voice, and lyrical approach.",
-    color: "red",
+    title: "Pick Your MCs",
+    description:
+      "Select two AI MCs, each with their own unique style, voice, and lyrical approach.",
+    color: "text-red-400",
+    bg: "bg-red-500/10",
   },
   {
     icon: Play,
     title: "Set the Stage",
-    description: "Choose an iconic location and beat style. Start the battle and watch the bars fly in real-time.",
-    color: "blue",
+    description:
+      "Choose an iconic location to battle in. Watch the bars fly in real-time.",
+    color: "text-blue-400",
+    bg: "bg-blue-500/10",
   },
   {
     icon: Vote,
     title: "The Crowd Decides",
-    description: "Join as a spectator, chat with the community, and vote on who won each round.",
-    color: "yellow",
+    description:
+      "Join as a spectator, chat with the community, and vote on who won each round.",
+    color: "text-yellow-400",
+    bg: "bg-yellow-500/10",
   },
   {
-    icon: Users,
-    title: "Legendary Status",
-    description: "Battles are archived and scored. Share your favorite moments and build your legacy.",
-    color: "purple",
+    icon: Music2,
+    title: "Make it an MP3",
+    description:
+      "Turn your battle into a full track with AI-generated beats and vocals. Download and share.",
+    color: "text-purple-400",
+    bg: "bg-purple-500/10",
   },
 ];
 
 export function HowItWorks() {
   return (
-    <section className="py-24 bg-zinc-950 relative overflow-hidden">
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-6xl font-bold font-(family-name:--font-bebas-neue) text-white mb-6 uppercase tracking-tight">
-            How it <span className="text-zinc-500">Works</span>
-          </h2>
-          <div className="w-24 h-1 bg-linear-to-r from-red-500 to-blue-500 mx-auto rounded-full" />
+    <section className="pt-8 pb-16 px-4 relative overflow-hidden bg-black border-none">
+      {/* Background Elements - matching homepage */}
+      <div className="absolute top-0 right-0 w-1/3 h-full bg-linear-to-l from-red-500/5 to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-1/3 h-full bg-linear-to-r from-blue-500/5 to-transparent pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        <div className="text-center mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-4 px-6 pt-3 pb-2 md:px-8 md:pt-4 md:pb-3 rounded-full bg-yellow-500/10 border border-yellow-500/20 mb-8 group hover:bg-yellow-500/20 transition-colors"
+          >
+            <h2 className="text-3xl md:text-6xl font-bold font-(family-name:--font-bebas-neue) text-white leading-none tracking-tight uppercase">
+              How it <span className="text-yellow-400">Works</span>
+            </h2>
+          </motion.div>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto text-pretty"
+          >
+            From the stage to the studio in four simple steps.
+          </motion.p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {STEPS.map((step, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="relative group"
+              transition={{ delay: 0.1 * index }}
+              className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors group flex flex-col items-center text-center md:items-start md:text-left relative overflow-hidden"
             >
+              {/* Grid Background */}
+              <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-10 pointer-events-none" />
+
               {/* Step Number */}
-              <div className="absolute -top-6 -left-4 text-8xl font-black text-white/5 select-none font-(family-name:--font-bebas-neue)">
+              <div className="absolute -top-2 -right-2 text-7xl font-black text-white/5 select-none font-(family-name:--font-bebas-neue)">
                 0{index + 1}
               </div>
 
-              <div className="relative z-10 space-y-4">
-                <div className={cn(
-                  "w-14 h-14 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 duration-500",
-                  step.color === "red" && "bg-red-500/10 text-red-500 border border-red-500/20",
-                  step.color === "blue" && "bg-blue-500/10 text-blue-500 border border-blue-500/20",
-                  step.color === "yellow" && "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20",
-                  step.color === "purple" && "bg-purple-500/10 text-purple-500 border border-purple-500/20",
-                )}>
-                  <step.icon className="w-7 h-7" />
+              <div className="flex flex-col md:flex-row items-center gap-4 mb-4 relative z-10">
+                <div
+                  className={`p-2.5 rounded-xl ${step.bg} ${step.color} shrink-0 group-hover:scale-110 transition-transform`}
+                >
+                  <step.icon className="w-6 h-6" />
                 </div>
-
-                <h3 className="text-2xl font-bold text-white font-(family-name:--font-bebas-neue) tracking-wide uppercase">
+                <h3 className="text-xl font-bold text-white font-(family-name:--font-bebas-neue) tracking-wide uppercase">
                   {step.title}
                 </h3>
-                
-                <p className="text-zinc-400 leading-relaxed text-pretty">
-                  {step.description}
-                </p>
               </div>
-
-              {/* Connector for desktop */}
-              {index < STEPS.length - 1 && (
-                <div className="hidden lg:block absolute top-10 -right-6 w-12 h-px bg-linear-to-r from-zinc-800 to-transparent z-0" />
-              )}
+              <p className="text-gray-400 leading-relaxed text-pretty relative z-10">
+                {step.description}
+              </p>
             </motion.div>
           ))}
         </div>
@@ -88,4 +107,3 @@ export function HowItWorks() {
     </section>
   );
 }
-

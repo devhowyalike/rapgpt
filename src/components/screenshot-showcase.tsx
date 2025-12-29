@@ -109,7 +109,7 @@ function OverlayCard({
   );
 }
 
-const FEATURES = [
+const CORE_FEATURES = [
   {
     key: "mcs" as FeatureKey,
     icon: <Mic2 className="w-6 h-6" />,
@@ -131,6 +131,9 @@ const FEATURES = [
     description: "Select a style and stream it.",
     color: "green" as ColorKey,
   },
+];
+
+const COMMUNITY_FEATURES = [
   {
     key: "watch" as FeatureKey,
     icon: <Radio className="w-6 h-6" />,
@@ -217,9 +220,9 @@ export function ScreenshotShowcase({
       </div>
 
       <div className="max-w-7xl mx-auto px-4 relative z-10">
-        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 lg:gap-16 items-start">
-          {/* Top/Right Column: Interactive Screenshot (Shown first on mobile) */}
-          <div className="w-full lg:col-span-7 order-1 lg:order-2 lg:sticky lg:top-32">
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 lg:gap-8 items-start">
+          {/* Center Column: Interactive Screenshot (Shown first on mobile) */}
+          <div className="w-full lg:col-span-6 order-1 lg:order-2 lg:sticky lg:top-32">
             <motion.div
               style={{
                 perspective: "1200px",
@@ -382,7 +385,7 @@ export function ScreenshotShowcase({
                 {/* Reflection / Bottom Glow */}
                 <div
                   className={cn(
-                    "absolute -bottom-8 md:-bottom-12 inset-x-8 md:inset-x-12 h-16 md:h-24 blur-[40px] md:blur-[60px] rounded-full opacity-50 transition-colors duration-500",
+                    "absolute -bottom-8 md:-bottom-12 inset-x-8 md:inset-x-12 h-16 md:h-24 blur-2xl md:blur-[60px] rounded-full opacity-50 transition-colors duration-500",
                     getGlowColor()
                   )}
                 />
@@ -481,82 +484,156 @@ export function ScreenshotShowcase({
             </motion.div>
           </div>
 
-          {/* Bottom/Left Column: Content (Shown second on mobile) */}
-          <div className="w-full lg:col-span-5 space-y-6 flex flex-col items-center lg:items-start text-center lg:text-left order-2 lg:order-1">
+          {/* Left Column: Core Features */}
+          <div className="w-full lg:col-span-3 order-2 lg:order-1">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="space-y-6 flex flex-col items-center lg:items-start w-full"
+              className="space-y-3 md:space-y-4 border-t border-white/5 pt-6 lg:border-t-0 lg:pt-0"
             >
-              {/* Features List */}
-              <div className="space-y-3 md:space-y-4 flex flex-col items-center lg:items-start border-t border-white/5 pt-6 w-full max-w-md relative">
-                <div className="flex justify-center lg:justify-start items-center w-full mb-2">
-                  <span className="text-[10px] md:text-xs text-zinc-500 uppercase tracking-[0.2em] font-bold">
-                    Core Features
-                  </span>
-                </div>
+              <div className="flex justify-center lg:justify-start items-center w-full mb-2">
+                <span className="text-[10px] md:text-xs text-zinc-500 uppercase tracking-[0.2em] font-bold">
+                  Core Features
+                </span>
+              </div>
+              <div className="grid grid-cols-1 gap-2 w-full">
+                {CORE_FEATURES.map((feature) => {
+                  const isActive = activeFeature === feature.key;
+                  const colors = COLOR_CLASSES[feature.color];
 
-                <div className="grid grid-cols-1 gap-2 w-full">
-                  {FEATURES.map((feature) => {
-                    const isActive = activeFeature === feature.key;
-                    const colors = COLOR_CLASSES[feature.color];
-
-                    return (
-                      <motion.button
-                        key={feature.key}
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        onMouseEnter={() => {
-                          if (window.innerWidth >= 1024) {
-                            setActiveFeature(feature.key);
-                          }
-                        }}
-                        onClick={() => {
-                          setActiveFeature(
-                            activeFeature === feature.key ? null : feature.key
-                          );
-                        }}
+                  return (
+                    <motion.button
+                      key={feature.key}
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      onMouseEnter={() => {
+                        if (window.innerWidth >= 1024) {
+                          setActiveFeature(feature.key);
+                        }
+                      }}
+                      onClick={() => {
+                        setActiveFeature(
+                          activeFeature === feature.key ? null : feature.key
+                        );
+                      }}
+                      className={cn(
+                        "flex items-start gap-3 w-full cursor-pointer transition-all duration-300 p-2 md:p-3 rounded-xl",
+                        isActive
+                          ? "bg-white/5 ring-1 ring-white/10"
+                          : "hover:bg-white/5"
+                      )}
+                    >
+                      <div
                         className={cn(
-                          "flex items-center gap-3 md:gap-4 w-full cursor-pointer transition-all duration-300 p-2 md:p-3 rounded-xl",
-                          isActive ? "bg-white/5 ring-1 ring-white/10" : "hover:bg-white/5"
+                          "flex items-center justify-center w-11 h-11 rounded-lg shrink-0 transition-all duration-300",
+                          colors.icon,
+                          isActive
+                            ? `${colors.activeBg} ${colors.activeBorder} border`
+                            : "bg-white/5 border border-white/10"
                         )}
                       >
-                        <div
+                        {feature.icon}
+                      </div>
+                      <div className="text-left">
+                        <h3
                           className={cn(
-                            "inline-flex p-2 md:p-2.5 rounded-lg shrink-0 transition-all duration-300",
-                            isActive
-                              ? `${colors.activeBg} ${colors.activeBorder} border`
-                              : "bg-white/5 border border-white/10"
+                            "text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue) tracking-wide uppercase leading-tight transition-colors duration-300",
+                            isActive ? "text-white" : "text-zinc-300"
                           )}
                         >
-                          <span className={cn("w-5 h-5 md:w-6 md:h-6", colors.icon)}>
-                            {feature.icon}
-                          </span>
-                        </div>
-                        <div className="text-left">
-                          <h3
-                            className={cn(
-                              "text-lg md:text-xl font-bold font-(family-name:--font-bebas-neue) tracking-wide uppercase leading-tight transition-colors duration-300",
-                              isActive ? "text-white" : "text-zinc-300"
-                            )}
-                          >
-                            {feature.title}
-                          </h3>
-                          <p
-                            className={cn(
-                              "text-xs md:text-base leading-relaxed transition-colors duration-300 line-clamp-1 md:line-clamp-none",
-                              isActive ? "text-zinc-300" : "text-zinc-500"
-                            )}
-                          >
-                            {feature.description}
-                          </p>
-                        </div>
-                      </motion.button>
-                    );
-                  })}
-                </div>
+                          {feature.title}
+                        </h3>
+                        <p
+                          className={cn(
+                            "text-sm leading-relaxed transition-colors duration-300",
+                            isActive ? "text-zinc-300" : "text-zinc-500"
+                          )}
+                        >
+                          {feature.description}
+                        </p>
+                      </div>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Right Column: Community Features */}
+          <div className="w-full lg:col-span-3 order-3 lg:order-3">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="space-y-3 md:space-y-4 border-t border-white/5 pt-6 lg:border-t-0 lg:pt-0"
+            >
+              <div className="flex justify-center lg:justify-start items-center w-full mb-2">
+                <span className="text-[10px] md:text-xs text-zinc-500 uppercase tracking-[0.2em] font-bold">
+                  Community Features
+                </span>
+              </div>
+              <div className="grid grid-cols-1 gap-2 w-full">
+                {COMMUNITY_FEATURES.map((feature) => {
+                  const isActive = activeFeature === feature.key;
+                  const colors = COLOR_CLASSES[feature.color];
+
+                  return (
+                    <motion.button
+                      key={feature.key}
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      onMouseEnter={() => {
+                        if (window.innerWidth >= 1024) {
+                          setActiveFeature(feature.key);
+                        }
+                      }}
+                      onClick={() => {
+                        setActiveFeature(
+                          activeFeature === feature.key ? null : feature.key
+                        );
+                      }}
+                      className={cn(
+                        "flex items-start gap-3 w-full cursor-pointer transition-all duration-300 p-2 md:p-3 rounded-xl",
+                        isActive
+                          ? "bg-white/5 ring-1 ring-white/10"
+                          : "hover:bg-white/5"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "flex items-center justify-center w-11 h-11 rounded-lg shrink-0 transition-all duration-300",
+                          colors.icon,
+                          isActive
+                            ? `${colors.activeBg} ${colors.activeBorder} border`
+                            : "bg-white/5 border border-white/10"
+                        )}
+                      >
+                        {feature.icon}
+                      </div>
+                      <div className="text-left">
+                        <h3
+                          className={cn(
+                            "text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue) tracking-wide uppercase leading-tight transition-colors duration-300",
+                            isActive ? "text-white" : "text-zinc-300"
+                          )}
+                        >
+                          {feature.title}
+                        </h3>
+                        <p
+                          className={cn(
+                            "text-sm leading-relaxed transition-colors duration-300",
+                            isActive ? "text-zinc-300" : "text-zinc-500"
+                          )}
+                        >
+                          {feature.description}
+                        </p>
+                      </div>
+                    </motion.button>
+                  );
+                })}
               </div>
             </motion.div>
           </div>
