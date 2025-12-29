@@ -131,6 +131,7 @@ export function MobileMenu({
                 label="Community"
                 isActive={isActiveLink("/community")}
               />
+              <DropdownMenuSeparator />
               <MenuLink
                 href="/learn-more"
                 icon={<Info className="w-4 h-4" />}

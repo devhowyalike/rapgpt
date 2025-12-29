@@ -11,6 +11,12 @@ import { decrypt } from "@/lib/auth/encryption";
 import { db } from "@/lib/db/client";
 import { users } from "@/lib/db/schema";
 
+export const metadata = {
+  title: "Community | RapGPT",
+  description:
+    "See what e-beef others have been cooking. Browse public profiles and battles from the RapGPT community.",
+};
+
 // Revalidate every 5 minutes
 export const revalidate = 300;
 export const dynamic = "force-dynamic";

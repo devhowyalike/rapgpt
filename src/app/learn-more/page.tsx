@@ -6,6 +6,12 @@ import { ScreenshotShowcase } from "@/components/screenshot-showcase";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { APP_TITLE } from "@/lib/constants";
 
+export const metadata = {
+  title: "Learn More | RapGPT",
+  description:
+    "Learn how RapGPT works. Create AI rap battles with unique personas, real-time lyrics, and audio.",
+};
+
 export default async function LearnMorePage() {
   const { sessionClaims } = await auth();
   const isAuthenticated = !!sessionClaims;
