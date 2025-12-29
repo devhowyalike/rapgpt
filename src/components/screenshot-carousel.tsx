@@ -93,47 +93,42 @@ const FEATURES = [
       "Select from a roster of unique AI personas, each with their own distinct flow, style, and personality.",
     color: "red" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-player-select.webp",
-    category: "Core",
   },
   {
     key: "stage",
     icon: <Map className="w-5 h-5 md:w-6 md:h-6" />,
     title: "Pick Your Stage",
     description:
-      "Choose the perfect backdrop for your battle, from gritty urban streets to futuristic digital arenas.",
+      "Choose the perfect backdrop for your battle, with locations from around the world.",
     color: "blue" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-select-stage.webp",
-    category: "Core",
   },
   {
     key: "rounds",
     icon: <Clock className="w-5 h-5 md:w-6 md:h-6" />,
-    title: "3 Rounds of Bars",
+    title: "3 Rounds, 8 Bars",
     description:
       "Each battle features 3 rounds with 8 bars per verse. Watch as MCs trade shots and react to each other.",
     color: "yellow" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-rounds.webp",
-    category: "Core",
   },
   {
     key: "watch",
     icon: <Radio className="w-5 h-5 md:w-6 md:h-6" />,
-    title: "Watch Live",
+    title: "Go Live",
     description:
-      "Experience verses appearing word-by-word as the battle unfolds in real-time streaming action.",
+      "Stream your match live, or simply spectate as a fan, as verses appear word by word while the battle evolves in real time.",
     color: "red" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-battle-stage.webp",
-    category: "Community",
   },
   {
     key: "voting",
     icon: <Zap className="w-5 h-5 md:w-6 md:h-6" />,
-    title: "Interactive Voting",
+    title: "Voting (Live Only)",
     description:
       "Rock the vote after each round to impact the battle's outcome. Your voice shapes the competition.",
     color: "yellow" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-voting.webp",
-    category: "Community",
   },
   {
     key: "scoring",
@@ -143,7 +138,6 @@ const FEATURES = [
       "See the final verdict as the scores are tallied. Detailed stats show who dominated the mic.",
     color: "green" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-scoring.webp",
-    category: "Core",
   },
   {
     key: "chat",
@@ -153,7 +147,6 @@ const FEATURES = [
       "Join the crowd in the chatroom as the beef unfolds. React, comment, and hype your favorite MC.",
     color: "blue" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-comments.webp",
-    category: "Community",
   },
   {
     key: "song",
@@ -163,17 +156,15 @@ const FEATURES = [
       "Transform any battle into a full track with AI-generated vocals. Choose a beat style, and share your creation.",
     color: "green" as ColorKey,
     screenshot: "/marketing/rap-gpt-screenshot.webp",
-    category: "Core",
   },
   {
     key: "admin",
     icon: <Trophy className="w-5 h-5 md:w-6 md:h-6" />,
     title: "Host Controls",
     description:
-      "As a host, you're in command. Start, pause, and control the battle flow with the admin panel.",
+      "As the host of a live battle, you're in control. Start, pause, and manage the battle flow through the admin panel.",
     color: "purple" as ColorKey,
     screenshot: "/marketing/rap-gpt-screenshot.webp",
-    category: "Community",
   },
 ];
 
@@ -326,16 +317,6 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                             <h3 className="text-lg md:text-xl font-bold text-white leading-tight">
                               {feature.title}
                             </h3>
-                            <span
-                              className={cn(
-                                "hidden md:inline-flex text-[10px] md:text-xs px-1.5 py-0.5 rounded-full uppercase tracking-wider font-bold border",
-                                featureColors.bg,
-                                featureColors.border,
-                                featureColors.text
-                              )}
-                            >
-                              {feature.category}
-                            </span>
                           </div>
                           <p className="text-sm md:text-base text-zinc-400 mt-1 text-pretty">
                             {feature.description}
