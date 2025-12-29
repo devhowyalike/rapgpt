@@ -7,6 +7,7 @@ import {
   Home,
   Info,
   Menu,
+  Mic,
   Radio,
   Settings,
   Shield,
@@ -135,6 +136,12 @@ export function MobileMenu({
                 icon={<Info className="w-4 h-4" />}
                 label="Learn More"
                 isActive={isActiveLink("/learn-more")}
+              />
+              <MenuLink
+                href="/roster"
+                icon={<Mic className="w-4 h-4" />}
+                label="The MCs"
+                isActive={isActiveLink("/roster")}
               />
 
               {/* Admin Section */}

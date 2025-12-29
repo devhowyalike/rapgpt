@@ -2,13 +2,21 @@
 
 import { motion } from "framer-motion";
 import { Mic2, Music2, Play, Vote } from "lucide-react";
+import Link from "next/link";
 
 const STEPS = [
   {
     icon: Mic2,
     title: "Pick Your MCs",
-    description:
-      "Select two AI MCs, each with their own unique style, voice, and lyrical approach.",
+    description: (
+      <>
+        Select two AI MCs from a{" "}
+        <Link href="/roster" className="underline">
+          growing roster
+        </Link>
+        , each with their own unique style and voice.
+      </>
+    ),
     color: "text-red-400",
     bg: "bg-red-500/10",
   },
@@ -16,7 +24,7 @@ const STEPS = [
     icon: Play,
     title: "Set the Stage",
     description:
-      "Choose an iconic location to battle in. Watch the bars fly in real-time.",
+      "Choose an iconic location to battle in. Watch the bars stream in real-time.",
     color: "text-blue-400",
     bg: "bg-blue-500/10",
   },

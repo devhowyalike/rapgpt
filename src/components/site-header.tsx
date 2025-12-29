@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth, useUser } from "@clerk/nextjs";
-import { Info, User, Users } from "lucide-react";
+import { Info, Mic, User, Users } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminControls } from "@/components/header/AdminControls";
@@ -178,6 +178,12 @@ export function SiteHeader({ activeBattleState }: SiteHeaderProps) {
             icon={<Info className="w-4 h-4" />}
             label="Learn More"
             isActive={isActiveLink("/learn-more")}
+          />
+          <DesktopNavLink
+            href="/roster"
+            icon={<Mic className="w-4 h-4" />}
+            label="The MCs"
+            isActive={isActiveLink("/roster")}
           />
         </div>
 

@@ -79,8 +79,8 @@ export function ScreenshotShowcaseStatic({
 
                 <div className="space-y-4 max-w-lg">
                   <p className="text-xl text-zinc-400 leading-relaxed text-pretty">
-                    Create dream matchups as MCs battle in real time, then turn
-                    it into a song with AI-generated beats and vocals.
+                    Pick your MCs, watch them battle, and turn the beef into a
+                    song with AI-generated beats and vocals.
                   </p>
                 </div>
               </div>
@@ -147,7 +147,9 @@ export function ScreenshotShowcaseStatic({
               return (
                 <div
                   key={feature.title}
-                  className={`flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-4 max-w-sm p-3 -m-3 rounded-2xl ${index === 2 ? "col-span-2 justify-self-center" : ""}`}
+                  className={`flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-4 max-w-sm p-3 -m-3 rounded-2xl ${
+                    index === 2 ? "col-span-2 justify-self-center" : ""
+                  }`}
                 >
                   <div className="inline-flex p-3 rounded-xl shrink-0 bg-white/5 border border-white/10">
                     <span className={iconColor}>{feature.icon}</span>
