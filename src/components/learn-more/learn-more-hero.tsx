@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Lightbulb, Mic2, Music, Zap } from "lucide-react";
+import { PageTitle } from "@/components/page-title";
 
 export function LearnMoreHero() {
   return (
@@ -34,9 +35,9 @@ export function LearnMoreHero() {
           transition={{ duration: 0.8, delay: 0.1 }}
           className="mb-6"
         >
-          <h1 className="text-5xl md:text-8xl font-bold font-(family-name:--font-bebas-neue) text-white tracking-tight leading-[0.9] uppercase">
+          <PageTitle>
             Elevating the <span className="text-transparent bg-clip-text bg-linear-to-r from-white via-zinc-400 to-zinc-600">Art of Beef</span>
-          </h1>
+          </PageTitle>
         </motion.div>
 
         <motion.p

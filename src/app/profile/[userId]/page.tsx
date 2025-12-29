@@ -10,6 +10,7 @@ import { ProfileBattlesFilter } from "@/components/profile-battles-filter";
 import { ProfileHeaderMenu } from "@/components/profile-header-menu";
 import { SiteHeader } from "@/components/site-header";
 import { PageHero } from "@/components/page-hero";
+import { PageTitle } from "@/components/page-title";
 import { decrypt } from "@/lib/auth/encryption";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { db } from "@/lib/db/client";
@@ -100,7 +101,7 @@ export default async function ProfilePage({
       <SiteHeader />
 
       {/* Hero Section - Matches Homepage Design */}
-      <PageHero 
+      <PageHero
         className="pt-24 pb-0 md:pt-32 md:pb-0"
         containerClassName="flex flex-col items-center"
       >
@@ -129,9 +130,12 @@ export default async function ProfilePage({
 
         {/* Name & Menu */}
         <div className="flex items-center gap-4 justify-center mb-3 animate-slide-up [animation-delay:100ms]">
-          <h1 className="font-bebas text-3xl md:text-5xl text-white tracking-wide wrap-break-word max-w-[80vw] text-center">
+          <PageTitle
+            size="small"
+            className="wrap-break-word max-w-[80vw] text-center"
+          >
             {displayName}
-          </h1>
+          </PageTitle>
           {isOwnProfile && (
             <div className="shrink-0">
               <ProfileHeaderMenu
