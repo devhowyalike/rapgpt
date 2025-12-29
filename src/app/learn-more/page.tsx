@@ -4,7 +4,7 @@ import { LearnMoreHero } from "@/components/learn-more/learn-more-hero";
 import { HowItWorks } from "@/components/learn-more/how-it-works";
 import { ScreenshotShowcase } from "@/components/screenshot-showcase";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
-import { APP_TITLE, MADE_BY, YEAR } from "@/lib/constants";
+import { APP_TITLE } from "@/lib/constants";
 
 export default async function LearnMorePage() {
   const { sessionClaims } = await auth();
@@ -43,13 +43,6 @@ export default async function LearnMorePage() {
               isAuthenticated={isAuthenticated}
               title="Start Your First Battle"
             />
-          </div>
-
-          {/* Footer tagline - matching homepage */}
-          <div className="mt-12">
-            <p className="text-gray-500 text-lg">
-              &copy;{YEAR}, {MADE_BY}
-            </p>
           </div>
         </div>
       </div>

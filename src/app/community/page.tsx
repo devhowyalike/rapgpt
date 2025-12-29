@@ -59,7 +59,7 @@ export default async function CommunityPage({
   const hasNextPage = pageNumber < totalPages;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col flex-1">
       <SiteHeader />
 
       {/* Hero Section */}
@@ -75,11 +75,7 @@ export default async function CommunityPage({
       </PageHero>
 
       {/* Main Content */}
-      <div
-        className={`bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center pt-2 pb-12 px-4 md:pt-4 md:pb-16 md:px-6 ${
-          isAuthenticated ? "flex-1" : "min-h-[50vh]"
-        }`}
-      >
+      <div className="bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center pt-2 pb-12 px-4 md:pt-4 md:pb-16 md:px-6 flex-1">
         <div className="max-w-7xl mx-auto w-full">
           {allUsers.length === 0 ? (
             <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-8 text-center max-w-md mx-auto mt-8">
@@ -134,7 +130,7 @@ export default async function CommunityPage({
           )}
 
           {!isAuthenticated && (
-            <div className="mt-16 max-w-4xl mx-auto flex-1">
+            <div className="mt-16 max-w-4xl mx-auto">
               <GuestProfileCallout />
             </div>
           )}

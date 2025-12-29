@@ -181,7 +181,7 @@ export default async function ProfilePage({
 
       {/* Battles Section */}
       <div
-        className={`bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center p-6 pt-6 pb-12 ${
+        className={`bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center p-6 pt-6 pb-24 ${
           !clerkUserId ? "min-h-[30vh]" : "flex-1"
         }`}
       >

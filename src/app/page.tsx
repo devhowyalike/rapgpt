@@ -9,7 +9,6 @@ import { ScreenshotShowcaseStatic } from "@/components/screenshot-showcase-stati
 import { SiteHeader } from "@/components/site-header";
 import { getUserByClerkId } from "@/lib/auth/sync-user";
 import { getLiveBattles } from "@/lib/battle-storage";
-import { MADE_BY, YEAR } from "@/lib/constants";
 
 // Revalidate every 10 seconds to show live battles
 export const revalidate = 10;
@@ -96,12 +95,6 @@ export default async function Home() {
             </div>
           )}
 
-          {/* Tagline at bottom */}
-          <div className="mt-12">
-            <p className="text-gray-500 text-lg">
-              &copy;{YEAR}, {MADE_BY}
-            </p>
-          </div>
         </div>
       </div>
     </>
