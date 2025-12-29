@@ -87,6 +87,17 @@ const FEATURE_COLORS: Record<NonNullable<FeatureKey>, ColorKey> = {
   admin: "purple",
 };
 
+// Map feature keys to custom screenshot images
+const FEATURE_SCREENSHOTS: Partial<Record<NonNullable<FeatureKey>, string>> = {
+  mcs: "/marketing/battle-system/rapgpt-player-select.webp",
+  rounds: "/marketing/battle-system/rapgpt-rounds.webp",
+  voting: "/marketing/battle-system/rapgpt-voting.webp",
+  chat: "/marketing/battle-system/rapgpt-comments.webp",
+};
+
+// Default screenshot
+const DEFAULT_SCREENSHOT = "/marketing/rap-gpt-screenshot.webp";
+
 // Reusable overlay card styling
 function OverlayCard({
   color,
@@ -203,6 +214,13 @@ export function ScreenshotShowcase({
     return COLOR_CLASSES[FEATURE_COLORS[activeFeature]].glow;
   };
 
+  const getCurrentScreenshot = () => {
+    if (activeFeature && FEATURE_SCREENSHOTS[activeFeature]) {
+      return FEATURE_SCREENSHOTS[activeFeature];
+    }
+    return DEFAULT_SCREENSHOT;
+  };
+
   return (
     <section
       ref={containerRef}
@@ -249,23 +267,39 @@ export function ScreenshotShowcase({
                     </div>
                   </div>
 
-                  {/* Screenshot Content */}
-                  <div className="relative w-full">
-                    <Image
-                      src="/marketing/rap-gpt-screenshot.webp"
-                      alt={`${APP_TITLE} Platform Screenshot`}
-                      width={1200}
-                      height={800}
-                      className="w-full h-auto"
-                      priority
-                    />
+                  {/* Screenshot Content - fixed aspect ratio to prevent layout shift */}
+                  <div className="relative w-full aspect-3/2 overflow-hidden bg-zinc-950">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={getCurrentScreenshot()}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute inset-0"
+                      >
+                        <Image
+                          src={getCurrentScreenshot()}
+                          alt={`${APP_TITLE} Platform Screenshot`}
+                          fill
+                          className={
+                            activeFeature === "voting" ||
+                            activeFeature === "chat"
+                              ? "object-cover object-[calc(50%-5px)_top] w-[55%]! left-[22.5%]! right-auto!"
+                              : activeFeature === "rounds"
+                              ? "object-cover object-[calc(50%-5px)_top]"
+                              : "object-contain"
+                          }
+                          priority
+                        />
+                      </motion.div>
+                    </AnimatePresence>
 
                     {/* Internal UI Overlays */}
                     <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
 
-                    {/* Interactive Overlays */}
+                    {/* Interactive Overlays - Disabled for now
                     <AnimatePresence>
-                      {/* MC Highlight Overlay */}
                       {activeFeature === "mcs" && (
                         <motion.div
                           key="mcs"
@@ -290,12 +324,10 @@ export function ScreenshotShowcase({
                               </div>
                             </div>
                           </OverlayCard>
-                          {/* Connecting line */}
                           <div className="absolute top-1/2 -right-4 md:-right-8 w-4 md:w-8 h-px bg-linear-to-r from-red-500/50 to-transparent" />
                         </motion.div>
                       )}
 
-                      {/* Rounds Highlight Overlay */}
                       {activeFeature === "rounds" && (
                         <motion.div
                           key="rounds"
@@ -335,7 +367,6 @@ export function ScreenshotShowcase({
                         </motion.div>
                       )}
 
-                      {/* Song/Music Highlight Overlay */}
                       {activeFeature === "song" && (
                         <motion.div
                           key="song"
@@ -359,7 +390,6 @@ export function ScreenshotShowcase({
                                 </div>
                               </div>
                             </div>
-                            {/* Fake waveform */}
                             <div className="mt-1 md:mt-2 flex items-end gap-0.5 h-3 md:h-4">
                               {WAVEFORM_HEIGHTS.map((h, i) => (
                                 <motion.div
@@ -380,7 +410,6 @@ export function ScreenshotShowcase({
                         </motion.div>
                       )}
 
-                      {/* Admin Control Panel Overlay */}
                       {activeFeature === "admin" && (
                         <motion.div
                           key="admin"
@@ -404,7 +433,6 @@ export function ScreenshotShowcase({
                                 </div>
                               </div>
                             </div>
-                            {/* Control buttons */}
                             <div className="flex flex-col gap-1 md:gap-1.5">
                               {[
                                 { label: "Start Battle", active: false },
@@ -428,11 +456,11 @@ export function ScreenshotShowcase({
                               ))}
                             </div>
                           </OverlayCard>
-                          {/* Connecting line */}
                           <div className="absolute top-1/2 -left-4 md:-left-8 w-4 md:w-8 h-px bg-linear-to-l from-purple-500/50 to-transparent" />
                         </motion.div>
                       )}
                     </AnimatePresence>
+                    */}
                   </div>
                 </div>
 
@@ -445,7 +473,7 @@ export function ScreenshotShowcase({
                 />
               </div>
 
-              {/* Comments Panel Preview - appears on chat */}
+              {/* Comments Panel Preview - Disabled for now
               <AnimatePresence>
                 {activeFeature === "chat" && (
                   <motion.div
@@ -478,8 +506,9 @@ export function ScreenshotShowcase({
                   </motion.div>
                 )}
               </AnimatePresence>
+              */}
 
-              {/* Vote Panel - appears on voting */}
+              {/* Vote Panel - Disabled for now
               <AnimatePresence>
                 {activeFeature === "voting" && (
                   <motion.div
@@ -514,8 +543,9 @@ export function ScreenshotShowcase({
                   </motion.div>
                 )}
               </AnimatePresence>
+              */}
 
-              {/* Watch Feature Overlay - added for watch */}
+              {/* Watch Feature Overlay - Disabled for now
               <AnimatePresence>
                 {activeFeature === "watch" && (
                   <motion.div
@@ -535,6 +565,7 @@ export function ScreenshotShowcase({
                   </motion.div>
                 )}
               </AnimatePresence>
+              */}
             </motion.div>
           </div>
 
