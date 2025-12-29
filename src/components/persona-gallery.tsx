@@ -62,6 +62,9 @@ export function PersonaGallery({
                 index >= 5 ? "hidden sm:flex" : "flex"
               }`}
             >
+              {/* Grid Background */}
+              <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-10 pointer-events-none" />
+
               {/* Background Glow */}
               <div
                 className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none"

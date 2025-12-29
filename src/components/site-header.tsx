@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth, useUser } from "@clerk/nextjs";
-import { User, Users } from "lucide-react";
+import { Info, User, Users } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminControls } from "@/components/header/AdminControls";
@@ -142,7 +142,7 @@ export function SiteHeader({ activeBattleState }: SiteHeaderProps) {
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between h-full gap-4">
         {/* Left Section: Hamburger (mobile), Logo and Navigation Links */}
-        <div className="flex items-center gap-1 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           {/* Mobile Hamburger Menu - Left of Logo */}
           <MobileMenu
             isSignedIn={Boolean(isSignedIn)}
@@ -154,7 +154,9 @@ export function SiteHeader({ activeBattleState }: SiteHeaderProps) {
             pathname={pathname}
           />
 
-          <RapGPTLogo size="sm" />
+          <div className="ml-1 md:ml-0">
+            <RapGPTLogo size="sm" />
+          </div>
 
           {/* Desktop Navigation Links */}
           {dbUserId && (
@@ -170,6 +172,12 @@ export function SiteHeader({ activeBattleState }: SiteHeaderProps) {
             icon={<Users className="w-4 h-4" />}
             label="Community"
             isActive={isActiveLink("/community")}
+          />
+          <DesktopNavLink
+            href="/learn-more"
+            icon={<Info className="w-4 h-4" />}
+            label="Learn More"
+            isActive={isActiveLink("/learn-more")}
           />
         </div>
 

@@ -18,7 +18,21 @@ interface MakeSongHighlightProps {
 
 export function MakeSongHighlight({ isAuthenticated }: MakeSongHighlightProps) {
   return (
-    <section className="-mt-px -mb-px pt-2 pb-4 px-4 relative overflow-hidden bg-linear-to-b from-stage-dark via-purple-950/20 to-stage-dark border-none">
+    <section className="-mt-px -mb-px pt-2 pb-4 px-4 relative overflow-hidden bg-black border-none">
+      {/* Smooth gradient blend - fades from black at edges to purple in center */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `linear-gradient(to bottom, 
+            transparent 0%, 
+            rgba(88, 28, 135, 0.08) 15%, 
+            rgba(88, 28, 135, 0.12) 35%, 
+            rgba(88, 28, 135, 0.12) 65%, 
+            rgba(88, 28, 135, 0.08) 85%, 
+            transparent 100%
+          )`
+        }}
+      />
       {/* Background Glows */}
       <div className="absolute top-20 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
@@ -46,14 +60,14 @@ export function MakeSongHighlight({ isAuthenticated }: MakeSongHighlightProps) {
           initial={{ opacity: 0, x: -20 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
-          className="space-y-8"
+          className="space-y-8 flex flex-col items-center lg:items-start text-center lg:text-left"
         >
-          <div className="space-y-4">
-            <div className="flex items-start gap-4">
+          <div className="space-y-4 w-full">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
               <div className="p-3 rounded-lg bg-purple-500/10 text-purple-400">
                 <Mic2 className="w-6 h-6" />
               </div>
-              <div>
+              <div className="flex flex-col items-center sm:items-start">
                 <h3 className="text-lg font-semibold text-white mb-1">
                   From Stage to Studio
                 </h3>
@@ -62,11 +76,11 @@ export function MakeSongHighlight({ isAuthenticated }: MakeSongHighlightProps) {
                 </p>
               </div>
             </div>
-            <div className="flex items-start gap-4">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
               <div className="p-3 rounded-lg bg-blue-500/10 text-blue-400">
                 <Music2 className="w-6 h-6" />
               </div>
-              <div>
+              <div className="flex flex-col items-center sm:items-start">
                 <h3 className="text-lg font-semibold text-white mb-1">
                   Choose Your Style
                 </h3>
@@ -77,7 +91,7 @@ export function MakeSongHighlight({ isAuthenticated }: MakeSongHighlightProps) {
             </div>
           </div>
 
-          <div className="pt-4 flex justify-center">
+          <div className="pt-4 flex justify-center lg:justify-start w-full">
             <CreateBattleCTA
               isAuthenticated={isAuthenticated}
               title="Create a Track"
@@ -94,7 +108,10 @@ export function MakeSongHighlight({ isAuthenticated }: MakeSongHighlightProps) {
         >
           {/* Mock Player Card */}
           <div className="relative bg-gray-900/60 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500 overflow-hidden">
-            <div className="flex items-center gap-6 mb-6">
+            {/* Grid Background */}
+            <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-10 pointer-events-none" />
+
+            <div className="flex items-center gap-6 mb-6 relative z-10">
               <div className="relative w-24 h-24 rounded-lg overflow-hidden shadow-lg shrink-0 border border-white/10">
                 <Image
                   src="/marketing/album-cover-example.webp"
@@ -117,7 +134,7 @@ export function MakeSongHighlight({ isAuthenticated }: MakeSongHighlightProps) {
             </div>
 
             {/* Waveform Visualization Mock - using deterministic heights to avoid hydration mismatch */}
-            <div className="h-16 flex items-end justify-between gap-1 mb-6 px-2">
+            <div className="h-16 flex items-end justify-between gap-1 mb-6 px-2 relative z-10">
               {WAVEFORM_HEIGHTS.map((height, i) => (
                 <div
                   key={i}
@@ -131,7 +148,7 @@ export function MakeSongHighlight({ isAuthenticated }: MakeSongHighlightProps) {
             </div>
 
             {/* Controls */}
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center justify-between gap-4 relative z-10">
               <div className="flex items-center gap-4">
                 <button className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform">
                   <Play className="w-5 h-5 ml-1 fill-current" />
