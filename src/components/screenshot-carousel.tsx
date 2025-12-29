@@ -14,7 +14,7 @@ import {
   Map,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { APP_TITLE } from "@/lib/constants";
+import { APP_TITLE, APP_URL } from "@/lib/constants";
 import {
   Carousel,
   CarouselContent,
@@ -88,7 +88,7 @@ const FEATURES = [
   {
     key: "mcs",
     icon: <Mic2 className="w-5 h-5 md:w-6 md:h-6" />,
-    title: "Choose Your MC's",
+    title: "Choose Your MCs",
     description:
       "Select from a roster of unique AI personas, each with their own distinct flow, style, and personality.",
     color: "red" as ColorKey,
@@ -257,7 +257,7 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                         <div className="flex-1 mx-4">
                           <div className="max-w-xs mx-auto h-5 md:h-6 bg-zinc-800/50 rounded-md flex items-center justify-center">
                             <span className="text-[10px] md:text-xs text-zinc-500 truncate px-2">
-                              rapgpt.app/battle
+                              {APP_URL}
                             </span>
                           </div>
                         </div>
@@ -323,12 +323,12 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <h3 className="text-lg md:text-xl font-bold text-white leading-tight truncate">
+                            <h3 className="text-lg md:text-xl font-bold text-white leading-tight">
                               {feature.title}
                             </h3>
                             <span
                               className={cn(
-                                "text-[10px] md:text-xs px-1.5 py-0.5 rounded-full uppercase tracking-wider font-bold border",
+                                "hidden md:inline-flex text-[10px] md:text-xs px-1.5 py-0.5 rounded-full uppercase tracking-wider font-bold border",
                                 featureColors.bg,
                                 featureColors.border,
                                 featureColors.text
@@ -337,7 +337,7 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                               {feature.category}
                             </span>
                           </div>
-                          <p className="text-sm md:text-base text-zinc-400 mt-1 line-clamp-2 text-pretty">
+                          <p className="text-sm md:text-base text-zinc-400 mt-1 text-pretty">
                             {feature.description}
                           </p>
                         </div>

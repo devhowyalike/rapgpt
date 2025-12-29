@@ -8,6 +8,7 @@ export const TAGLINE_2 = "No Byting";
 export const TAGLINE_3 = "Don't Byte";
 export const MADE_BY = "Good At Coding";
 export const YEAR = new Date().getFullYear();
+export const APP_URL = "rapgpt.app";
 
 /* When true in environment variables, the app will show the Hoopla personas and allow the user to select any of them. */
 export const HOOPLA_MODE = process.env.NEXT_PUBLIC_HOOPLA_MODE === "true";
