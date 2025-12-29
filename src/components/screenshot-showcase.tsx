@@ -302,7 +302,7 @@ export function ScreenshotShowcase({
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
                           transition={{ duration: 0.3 }}
-                          className="absolute z-10 right-[5%] md:right-[20%] top-[10%]"
+                          className="absolute z-10 right-[5%] md:right-[24%] top-[15%]"
                         >
                           <OverlayCard color="yellow" className="p-1.5 md:p-3">
                             <div className="flex items-center gap-2 md:gap-3">
@@ -453,7 +453,7 @@ export function ScreenshotShowcase({
                     animate={{ opacity: 1, x: 0, scale: 1 }}
                     exit={{ opacity: 0, x: 20, scale: 0.9 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
-                    className="absolute -right-2 md:-right-6 top-1/4 z-20 flex flex-col gap-1.5 md:gap-2 bg-zinc-900/95 backdrop-blur-xl p-2 md:p-3 rounded-xl md:rounded-2xl shadow-2xl border border-blue-500/30 shadow-blue-500/10 max-w-[140px] md:max-w-none"
+                    className="absolute -right-2 md:-right-6 bottom-1/4 z-20 flex flex-col gap-1.5 md:gap-2 bg-zinc-900/95 backdrop-blur-xl p-2 md:p-3 rounded-xl md:rounded-2xl shadow-2xl border border-blue-500/30 shadow-blue-500/10 max-w-[140px] md:max-w-none"
                   >
                     <div className="flex items-center gap-1.5 md:gap-2 text-blue-400">
                       <MessageSquare className="w-3 h-3 md:w-4 md:h-4" />
@@ -487,7 +487,7 @@ export function ScreenshotShowcase({
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 20, scale: 0.9 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
-                    className="absolute -right-2 md:-right-6 bottom-1/4 z-20 flex flex-col gap-1.5 md:gap-2 bg-zinc-900/95 backdrop-blur-xl p-2 md:p-3 rounded-xl md:rounded-2xl shadow-2xl border border-yellow-500/30 shadow-yellow-500/10"
+                    className="absolute -right-2 md:-right-6 top-1/4 z-20 flex flex-col gap-1.5 md:gap-2 bg-zinc-900/95 backdrop-blur-xl p-2 md:p-3 rounded-xl md:rounded-2xl shadow-2xl border border-yellow-500/30 shadow-yellow-500/10"
                   >
                     <div className="flex items-center gap-1.5 md:gap-2 text-yellow-400">
                       <Vote className="w-3 h-3 md:w-4 md:h-4" />
