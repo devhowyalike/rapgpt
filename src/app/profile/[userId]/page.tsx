@@ -97,7 +97,7 @@ export default async function ProfilePage({
   const shareUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col flex-1">
       <SiteHeader />
 
       {/* Hero Section - Matches Homepage Design */}
