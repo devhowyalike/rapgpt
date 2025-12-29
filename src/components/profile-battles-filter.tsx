@@ -46,7 +46,7 @@ function CollapsibleBattleSection({
         )}
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           {battles.map((battle) => (
             <MyBattleCard
               key={battle.id}
@@ -54,6 +54,7 @@ function CollapsibleBattleSection({
               shareUrl={shareUrl}
               showManagement={isOwnProfile}
               userIsProfilePublic={userIsProfilePublic}
+              variant="horizontal"
             />
           ))}
         </div>
