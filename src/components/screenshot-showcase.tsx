@@ -439,13 +439,13 @@ export function ScreenshotShowcase({
                     <div className="flex items-center gap-1.5 md:gap-2 text-yellow-400">
                       <Vote className="w-3 h-3 md:w-4 md:h-4" />
                       <span className="text-[9px] md:text-[11px] uppercase tracking-widest font-bold">
-                        Community
+                        Voting
                       </span>
                     </div>
                     <div className="flex gap-2 md:gap-3">
                       {[
-                        { value: "847", label: "Votes" },
-                        { value: "12", label: "Remixes" },
+                        { value: "84", label: "Humpty Hump" },
+                        { value: "72", label: "Tyler, The Creator" },
                       ].map(({ value, label }) => (
                         <div key={label} className="text-center">
                           <div className="text-sm md:text-xl font-bold text-white leading-tight">
@@ -547,7 +547,7 @@ export function ScreenshotShowcase({
                         </h3>
                         <p
                           className={cn(
-                            "text-sm leading-relaxed transition-colors duration-300",
+                            "text-sm leading-relaxed transition-colors duration-300 text-pretty",
                             isActive ? "text-zinc-300" : "text-zinc-500"
                           )}
                         >

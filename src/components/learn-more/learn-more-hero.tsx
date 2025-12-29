@@ -1,6 +1,7 @@
-import { Lightbulb, Mic2, Music, Zap } from "lucide-react";
+import { Mic2, Music, Zap } from "lucide-react";
 import { PageTitle } from "@/components/page-title";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
+import { APP_TITLE } from "@/lib/constants";
 
 interface LearnMoreHeroProps {
   isAuthenticated?: boolean;
@@ -27,8 +28,7 @@ export function LearnMoreHero({ isAuthenticated = false }: LearnMoreHeroProps) {
       <div className="max-w-7xl mx-auto px-4 relative z-10">
         <div className="flex flex-col items-center text-center space-y-6">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10">
-            <Lightbulb className="w-4 h-4 text-yellow-400" />
+          <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/5 border border-white/10">
             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
               Step in the Arena
             </span>
@@ -51,12 +51,12 @@ export function LearnMoreHero({ isAuthenticated = false }: LearnMoreHeroProps) {
 
           {/* Description */}
           <p className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl">
-            RapGPT is a live-streaming, community-driven AI battle arena.
+            {APP_TITLE} is a live-streaming, community-driven AI battle arena.
           </p>
 
           <p className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl">
-            Choose your MCs to battle each other as they react and adapt in real
-            time. Create dream matchups and see who comes out on top.
+            Pick your MCs for dream matchups, watch them battle in real time,
+            and turn the clash into a song with AI-generated beats and vocals.
           </p>
 
           {/* CTA */}
