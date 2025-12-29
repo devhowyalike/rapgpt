@@ -130,8 +130,9 @@ export function LiveFeaturesHighlight({
                   </div>
                 </div>
               ))}
-              <div className="w-12 h-12 rounded-full border-2 border-black bg-red-500 flex items-center justify-center text-xs font-bold text-white z-10">
-                +84
+              <div className="w-12 h-12 rounded-full border-2 border-black bg-red-500 flex flex-col items-center justify-center text-xs font-bold text-white z-10 leading-tight">
+                <span>+</span>
+                <span>You</span>
               </div>
             </div>
             <div className="text-left relative z-10">

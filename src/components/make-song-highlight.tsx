@@ -18,7 +18,21 @@ interface MakeSongHighlightProps {
 
 export function MakeSongHighlight({ isAuthenticated }: MakeSongHighlightProps) {
   return (
-    <section className="-mt-px -mb-px pt-2 pb-4 px-4 relative overflow-hidden bg-linear-to-b from-stage-dark via-purple-950/20 to-stage-dark border-none">
+    <section className="-mt-px -mb-px pt-2 pb-4 px-4 relative overflow-hidden bg-black border-none">
+      {/* Smooth gradient blend - fades from black at edges to purple in center */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `linear-gradient(to bottom, 
+            transparent 0%, 
+            rgba(88, 28, 135, 0.08) 15%, 
+            rgba(88, 28, 135, 0.12) 35%, 
+            rgba(88, 28, 135, 0.12) 65%, 
+            rgba(88, 28, 135, 0.08) 85%, 
+            transparent 100%
+          )`
+        }}
+      />
       {/* Background Glows */}
       <div className="absolute top-20 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
