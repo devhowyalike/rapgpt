@@ -10,6 +10,12 @@ import { PageTitle } from "@/components/page-title";
 import { decrypt } from "@/lib/auth/encryption";
 import { db } from "@/lib/db/client";
 import { users } from "@/lib/db/schema";
+import { APP_TITLE } from "@/lib/constants";
+
+export const metadata = {
+  title: `Community | ${APP_TITLE}`,
+  description: `See what e-beef others have been cooking. Browse public profiles and battles from the ${APP_TITLE} community.`,
+};
 
 // Revalidate every 5 minutes
 export const revalidate = 300;

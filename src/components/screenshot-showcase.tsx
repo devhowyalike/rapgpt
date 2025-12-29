@@ -20,6 +20,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { APP_TITLE } from "@/lib/constants";
 
 type FeatureKey =
   | "mcs"
@@ -252,7 +253,7 @@ export function ScreenshotShowcase({
                   <div className="relative w-full">
                     <Image
                       src="/marketing/rap-gpt-screenshot.webp"
-                      alt="RapGPT Platform Screenshot"
+                      alt={`${APP_TITLE} Platform Screenshot`}
                       width={1200}
                       height={800}
                       className="w-full h-auto"

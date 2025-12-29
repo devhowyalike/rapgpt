@@ -15,6 +15,36 @@ import { decrypt } from "@/lib/auth/encryption";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { db } from "@/lib/db/client";
 import { type BattleDB, battles, users } from "@/lib/db/schema";
+import { APP_TITLE } from "@/lib/constants";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ userId: string }>;
+}) {
+  const { userId } = await params;
+  const profileUser = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+
+  if (!profileUser) {
+    return {
+      title: `Profile | ${APP_TITLE}`,
+      description: `View battle history and profile on ${APP_TITLE}.`,
+    };
+  }
+
+  const displayName = profileUser.encryptedDisplayName
+    ? decrypt(profileUser.encryptedDisplayName)
+    : profileUser.encryptedName
+      ? decrypt(profileUser.encryptedName)
+      : "Anonymous User";
+
+  return {
+    title: `${displayName}'s Profile | ${APP_TITLE}`,
+    description: `View ${displayName}'s battle history and profile on ${APP_TITLE}.`,
+  };
+}
 
 export const dynamic = "force-dynamic";
 
@@ -152,7 +182,7 @@ export default async function ProfilePage({
             Member since{" "}
             {new Date(profileUser.createdAt).toLocaleDateString("en-US", {
               year: "numeric",
-              month: "short",
+              month: "long",
             })}
           </p>
 

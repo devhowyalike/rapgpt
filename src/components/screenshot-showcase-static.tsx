@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Clock, Mic2, Music, Lightbulb } from "lucide-react";
 import { RapGPTLogo } from "./rapgpt-logo";
 import { CreateBattleCTA } from "./create-battle-cta";
-import { TAGLINE_2 } from "@/lib/constants";
+import { APP_TITLE, TAGLINE_2 } from "@/lib/constants";
 import Link from "next/link";
 
 interface ScreenshotShowcaseStaticProps {
@@ -79,8 +79,8 @@ export function ScreenshotShowcaseStatic({
 
                 <div className="space-y-4 max-w-lg">
                   <p className="text-xl text-zinc-400 leading-relaxed text-pretty">
-                    Create dream matchups as MCs battle in real time, then turn
-                    it into a song with AI-generated beats and vocals.
+                    Pick your MCs, watch them battle, and turn the beef into a
+                    song with AI-generated beats and vocals.
                   </p>
                 </div>
               </div>
@@ -106,7 +106,7 @@ export function ScreenshotShowcaseStatic({
                   <div className="relative w-full">
                     <Image
                       src="/marketing/rap-gpt-screenshot.webp"
-                      alt="RapGPT Platform Screenshot"
+                      alt={`${APP_TITLE} Platform Screenshot`}
                       width={1200}
                       height={800}
                       className="w-full h-auto transition-all duration-700 ease-in-out group-hover:scale-[1.02] group-hover:blur-[2px] group-hover:opacity-70 will-change-transform"
@@ -147,7 +147,9 @@ export function ScreenshotShowcaseStatic({
               return (
                 <div
                   key={feature.title}
-                  className={`flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-4 max-w-sm p-3 -m-3 rounded-2xl ${index === 2 ? "col-span-2 justify-self-center" : ""}`}
+                  className={`flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-4 max-w-sm p-3 -m-3 rounded-2xl ${
+                    index === 2 ? "col-span-2 justify-self-center" : ""
+                  }`}
                 >
                   <div className="inline-flex p-3 rounded-xl shrink-0 bg-white/5 border border-white/10">
                     <span className={iconColor}>{feature.icon}</span>

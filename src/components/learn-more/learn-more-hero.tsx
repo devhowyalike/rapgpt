@@ -27,13 +27,6 @@ export function LearnMoreHero({ isAuthenticated = false }: LearnMoreHeroProps) {
 
       <div className="max-w-7xl mx-auto px-4 relative z-10">
         <div className="flex flex-col items-center text-center space-y-6">
-          {/* Badge */}
-          <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/5 border border-white/10">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-              Step in the Arena
-            </span>
-          </div>
-
           {/* Title with decorative emoji */}
           <div className="relative w-fit mx-auto">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10">
@@ -51,11 +44,6 @@ export function LearnMoreHero({ isAuthenticated = false }: LearnMoreHeroProps) {
           {/* Description */}
           <p className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl text-pretty">
             {APP_TITLE} is a live-streaming, community-driven AI battle arena.
-          </p>
-
-          <p className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl text-pretty">
-            Pick your MCs, watch them battle, and turn the clash into a song
-            with AI-generated beats and vocals.
           </p>
 
           {/* CTA */}

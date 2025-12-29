@@ -11,10 +11,14 @@ import {
 
 interface PersonaGalleryProps {
   hideAltPersonas?: boolean;
+  hideHeader?: boolean;
+  showAllOnMobile?: boolean;
 }
 
 export function PersonaGallery({
   hideAltPersonas = true,
+  hideHeader = false,
+  showAllOnMobile = false,
 }: PersonaGalleryProps) {
   const personas = (
     hideAltPersonas ? getPrimaryClientPersonas() : getAllClientPersonas()
@@ -38,15 +42,17 @@ export function PersonaGallery({
           origin={clickOrigin}
         />
       )}
-      <div className="text-center mb-12">
-        <h2 className="text-4xl md:text-5xl font-bold font-(family-name:--font-bebas-neue) mb-4 text-white">
-          Choose Your MC
-        </h2>
-        <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-          Select your fighters, each with their own unique flow, style, and
-          personality.
-        </p>
-      </div>
+      {!hideHeader && (
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-bold font-(family-name:--font-bebas-neue) mb-4 text-white">
+            Choose Your MC
+          </h2>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Select your fighters, each with their own unique flow, style, and
+            personality.
+          </p>
+        </div>
+      )}
 
       <div className="relative">
         <div className="flex flex-wrap justify-center gap-6 sm:pb-0">
@@ -59,7 +65,7 @@ export function PersonaGallery({
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
               className={`group relative bg-gray-900/40 border border-gray-800 rounded-xl overflow-hidden hover:border-purple-500/50 transition-colors duration-300 flex-col w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(25%-18px)] ${
-                index >= 5 ? "hidden sm:flex" : "flex"
+                showAllOnMobile || index < 5 ? "flex" : "hidden sm:flex"
               }`}
             >
               {/* Grid Background */}
@@ -106,22 +112,26 @@ export function PersonaGallery({
           ))}
         </div>
 
-        {/* Mobile Fadeout Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 h-64 bg-linear-to-t from-black to-transparent sm:hidden pointer-events-none z-20" />
+        {/* Mobile Fadeout Overlay - only when not showing all */}
+        {!showAllOnMobile && (
+          <div className="absolute bottom-0 left-0 right-0 h-64 bg-linear-to-t from-black to-transparent sm:hidden pointer-events-none z-20" />
+        )}
       </div>
 
-      {/* "And More" Text - Positioned below cards */}
-      <motion.div
-        className="flex justify-center pt-8 z-30 relative"
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: personas.length * 0.1 }}
-        viewport={{ once: true }}
-      >
-        <span className="text-white/80 font-bold text-xl font-(family-name:--font-bebas-neue) tracking-wider text-uppercase">
-          And More!
-        </span>
-      </motion.div>
+      {/* "And More" Text - Only shown when hiding alt personas */}
+      {hideAltPersonas && (
+        <motion.div
+          className="flex justify-center pt-8 z-30 relative"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: personas.length * 0.1 }}
+          viewport={{ once: true }}
+        >
+          <span className="text-white/80 font-bold text-xl font-(family-name:--font-bebas-neue) tracking-wider text-uppercase">
+            And More!
+          </span>
+        </motion.div>
+      )}
     </section>
   );
 }
