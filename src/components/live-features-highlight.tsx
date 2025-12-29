@@ -45,7 +45,7 @@ export function LiveFeaturesHighlight({
   ];
 
   return (
-    <section className="pt-16 pb-16 px-4 relative overflow-hidden bg-black border-none">
+    <section className="pt-16 pb-10 px-4 relative overflow-hidden bg-black border-none">
       {/* Background Elements */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-linear-to-l from-red-500/5 to-transparent pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-1/3 h-full bg-linear-to-r from-blue-500/5 to-transparent pointer-events-none" />
