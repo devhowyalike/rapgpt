@@ -47,11 +47,11 @@ export default async function Home() {
         </div>
       )}
 
-      {/* Live Experience Highlight */}
-      <LiveFeaturesHighlight isAuthenticated={isAuthenticated} />
-
       {/* Make Song Highlight */}
       <MakeSongHighlight isAuthenticated={isAuthenticated} />
+
+      {/* Live Experience Highlight */}
+      <LiveFeaturesHighlight isAuthenticated={isAuthenticated} />
 
       <div className="bg-black flex flex-col items-center justify-center p-6 pt-6 pb-0">
         <div className="max-w-6xl mx-auto text-center space-y-4 w-full">

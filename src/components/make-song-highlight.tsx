@@ -20,7 +20,7 @@ export function MakeSongHighlight({ isAuthenticated }: MakeSongHighlightProps) {
   return (
     <section className="-mt-px -mb-px pt-2 pb-4 px-4 relative overflow-hidden bg-black border-none">
       {/* Smooth gradient blend - fades from black at edges to purple in center */}
-      <div 
+      <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background: `linear-gradient(to bottom, 
@@ -30,7 +30,7 @@ export function MakeSongHighlight({ isAuthenticated }: MakeSongHighlightProps) {
             rgba(88, 28, 135, 0.12) 65%, 
             rgba(88, 28, 135, 0.08) 85%, 
             transparent 100%
-          )`
+          )`,
         }}
       />
       {/* Background Glows */}
@@ -48,8 +48,8 @@ export function MakeSongHighlight({ isAuthenticated }: MakeSongHighlightProps) {
           <Wand2 className="w-4 h-4" />
           <span>AI Music Generation</span>
         </div>
-        <p className="text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto">
-          Don't let the bars fade away. Convert your best rap battles into
+        <p className="text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto text-pretty">
+          Don't let the bars fade away. Convert your best battles into
           full-length tracks with AI-generated beats, vocals, and cover art.
         </p>
       </div>

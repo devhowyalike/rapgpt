@@ -42,21 +42,20 @@ export function LearnMoreHero({ isAuthenticated = false }: LearnMoreHeroProps) {
               </span>
             </div>
             <PageTitle className="relative z-10">
-              Advancing the{" "}
-              <span className="text-transparent bg-clip-text bg-linear-to-r from-white via-gray-400 to-gray-600">
-                Art of Beef
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-white via-gray-400 to-gray-600 text-pretty block">
+                Advancing the Art of Beef
               </span>
             </PageTitle>
           </div>
 
           {/* Description */}
-          <p className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl">
+          <p className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl text-pretty">
             {APP_TITLE} is a live-streaming, community-driven AI battle arena.
           </p>
 
-          <p className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl">
-            Pick your MCs for dream matchups, watch them battle in real time,
-            and turn the clash into a song with AI-generated beats and vocals.
+          <p className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl text-pretty">
+            Pick your MCs, watch them battle, and turn the clash into a song
+            with AI-generated beats and vocals.
           </p>
 
           {/* CTA */}
@@ -66,7 +65,7 @@ export function LearnMoreHero({ isAuthenticated = false }: LearnMoreHeroProps) {
 
           {/* Features Row - matching homepage style */}
           <div className="pt-6 border-t border-white/5 w-full max-w-3xl">
-            <div className="flex flex-wrap justify-center gap-8 md:gap-16">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-16">
               {features.map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <div className="inline-flex p-2 rounded-xl shrink-0 bg-white/5 border border-white/10">

@@ -45,13 +45,13 @@ export function LiveFeaturesHighlight({
   ];
 
   return (
-    <section className="pt-8 pb-16 px-4 relative overflow-hidden bg-black border-none">
+    <section className="pt-16 pb-16 px-4 relative overflow-hidden bg-black border-none">
       {/* Background Elements */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-linear-to-l from-red-500/5 to-transparent pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-1/3 h-full bg-linear-to-r from-blue-500/5 to-transparent pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -138,7 +138,7 @@ export function LiveFeaturesHighlight({
                 <span>You</span>
               </div>
             </div>
-            <div className="text-left relative z-10">
+            <div className="text-center sm:text-left relative z-10">
               <div className="text-white font-bold text-lg">
                 Step in the Arena
               </div>

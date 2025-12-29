@@ -79,9 +79,8 @@ export function ScreenshotShowcaseStatic({
 
                 <div className="space-y-4 max-w-lg">
                   <p className="text-xl text-zinc-400 leading-relaxed text-pretty">
-                    Choose your MCs to battle each other as they react and adapt
-                    in real time. Create dream matchups and see who comes out on
-                    top.
+                    Create dream matchups as MCs battle in real time, then turn
+                    it into a song with AI-generated beats and vocals.
                   </p>
                 </div>
               </div>
@@ -135,8 +134,8 @@ export function ScreenshotShowcaseStatic({
 
         {/* Features Row (Static) */}
         <div className="mt-8 pt-4 border-none">
-          <div className="flex flex-col md:flex-row flex-wrap justify-center items-center md:items-start gap-x-16 gap-y-10">
-            {features.map((feature) => {
+          <div className="grid grid-cols-2 md:flex md:flex-row md:flex-wrap justify-center items-center md:items-start gap-x-16 gap-y-10">
+            {features.map((feature, index) => {
               const colorClasses = {
                 red: "text-red-500",
                 yellow: "text-yellow-500",
@@ -148,7 +147,7 @@ export function ScreenshotShowcaseStatic({
               return (
                 <div
                   key={feature.title}
-                  className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-4 max-w-sm p-3 -m-3 rounded-2xl"
+                  className={`flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-4 max-w-sm p-3 -m-3 rounded-2xl ${index === 2 ? "col-span-2 justify-self-center" : ""}`}
                 >
                   <div className="inline-flex p-3 rounded-xl shrink-0 bg-white/5 border border-white/10">
                     <span className={iconColor}>{feature.icon}</span>
