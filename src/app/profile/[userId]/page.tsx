@@ -15,6 +15,7 @@ import { decrypt } from "@/lib/auth/encryption";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { db } from "@/lib/db/client";
 import { type BattleDB, battles, users } from "@/lib/db/schema";
+import { APP_TITLE } from "@/lib/constants";
 
 export async function generateMetadata({
   params,
@@ -28,8 +29,8 @@ export async function generateMetadata({
 
   if (!profileUser) {
     return {
-      title: "Profile | RapGPT",
-      description: "View battle history and profile on RapGPT.",
+      title: `Profile | ${APP_TITLE}`,
+      description: `View battle history and profile on ${APP_TITLE}.`,
     };
   }
 
@@ -40,8 +41,8 @@ export async function generateMetadata({
       : "Anonymous User";
 
   return {
-    title: `${displayName}'s Profile | RapGPT`,
-    description: `View ${displayName}'s battle history and profile on RapGPT.`,
+    title: `${displayName}'s Profile | ${APP_TITLE}`,
+    description: `View ${displayName}'s battle history and profile on ${APP_TITLE}.`,
   };
 }
 

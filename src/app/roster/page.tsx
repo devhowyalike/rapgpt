@@ -2,11 +2,11 @@ import { auth } from "@clerk/nextjs/server";
 import { SiteHeader } from "@/components/site-header";
 import { PersonaGallery } from "@/components/persona-gallery";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
+import { APP_TITLE } from "@/lib/constants";
 
 export const metadata = {
-  title: "The Roster | RapGPT",
-  description:
-    "Meet the MCs of RapGPT. Each AI rapper has their own unique flow, style, and personality.",
+  title: `The Roster | ${APP_TITLE}`,
+  description: `Meet the MCs of ${APP_TITLE}. Each AI rapper has their own unique flow, style, and personality.`,
 };
 
 export default async function RosterPage() {

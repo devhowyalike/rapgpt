@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Clock, Mic2, Music, Lightbulb } from "lucide-react";
 import { RapGPTLogo } from "./rapgpt-logo";
 import { CreateBattleCTA } from "./create-battle-cta";
-import { TAGLINE_2 } from "@/lib/constants";
+import { APP_TITLE, TAGLINE_2 } from "@/lib/constants";
 import Link from "next/link";
 
 interface ScreenshotShowcaseStaticProps {
@@ -106,7 +106,7 @@ export function ScreenshotShowcaseStatic({
                   <div className="relative w-full">
                     <Image
                       src="/marketing/rap-gpt-screenshot.webp"
-                      alt="RapGPT Platform Screenshot"
+                      alt={`${APP_TITLE} Platform Screenshot`}
                       width={1200}
                       height={800}
                       className="w-full h-auto transition-all duration-700 ease-in-out group-hover:scale-[1.02] group-hover:blur-[2px] group-hover:opacity-70 will-change-transform"
