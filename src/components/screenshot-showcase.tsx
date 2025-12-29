@@ -222,7 +222,7 @@ export function ScreenshotShowcase({
       <div className="max-w-7xl mx-auto px-4 relative z-10">
         <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 lg:gap-8 items-start">
           {/* Center Column: Interactive Screenshot (Shown first on mobile) */}
-          <div className="w-full lg:col-span-6 order-1 lg:order-2 lg:sticky lg:top-32">
+          <div className="w-full lg:col-span-6 order-1 lg:order-2 lg:sticky lg:top-8">
             <motion.div
               style={{
                 perspective: "1200px",
@@ -272,7 +272,7 @@ export function ScreenshotShowcase({
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.9 }}
                           transition={{ duration: 0.3 }}
-                          className="absolute z-10 left-[3%] top-[18%]"
+                          className="absolute z-10 left-[10%] top-[28%]"
                         >
                           <OverlayCard color="red" className="p-1.5 md:p-3">
                             <div className="flex items-center gap-1.5 md:gap-2">
@@ -376,6 +376,59 @@ export function ScreenshotShowcase({
                               ))}
                             </div>
                           </OverlayCard>
+                        </motion.div>
+                      )}
+
+                      {/* Admin Control Panel Overlay */}
+                      {activeFeature === "admin" && (
+                        <motion.div
+                          key="admin"
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          transition={{ duration: 0.3 }}
+                          className="absolute z-10 right-[3%] bottom-[10%]"
+                        >
+                          <OverlayCard color="purple" className="p-1.5 md:p-3">
+                            <div className="flex items-center gap-1.5 md:gap-2 mb-1.5 md:mb-2">
+                              <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
+                                <Trophy className="w-3 h-3 md:w-4 md:h-4 text-purple-400" />
+                              </div>
+                              <div>
+                                <div className="text-[8px] md:text-[10px] text-purple-400 uppercase tracking-widest font-bold">
+                                  Host Controls
+                                </div>
+                                <div className="text-xs md:text-sm text-white font-medium">
+                                  Options
+                                </div>
+                              </div>
+                            </div>
+                            {/* Control buttons */}
+                            <div className="flex flex-col gap-1 md:gap-1.5">
+                              {[
+                                { label: "Start Battle", active: false },
+                                { label: "Begin Voting", active: true },
+                                { label: "End Battle", active: false },
+                              ].map((btn, i) => (
+                                <motion.div
+                                  key={btn.label}
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: i * 0.1 }}
+                                  className={cn(
+                                    "text-[8px] md:text-[10px] px-2 md:px-3 py-0.5 md:py-1 rounded",
+                                    btn.active
+                                      ? "bg-purple-500 text-white font-medium"
+                                      : "bg-zinc-800/80 text-zinc-400"
+                                  )}
+                                >
+                                  {btn.label}
+                                </motion.div>
+                              ))}
+                            </div>
+                          </OverlayCard>
+                          {/* Connecting line */}
+                          <div className="absolute top-1/2 -left-4 md:-left-8 w-4 md:w-8 h-px bg-linear-to-l from-purple-500/50 to-transparent" />
                         </motion.div>
                       )}
                     </AnimatePresence>
