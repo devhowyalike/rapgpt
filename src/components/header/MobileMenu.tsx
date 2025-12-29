@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronLeft,
   Home,
+  Info,
   Menu,
   Radio,
   Settings,
@@ -128,6 +129,12 @@ export function MobileMenu({
                 icon={<Users className="w-4 h-4" />}
                 label="Community"
                 isActive={isActiveLink("/community")}
+              />
+              <MenuLink
+                href="/learn-more"
+                icon={<Info className="w-4 h-4" />}
+                label="Learn More"
+                isActive={isActiveLink("/learn-more")}
               />
 
               {/* Admin Section */}
