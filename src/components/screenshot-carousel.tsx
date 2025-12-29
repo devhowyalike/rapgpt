@@ -110,7 +110,7 @@ const FEATURES = [
     icon: <Clock className="w-5 h-5 md:w-6 md:h-6" />,
     title: "3 Rounds of Bars",
     description:
-      "Each battle features 3 rounds with 8 bars per verse. Watch as MCs trade shots and build momentum.",
+      "Each battle features 3 rounds with 8 bars per verse. Watch as MCs trade shots and react to each other.",
     color: "yellow" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-rounds.webp",
     category: "Core",
@@ -160,7 +160,7 @@ const FEATURES = [
     icon: <Music className="w-5 h-5 md:w-6 md:h-6" />,
     title: "Make it a Song",
     description:
-      "Transform any battle into a full track. Choose a style, generate audio, and share your creation.",
+      "Transform any battle into a full track with AI-generated vocals. Choose a beat style, and share your creation.",
     color: "green" as ColorKey,
     screenshot: "/marketing/rap-gpt-screenshot.webp",
     category: "Core",
