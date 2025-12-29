@@ -120,15 +120,18 @@ export function LiveFeaturesHighlight({
             <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-10 pointer-events-none" />
 
             <div className="flex -space-x-4 relative z-10">
-              {[1, 2, 3, 4].map((i) => (
-                <div
+              {[
+                "/marketing/avatars/adventurer-1766980363322.svg",
+                "/marketing/avatars/adventurerNeutral-1766980376476.svg",
+                "/marketing/avatars/bigSmile-1766980388157.svg",
+                "/marketing/avatars/pixelArt-1766980354480.svg",
+              ].map((src, i) => (
+                <img
                   key={i}
-                  className="w-12 h-12 rounded-full border-2 border-black bg-gray-800 overflow-hidden relative"
-                >
-                  <div className="absolute inset-0 bg-linear-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-white">
-                    MC {i}
-                  </div>
-                </div>
+                  src={src}
+                  alt={`MC ${i + 1}`}
+                  className="w-12 h-12 rounded-full border-2 border-black bg-gray-800"
+                />
               ))}
               <div className="w-12 h-12 rounded-full border-2 border-black bg-red-500 flex flex-col items-center justify-center text-xs font-bold text-white z-10 leading-tight">
                 <span>+</span>
