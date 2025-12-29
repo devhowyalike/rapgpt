@@ -10,8 +10,8 @@ interface LearnMoreHeroProps {
 export function LearnMoreHero({ isAuthenticated = false }: LearnMoreHeroProps) {
   const features = [
     { icon: Mic2, label: "Dream matchups", color: "text-red-500" },
-    { icon: Music, label: "Make it a Song", color: "text-green-500" },
     { icon: Zap, label: "Live Events", color: "text-yellow-500" },
+    { icon: Music, label: "Make it a Song", color: "text-green-500" },
   ];
 
   return (

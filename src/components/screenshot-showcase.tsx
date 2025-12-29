@@ -147,7 +147,7 @@ const COMMUNITY_FEATURES = [
     icon: <Zap className="w-6 h-6" />,
     title: "Interactive Voting",
     description:
-      "Participants vote after each round to impact the battle's outcome.",
+      "Rock the vote after each round to impact the battle's outcome.",
     color: "yellow" as ColorKey,
   },
   {
