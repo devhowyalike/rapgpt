@@ -23,6 +23,7 @@ import {
   CarouselNext,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import { BattleBarDemo } from "@/components/learn-more/battle-bar-demo";
 
 type ColorKey = "red" | "yellow" | "green" | "blue" | "purple";
 
@@ -254,40 +255,57 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                         </div>
                       </div>
 
-                      {/* Screenshot */}
+                      {/* Screenshot or Interactive Demo */}
                       <div className="relative w-full aspect-16/10 overflow-hidden bg-zinc-950">
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key={feature.screenshot}
-                            initial={{ opacity: 0, scale: 1.02 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="absolute inset-0"
-                          >
-                            <Image
-                              src={feature.screenshot}
-                              alt={`${APP_TITLE} - ${feature.title}`}
-                              fill
-                              className={cn(
-                                feature.key === "voting"
-                                  ? "object-cover object-[calc(50%-5px)_top] w-[55%]! left-[22.5%]! right-auto!"
-                                  : feature.key === "chat"
-                                  ? "object-cover object-[calc(50%-5px)_bottom] w-[55%]! left-[22.5%]! right-auto!"
-                                  : feature.key === "scoring"
-                                  ? "object-cover object-[calc(50%-5px)_bottom]"
-                                  : feature.key === "rounds"
-                                  ? "object-cover object-[calc(50%-5px)_top]"
-                                  : feature.key === "stage"
-                                  ? "object-cover object-[calc(50%-5px)_50%]"
-                                  : feature.key === "song"
-                                  ? "object-cover object-[calc(50%-5px)_bottom]"
-                                  : "object-contain"
-                              )}
-                              priority={index === 0}
-                            />
-                          </motion.div>
-                        </AnimatePresence>
+                        {feature.key === "admin" ? (
+                          /* Interactive Battle Bar Demo for Dynamic Interface slide */
+                          <AnimatePresence mode="wait">
+                            <motion.div
+                              key="battle-bar-demo"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.4 }}
+                              className="absolute inset-0"
+                            >
+                              <BattleBarDemo />
+                            </motion.div>
+                          </AnimatePresence>
+                        ) : (
+                          /* Static Screenshot for other slides */
+                          <AnimatePresence mode="wait">
+                            <motion.div
+                              key={feature.screenshot}
+                              initial={{ opacity: 0, scale: 1.02 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.4 }}
+                              className="absolute inset-0"
+                            >
+                              <Image
+                                src={feature.screenshot}
+                                alt={`${APP_TITLE} - ${feature.title}`}
+                                fill
+                                className={cn(
+                                  feature.key === "voting"
+                                    ? "object-cover object-[calc(50%-5px)_top] w-[55%]! left-[22.5%]! right-auto!"
+                                    : feature.key === "chat"
+                                    ? "object-cover object-[calc(50%-5px)_bottom] w-[55%]! left-[22.5%]! right-auto!"
+                                    : feature.key === "scoring"
+                                    ? "object-cover object-[calc(50%-5px)_bottom]"
+                                    : feature.key === "rounds"
+                                    ? "object-cover object-[calc(50%-5px)_top]"
+                                    : feature.key === "stage"
+                                    ? "object-cover object-[calc(50%-5px)_50%]"
+                                    : feature.key === "song"
+                                    ? "object-cover object-[calc(50%-5px)_bottom]"
+                                    : "object-contain"
+                                )}
+                                priority={index === 0}
+                              />
+                            </motion.div>
+                          </AnimatePresence>
+                        )}
                       </div>
                     </div>
 
@@ -296,7 +314,7 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 }}
-                      className="mt-3 px-2 md:max-w-lg mx-auto"
+                      className="mt-3 px-2 md:max-w-lg mx-auto relative z-10"
                     >
                       <div
                         className={cn(
@@ -330,7 +348,7 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                     {/* Glow Effect */}
                     <div
                       className={cn(
-                        "absolute -bottom-6 md:-bottom-10 inset-x-8 md:inset-x-16 h-12 md:h-20 blur-2xl md:blur-3xl rounded-full opacity-50 transition-colors duration-500",
+                        "absolute -bottom-6 md:-bottom-10 inset-x-8 md:inset-x-16 h-12 md:h-20 blur-2xl md:blur-3xl rounded-full opacity-50 -z-10",
                         featureColors.glow
                       )}
                     />
