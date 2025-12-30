@@ -369,6 +369,44 @@ function VerseDemo({
   const playerColor =
     position === "player1" ? `rgb(${PLAYER1_COLOR})` : `rgb(${PLAYER2_COLOR})`;
 
+  const [streamedTime, setStreamedTime] = useState(0);
+  const lastTimestampRef = useRef<number | null>(null);
+  const rafIdRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // Reset streamedTime when not streaming or no lines visible
+    if (!isStreaming || visibleCount === 0) {
+      setStreamedTime(0);
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+      lastTimestampRef.current = null;
+      return;
+    }
+
+    if (isPaused) {
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+      lastTimestampRef.current = null;
+      return;
+    }
+
+    const animate = (timestamp: number) => {
+      if (!lastTimestampRef.current) {
+        lastTimestampRef.current = timestamp;
+      }
+
+      const deltaTime = timestamp - lastTimestampRef.current;
+      lastTimestampRef.current = timestamp;
+
+      setStreamedTime((prev) => prev + deltaTime);
+      rafIdRef.current = requestAnimationFrame(animate);
+    };
+
+    rafIdRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    };
+  }, [isStreaming, isPaused, visibleCount]);
+
   const visibleLines = lines.slice(0, visibleCount);
   let cumulativeWordCount = 0;
 
@@ -410,11 +448,13 @@ function VerseDemo({
               <motion.span
                 key={`line-num-${lineIndex}`}
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
-                transition={{
-                  duration: isStreaming ? 0.2 : 0,
-                  delay: isStreaming ? lineStartWordIndex * 0.12 : 0,
+                animate={{
+                  opacity:
+                    !isStreaming || streamedTime >= lineStartWordIndex * 120
+                      ? 0.5
+                      : 0,
                 }}
+                transition={{ duration: 0.2 }}
                 className="text-[10px] sm:text-sm w-4 sm:w-6 shrink-0"
                 style={{ color: playerColor }}
               >
@@ -426,16 +466,17 @@ function VerseDemo({
               >
                 {words.map((word, wordIndex) => {
                   const globalWordIndex = lineStartWordIndex + wordIndex;
-                  const delay = globalWordIndex * 0.12;
+                  const isVisible =
+                    !isStreaming || streamedTime >= globalWordIndex * 120;
                   return (
                     <motion.span
                       key={`word-${lineIndex}-${wordIndex}`}
                       initial={{ opacity: 0, filter: "blur(4px)" }}
-                      animate={{ opacity: 1, filter: "blur(0px)" }}
-                      transition={{
-                        duration: isStreaming ? 0.2 : 0,
-                        delay: isStreaming ? delay : 0,
+                      animate={{
+                        opacity: isVisible ? 1 : 0,
+                        filter: isVisible ? "blur(0px)" : "blur(4px)",
                       }}
+                      transition={{ duration: 0.2 }}
                       className="inline-block mr-[0.25em]"
                     >
                       {word}
