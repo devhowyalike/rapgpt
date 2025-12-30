@@ -163,13 +163,50 @@ export function useInView<T extends HTMLElement>({
   const ref = useRef<T>(null);
   const [isInView, setIsInView] = useState(false);
   const isInViewRef = useRef(false);
+  const hasInitializedRef = useRef(false);
+
+  // Store callbacks in refs to avoid recreating observer when callbacks change
+  const onEnterRef = useRef(onEnter);
+  const onLeaveRef = useRef(onLeave);
+
+  // Keep refs up to date with latest callbacks
+  useEffect(() => {
+    onEnterRef.current = onEnter;
+    onLeaveRef.current = onLeave;
+  });
 
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
 
+    // Check initial visibility immediately (fixes mobile Safari issues)
+    // Some mobile browsers don't fire the observer callback reliably on initial load
+    const checkInitialVisibility = () => {
+      if (hasInitializedRef.current) return;
+      
+      const rect = element.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      const visibleHeight = Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0);
+      const visibleRatio = Math.max(0, visibleHeight) / rect.height;
+      
+      if (visibleRatio >= threshold) {
+        hasInitializedRef.current = true;
+        if (!isInViewRef.current) {
+          isInViewRef.current = true;
+          setIsInView(true);
+          onEnterRef.current?.();
+        }
+      }
+    };
+
+    // Run initial check after a brief delay to ensure layout is complete
+    const timeoutId = requestAnimationFrame(() => {
+      checkInitialVisibility();
+    });
+
     const observer = new IntersectionObserver(
       ([entry]) => {
+        hasInitializedRef.current = true;
         const wasInView = isInViewRef.current;
         const nowInView = entry.isIntersecting;
 
@@ -177,17 +214,20 @@ export function useInView<T extends HTMLElement>({
         setIsInView(nowInView);
 
         if (!wasInView && nowInView) {
-          onEnter?.();
+          onEnterRef.current?.();
         } else if (wasInView && !nowInView) {
-          onLeave?.();
+          onLeaveRef.current?.();
         }
       },
       { threshold }
     );
 
     observer.observe(element);
-    return () => observer.disconnect();
-  }, [threshold, onEnter, onLeave]);
+    return () => {
+      cancelAnimationFrame(timeoutId);
+      observer.disconnect();
+    };
+  }, [threshold]);
 
   return { ref, isInView, isInViewRef };
 }

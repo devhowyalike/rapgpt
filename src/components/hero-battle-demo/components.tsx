@@ -327,8 +327,10 @@ const VerseLine = memo(function VerseLine({
   isPaused,
 }: VerseLineProps) {
   const words = useMemo(() => line.split(" ").filter(Boolean), [line]);
+  // Use > (not >=) to match word visibility check: visibleWordCount > globalWordIndex
+  // This ensures line numbers appear exactly when the first word of that line appears
   const lineNumberVisible =
-    !isStreaming || visibleWordCount >= lineStartWordIndex;
+    !isStreaming || visibleWordCount > lineStartWordIndex;
 
   return (
     <motion.div
@@ -363,8 +365,6 @@ const VerseLine = memo(function VerseLine({
         {words.map((word, wordIndex) => {
           const globalWordIndex = lineStartWordIndex + wordIndex;
           const isVisible = !isStreaming || visibleWordCount > globalWordIndex;
-          // Use CSS animation-delay for staggered reveal during streaming
-          const delay = isStreaming ? `${globalWordIndex * 120}ms` : "0ms";
 
           return (
             <span
@@ -372,11 +372,6 @@ const VerseLine = memo(function VerseLine({
               className={`demo-word ${isVisible ? "visible" : ""} ${
                 !isStreaming ? "instant" : ""
               } ${isPaused ? "paused" : ""}`}
-              style={
-                isStreaming && !isPaused && !isVisible
-                  ? { animationDelay: delay }
-                  : undefined
-              }
             >
               {word}
             </span>
