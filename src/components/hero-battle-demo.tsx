@@ -750,7 +750,7 @@ function SongStyleSelectOverlay() {
         {/* Header */}
         <div className="text-center mb-1">
           <p className="text-sm sm:text-base font-bold text-white">
-            Pick Your Style
+            Make it a Song
           </p>
           <p className="text-[10px] sm:text-xs text-gray-400">
             Choose a beat for your battle track
