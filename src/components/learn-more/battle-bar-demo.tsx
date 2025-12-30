@@ -94,8 +94,8 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
 };
 
 const STATE_ORDER: DemoState[] = [
-  "generate-start",
   "generating",
+  "generate-start",
   "reading",
   "voting",
   "generate-next",
@@ -312,70 +312,50 @@ export function BattleBarDemo() {
   return (
     <div
       ref={containerRef}
-      className="w-full"
+      className="absolute inset-0 bg-gray-900 flex flex-col"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* Browser mockup content area */}
-      <div className="aspect-4/5 sm:aspect-16/10 bg-gray-900 flex flex-col">
-        {/* Blurred screenshot background */}
-        <div className="flex-1 relative overflow-hidden">
-          <Image
-            src="/marketing/battle-system/rapgpt-battle-stage.webp"
-            alt="Battle stage"
-            fill
-            className="object-cover object-center blur-sm scale-105 brightness-50"
-          />
-          {/* Gradient overlay to fade toward the control bar */}
-          <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-gray-900/90" />
-        </div>
-
-        {/* Control Bar */}
-        <div className="p-2 sm:p-3 md:p-4 bg-gray-900 border-t border-gray-800">
-          <div className="flex items-center gap-2 sm:gap-3 max-w-4xl mx-auto">
-            {/* Main Action Button - fixed height container to prevent shifting */}
-            <div className="flex-1 h-[44px] sm:h-[52px]">
-              <motion.div
-                key={`${stateIndex}-${currentStateName}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.25 }}
-                className={`
-                  w-full h-full px-3 sm:px-4 rounded-lg text-white font-bold
-                  bg-linear-to-r ${config.gradient}
-                  flex items-center justify-center
-                `}
-              >
-                <ActionButtonContent config={config} />
-              </motion.div>
-            </div>
-
-            {/* Options Button - hidden on smallest screens */}
-            <div className="hidden sm:block">
-              <OptionsButtonDemo />
-            </div>
-
-            {/* Go Live Button */}
-            <GoLiveButtonDemo state={config.goLiveState || "off"} />
-          </div>
-        </div>
+      {/* Blurred screenshot background */}
+      <div className="flex-1 relative overflow-hidden">
+        <Image
+          src="/marketing/battle-system/rapgpt-battle-stage.webp"
+          alt="Battle stage"
+          fill
+          className="object-cover object-center blur-sm scale-105 brightness-50"
+        />
+        {/* Gradient overlay to fade toward the control bar */}
+        <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-gray-900/90" />
       </div>
 
-      {/* State indicator pills */}
-      <div className="flex justify-center gap-1.5 mt-3 px-2">
-        {STATE_ORDER.map((state, idx) => (
-          <motion.button
-            key={`${state}-${idx}`}
-            onClick={() => setStateIndex(idx)}
-            className={`
-              h-1.5 rounded-full transition-all duration-300
-              ${idx === stateIndex ? "w-6 sm:w-8" : "w-1.5 sm:w-2"}
-            `}
-            animate={{
-              backgroundColor: idx === stateIndex ? "#a855f7" : "#374151",
-            }}
-          />
-        ))}
+      {/* Control Bar */}
+      <div className="p-2 sm:p-3 md:p-4 bg-gray-900 border-t border-gray-800">
+        <div className="flex items-center gap-2 sm:gap-3 max-w-4xl mx-auto">
+          {/* Main Action Button - fixed height container to prevent shifting */}
+          <div className="flex-1 h-[44px] sm:h-[52px]">
+            <motion.div
+              key={`${stateIndex}-${currentStateName}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.25 }}
+              className={`
+                w-full h-full px-3 sm:px-4 rounded-lg text-white font-bold
+                bg-linear-to-r ${config.gradient}
+                flex items-center justify-center
+              `}
+            >
+              <ActionButtonContent config={config} />
+            </motion.div>
+          </div>
+
+          {/* Options Button - hidden on smallest screens */}
+          <div className="hidden sm:block">
+            <OptionsButtonDemo />
+          </div>
+
+          {/* Go Live Button */}
+          <GoLiveButtonDemo state={config.goLiveState || "off"} />
+        </div>
       </div>
     </div>
   );

@@ -7,12 +7,11 @@ import { APP_URL } from "@/lib/constants";
 interface BrowserChromeProps {
   children: ReactNode;
   className?: string;
+  /** Use this to set aspect ratio (e.g. "aspect-16/10") or other content styling */
   contentClassName?: string;
   url?: string;
   showAddressBar?: boolean;
   headerRight?: ReactNode;
-  /** When true, content area has no fixed aspect ratio and grows with content */
-  disableAspectRatio?: boolean;
 }
 
 export function BrowserChrome({
@@ -22,7 +21,6 @@ export function BrowserChrome({
   url = APP_URL,
   showAddressBar = false,
   headerRight,
-  disableAspectRatio = false,
 }: BrowserChromeProps) {
   return (
     <div
@@ -65,7 +63,6 @@ export function BrowserChrome({
       <div
         className={cn(
           "relative w-full overflow-hidden bg-zinc-950",
-          !disableAspectRatio && "aspect-4/5 sm:aspect-16/10",
           contentClassName
         )}
       >

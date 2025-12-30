@@ -461,91 +461,71 @@ export function GoLiveDemo() {
   }, [stateIndex, isInView, config.duration, advanceState]);
 
   return (
-    <div ref={containerRef} className="w-full">
-      {/* Browser mockup content area */}
-      <div className="aspect-4/5 sm:aspect-16/10 bg-gray-900 flex flex-col relative overflow-hidden">
-        {/* Blurred screenshot background */}
-        <div className="absolute inset-0">
-          <Image
-            src="/marketing/battle-system/rapgpt-battle-stage.webp"
-            alt="Battle stage"
-            fill
-            className="object-cover object-center blur-sm scale-105 brightness-50"
-          />
-          {/* Gradient overlays */}
-          <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-gray-900/90" />
-
-          {/* Live color overlay */}
-          <AnimatePresence>
-            {isLive && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-red-900/10"
-              />
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Live Badge */}
-        <LiveBadge isLive={isLive} />
-
-        {/* Viewer Counter */}
-        <div className="absolute top-4 right-4 z-10">
-          <ViewerCounter count={config.viewerCount} isLive={isLive} />
-        </div>
-
-        {/* Reaction Burst */}
-        <ReactionBurst isActive={currentStateName === "peak-hype"} />
-
-        {/* Live Chat */}
-        <LiveChat
-          messages={config.chatMessages || []}
-          isVisible={isLive && !!config.chatMessages}
+    <div
+      ref={containerRef}
+      className="absolute inset-0 bg-gray-900 flex flex-col overflow-hidden"
+    >
+      {/* Blurred screenshot background */}
+      <div className="absolute inset-0">
+        <Image
+          src="/marketing/battle-system/rapgpt-battle-stage.webp"
+          alt="Battle stage"
+          fill
+          className="object-cover object-center blur-sm scale-105 brightness-50"
         />
+        {/* Gradient overlays */}
+        <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-gray-900/90" />
 
-        {/* Control Bar */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-linear-to-t from-gray-900 via-gray-900/95 to-transparent pt-12">
-          <div className="flex items-center justify-between gap-3 max-w-4xl mx-auto">
-            {/* Status Label */}
-            <div className="flex-1 min-w-0">
-              <AnimatePresence mode="wait">
-                <StatusLabel
-                  key={currentStateName}
-                  label={config.label}
-                  isLive={isLive}
-                />
-              </AnimatePresence>
-            </div>
-
-            {/* Go Live Button */}
-            <GoLiveButton
-              state={config.buttonState}
-              showPulse={config.showPulse}
+        {/* Live color overlay */}
+        <AnimatePresence>
+          {isLive && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-red-900/10"
             />
-          </div>
-        </div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* State indicator pills */}
-      <div className="flex justify-center gap-1.5 mt-3 px-2">
-        {STATE_ORDER.map((state, idx) => (
-          <motion.button
-            key={`${state}-${idx}`}
-            onClick={() => setStateIndex(idx)}
-            className={`
-              h-1.5 rounded-full transition-all duration-300
-              ${idx === stateIndex ? "w-6 sm:w-8" : "w-1.5 sm:w-2"}
-            `}
-            animate={{
-              backgroundColor:
-                idx === stateIndex
-                  ? "#ef4444" // red-500 to match Go Live theme
-                  : "#374151", // gray-700
-            }}
+      {/* Live Badge */}
+      <LiveBadge isLive={isLive} />
+
+      {/* Viewer Counter */}
+      <div className="absolute top-4 right-4 z-10">
+        <ViewerCounter count={config.viewerCount} isLive={isLive} />
+      </div>
+
+      {/* Reaction Burst */}
+      <ReactionBurst isActive={currentStateName === "peak-hype"} />
+
+      {/* Live Chat */}
+      <LiveChat
+        messages={config.chatMessages || []}
+        isVisible={isLive && !!config.chatMessages}
+      />
+
+      {/* Control Bar */}
+      <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-linear-to-t from-gray-900 via-gray-900/95 to-transparent pt-12">
+        <div className="flex items-center justify-between gap-3 max-w-4xl mx-auto">
+          {/* Status Label */}
+          <div className="flex-1 min-w-0">
+            <AnimatePresence mode="wait">
+              <StatusLabel
+                key={currentStateName}
+                label={config.label}
+                isLive={isLive}
+              />
+            </AnimatePresence>
+          </div>
+
+          {/* Go Live Button */}
+          <GoLiveButton
+            state={config.buttonState}
+            showPulse={config.showPulse}
           />
-        ))}
+        </div>
       </div>
     </div>
   );

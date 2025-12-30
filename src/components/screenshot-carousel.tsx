@@ -239,7 +239,10 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                 <CarouselItem key={feature.key} className="pl-0">
                   <div className="relative">
                     {/* Browser Chrome Shell */}
-                    <BrowserChrome showAddressBar={false}>
+                    <BrowserChrome
+                      showAddressBar={false}
+                      contentClassName="aspect-16/10"
+                    >
                       {feature.key === "admin" ? (
                         /* Interactive Battle Bar Demo for Dynamic Interface slide */
                         <AnimatePresence mode="wait">
@@ -354,36 +357,84 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
             })}
           </CarouselContent>
 
-          <CarouselPrevious className="flex left-4 md:-left-12 lg:-left-16 size-9 md:size-10 lg:size-12 border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 [&_svg]:size-5 md:[&_svg]:size-6 lg:[&_svg]:size-7 z-20" />
-          <CarouselNext className="flex right-4 md:-right-12 lg:-right-16 size-9 md:size-10 lg:size-12 border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 [&_svg]:size-5 md:[&_svg]:size-6 lg:[&_svg]:size-7 z-20" />
+          {/* Desktop arrows - hidden on mobile */}
+          <CarouselPrevious className="hidden md:flex md:-left-12 lg:-left-16 md:size-10 lg:size-12 border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 md:[&_svg]:size-6 lg:[&_svg]:size-7 z-20" />
+          <CarouselNext className="hidden md:flex md:-right-12 lg:-right-16 md:size-10 lg:size-12 border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 md:[&_svg]:size-6 lg:[&_svg]:size-7 z-20" />
         </Carousel>
 
-        {/* Dot Indicators */}
-        <div className="flex items-center justify-center gap-2 mt-6 md:mt-8">
-          {FEATURES.map((feature, index) => {
-            const dotColors = COLOR_CLASSES[feature.color];
-            const isActive = current === index;
-            return (
-              <button
-                key={feature.key}
-                onClick={() => scrollTo(index)}
-                className={cn(
-                  "relative h-2 rounded-full transition-all duration-300",
-                  isActive ? "w-8 md:w-10" : "w-2 hover:w-3"
-                )}
-                aria-label={`Go to slide ${index + 1}: ${feature.title}`}
-              >
-                <span
+        {/* Navigation: Dots with mobile arrows on sides */}
+        <div className="flex items-center justify-center gap-3 mt-6 md:mt-8">
+          {/* Mobile Previous Arrow */}
+          <button
+            onClick={() => api?.scrollPrev()}
+            className="flex md:hidden items-center justify-center size-9 rounded-full border border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300"
+            aria-label="Previous slide"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m12 19-7-7 7-7" />
+              <path d="M19 12H5" />
+            </svg>
+          </button>
+
+          {/* Dot Indicators */}
+          <div className="flex items-center justify-center gap-2">
+            {FEATURES.map((feature, index) => {
+              const dotColors = COLOR_CLASSES[feature.color];
+              const isActive = current === index;
+              return (
+                <button
+                  key={feature.key}
+                  onClick={() => scrollTo(index)}
                   className={cn(
-                    "absolute inset-0 rounded-full transition-all duration-300",
-                    isActive
-                      ? `bg-linear-to-r ${dotColors.accent}`
-                      : "bg-zinc-700 hover:bg-zinc-600"
+                    "relative h-2 rounded-full transition-all duration-300",
+                    isActive ? "w-8 md:w-10" : "w-2 hover:w-3"
                   )}
-                />
-              </button>
-            );
-          })}
+                  aria-label={`Go to slide ${index + 1}: ${feature.title}`}
+                >
+                  <span
+                    className={cn(
+                      "absolute inset-0 rounded-full transition-all duration-300",
+                      isActive
+                        ? `bg-linear-to-r ${dotColors.accent}`
+                        : "bg-zinc-700 hover:bg-zinc-600"
+                    )}
+                  />
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Mobile Next Arrow */}
+          <button
+            onClick={() => api?.scrollNext()}
+            className="flex md:hidden items-center justify-center size-9 rounded-full border border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300"
+            aria-label="Next slide"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </button>
         </div>
 
         {/* Keyboard hint */}

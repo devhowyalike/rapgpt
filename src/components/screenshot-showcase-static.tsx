@@ -101,7 +101,6 @@ export function ScreenshotShowcaseStatic({
                   className="group-hover:border-white/20 group-hover:shadow-[0_0_60px_rgba(245,158,11,0.15)]"
                   contentClassName="bg-stage-dark"
                   showAddressBar={false}
-                  disableAspectRatio
                   headerRight={
                     <button
                       onClick={(e) => {
