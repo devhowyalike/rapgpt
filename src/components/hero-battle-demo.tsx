@@ -1042,14 +1042,18 @@ function SongCompleteOverlay({ isPaused }: { isPaused: boolean }) {
               key={i}
               className="flex-1 rounded-t-sm bg-orange-500/60"
               initial={{ height: "2px", opacity: 0 }}
-              animate={{
-                height: [`${height}%`, `${height * 0.4}%`],
-                opacity: 1,
-              }}
+              animate={
+                isPaused
+                  ? { height: `${height * 0.7}%`, opacity: 1 }
+                  : {
+                      height: [`${height}%`, `${height * 0.4}%`],
+                      opacity: 1,
+                    }
+              }
               transition={{
                 height: {
                   duration: 0.6,
-                  repeat: Infinity,
+                  repeat: isPaused ? 0 : Infinity,
                   repeatType: "reverse",
                   delay: i * 0.04,
                   ease: "easeInOut",
