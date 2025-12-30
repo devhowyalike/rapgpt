@@ -23,7 +23,7 @@ export function LiveFeaturesHighlight({
       icon: <Zap className="w-6 h-6" />,
       title: "Interactive Voting",
       description:
-        "Participants vote after each round to impact the battle's outcome.",
+        "Viewers can vote after each round to impact the battle's outcome.",
       color: "text-yellow-400",
       bg: "bg-yellow-500/10",
     },

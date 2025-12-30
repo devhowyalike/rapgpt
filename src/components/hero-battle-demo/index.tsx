@@ -1,7 +1,15 @@
 "use client";
 
 import { motion, AnimatePresence, MotionConfig } from "framer-motion";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+  forwardRef,
+} from "react";
 
 import { StageHeader, PersonaCardDemo, VerseDemo } from "./components";
 import { MC1, MC2, VERSES, STATE_CONFIGS, STATE_ORDER } from "./data";
@@ -29,10 +37,16 @@ interface HeroBattleDemoProps {
   setIsPaused?: (paused: boolean | ((prev: boolean) => boolean)) => void;
 }
 
-export function HeroBattleDemo({
-  isPaused: externalPaused,
-  setIsPaused: setExternalPaused,
-}: HeroBattleDemoProps) {
+export interface HeroBattleDemoRef {
+  goToNext: () => void;
+  goToPrev: () => void;
+}
+
+export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>(
+  function HeroBattleDemo(
+    { isPaused: externalPaused, setIsPaused: setExternalPaused },
+    ref
+  ) {
   const [stateIndex, setStateIndex] = useState(0);
   const [internalPaused, setInternalPaused] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
@@ -59,6 +73,12 @@ export function HeroBattleDemo({
     setStateIndex((prev) => (prev === 0 ? STATE_ORDER.length - 1 : prev - 1));
     setIsPaused(false);
   }, [setIsPaused]);
+
+  // Expose navigation methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    goToNext,
+    goToPrev,
+  }), [goToNext, goToPrev]);
 
   // Intersection Observer - pause when scrolled away, resume when back in view
   const {
@@ -223,7 +243,7 @@ export function HeroBattleDemo({
       </div>
     </MotionConfig>
   );
-}
+});
 
 // =============================================================================
 // Helper Components

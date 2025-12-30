@@ -5,9 +5,9 @@ import { RapGPTLogo } from "./rapgpt-logo";
 import { CreateBattleCTA } from "./create-battle-cta";
 import { APP_TITLE, TAGLINE_2 } from "@/lib/constants";
 import Link from "next/link";
-import { HeroBattleDemo } from "./hero-battle-demo";
+import { HeroBattleDemo, type HeroBattleDemoRef } from "./hero-battle-demo";
 import { BrowserChrome } from "./browser-chrome";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 interface ScreenshotShowcaseStaticProps {
   isAuthenticated?: boolean;
@@ -17,6 +17,7 @@ export function ScreenshotShowcaseStatic({
   isAuthenticated = false,
 }: ScreenshotShowcaseStaticProps) {
   const [isPaused, setIsPaused] = useState(false);
+  const demoRef = useRef<HeroBattleDemoRef>(null);
   const features = [
     {
       icon: <Mic2 className="w-6 h-6" />,
@@ -123,6 +124,7 @@ export function ScreenshotShowcaseStatic({
                 >
                   {/* Animated Battle Demo */}
                   <HeroBattleDemo
+                    ref={demoRef}
                     isPaused={isPaused}
                     setIsPaused={setIsPaused}
                   />
@@ -141,10 +143,64 @@ export function ScreenshotShowcaseStatic({
             </Link>
 
             {/* Simulation Notice & Controls */}
-            <div className="flex items-center justify-center sm:relative sm:min-h-[24px]">
+            <div className="flex items-center justify-center gap-3 sm:relative sm:min-h-[24px]">
+              {/* Previous Arrow */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  demoRef.current?.goToPrev();
+                }}
+                className="flex items-center justify-center size-7 rounded-full border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/prev"
+                aria-label="Previous slide"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-zinc-500 group-hover/prev:text-zinc-400 transition-colors"
+                >
+                  <path d="m12 19-7-7 7-7" />
+                  <path d="M19 12H5" />
+                </svg>
+              </button>
+
               <span className="text-[10px] text-zinc-300 uppercase tracking-widest opacity-40">
                 &mdash; Simulated for demonstration &mdash;
               </span>
+
+              {/* Next Arrow */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  demoRef.current?.goToNext();
+                }}
+                className="flex items-center justify-center size-7 rounded-full border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/next"
+                aria-label="Next slide"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-zinc-500 group-hover/next:text-zinc-400 transition-colors"
+                >
+                  <path d="M5 12h14" />
+                  <path d="m12 5 7 7-7 7" />
+                </svg>
+              </button>
 
               <button
                 onClick={(e) => {
