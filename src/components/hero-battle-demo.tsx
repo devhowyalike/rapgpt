@@ -1128,6 +1128,7 @@ export function HeroBattleDemo({
   const containerRef = useRef<HTMLDivElement>(null);
   const [stateIndex, setStateIndex] = useState(0);
   const [isInView, setIsInView] = useState(false);
+  const isInViewRef = useRef(false); // Ref to avoid circular dependency in effects
   const [internalPaused, setInternalPaused] = useState(false);
 
   // Touch/swipe state
@@ -1154,9 +1155,11 @@ export function HeroBattleDemo({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const wasInView = isInView;
+        const wasInView = isInViewRef.current;
         const nowInView = entry.isIntersecting;
 
+        // Update both ref and state
+        isInViewRef.current = nowInView;
         setIsInView(nowInView);
 
         if (!wasInView && nowInView) {
@@ -1169,7 +1172,7 @@ export function HeroBattleDemo({
 
     observer.observe(container);
     return () => observer.disconnect();
-  }, [isInView]);
+  }, [setIsPaused]);
 
   // Auto-advance
   useEffect(() => {
@@ -1182,7 +1185,7 @@ export function HeroBattleDemo({
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isInView) return;
+      if (!isInViewRef.current) return;
 
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
@@ -1202,7 +1205,7 @@ export function HeroBattleDemo({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isInView]);
+  }, [setIsPaused]);
 
   // Touch/swipe navigation
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
