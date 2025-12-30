@@ -12,10 +12,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 type DemoState =
   | "intro"
-  | "mc1-streaming"
   | "mc1-verse"
   | "mc2-intro"
-  | "mc2-streaming"
   | "mc2-verse"
   | "scoring"
   | "winner"
@@ -74,9 +72,20 @@ const VERSES = {
   ],
 };
 
+/**
+ * Calculates duration based on word count to ensure the next slide
+ * starts exactly 500ms after the streaming animation finishes.
+ */
+const calculateVerseDuration = (verse: string[]) => {
+  const wordCount = verse.join(" ").split(" ").filter(Boolean).length;
+  // 0.12s per word delay + 0.2s for the last word's animation duration
+  // + 500ms pause after streaming ends
+  return Math.ceil((wordCount * 0.12 + 0.2) * 1000 + 500);
+};
+
 const STATE_CONFIGS: Record<DemoState, StateConfig> = {
   intro: {
-    duration: 2200,
+    duration: 800,
     activeMC: "mc1",
     round: 3,
     streamingMC: "mc1",
@@ -84,24 +93,16 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
     mc1Lines: 0,
     mc2Lines: 0,
   },
-  "mc1-streaming": {
-    duration: 1500,
+  "mc1-verse": {
+    duration: calculateVerseDuration(VERSES.mc1),
     activeMC: "mc1",
     round: 3,
     streamingMC: "mc1",
-    showStreamingIndicator: false,
-    mc1Lines: 2, // Show first 2 lines streaming
-    mc2Lines: 0,
-  },
-  "mc1-verse": {
-    duration: 2500,
-    activeMC: "mc1",
-    round: 3,
-    mc1Lines: 4, // Show all 4 lines
+    mc1Lines: 4,
     mc2Lines: 0,
   },
   "mc2-intro": {
-    duration: 2200,
+    duration: 800,
     activeMC: "mc2",
     round: 3,
     streamingMC: "mc2",
@@ -109,19 +110,11 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
     mc1Lines: 4,
     mc2Lines: 0,
   },
-  "mc2-streaming": {
-    duration: 1500,
+  "mc2-verse": {
+    duration: calculateVerseDuration(VERSES.mc2),
     activeMC: "mc2",
     round: 3,
     streamingMC: "mc2",
-    showStreamingIndicator: false,
-    mc1Lines: 4,
-    mc2Lines: 2,
-  },
-  "mc2-verse": {
-    duration: 2500,
-    activeMC: "mc2",
-    round: 3,
     mc1Lines: 4,
     mc2Lines: 4,
   },
@@ -169,10 +162,8 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
 
 const STATE_ORDER: DemoState[] = [
   "intro",
-  "mc1-streaming",
   "mc1-verse",
   "mc2-intro",
-  "mc2-streaming",
   "mc2-verse",
   "scoring",
   "winner",
@@ -243,7 +234,17 @@ function StageHeader({
                   : "bg-gray-800 text-gray-500 border-2 border-gray-700"
               }`}
             >
-              {completedRounds.includes(round) ? "✓" : round}
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={completedRounds.includes(round) ? "check" : "num"}
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {completedRounds.includes(round) ? "✓" : round}
+                </motion.span>
+              </AnimatePresence>
             </div>
           ))}
         </div>
@@ -369,36 +370,82 @@ function VerseDemo({
     position === "player1" ? `rgb(${PLAYER1_COLOR})` : `rgb(${PLAYER2_COLOR})`;
 
   const visibleLines = lines.slice(0, visibleCount);
+  let cumulativeWordCount = 0;
 
   return (
     <div className="flex-1 p-2 sm:p-4 space-y-1.5 sm:space-y-2 overflow-hidden text-pretty">
-      <AnimatePresence mode="popLayout">
-        {visibleLines.map((line, index) => (
-          <motion.div
-            key={`${position}-${index}`}
-            initial={{ opacity: 0, x: position === "player1" ? -15 : 15 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{
-              delay: isStreaming ? index * 0.15 : 0,
-              duration: 0.3,
-            }}
-            className="flex"
-          >
-            <span
-              className="text-[10px] sm:text-sm opacity-50 w-4 sm:w-6 shrink-0"
-              style={{ color: playerColor }}
+      <AnimatePresence mode="wait">
+        {visibleLines.map((line, lineIndex) => {
+          const words = line.split(" ");
+          const lineStartWordIndex = cumulativeWordCount;
+          cumulativeWordCount += words.length;
+
+          return (
+            <motion.div
+              key={`${position}-${lineIndex}`}
+              initial={{
+                opacity: 0,
+                x: position === "player1" ? -20 : 20,
+                scale: 0.95,
+              }}
+              animate={{
+                opacity: 1,
+                x: 0,
+                scale: 1,
+              }}
+              exit={{
+                opacity: 0,
+                x: position === "player1" ? -10 : 10,
+                scale: 0.95,
+                transition: { duration: 0.2 },
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 400,
+                damping: 25,
+                mass: 1,
+              }}
+              className="flex"
             >
-              {index + 1}.
-            </span>
-            <p
-              className="text-xs sm:text-base text-white font-medium leading-relaxed flex-1"
-              style={{ textShadow: `0 0 8px ${playerColor}40` }}
-            >
-              {line}
-            </p>
-          </motion.div>
-        ))}
+              <motion.span
+                key={`line-num-${lineIndex}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.5 }}
+                transition={{
+                  duration: isStreaming ? 0.2 : 0,
+                  delay: isStreaming ? lineStartWordIndex * 0.12 : 0,
+                }}
+                className="text-[10px] sm:text-sm w-4 sm:w-6 shrink-0"
+                style={{ color: playerColor }}
+              >
+                {lineIndex + 1}.
+              </motion.span>
+              <div
+                className="text-xs sm:text-base text-white font-medium leading-relaxed flex-1"
+                style={{ textShadow: `0 0 8px ${playerColor}40` }}
+              >
+                {words.map((word, wordIndex) => {
+                  const globalWordIndex = lineStartWordIndex + wordIndex;
+                  const delay = globalWordIndex * 0.12;
+                  return (
+                    <motion.span
+                      key={`word-${lineIndex}-${wordIndex}`}
+                      initial={{ opacity: 0, filter: "blur(4px)" }}
+                      animate={{ opacity: 1, filter: "blur(0px)" }}
+                      transition={{
+                        duration: isStreaming ? 0.2 : 0,
+                        delay: isStreaming ? delay : 0,
+                      }}
+                      className="inline-block mr-[0.25em]"
+                    >
+                      {word}
+                    </motion.span>
+                  );
+                })}
+              </div>
+            </motion.div>
+          );
+        })}
       </AnimatePresence>
 
       {/* Streaming indicator */}
@@ -443,7 +490,7 @@ function ScoringOverlay({ isPaused }: { isPaused: boolean }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-10"
+      className="absolute inset-0 flex items-center justify-center z-20"
     >
       <div className="flex flex-col items-center gap-3">
         <div className="flex items-center gap-2">
@@ -549,11 +596,11 @@ function ContainedConfetti({ isPaused }: { isPaused: boolean }) {
     const width = () => canvas.clientWidth || canvas.width / dpr;
     const height = () => canvas.clientHeight || canvas.height / dpr;
 
-    // Create particles from center
+    // Create particles from a responsive point
     for (let i = 0; i < 80; i++) {
       const w = width();
       const h = height();
-      const startX = w / 2;
+      const startX = w * 0.55; // 55% of container width (5% offset from center)
       const startY = h / 2;
 
       const angle = Math.random() * Math.PI * 2;
@@ -658,18 +705,13 @@ function ContainedConfetti({ isPaused }: { isPaused: boolean }) {
 function WinnerOverlay({ mc, isPaused }: WinnerOverlayProps) {
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="absolute inset-0 flex items-center justify-center z-10 overflow-hidden"
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      className="absolute inset-0 flex items-center justify-center z-20 overflow-hidden"
     >
       <ContainedConfetti isPaused={isPaused} />
-      <motion.div
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", damping: 12 }}
-        className="flex flex-col items-center gap-2 text-center px-4 relative z-10"
-      >
+      <div className="flex flex-col items-center gap-2 text-center px-4 relative z-10">
         <motion.span
           className="text-3xl sm:text-4xl"
           animate={isPaused ? { rotate: 0 } : { rotate: [0, -10, 10, 0] }}
@@ -684,7 +726,7 @@ function WinnerOverlay({ mc, isPaused }: WinnerOverlayProps) {
         <p className="text-lg sm:text-2xl font-bold text-yellow-400 font-(family-name:--font-bebas-neue)">
           WINNER: {mc.name}
         </p>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
@@ -730,18 +772,12 @@ function SongStyleSelectOverlay() {
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-      className="absolute inset-0 flex items-center justify-center z-10"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      className="absolute inset-0 flex items-center justify-center z-20"
     >
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
-        className="flex flex-col gap-3 px-4 py-4 mx-4 rounded-xl bg-gray-900/95 border border-gray-700 max-w-xs w-full"
-      >
+      <div className="flex flex-col gap-3 px-4 py-4 mx-4 rounded-xl bg-gray-900/95 border border-gray-700 max-w-xs w-full">
         {/* Header */}
         <div className="text-center mb-1">
           <p className="text-sm sm:text-base font-bold text-white">
@@ -820,7 +856,7 @@ function SongStyleSelectOverlay() {
             <span>Generate Song</span>
           </div>
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
@@ -869,18 +905,12 @@ function SongGeneratingOverlay({ isPaused }: { isPaused: boolean }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-      className="absolute inset-0 flex items-center justify-center z-10"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="absolute inset-0 flex items-center justify-center z-20"
     >
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
-        className="flex flex-col items-center gap-4 px-6 py-5 mx-4 rounded-xl bg-gray-900/90 border border-gray-700 max-w-xs w-full"
-      >
+      <div className="flex flex-col items-center gap-4 px-6 py-5 mx-4 rounded-xl bg-gray-900/90 border border-gray-700 max-w-xs w-full">
         {/* Icon */}
         <motion.div
           className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-linear-to-br from-orange-500 to-red-600 flex items-center justify-center"
@@ -916,6 +946,7 @@ function SongGeneratingOverlay({ isPaused }: { isPaused: boolean }) {
           <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
             <motion.div
               className="h-full bg-linear-to-r from-yellow-400 to-orange-500 rounded-full"
+              initial={{ width: "0%" }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: isPaused ? 0 : 0.1 }}
             />
@@ -924,7 +955,7 @@ function SongGeneratingOverlay({ isPaused }: { isPaused: boolean }) {
             {Math.round(progress)}% complete
           </p>
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
@@ -969,18 +1000,12 @@ function SongCompleteOverlay({ isPaused }: { isPaused: boolean }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-      className="absolute inset-0 flex items-center justify-center z-10"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      className="absolute inset-0 flex items-center justify-center z-20"
     >
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
-        className="flex flex-col gap-3 px-4 py-4 mx-4 rounded-xl bg-linear-to-br from-gray-900 to-gray-950 border border-gray-700 max-w-md w-full"
-      >
+      <div className="flex flex-col gap-3 px-4 py-4 mx-4 rounded-xl bg-linear-to-br from-gray-900 to-gray-950 border border-gray-700 max-w-md w-full">
         {/* Header */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden shrink-0 border border-white/10 shadow-lg">
@@ -1060,6 +1085,7 @@ function SongCompleteOverlay({ isPaused }: { isPaused: boolean }) {
             <div className="flex-1 h-1 bg-gray-700 rounded-full overflow-hidden">
               <motion.div
                 className="h-full bg-white rounded-full"
+                initial={{ width: "0%" }}
                 animate={{ width: `${(currentTime / 45) * 100}%` }}
                 transition={{ duration: isPaused ? 0 : 0.1 }}
               />
@@ -1077,7 +1103,7 @@ function SongCompleteOverlay({ isPaused }: { isPaused: boolean }) {
             <Download className="w-4 h-4 sm:w-5 sm:h-5" />
           </motion.button>
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
@@ -1091,22 +1117,6 @@ interface HeroBattleDemoProps {
   setIsPaused?: (paused: boolean | ((prev: boolean) => boolean)) => void;
 }
 
-// Slide animation variants
-const slideVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? 80 : -80,
-    opacity: 0,
-  }),
-  center: {
-    x: 0,
-    opacity: 1,
-  },
-  exit: (direction: number) => ({
-    x: direction < 0 ? 80 : -80,
-    opacity: 0,
-  }),
-};
-
 export function HeroBattleDemo({
   isPaused: externalPaused,
   setIsPaused: setExternalPaused,
@@ -1115,7 +1125,6 @@ export function HeroBattleDemo({
   const [stateIndex, setStateIndex] = useState(0);
   const [isInView, setIsInView] = useState(false);
   const [internalPaused, setInternalPaused] = useState(false);
-  const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
 
   // Touch/swipe state
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -1131,7 +1140,6 @@ export function HeroBattleDemo({
   const config = STATE_CONFIGS[currentStateName];
 
   const advanceState = useCallback(() => {
-    setDirection(1);
     setStateIndex((prev) => (prev + 1) % STATE_ORDER.length);
   }, []);
 
@@ -1148,7 +1156,6 @@ export function HeroBattleDemo({
         setIsInView(nowInView);
 
         if (!wasInView && nowInView) {
-          setDirection(1);
           setStateIndex(0);
           setIsPaused(false);
         }
@@ -1175,12 +1182,10 @@ export function HeroBattleDemo({
 
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
-        setDirection(1);
         setStateIndex((prev) => (prev + 1) % STATE_ORDER.length);
         setIsPaused(false);
       } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
         e.preventDefault();
-        setDirection(-1);
         setStateIndex((prev) =>
           prev === 0 ? STATE_ORDER.length - 1 : prev - 1
         );
@@ -1225,11 +1230,9 @@ export function HeroBattleDemo({
       ) {
         if (deltaX < 0) {
           // Swipe left → next slide
-          setDirection(1);
           setStateIndex((prev) => (prev + 1) % STATE_ORDER.length);
         } else {
           // Swipe right → previous slide
-          setDirection(-1);
           setStateIndex((prev) =>
             prev === 0 ? STATE_ORDER.length - 1 : prev - 1
           );
@@ -1323,76 +1326,69 @@ export function HeroBattleDemo({
             />
           </div>
 
-          {/* Split View - Two Columns with slide animation */}
-          <AnimatePresence mode="popLayout" custom={direction} initial={false}>
-            <motion.div
-              key={stateIndex}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{
-                x: { type: "spring", stiffness: 300, damping: 30 },
-                opacity: { duration: 0.2 },
-              }}
-              className="relative z-10 flex-1 grid grid-cols-2 pb-8"
-            >
-              {/* Player 1 (Left) */}
-              <div className="flex flex-col border-r border-gray-800/50 overflow-hidden">
-                <PersonaCardDemo
-                  mc={MC1}
-                  position="player1"
-                  isActive={
-                    config.activeMC === "mc1" || config.activeMC === "both"
-                  }
-                  isWinner={config.showWinner}
-                  isPaused={isPaused}
-                />
-                <VerseDemo
-                  lines={VERSES.mc1}
-                  visibleCount={config.mc1Lines || 0}
-                  position="player1"
-                  isStreaming={config.streamingMC === "mc1"}
-                  showIndicator={config.showStreamingIndicator}
-                  mcName={MC1.name}
-                  isPaused={isPaused}
-                />
-              </div>
+          {/* Split View - Two Columns - Frame-by-frame (Instant) */}
+          <div className="relative z-10 flex-1 grid grid-cols-2 pb-8">
+            {/* Player 1 (Left) */}
+            <div className="flex flex-col border-r border-gray-800/50 overflow-hidden">
+              <PersonaCardDemo
+                mc={MC1}
+                position="player1"
+                isActive={
+                  config.activeMC === "mc1" || config.activeMC === "both"
+                }
+                isWinner={config.showWinner}
+                isPaused={isPaused}
+              />
+              <VerseDemo
+                lines={VERSES.mc1}
+                visibleCount={config.mc1Lines || 0}
+                position="player1"
+                isStreaming={config.streamingMC === "mc1"}
+                showIndicator={config.showStreamingIndicator}
+                mcName={MC1.name}
+                isPaused={isPaused}
+              />
+            </div>
 
-              {/* Player 2 (Right) */}
-              <div className="flex flex-col overflow-hidden">
-                <PersonaCardDemo
-                  mc={MC2}
-                  position="player2"
-                  isActive={
-                    config.activeMC === "mc2" || config.activeMC === "both"
-                  }
-                  isPaused={isPaused}
-                />
-                <VerseDemo
-                  lines={VERSES.mc2}
-                  visibleCount={config.mc2Lines || 0}
-                  position="player2"
-                  isStreaming={config.streamingMC === "mc2"}
-                  showIndicator={config.showStreamingIndicator}
-                  mcName={MC2.name}
-                  isPaused={isPaused}
-                />
-              </div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Persistent frost overlay for post-battle states */}
-          {(config.showWinner ||
-            config.showSongStyleSelect ||
-            config.showSongGenerating ||
-            config.showSongComplete) && (
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10 pointer-events-none" />
-          )}
+            {/* Player 2 (Right) */}
+            <div className="flex flex-col overflow-hidden">
+              <PersonaCardDemo
+                mc={MC2}
+                position="player2"
+                isActive={
+                  config.activeMC === "mc2" || config.activeMC === "both"
+                }
+                isPaused={isPaused}
+              />
+              <VerseDemo
+                lines={VERSES.mc2}
+                visibleCount={config.mc2Lines || 0}
+                position="player2"
+                isStreaming={config.streamingMC === "mc2"}
+                showIndicator={config.showStreamingIndicator}
+                mcName={MC2.name}
+                isPaused={isPaused}
+              />
+            </div>
+          </div>
 
           {/* Overlays */}
           <AnimatePresence>
+            {/* Persistent frost overlay for post-battle states */}
+            {(config.showScoring ||
+              config.showWinner ||
+              config.showSongStyleSelect ||
+              config.showSongGenerating ||
+              config.showSongComplete) && (
+              <motion.div
+                key="post-battle-frost"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10 pointer-events-none"
+              />
+            )}
             {isPaused && (
               <div className="absolute inset-0 z-40 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
                 <motion.div
@@ -1452,7 +1448,6 @@ export function HeroBattleDemo({
                 <motion.button
                   key={`${state}-${idx}`}
                   onClick={() => {
-                    setDirection(idx > stateIndex ? 1 : -1);
                     setStateIndex(idx);
                     setIsPaused(false);
                   }}
