@@ -35,6 +35,7 @@ export type { DemoState, MCData, StateConfig } from "./types";
 interface HeroBattleDemoProps {
   isPaused?: boolean;
   setIsPaused?: (paused: boolean | ((prev: boolean) => boolean)) => void;
+  ignoreHoverPause?: boolean;
 }
 
 export interface HeroBattleDemoRef {
@@ -44,7 +45,7 @@ export interface HeroBattleDemoRef {
 
 export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>(
   function HeroBattleDemo(
-    { isPaused: externalPaused, setIsPaused: setExternalPaused },
+    { isPaused: externalPaused, setIsPaused: setExternalPaused, ignoreHoverPause },
     ref
   ) {
   const [stateIndex, setStateIndex] = useState(0);
@@ -57,8 +58,8 @@ export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>
   const setIsPaused =
     setExternalPaused !== undefined ? setExternalPaused : setInternalPaused;
 
-  // Hover pauses the demo
-  const effectivePaused = isPaused || isHovering;
+  // Hover pauses the demo (unless ignoreHoverPause is true)
+  const effectivePaused = isPaused || (isHovering && !ignoreHoverPause);
 
   const currentStateName = STATE_ORDER[stateIndex];
   const config = STATE_CONFIGS[currentStateName];
@@ -228,8 +229,8 @@ export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>
             {config.showSongComplete && (
               <SongCompleteOverlay key="complete" isPaused={effectivePaused} />
             )}
-            {/* Hover frost - covers all content including state overlays */}
-            {isHovering && (
+            {/* Hover frost - only show when not explicitly paused and not ignoring hover */}
+            {isHovering && !isPaused && !ignoreHoverPause && (
               <motion.div
                 key="hover-frost"
                 initial={{ opacity: 0 }}
