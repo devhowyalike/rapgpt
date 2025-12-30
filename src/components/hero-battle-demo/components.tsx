@@ -251,11 +251,12 @@ export const VerseDemo = memo(function VerseDemo({
 
   // Pre-calculate cumulative word counts to avoid mutation during render
   // This ensures pure function behavior for React Strict Mode & concurrent rendering
+  // Note: filter(Boolean) ensures consistency with calculateVerseDuration in utils.ts
   const lineStartWordIndices = useMemo(() => {
     let cumulative = 0;
     return visibleLines.map((line) => {
       const startIndex = cumulative;
-      cumulative += line.split(" ").length;
+      cumulative += line.split(" ").filter(Boolean).length;
       return startIndex;
     });
   }, [visibleLines]);
@@ -325,7 +326,7 @@ const VerseLine = memo(function VerseLine({
   playerColor,
   isPaused,
 }: VerseLineProps) {
-  const words = useMemo(() => line.split(" "), [line]);
+  const words = useMemo(() => line.split(" ").filter(Boolean), [line]);
   const lineNumberVisible =
     !isStreaming || visibleWordCount >= lineStartWordIndex;
 
@@ -368,7 +369,9 @@ const VerseLine = memo(function VerseLine({
           return (
             <span
               key={`word-${lineIndex}-${wordIndex}`}
-              className={`demo-word ${isVisible ? "visible" : ""} ${!isStreaming ? "instant" : ""} ${isPaused ? "paused" : ""}`}
+              className={`demo-word ${isVisible ? "visible" : ""} ${
+                !isStreaming ? "instant" : ""
+              } ${isPaused ? "paused" : ""}`}
               style={
                 isStreaming && !isPaused && !isVisible
                   ? { animationDelay: delay }
