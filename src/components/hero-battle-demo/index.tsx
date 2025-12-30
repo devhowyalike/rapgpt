@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence, MotionConfig } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 import { StageHeader, PersonaCardDemo, VerseDemo } from "./components";
 import { MC1, MC2, VERSES, STATE_CONFIGS, STATE_ORDER } from "./data";
@@ -35,12 +35,16 @@ export function HeroBattleDemo({
 }: HeroBattleDemoProps) {
   const [stateIndex, setStateIndex] = useState(0);
   const [internalPaused, setInternalPaused] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
 
   // Use external state if provided, otherwise fallback to internal
   const isPaused =
     externalPaused !== undefined ? externalPaused : internalPaused;
   const setIsPaused =
     setExternalPaused !== undefined ? setExternalPaused : setInternalPaused;
+
+  // Hover pauses the demo
+  const effectivePaused = isPaused || isHovering;
 
   const currentStateName = STATE_ORDER[stateIndex];
   const config = STATE_CONFIGS[currentStateName];
@@ -71,13 +75,13 @@ export function HeroBattleDemo({
     },
   });
 
-  // Auto-advance
+  // Auto-advance (pauses when hovering too)
   useEffect(() => {
-    if (!isInView || isPaused) return;
+    if (!isInView || effectivePaused) return;
 
     const timer = setTimeout(goToNext, config.duration);
     return () => clearTimeout(timer);
-  }, [stateIndex, isInView, isPaused, config.duration, goToNext]);
+  }, [stateIndex, isInView, effectivePaused, config.duration, goToNext]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -118,13 +122,15 @@ export function HeroBattleDemo({
     config.showSongComplete;
 
   return (
-    <MotionConfig reducedMotion={isPaused ? "always" : "never"}>
+    <MotionConfig reducedMotion={effectivePaused ? "always" : "never"}>
       <div
         ref={containerRef}
-        className="relative w-full group touch-pan-y"
-        data-paused={isPaused}
+        className="relative w-full touch-pan-y"
+        data-paused={effectivePaused}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
         style={
           {
             "--player1-color": PLAYER_COLORS.player1,
@@ -135,8 +141,11 @@ export function HeroBattleDemo({
         {/* Measurement container - invisible but defines height */}
         <MeasurementContainer />
 
-        {/* Visible demo container */}
-        <div className="absolute inset-0 flex flex-col overflow-hidden">
+        {/* Visible demo container - contain: content for layout isolation */}
+        <div
+          className="absolute inset-0 flex flex-col overflow-hidden"
+          style={{ contain: "content" }}
+        >
           {/* Background */}
           <div className="absolute inset-0 bg-linear-to-b from-gray-900 via-gray-950 to-black" />
 
@@ -145,7 +154,7 @@ export function HeroBattleDemo({
             <StageHeader
               currentRound={config.round}
               completedRounds={completedRounds}
-              isPaused={isPaused}
+              isPaused={effectivePaused}
             />
           </div>
 
@@ -160,7 +169,7 @@ export function HeroBattleDemo({
               isStreaming={config.streamingMC === "mc1"}
               showIndicator={config.showStreamingIndicator}
               visibleLines={config.mc1Lines || 0}
-              isPaused={isPaused}
+              isPaused={effectivePaused}
               className="border-r border-gray-800/50"
             />
 
@@ -173,28 +182,31 @@ export function HeroBattleDemo({
               isStreaming={config.streamingMC === "mc2"}
               showIndicator={config.showStreamingIndicator}
               visibleLines={config.mc2Lines || 0}
-              isPaused={isPaused}
+              isPaused={effectivePaused}
             />
           </div>
 
           {/* Overlays */}
           <AnimatePresence>
             {showFrostOverlay && <FrostOverlay key="frost" />}
-            {isPaused && <PauseOverlay key="pause" />}
+            {effectivePaused && <PauseOverlay key="pause" />}
             {config.showScoring && (
-              <ScoringOverlay key="scoring" isPaused={isPaused} />
+              <ScoringOverlay key="scoring" isPaused={effectivePaused} />
             )}
             {config.showWinner && (
-              <WinnerOverlay key="winner" mc={MC2} isPaused={isPaused} />
+              <WinnerOverlay key="winner" mc={MC2} isPaused={effectivePaused} />
             )}
             {config.showSongStyleSelect && (
               <SongStyleSelectOverlay key="style" />
             )}
             {config.showSongGenerating && (
-              <SongGeneratingOverlay key="generating" isPaused={isPaused} />
+              <SongGeneratingOverlay
+                key="generating"
+                isPaused={effectivePaused}
+              />
             )}
             {config.showSongComplete && (
-              <SongCompleteOverlay key="complete" isPaused={isPaused} />
+              <SongCompleteOverlay key="complete" isPaused={effectivePaused} />
             )}
           </AnimatePresence>
 
@@ -207,9 +219,6 @@ export function HeroBattleDemo({
               setIsPaused(false);
             }}
           />
-
-          {/* Frost overlay on hover */}
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-30" />
         </div>
       </div>
     </MotionConfig>
@@ -241,7 +250,7 @@ interface PlayerColumnProps {
   className?: string;
 }
 
-function PlayerColumn({
+const PlayerColumn = memo(function PlayerColumn({
   mc,
   verses,
   position,
@@ -252,6 +261,9 @@ function PlayerColumn({
   isPaused,
   className,
 }: PlayerColumnProps) {
+  // Convert readonly array to mutable only once, memoized
+  const mutableVerses = useMemo(() => [...verses], [verses]);
+
   return (
     <div className={`flex flex-col overflow-hidden ${className || ""}`}>
       <PersonaCardDemo
@@ -261,7 +273,7 @@ function PlayerColumn({
         isPaused={isPaused}
       />
       <VerseDemo
-        lines={[...verses]}
+        lines={mutableVerses}
         visibleCount={visibleLines}
         position={position}
         isStreaming={isStreaming}
@@ -272,9 +284,46 @@ function PlayerColumn({
       />
     </div>
   );
+});
+
+interface StateIndicatorProps {
+  currentIndex: number;
+  totalStates: number;
+  onSelect: (index: number) => void;
 }
 
-function MeasurementContainer() {
+const StateIndicator = memo(function StateIndicator({
+  currentIndex,
+  totalStates,
+  onSelect,
+}: StateIndicatorProps) {
+  // Memoize array to prevent recreation on every render
+  const stateIndices = useMemo(
+    () => Array.from({ length: totalStates }, (_, i) => i),
+    [totalStates]
+  );
+
+  return (
+    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20 bg-black/60 px-3 py-1.5 rounded-full border border-white/5">
+      <div className="flex gap-1">
+        {stateIndices.map((idx) => (
+          <button
+            key={idx}
+            onClick={() => onSelect(idx)}
+            className={`h-1 rounded-full transition-all duration-300 ${
+              idx === currentIndex
+                ? "w-4 sm:w-6 bg-yellow-400"
+                : "w-1 sm:w-1.5 bg-gray-700"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+});
+
+// Memoized measurement container - renders once to establish layout height
+const MeasurementContainer = memo(function MeasurementContainer() {
   return (
     <div
       aria-hidden="true"
@@ -320,35 +369,4 @@ function MeasurementContainer() {
       </div>
     </div>
   );
-}
-
-interface StateIndicatorProps {
-  currentIndex: number;
-  totalStates: number;
-  onSelect: (index: number) => void;
-}
-
-function StateIndicator({
-  currentIndex,
-  totalStates,
-  onSelect,
-}: StateIndicatorProps) {
-  return (
-    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/5">
-      <div className="flex gap-1">
-        {Array.from({ length: totalStates }).map((_, idx) => (
-          <motion.button
-            key={idx}
-            onClick={() => onSelect(idx)}
-            className={`h-1 rounded-full transition-all duration-300 ${
-              idx === currentIndex ? "w-4 sm:w-6" : "w-1 sm:w-1.5"
-            }`}
-            animate={{
-              backgroundColor: idx === currentIndex ? "#facc15" : "#374151",
-            }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
+});

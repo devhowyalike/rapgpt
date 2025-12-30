@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell } from "lucide-react";
 import Image from "next/image";
 
 import type { MCData, PausableProps, PlayerPositionProps } from "./types";
 import type { PlayerPosition } from "./utils";
-import { useElapsedTime } from "./hooks";
+import { useVisibleWordCount } from "./hooks";
 import { getPlayerColor, ringPulseAnimation } from "./utils";
 
 // =============================================================================
@@ -19,7 +19,7 @@ interface StageHeaderProps extends PausableProps {
   completedRounds: number[];
 }
 
-export function StageHeader({
+export const StageHeader = memo(function StageHeader({
   currentRound,
   completedRounds,
   isPaused,
@@ -68,7 +68,7 @@ export function StageHeader({
       </div>
     </div>
   );
-}
+});
 
 // =============================================================================
 // Round Indicator (extracted for clarity)
@@ -120,7 +120,7 @@ interface PersonaCardDemoProps extends PausableProps, PlayerPositionProps {
   isActive: boolean;
 }
 
-export function PersonaCardDemo({
+export const PersonaCardDemo = memo(function PersonaCardDemo({
   mc,
   position,
   isActive,
@@ -158,7 +158,7 @@ export function PersonaCardDemo({
       </div>
     </div>
   );
-}
+});
 
 // =============================================================================
 // Persona Avatar (extracted for clarity)
@@ -231,7 +231,7 @@ interface VerseDemoProps extends PausableProps, PlayerPositionProps {
   shortMcName?: string;
 }
 
-export function VerseDemo({
+export const VerseDemo = memo(function VerseDemo({
   lines,
   visibleCount,
   position,
@@ -242,7 +242,7 @@ export function VerseDemo({
   isPaused,
 }: VerseDemoProps) {
   const playerColor = getPlayerColor(position);
-  const { elapsedTime: streamedTime } = useElapsedTime({
+  const { visibleWordCount } = useVisibleWordCount({
     isPaused,
     enabled: isStreaming && visibleCount > 0,
   });
@@ -271,8 +271,9 @@ export function VerseDemo({
             lineStartWordIndex={lineStartWordIndices[lineIndex]}
             position={position}
             isStreaming={isStreaming}
-            streamedTime={streamedTime}
+            visibleWordCount={visibleWordCount}
             playerColor={playerColor}
+            isPaused={isPaused}
           />
         ))}
       </AnimatePresence>
@@ -297,7 +298,7 @@ export function VerseDemo({
       )}
     </div>
   );
-}
+});
 
 // =============================================================================
 // Verse Line (extracted for clarity)
@@ -309,20 +310,24 @@ interface VerseLineProps {
   lineStartWordIndex: number;
   position: PlayerPosition;
   isStreaming?: boolean;
-  streamedTime: number;
+  visibleWordCount: number;
   playerColor: string;
+  isPaused: boolean;
 }
 
-function VerseLine({
+const VerseLine = memo(function VerseLine({
   line,
   lineIndex,
   lineStartWordIndex,
   position,
   isStreaming,
-  streamedTime,
+  visibleWordCount,
   playerColor,
+  isPaused,
 }: VerseLineProps) {
-  const words = line.split(" ");
+  const words = useMemo(() => line.split(" "), [line]);
+  const lineNumberVisible =
+    !isStreaming || visibleWordCount >= lineStartWordIndex;
 
   return (
     <motion.div
@@ -341,45 +346,43 @@ function VerseLine({
       transition={{ type: "spring", stiffness: 400, damping: 25, mass: 1 }}
       className="flex"
     >
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={{
-          opacity:
-            !isStreaming || streamedTime >= lineStartWordIndex * 120 ? 0.5 : 0,
+      <span
+        className="text-[10px] sm:text-sm w-4 sm:w-6 shrink-0 transition-opacity duration-200"
+        style={{
+          color: playerColor,
+          opacity: lineNumberVisible ? 0.5 : 0,
         }}
-        transition={{ duration: 0.2 }}
-        className="text-[10px] sm:text-sm w-4 sm:w-6 shrink-0"
-        style={{ color: playerColor }}
       >
         {lineIndex + 1}.
-      </motion.span>
+      </span>
       <div
         className="text-xs sm:text-base text-white font-medium leading-relaxed flex-1"
         style={{ textShadow: `0 0 8px ${playerColor}40` }}
       >
         {words.map((word, wordIndex) => {
           const globalWordIndex = lineStartWordIndex + wordIndex;
-          const isVisible =
-            !isStreaming || streamedTime >= globalWordIndex * 120;
+          const isVisible = !isStreaming || visibleWordCount > globalWordIndex;
+          // Use CSS animation-delay for staggered reveal during streaming
+          const delay = isStreaming ? `${globalWordIndex * 120}ms` : "0ms";
+
           return (
-            <motion.span
+            <span
               key={`word-${lineIndex}-${wordIndex}`}
-              initial={{ opacity: 0, filter: "blur(4px)" }}
-              animate={{
-                opacity: isVisible ? 1 : 0,
-                filter: isVisible ? "blur(0px)" : "blur(4px)",
-              }}
-              transition={{ duration: 0.2 }}
-              className="inline-block mr-[0.25em]"
+              className={`demo-word ${isVisible ? "visible" : ""} ${!isStreaming ? "instant" : ""} ${isPaused ? "paused" : ""}`}
+              style={
+                isStreaming && !isPaused && !isVisible
+                  ? { animationDelay: delay }
+                  : undefined
+              }
             >
               {word}
-            </motion.span>
+            </span>
           );
         })}
       </div>
     </motion.div>
   );
-}
+});
 
 // =============================================================================
 // Streaming Indicator

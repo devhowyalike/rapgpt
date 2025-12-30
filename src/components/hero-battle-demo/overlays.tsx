@@ -449,27 +449,15 @@ export function SongCompleteOverlay({ isPaused }: PausableProps) {
           </motion.div>
         </div>
 
-        {/* Waveform */}
+        {/* Waveform - CSS-animated for performance */}
         <div className="h-10 sm:h-12 flex items-end justify-between gap-0.5 px-1">
           {WAVEFORM_HEIGHTS.map((height, i) => (
-            <motion.div
+            <div
               key={i}
-              className="flex-1 rounded-t-sm bg-orange-500/60"
-              initial={{ height: "2px", opacity: 0 }}
-              animate={
-                isPaused
-                  ? { height: `${height * 0.7}%`, opacity: 1 }
-                  : { height: [`${height}%`, `${height * 0.4}%`], opacity: 1 }
-              }
-              transition={{
-                height: {
-                  duration: 0.6,
-                  repeat: isPaused ? 0 : Infinity,
-                  repeatType: "reverse",
-                  delay: i * 0.04,
-                  ease: "easeInOut",
-                },
-                opacity: { duration: 0.3, delay: i * 0.04 },
+              className={`demo-waveform-bar ${!isPaused ? "animating" : ""}`}
+              style={{
+                height: `${height}%`,
+                animationDelay: `${i * 40}ms`,
               }}
             />
           ))}
@@ -515,34 +503,32 @@ export function SongCompleteOverlay({ isPaused }: PausableProps) {
 }
 
 // =============================================================================
-// Pause Overlay
+// Pause Overlay (optimized - single blur layer)
 // =============================================================================
 
 export function PauseOverlay() {
   return (
-    <div className="absolute inset-0 z-40 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
+    <motion.div
+      key="pause-overlay"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="absolute inset-0 z-40 pointer-events-none flex items-center justify-center bg-black/40 backdrop-blur-sm"
+    >
       <motion.div
-        key="pause-frost"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
-      />
-      <motion.div
-        key="pause-overlay"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="absolute inset-0 flex items-center justify-center z-10"
+        transition={{ duration: 0.15, delay: 0.05 }}
+        className="bg-black/70 border border-white/10 px-6 py-3 rounded-2xl flex items-center gap-3 shadow-2xl"
       >
-        <div className="bg-black/60 backdrop-blur-xl border border-white/10 px-6 py-3 rounded-2xl flex items-center gap-3 shadow-2xl">
-          <Pause className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-          <span className="text-lg font-bold text-white font-(family-name:--font-bebas-neue) tracking-widest uppercase">
-            Demo Paused
-          </span>
-        </div>
+        <Pause className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+        <span className="text-lg font-bold text-white font-(family-name:--font-bebas-neue) tracking-widest uppercase">
+          Demo Paused
+        </span>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }
 

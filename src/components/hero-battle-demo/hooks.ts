@@ -65,61 +65,84 @@ export function useAnimationProgress({
 }
 
 // =============================================================================
-// RAF-based Elapsed Time Hook
+// Threshold-based Visible Word Count Hook (Optimized)
 // =============================================================================
 
-interface UseElapsedTimeOptions {
+interface UseVisibleWordCountOptions {
   isPaused: boolean;
   enabled?: boolean;
+  wordInterval?: number; // ms between word reveals, default 120ms
 }
 
 /**
- * Hook that tracks elapsed time in milliseconds using requestAnimationFrame.
- * Useful for streaming text animations.
+ * Optimized hook that tracks visible word count using threshold-based updates.
+ * Only triggers re-renders when crossing a word boundary, not every frame.
+ * This dramatically reduces re-render frequency from 60fps to ~8fps for word reveals.
  */
-export function useElapsedTime({ isPaused, enabled = true }: UseElapsedTimeOptions) {
-  const [elapsedTime, setElapsedTime] = useState(0);
+export function useVisibleWordCount({
+  isPaused,
+  enabled = true,
+  wordInterval = 120,
+}: UseVisibleWordCountOptions) {
+  const [visibleWordCount, setVisibleWordCount] = useState(0);
   const rafIdRef = useRef<number | null>(null);
-  const lastTimestampRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number | null>(null);
+  const accumulatedTimeRef = useRef(0);
 
   useEffect(() => {
     if (!enabled) {
-      setElapsedTime(0);
+      setVisibleWordCount(0);
+      accumulatedTimeRef.current = 0;
+      startTimeRef.current = null;
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
-      lastTimestampRef.current = null;
       return;
     }
 
     if (isPaused) {
+      // When pausing, preserve accumulated time
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
-      lastTimestampRef.current = null;
+      startTimeRef.current = null;
       return;
     }
 
     const animate = (timestamp: number) => {
-      if (!lastTimestampRef.current) {
-        lastTimestampRef.current = timestamp;
+      if (!startTimeRef.current) {
+        startTimeRef.current = timestamp;
       }
 
-      const deltaTime = timestamp - lastTimestampRef.current;
-      lastTimestampRef.current = timestamp;
+      const elapsedSinceStart = timestamp - startTimeRef.current;
+      const totalElapsed = accumulatedTimeRef.current + elapsedSinceStart;
+      const newWordCount = Math.floor(totalElapsed / wordInterval);
 
-      setElapsedTime((prev) => prev + deltaTime);
+      // Only update state when word count actually changes
+      setVisibleWordCount((prev) => {
+        if (newWordCount !== prev) {
+          return newWordCount;
+        }
+        return prev;
+      });
+
       rafIdRef.current = requestAnimationFrame(animate);
     };
 
     rafIdRef.current = requestAnimationFrame(animate);
 
     return () => {
+      // Save accumulated time when effect cleans up
+      if (startTimeRef.current) {
+        accumulatedTimeRef.current += performance.now() - startTimeRef.current;
+      }
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
     };
-  }, [isPaused, enabled]);
+  }, [isPaused, enabled, wordInterval]);
 
   const reset = useCallback(() => {
-    setElapsedTime(0);
+    setVisibleWordCount(0);
+    accumulatedTimeRef.current = 0;
+    startTimeRef.current = null;
   }, []);
 
-  return { elapsedTime, reset };
+  return { visibleWordCount, reset };
 }
 
 // =============================================================================
