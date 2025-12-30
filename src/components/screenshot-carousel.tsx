@@ -24,6 +24,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { BattleBarDemo } from "@/components/learn-more/battle-bar-demo";
+import { GoLiveDemo } from "@/components/learn-more/go-live-demo";
 
 type ColorKey = "red" | "yellow" | "green" | "blue" | "purple";
 
@@ -269,6 +270,20 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                               className="absolute inset-0"
                             >
                               <BattleBarDemo />
+                            </motion.div>
+                          </AnimatePresence>
+                        ) : feature.key === "watch" ? (
+                          /* Interactive Go Live Demo for Go Live slide */
+                          <AnimatePresence mode="wait">
+                            <motion.div
+                              key="go-live-demo"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.4 }}
+                              className="absolute inset-0"
+                            >
+                              <GoLiveDemo />
                             </motion.div>
                           </AnimatePresence>
                         ) : (
