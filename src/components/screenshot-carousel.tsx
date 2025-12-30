@@ -23,6 +23,9 @@ import {
   CarouselNext,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import { BattleBarDemo } from "@/components/learn-more/battle-bar-demo";
+import { GoLiveDemo } from "@/components/learn-more/go-live-demo";
+import { BrowserChrome } from "@/components/browser-chrome";
 
 type ColorKey = "red" | "yellow" | "green" | "blue" | "purple";
 
@@ -113,6 +116,33 @@ const FEATURES = [
     screenshot: "/marketing/battle-system/rapgpt-rounds.webp",
   },
   {
+    key: "admin",
+    icon: <Zap className="w-5 h-5 md:w-6 md:h-6" />,
+    title: "Dynamic Interface",
+    description:
+      "Control the battle's flow with the adaptive Battle Bar. Adjust options and pacing on the fly.",
+    color: "purple" as ColorKey,
+    screenshot: "/marketing/rap-gpt-screenshot.webp",
+  },
+  {
+    key: "scoring",
+    icon: <Trophy className="w-5 h-5 md:w-6 md:h-6" />,
+    title: "Score",
+    description:
+      "See the final verdict as the scores are tallied. Detailed stats show who dominated the mic.",
+    color: "green" as ColorKey,
+    screenshot: "/marketing/battle-system/rapgpt-scoring.webp",
+  },
+  {
+    key: "chat",
+    icon: <MessageSquare className="w-5 h-5 md:w-6 md:h-6" />,
+    title: "Comments",
+    description:
+      "Join the crowd in the chatroom as the beef unfolds. React, comment, and hype your favorite MC.",
+    color: "blue" as ColorKey,
+    screenshot: "/marketing/battle-system/rapgpt-comments.webp",
+  },
+  {
     key: "watch",
     icon: <Radio className="w-5 h-5 md:w-6 md:h-6" />,
     title: "Go Live",
@@ -124,29 +154,11 @@ const FEATURES = [
   {
     key: "voting",
     icon: <Zap className="w-5 h-5 md:w-6 md:h-6" />,
-    title: "Voting (Live Only)",
+    title: "Voting",
     description:
       "Rock the vote after each round to impact the battle's outcome. Your voice shapes the competition.",
     color: "yellow" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-voting.webp",
-  },
-  {
-    key: "scoring",
-    icon: <Trophy className="w-5 h-5 md:w-6 md:h-6" />,
-    title: "Battle Results",
-    description:
-      "See the final verdict as the scores are tallied. Detailed stats show who dominated the mic.",
-    color: "green" as ColorKey,
-    screenshot: "/marketing/battle-system/rapgpt-scoring.webp",
-  },
-  {
-    key: "chat",
-    icon: <MessageSquare className="w-5 h-5 md:w-6 md:h-6" />,
-    title: "Live Chat & Reactions",
-    description:
-      "Join the crowd in the chatroom as the beef unfolds. React, comment, and hype your favorite MC.",
-    color: "blue" as ColorKey,
-    screenshot: "/marketing/battle-system/rapgpt-comments.webp",
   },
   {
     key: "song",
@@ -156,15 +168,6 @@ const FEATURES = [
       "Transform any battle into a full track with AI-generated vocals. Choose a beat style, and share your creation.",
     color: "green" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-generate-song.webp",
-  },
-  {
-    key: "admin",
-    icon: <Trophy className="w-5 h-5 md:w-6 md:h-6" />,
-    title: "Host Controls",
-    description:
-      "As the host of a live battle, you're in control. Start, pause, and manage the battle flow through the admin panel.",
-    color: "purple" as ColorKey,
-    screenshot: "/marketing/rap-gpt-screenshot.webp",
   },
 ];
 
@@ -235,27 +238,41 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
               return (
                 <CarouselItem key={feature.key} className="pl-0">
                   <div className="relative">
-                    {/* Screenshot Container */}
-                    <div className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-zinc-950">
-                      {/* Browser Chrome */}
-                      <div className="h-8 md:h-10 bg-zinc-900/80 border-b border-white/5 flex items-center px-4 md:px-6">
-                        <div className="flex gap-1.5">
-                          <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-zinc-700" />
-                          <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-zinc-700" />
-                          <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-zinc-700" />
-                        </div>
-                        {/* URL Bar */}
-                        <div className="flex-1 mx-4">
-                          <div className="max-w-xs mx-auto h-5 md:h-6 bg-zinc-800/50 rounded-md flex items-center justify-center">
-                            <span className="text-[10px] md:text-xs text-zinc-500 truncate px-2">
-                              {APP_URL}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Screenshot */}
-                      <div className="relative w-full aspect-16/10 overflow-hidden bg-zinc-950">
+                    {/* Browser Chrome Shell */}
+                    <BrowserChrome
+                      showAddressBar={false}
+                      contentClassName="aspect-16/10"
+                    >
+                      {feature.key === "admin" ? (
+                        /* Interactive Battle Bar Demo for Dynamic Interface slide */
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key="battle-bar-demo"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className="absolute inset-0"
+                          >
+                            <BattleBarDemo />
+                          </motion.div>
+                        </AnimatePresence>
+                      ) : feature.key === "watch" ? (
+                        /* Interactive Go Live Demo for Go Live slide */
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key="go-live-demo"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className="absolute inset-0"
+                          >
+                            <GoLiveDemo />
+                          </motion.div>
+                        </AnimatePresence>
+                      ) : (
+                        /* Static Screenshot for other slides */
                         <AnimatePresence mode="wait">
                           <motion.div
                             key={feature.screenshot}
@@ -288,15 +305,15 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                             />
                           </motion.div>
                         </AnimatePresence>
-                      </div>
-                    </div>
+                      )}
+                    </BrowserChrome>
 
                     {/* Feature Info - Moved below the screenshot */}
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 }}
-                      className="mt-3 px-2 md:max-w-lg mx-auto"
+                      className="mt-3 px-2 md:max-w-lg mx-auto relative z-10"
                     >
                       <div
                         className={cn(
@@ -330,7 +347,7 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                     {/* Glow Effect */}
                     <div
                       className={cn(
-                        "absolute -bottom-6 md:-bottom-10 inset-x-8 md:inset-x-16 h-12 md:h-20 blur-2xl md:blur-3xl rounded-full opacity-50 transition-colors duration-500",
+                        "absolute -bottom-6 md:-bottom-10 inset-x-8 md:inset-x-16 h-12 md:h-20 blur-2xl md:blur-3xl rounded-full opacity-50 -z-10",
                         featureColors.glow
                       )}
                     />
@@ -340,36 +357,84 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
             })}
           </CarouselContent>
 
-          <CarouselPrevious className="flex left-4 md:-left-12 lg:-left-16 size-9 md:size-10 lg:size-12 border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 [&_svg]:size-5 md:[&_svg]:size-6 lg:[&_svg]:size-7 z-20" />
-          <CarouselNext className="flex right-4 md:-right-12 lg:-right-16 size-9 md:size-10 lg:size-12 border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 [&_svg]:size-5 md:[&_svg]:size-6 lg:[&_svg]:size-7 z-20" />
+          {/* Desktop arrows - hidden on mobile */}
+          <CarouselPrevious className="hidden md:flex md:-left-12 lg:-left-16 md:size-10 lg:size-12 border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 md:[&_svg]:size-6 lg:[&_svg]:size-7 z-20" />
+          <CarouselNext className="hidden md:flex md:-right-12 lg:-right-16 md:size-10 lg:size-12 border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 md:[&_svg]:size-6 lg:[&_svg]:size-7 z-20" />
         </Carousel>
 
-        {/* Dot Indicators */}
-        <div className="flex items-center justify-center gap-2 mt-6 md:mt-8">
-          {FEATURES.map((feature, index) => {
-            const dotColors = COLOR_CLASSES[feature.color];
-            const isActive = current === index;
-            return (
-              <button
-                key={feature.key}
-                onClick={() => scrollTo(index)}
-                className={cn(
-                  "relative h-2 rounded-full transition-all duration-300",
-                  isActive ? "w-8 md:w-10" : "w-2 hover:w-3"
-                )}
-                aria-label={`Go to slide ${index + 1}: ${feature.title}`}
-              >
-                <span
+        {/* Navigation: Dots with mobile arrows on sides */}
+        <div className="flex items-center justify-center gap-3 mt-6 md:mt-8">
+          {/* Mobile Previous Arrow */}
+          <button
+            onClick={() => api?.scrollPrev()}
+            className="flex md:hidden items-center justify-center size-9 rounded-full border border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300"
+            aria-label="Previous slide"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m12 19-7-7 7-7" />
+              <path d="M19 12H5" />
+            </svg>
+          </button>
+
+          {/* Dot Indicators */}
+          <div className="flex items-center justify-center gap-2">
+            {FEATURES.map((feature, index) => {
+              const dotColors = COLOR_CLASSES[feature.color];
+              const isActive = current === index;
+              return (
+                <button
+                  key={feature.key}
+                  onClick={() => scrollTo(index)}
                   className={cn(
-                    "absolute inset-0 rounded-full transition-all duration-300",
-                    isActive
-                      ? `bg-linear-to-r ${dotColors.accent}`
-                      : "bg-zinc-700 hover:bg-zinc-600"
+                    "relative h-2 rounded-full transition-all duration-300",
+                    isActive ? "w-8 md:w-10" : "w-2 hover:w-3"
                   )}
-                />
-              </button>
-            );
-          })}
+                  aria-label={`Go to slide ${index + 1}: ${feature.title}`}
+                >
+                  <span
+                    className={cn(
+                      "absolute inset-0 rounded-full transition-all duration-300",
+                      isActive
+                        ? `bg-linear-to-r ${dotColors.accent}`
+                        : "bg-zinc-700 hover:bg-zinc-600"
+                    )}
+                  />
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Mobile Next Arrow */}
+          <button
+            onClick={() => api?.scrollNext()}
+            className="flex md:hidden items-center justify-center size-9 rounded-full border border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300"
+            aria-label="Next slide"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </button>
         </div>
 
         {/* Keyboard hint */}

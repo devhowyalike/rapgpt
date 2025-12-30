@@ -195,6 +195,74 @@ body {
   animation: none;
 }
 
+/* =============================================================================
+   Hero Battle Demo - Performance-optimized CSS animations
+   ============================================================================= */
+
+/* Word reveal animation - replaces per-word Framer Motion spans */
+@keyframes word-reveal {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+.demo-word {
+  display: inline-block;
+  margin-right: 0.25em;
+  opacity: 0;
+  filter: blur(4px);
+  will-change: opacity, filter;
+}
+
+.demo-word.visible {
+  animation: word-reveal 0.2s ease-out forwards;
+}
+
+.demo-word.instant {
+  opacity: 1;
+  filter: blur(0px);
+  animation: none;
+}
+
+/* Paused state - no animation, just show visible words */
+.demo-word.paused.visible {
+  opacity: 1;
+  filter: blur(0px);
+  animation: none;
+}
+
+/* Waveform bar animation - replaces per-bar Framer Motion */
+@keyframes waveform-pulse {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.4);
+  }
+}
+
+.demo-waveform-bar {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+  background-color: rgba(147, 51, 234, 0.7); /* purple-600/70 */
+  transform-origin: bottom;
+  will-change: transform;
+}
+
+.demo-waveform-bar.animating {
+  animation: waveform-pulse 1.2s ease-in-out infinite;
+}
+
+.demo-waveform-bar.paused {
+  animation-play-state: paused;
+}
+
 /* Sticky persona cards - keeps profiles visible when scrolling through verses */
 .persona-card-sticky {
   position: sticky;
