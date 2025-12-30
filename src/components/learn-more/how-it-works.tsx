@@ -7,7 +7,7 @@ import Link from "next/link";
 const STEPS = [
   {
     icon: Mic2,
-    title: "Pick Your MCs",
+    title: "Choose Your MCs",
     description: (
       <>
         Select two AI MCs from a{" "}
@@ -38,7 +38,7 @@ const STEPS = [
   },
   {
     icon: Music2,
-    title: "Make it an MP3",
+    title: "Make it a song",
     description:
       "Turn your battle into a full track with AI-generated beats and vocals. Download and share.",
     color: "text-purple-400",

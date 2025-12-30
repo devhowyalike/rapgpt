@@ -113,6 +113,33 @@ const FEATURES = [
     screenshot: "/marketing/battle-system/rapgpt-rounds.webp",
   },
   {
+    key: "admin",
+    icon: <Zap className="w-5 h-5 md:w-6 md:h-6" />,
+    title: "Dynamic Interface",
+    description:
+      "Control the battle's flow with the adaptive Battle Bar. Adjust options and pacing on the fly.",
+    color: "purple" as ColorKey,
+    screenshot: "/marketing/rap-gpt-screenshot.webp",
+  },
+  {
+    key: "scoring",
+    icon: <Trophy className="w-5 h-5 md:w-6 md:h-6" />,
+    title: "Score",
+    description:
+      "See the final verdict as the scores are tallied. Detailed stats show who dominated the mic.",
+    color: "green" as ColorKey,
+    screenshot: "/marketing/battle-system/rapgpt-scoring.webp",
+  },
+  {
+    key: "chat",
+    icon: <MessageSquare className="w-5 h-5 md:w-6 md:h-6" />,
+    title: "Comments",
+    description:
+      "Join the crowd in the chatroom as the beef unfolds. React, comment, and hype your favorite MC.",
+    color: "blue" as ColorKey,
+    screenshot: "/marketing/battle-system/rapgpt-comments.webp",
+  },
+  {
     key: "watch",
     icon: <Radio className="w-5 h-5 md:w-6 md:h-6" />,
     title: "Go Live",
@@ -124,29 +151,11 @@ const FEATURES = [
   {
     key: "voting",
     icon: <Zap className="w-5 h-5 md:w-6 md:h-6" />,
-    title: "Voting (Live Only)",
+    title: "Voting",
     description:
       "Rock the vote after each round to impact the battle's outcome. Your voice shapes the competition.",
     color: "yellow" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-voting.webp",
-  },
-  {
-    key: "scoring",
-    icon: <Trophy className="w-5 h-5 md:w-6 md:h-6" />,
-    title: "Battle Results",
-    description:
-      "See the final verdict as the scores are tallied. Detailed stats show who dominated the mic.",
-    color: "green" as ColorKey,
-    screenshot: "/marketing/battle-system/rapgpt-scoring.webp",
-  },
-  {
-    key: "chat",
-    icon: <MessageSquare className="w-5 h-5 md:w-6 md:h-6" />,
-    title: "Live Chat & Reactions",
-    description:
-      "Join the crowd in the chatroom as the beef unfolds. React, comment, and hype your favorite MC.",
-    color: "blue" as ColorKey,
-    screenshot: "/marketing/battle-system/rapgpt-comments.webp",
   },
   {
     key: "song",
@@ -156,15 +165,6 @@ const FEATURES = [
       "Transform any battle into a full track with AI-generated vocals. Choose a beat style, and share your creation.",
     color: "green" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-generate-song.webp",
-  },
-  {
-    key: "admin",
-    icon: <Trophy className="w-5 h-5 md:w-6 md:h-6" />,
-    title: "Host Controls",
-    description:
-      "As the host of a live battle, you're in control. Start, pause, and manage the battle flow through the admin panel.",
-    color: "purple" as ColorKey,
-    screenshot: "/marketing/rap-gpt-screenshot.webp",
   },
 ];
 
