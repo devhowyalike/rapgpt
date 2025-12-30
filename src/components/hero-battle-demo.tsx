@@ -639,40 +639,36 @@ function ContainedConfetti({ isPaused }: { isPaused: boolean }) {
     };
 
     const particles: Particle[] = [];
-    const width = () => canvas.clientWidth || canvas.width / dpr;
-    const height = () => canvas.clientHeight || canvas.height / dpr;
+
+    // Cache dimensions once outside the loop for better performance
+    const w = canvas.clientWidth || canvas.width / dpr;
+    const h = canvas.clientHeight || canvas.height / dpr;
+    const startX = w * 0.55; // 55% of container width (5% offset from center)
+    const startY = h / 2;
+
+    // Pre-allocate particle count (reduced from 80 for smoother initial render)
+    const PARTICLE_COUNT = 60;
 
     // Create particles from a responsive point
-    for (let i = 0; i < 80; i++) {
-      const w = width();
-      const h = height();
-      const startX = w * 0.55; // 55% of container width (5% offset from center)
-      const startY = h / 2;
-
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = 80 + Math.random() * 200;
-      const vx = Math.cos(angle) * speed;
-      const vy = Math.sin(angle) * speed;
-      const size = 3 + Math.random() * 8;
-      const color =
-        CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
-      const rotation = Math.random() * Math.PI * 2;
-      const rotationSpeed =
-        (Math.random() > 0.5 ? 1 : -1) * (Math.PI * (0.5 + Math.random() * 2));
-      const maxLife = 2 + Math.random() * 1.5;
 
       particles.push({
         x: startX,
         y: startY,
-        vx,
-        vy,
-        size,
-        color,
-        rotation,
-        rotationSpeed,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 3 + Math.random() * 8,
+        color:
+          CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+        rotation: Math.random() * Math.PI * 2,
+        rotationSpeed:
+          (Math.random() > 0.5 ? 1 : -1) *
+          (Math.PI * (0.5 + Math.random() * 2)),
         shape: Math.random() > 0.5 ? "circle" : "rect",
         life: 0,
-        maxLife,
+        maxLife: 2 + Math.random() * 1.5,
       });
     }
 
@@ -680,6 +676,10 @@ function ContainedConfetti({ isPaused }: { isPaused: boolean }) {
     let rafId: number;
     const gravity = 150;
     const drag = 0.001;
+
+    // Helper to get current dimensions for animation frame
+    const width = () => canvas.clientWidth || canvas.width / dpr;
+    const height = () => canvas.clientHeight || canvas.height / dpr;
 
     const frame = () => {
       const t = performance.now();
@@ -760,11 +760,10 @@ function WinnerOverlay({ mc, isPaused }: WinnerOverlayProps) {
       <div className="flex flex-col items-center gap-2 text-center px-4 relative z-10">
         <motion.span
           className="text-3xl sm:text-4xl"
-          animate={isPaused ? { rotate: 0 } : { rotate: [0, -10, 10, 0] }}
+          animate={{ rotate: [0, -12, 12, -5, 5, -2, 2, 0] }}
           transition={{
-            duration: 0.5,
-            repeat: isPaused ? 0 : Infinity,
-            repeatDelay: 1,
+            duration: 0.8,
+            ease: "easeOut",
           }}
         >
           🏆
