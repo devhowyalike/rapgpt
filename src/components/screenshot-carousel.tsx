@@ -155,7 +155,7 @@ const FEATURES = [
     description:
       "Transform any battle into a full track with AI-generated vocals. Choose a beat style, and share your creation.",
     color: "green" as ColorKey,
-    screenshot: "/marketing/rap-gpt-screenshot.webp",
+    screenshot: "/marketing/battle-system/rapgpt-generate-song.webp",
   },
   {
     key: "admin",
@@ -280,6 +280,8 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                                   ? "object-cover object-[calc(50%-5px)_top]"
                                   : feature.key === "stage"
                                   ? "object-cover object-[calc(50%-5px)_50%]"
+                                  : feature.key === "song"
+                                  ? "object-cover object-[calc(50%-5px)_bottom]"
                                   : "object-contain"
                               )}
                               priority={index === 0}
