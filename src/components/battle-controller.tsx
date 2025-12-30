@@ -191,6 +191,19 @@ export function BattleController({
     }
   }, [isVotingPhase, setMobileActiveTab, setShowMobileDrawer]);
 
+  // Automatically switch mobile tab when a feature is disabled
+  // This ensures content is always visible when one feature is toggled off
+  useEffect(() => {
+    // If comments are disabled and we're on the comments tab, switch to voting
+    if (!showCommenting && mobileActiveTab === "comments" && showVoting) {
+      setMobileActiveTab("voting");
+    }
+    // If voting is disabled and we're on the voting tab, switch to comments
+    if (!showVoting && mobileActiveTab === "voting" && showCommenting) {
+      setMobileActiveTab("comments");
+    }
+  }, [showCommenting, showVoting, mobileActiveTab, setMobileActiveTab]);
+
   // Navigation guard - prevent leaving page during active battle
   // Guard is active when:
   // 1. Battle is paused (in progress)

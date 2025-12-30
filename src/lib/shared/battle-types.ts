@@ -106,6 +106,7 @@ export interface Battle {
     userId: string;
     displayName: string;
     imageUrl?: string | null;
+    isProfilePublic?: boolean;
   } | null;
   // Battle type flags
   isFeatured?: boolean; // true = admin featured battle, false = user battle

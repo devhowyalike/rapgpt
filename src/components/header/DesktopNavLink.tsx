@@ -17,7 +17,7 @@ export function DesktopNavLink({
   isActive,
 }: DesktopNavLinkProps) {
   const baseClasses =
-    "hidden md:flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg";
+    "hidden lg:flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg";
   const activeClasses = isActive
     ? "text-white bg-gray-800 font-medium"
     : "text-gray-400 hover:text-white hover:bg-gray-800";

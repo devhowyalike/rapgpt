@@ -106,6 +106,7 @@ export function BattleReplayControlBar({
     isStoppingLive,
     onGoLiveClick: handleEndLiveClick,
     onShareClick: handleShare,
+    canManage, // Allow managers to always see comments/voting buttons to toggle back on
   });
 
   return (
@@ -173,6 +174,7 @@ export function BattleReplayControlBar({
             onToggleCommenting={onToggleCommenting}
             onToggleVoting={onToggleVoting}
             battleId={battle.id}
+            isReplay={true}
             customTrigger={<OptionsButton />}
           />
         </div>

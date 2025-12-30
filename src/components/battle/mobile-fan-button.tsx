@@ -12,6 +12,8 @@ export interface MobileFanButtonAction {
   onClick: () => void;
   isActive?: boolean;
   disabled?: boolean;
+  /** Shows dimmed/off appearance but still clickable (for toggled-off features) */
+  featureOff?: boolean;
   /** Custom variant for special styling (e.g., "danger" for red) */
   variant?: "default" | "danger";
 }
@@ -99,12 +101,14 @@ export function MobileFanButton({
                       action.onClick();
                       setIsOpen(false);
                     }}
-                    className={`absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full border backdrop-blur-md shadow-lg flex items-center justify-center text-white ${
-                      action.variant === "danger"
-                        ? "bg-red-600 border-red-500 hover:bg-red-700"
+                    className={`absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full border backdrop-blur-md shadow-lg flex items-center justify-center ${
+                      action.featureOff
+                        ? "bg-gray-800/60 border-gray-600/50 text-gray-500 hover:bg-gray-700/60"
+                        : action.variant === "danger"
+                        ? "bg-red-600 border-red-500 hover:bg-red-700 text-white"
                         : action.isActive
-                        ? "bg-blue-600 border-blue-400"
-                        : "bg-gray-900/90 border-gray-700 hover:bg-gray-800"
+                        ? "bg-blue-600 border-blue-400 text-white"
+                        : "bg-gray-900/90 border-gray-700 hover:bg-gray-800 text-white"
                     }`}
                     aria-label={action.label}
                   >

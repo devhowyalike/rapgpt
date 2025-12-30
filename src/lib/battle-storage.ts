@@ -37,8 +37,9 @@ export async function getBattleById(id: string): Promise<Battle | null> {
         // Always include userId for ownership verification
         creatorInfo = {
           userId: creator.id,
-          displayName: "Anonymous",
+          displayName: "Private User",
           imageUrl: null as string | null,
+          isProfilePublic: creator.isProfilePublic ?? false,
         };
 
         // Only populate display details if profile is public
@@ -55,8 +56,9 @@ export async function getBattleById(id: string): Promise<Battle | null> {
         // Still keep the userId for ownership checks
         creatorInfo = {
           userId: creator.id,
-          displayName: "Anonymous",
+          displayName: "Private User",
           imageUrl: null,
+          isProfilePublic: false,
         };
       }
     }
@@ -207,21 +209,38 @@ export async function getAllBattles(): Promise<Battle[]> {
     return result.map(({ battle, creator }) => {
       // Decrypt creator display name if available
       let creatorInfo = null;
-      if (creator && creator.isProfilePublic) {
+      if (creator) {
+        const isPublic = creator.isProfilePublic ?? false;
         try {
-          const displayName = creator.encryptedDisplayName
-            ? decrypt(creator.encryptedDisplayName)
-            : creator.encryptedName
-              ? decrypt(creator.encryptedName)
-              : "Anonymous";
+          if (isPublic) {
+            const displayName = creator.encryptedDisplayName
+              ? decrypt(creator.encryptedDisplayName)
+              : creator.encryptedName
+                ? decrypt(creator.encryptedName)
+                : "Anonymous";
 
-          creatorInfo = {
-            userId: creator.id, // Use internal user ID for profile links
-            displayName,
-            imageUrl: creator.imageUrl,
-          };
+            creatorInfo = {
+              userId: creator.id,
+              displayName,
+              imageUrl: creator.imageUrl,
+              isProfilePublic: true,
+            };
+          } else {
+            creatorInfo = {
+              userId: creator.id,
+              displayName: "Private User",
+              imageUrl: null,
+              isProfilePublic: false,
+            };
+          }
         } catch (error) {
           console.error("Error decrypting creator info:", error);
+          creatorInfo = {
+            userId: creator.id,
+            displayName: "Private User",
+            imageUrl: null,
+            isProfilePublic: false,
+          };
         }
       }
 
@@ -287,21 +306,38 @@ export async function getFeaturedBattles(): Promise<Battle[]> {
     return result.map(({ battle, creator }) => {
       // Decrypt creator display name if available
       let creatorInfo = null;
-      if (creator && creator.isProfilePublic) {
+      if (creator) {
+        const isPublic = creator.isProfilePublic ?? false;
         try {
-          const displayName = creator.encryptedDisplayName
-            ? decrypt(creator.encryptedDisplayName)
-            : creator.encryptedName
-              ? decrypt(creator.encryptedName)
-              : "Anonymous";
+          if (isPublic) {
+            const displayName = creator.encryptedDisplayName
+              ? decrypt(creator.encryptedDisplayName)
+              : creator.encryptedName
+                ? decrypt(creator.encryptedName)
+                : "Anonymous";
 
-          creatorInfo = {
-            userId: creator.id, // Use internal user ID for profile links
-            displayName,
-            imageUrl: creator.imageUrl,
-          };
+            creatorInfo = {
+              userId: creator.id,
+              displayName,
+              imageUrl: creator.imageUrl,
+              isProfilePublic: true,
+            };
+          } else {
+            creatorInfo = {
+              userId: creator.id,
+              displayName: "Private User",
+              imageUrl: null,
+              isProfilePublic: false,
+            };
+          }
         } catch (error) {
           console.error("Error decrypting creator info:", error);
+          creatorInfo = {
+            userId: creator.id,
+            displayName: "Private User",
+            imageUrl: null,
+            isProfilePublic: false,
+          };
         }
       }
 
@@ -376,21 +412,38 @@ export async function getLiveBattles(): Promise<Battle[]> {
     return result.map(({ battle, creator }) => {
       // Decrypt creator display name if available
       let creatorInfo = null;
-      if (creator && creator.isProfilePublic) {
+      if (creator) {
+        const isPublic = creator.isProfilePublic ?? false;
         try {
-          const displayName = creator.encryptedDisplayName
-            ? decrypt(creator.encryptedDisplayName)
-            : creator.encryptedName
-              ? decrypt(creator.encryptedName)
-              : "Anonymous";
+          if (isPublic) {
+            const displayName = creator.encryptedDisplayName
+              ? decrypt(creator.encryptedDisplayName)
+              : creator.encryptedName
+                ? decrypt(creator.encryptedName)
+                : "Anonymous";
 
-          creatorInfo = {
-            userId: creator.id, // Use internal user ID for profile links
-            displayName,
-            imageUrl: creator.imageUrl,
-          };
+            creatorInfo = {
+              userId: creator.id,
+              displayName,
+              imageUrl: creator.imageUrl,
+              isProfilePublic: true,
+            };
+          } else {
+            creatorInfo = {
+              userId: creator.id,
+              displayName: "Private User",
+              imageUrl: null,
+              isProfilePublic: false,
+            };
+          }
         } catch (error) {
           console.error("Error decrypting creator info:", error);
+          creatorInfo = {
+            userId: creator.id,
+            displayName: "Private User",
+            imageUrl: null,
+            isProfilePublic: false,
+          };
         }
       }
 

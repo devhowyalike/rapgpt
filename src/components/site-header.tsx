@@ -142,7 +142,7 @@ export function SiteHeader({ activeBattleState }: SiteHeaderProps) {
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between h-full gap-4">
         {/* Left Section: Hamburger (mobile), Logo and Navigation Links */}
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2 lg:gap-4">
           {/* Mobile Hamburger Menu - Left of Logo */}
           <MobileMenu
             isSignedIn={Boolean(isSignedIn)}
@@ -154,7 +154,7 @@ export function SiteHeader({ activeBattleState }: SiteHeaderProps) {
             pathname={pathname}
           />
 
-          <div className="ml-1 md:ml-0">
+          <div className="ml-1 lg:ml-0">
             <RapGPTLogo size="sm" />
           </div>
 
@@ -219,7 +219,7 @@ export function SiteHeader({ activeBattleState }: SiteHeaderProps) {
 
           {/* User Dropdown - Desktop Only, Signed In Only */}
           {isSignedIn && (
-            <div className="hidden md:block">
+            <div className="hidden lg:block">
               <UserButton />
             </div>
           )}

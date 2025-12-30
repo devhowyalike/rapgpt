@@ -24,6 +24,8 @@ interface BattleOptionsDropdownProps {
   pauseLabel?: string;
   customTrigger?: React.ReactNode;
   isLive?: boolean;
+  /** Whether viewing a completed battle replay (enables voting toggle) */
+  isReplay?: boolean;
   battleId: string;
 }
 
@@ -37,10 +39,14 @@ export function BattleOptionsDropdown({
   pauseLabel,
   customTrigger,
   isLive = false,
+  isReplay = false,
   battleId,
 }: BattleOptionsDropdownProps) {
   const [open, setOpen] = useState(false);
   const { shareBattle, ShareDialog } = useBattleShare();
+  
+  // Voting can be toggled when live OR when viewing a replay
+  const canToggleVoting = isLive || isReplay;
 
   const handleShare = async () => {
     const url = `${window.location.origin}/battle/${battleId}`;
@@ -88,16 +94,16 @@ export function BattleOptionsDropdown({
             <div className="flex items-center gap-2">
               <Vote className="w-4 h-4 text-gray-400" />
               <span className="text-sm">Voting</span>
-              {!isLive && (
+              {!canToggleVoting && (
                 <span className="text-[10px] text-gray-500 whitespace-nowrap">
                   ("Go Live" Only)
                 </span>
               )}
             </div>
             <Switch
-              checked={showVoting && isLive}
+              checked={showVoting}
               onCheckedChange={onToggleVoting}
-              disabled={!isLive}
+              disabled={!canToggleVoting}
             />
           </div>
 

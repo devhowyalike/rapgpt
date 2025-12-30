@@ -130,6 +130,7 @@ export function BattleControlBar({
     isStoppingLive,
     onGoLiveClick: handleGoLiveClick,
     onShareClick: handleShare,
+    canManage: canManageLive, // Allow managers to always see comments/voting buttons to toggle back on
   });
 
   // Show special message when host ended the battle (for viewers only)

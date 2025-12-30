@@ -48,13 +48,13 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section className="pt-8 pb-16 px-4 relative overflow-hidden bg-black border-none">
+    <section className="pt-8 pb-8 px-4 relative overflow-hidden bg-black border-none">
       {/* Background Elements - matching homepage */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-linear-to-l from-red-500/5 to-transparent pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-1/3 h-full bg-linear-to-r from-blue-500/5 to-transparent pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="text-center mb-16">
+        <div className="text-center mb-10 md:mb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

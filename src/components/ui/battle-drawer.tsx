@@ -140,8 +140,8 @@ export function BattleDrawer({
             </button>
           </div>
         )}
-        {/* Children - only render when open to prevent overlap */}
-        {open && children}
+        {/* Children - always mounted but visually hidden when closed to preserve state */}
+        <div className={open ? "" : "hidden"}>{children}</div>
       </motion.div>
     </>
   );

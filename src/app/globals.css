@@ -24,6 +24,7 @@
 
   /* Layout heights - centralized for scalability */
   --header-height: 56px;
+  --footer-height: 0px; /* Updated dynamically when footer is visible */
   --battle-header-height: 89px; /* battle header with round tracker and stage info */
   --live-banner-height: 60px;
   --bottom-controls-height: 72px; /* drawer offset for bottom buttons */
@@ -208,6 +209,11 @@ body {
     /* On desktop, battle header is not sticky, so stick at top of scroll container */
     top: 0;
   }
+}
+
+/* Fullscreen pages (e.g. battle pages) - hide footer */
+body:has([data-fullscreen-page]) > footer {
+  display: none;
 }
 
 /* Ensure smooth touch scrolling on containers with sticky children */

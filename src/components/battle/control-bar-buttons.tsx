@@ -368,6 +368,8 @@ interface BuildMobileFanActionsOptions {
   isStoppingLive?: boolean;
   onGoLiveClick?: () => void;
   onShareClick?: () => void;
+  /** If true, always show comments/voting buttons even when disabled (for managers to toggle back on) */
+  canManage?: boolean;
 }
 
 /**
@@ -391,6 +393,7 @@ export function buildMobileFanActions({
   isStoppingLive = false,
   onGoLiveClick,
   onShareClick,
+  canManage = false,
 }: BuildMobileFanActionsOptions): MobileFanButtonAction[] {
   const actions: MobileFanButtonAction[] = [];
 
@@ -424,28 +427,37 @@ export function buildMobileFanActions({
     });
   }
 
-  if (showCommenting && onCommentsClick) {
+  // For managers, always show comments button so they can toggle it back on
+  // For regular users, only show when comments are enabled
+  // When feature is off, clicking opens options to toggle it back on
+  if ((showCommenting || canManage) && onCommentsClick) {
+    const isOff = !showCommenting;
     actions.push({
       id: "comments",
-      label: "Comments",
+      label: isOff ? "Comments (Off)" : "Comments",
       icon: <MessageSquare className="w-5 h-5" />,
-      onClick: onCommentsClick,
-      isActive: mobileActiveTab === "comments" && isMobileDrawerOpen,
+      onClick: isOff && onSettingsClick ? onSettingsClick : onCommentsClick,
+      isActive: !isOff && mobileActiveTab === "comments" && isMobileDrawerOpen,
+      featureOff: isOff,
     });
   }
 
   // For active battles, voting requires isLive; for replay, it doesn't
+  // For managers, always show voting button so they can toggle it back on
+  // When feature is off, clicking opens options to toggle it back on
   const showVotingAction = requireLiveForVoting
-    ? showVoting && isLive && onVotingClick
-    : showVoting && onVotingClick;
+    ? (showVoting || canManage) && isLive && onVotingClick
+    : (showVoting || canManage) && onVotingClick;
 
   if (showVotingAction && onVotingClick) {
+    const isOff = !showVoting;
     actions.push({
       id: "voting",
-      label: "Voting",
+      label: isOff ? "Voting (Off)" : "Voting",
       icon: <ThumbsUp className="w-5 h-5" />,
-      onClick: onVotingClick,
-      isActive: mobileActiveTab === "voting" && isMobileDrawerOpen,
+      onClick: isOff && onSettingsClick ? onSettingsClick : onVotingClick,
+      isActive: !isOff && mobileActiveTab === "voting" && isMobileDrawerOpen,
+      featureOff: isOff,
     });
   }
 

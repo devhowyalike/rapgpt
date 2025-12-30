@@ -62,7 +62,7 @@ export function MobileMenu({
       }}
     >
       <DropdownMenuTrigger asChild>
-        <button className="md:hidden flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800">
+        <button className="lg:hidden flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800">
           <Menu className="w-4 h-4" />
         </button>
       </DropdownMenuTrigger>

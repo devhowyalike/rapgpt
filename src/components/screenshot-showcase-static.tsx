@@ -79,8 +79,8 @@ export function ScreenshotShowcaseStatic({
 
                 <div className="space-y-4 max-w-lg">
                   <p className="text-xl text-zinc-400 leading-relaxed text-pretty">
-                    Pick your MCs, watch the battle or stream it live, and turn
-                    the beef into a song with AI-generated beats and vocals.
+                    Choose your AI MCs, watch the battle or stream it live, and
+                    turn the verses into a song with beats and vocals.
                   </p>
                 </div>
               </div>

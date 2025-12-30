@@ -190,7 +190,7 @@ export function CompletedBattleView({
       <div style={{ height: "var(--header-height)" }} />
       <div className="px-0 md:px-6">
         <div className="max-w-7xl mx-auto flex flex-col h-[calc(100dvh-var(--header-height))] md:flex-row">
-          <div className="flex-1 flex flex-col min-h-0 relative">
+          <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
             <BattleStage
               battle={battle}
               mode="replay"
@@ -237,72 +237,76 @@ export function CompletedBattleView({
               onEndLive={onEndLive}
             />
 
-            {/* Scores/Song Drawer */}
+            {/* Scores/Song Drawer - wrapped in clip container to prevent animation visible over footer */}
             {(roundScore || showSongGenerator || showSongPlayer) && (
-              <BattleDrawer
-                open={isDrawerOpen}
-                onOpenChange={setIsDrawerOpen}
-                title={
-                  activeTab === "scores"
-                    ? "Round Scores"
-                    : showSongGenerator
-                    ? "Generate Song"
-                    : "Generated Song"
-                }
-                excludeBottomControls={false}
-                mobileOnly={false}
-                position="absolute"
-              >
-                <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 touch-scroll-container pb-(--bottom-controls-height)">
-                  <div className="p-4 md:p-6">
-                    <div className={activeTab === "scores" ? "" : "hidden"}>
-                      {roundScore && (
-                        <div>
-                          {/* Round Navigation Controls */}
-                          <div className="flex justify-center mb-6">
-                            <RoundControls
-                              selectedRound={selectedRound}
-                              canGoPrev={canGoPrev}
-                              canGoNext={canGoNext}
-                              onPrev={handlePrevRound}
-                              onNext={handleNextRound}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <BattleDrawer
+                  open={isDrawerOpen}
+                  onOpenChange={setIsDrawerOpen}
+                  title={
+                    activeTab === "scores"
+                      ? "Round Scores"
+                      : showSongGenerator
+                      ? "Generate Song"
+                      : "Generated Song"
+                  }
+                  excludeBottomControls={false}
+                  mobileOnly={false}
+                  position="absolute"
+                >
+                  <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 touch-scroll-container pb-(--bottom-controls-height)">
+                    <div className="p-4 md:p-6">
+                      <div className={activeTab === "scores" ? "" : "hidden"}>
+                        {roundScore && (
+                          <div>
+                            {/* Round Navigation Controls */}
+                            <div className="flex justify-center mb-6">
+                              <RoundControls
+                                selectedRound={selectedRound}
+                                canGoPrev={canGoPrev}
+                                canGoNext={canGoNext}
+                                onPrev={handlePrevRound}
+                                onNext={handleNextRound}
+                              />
+                            </div>
+
+                            <BattleScoreSection
+                              battle={battle}
+                              roundScore={roundScore}
                             />
                           </div>
-
-                          <BattleScoreSection
+                        )}
+                      </div>
+                      <div
+                        className={`max-w-2xl mx-auto ${
+                          activeTab === "song" ? "" : "hidden"
+                        }`}
+                      >
+                        {showSongGenerator && (
+                          <SongGenerator
+                            battleId={battle.id}
                             battle={battle}
-                            roundScore={roundScore}
+                            onSongGenerated={() => router.refresh()}
                           />
-                        </div>
-                      )}
-                    </div>
-                    <div
-                      className={`max-w-2xl mx-auto ${
-                        activeTab === "song" ? "" : "hidden"
-                      }`}
-                    >
-                      {showSongGenerator && (
-                        <SongGenerator
-                          battleId={battle.id}
-                          battle={battle}
-                          onSongGenerated={() => router.refresh()}
-                        />
-                      )}
-                      {showSongPlayer && battle.generatedSong && (
-                        <SongPlayer
-                          song={battle.generatedSong}
-                          externalIsPlaying={isSongPlaying}
-                          onPlayStateChange={(playing) =>
-                            setIsSongPlaying(playing)
-                          }
-                          onTogglePlay={() => setIsSongPlaying(!isSongPlaying)}
-                          audioRef={audioRef}
-                        />
-                      )}
+                        )}
+                        {showSongPlayer && battle.generatedSong && (
+                          <SongPlayer
+                            song={battle.generatedSong}
+                            externalIsPlaying={isSongPlaying}
+                            onPlayStateChange={(playing) =>
+                              setIsSongPlaying(playing)
+                            }
+                            onTogglePlay={() =>
+                              setIsSongPlaying(!isSongPlaying)
+                            }
+                            audioRef={audioRef}
+                          />
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </BattleDrawer>
+                </BattleDrawer>
+              </div>
             )}
           </div>
 
@@ -332,6 +336,7 @@ export function CompletedBattleView({
           onToggleCommenting={onToggleCommenting}
           onToggleVoting={onToggleVoting}
           isLive={isLive}
+          isReplay={true}
           onEndLive={onEndLive}
           isStoppingLive={isStoppingLive}
         />
