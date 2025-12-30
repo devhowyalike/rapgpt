@@ -77,15 +77,16 @@ export function SidebarContainer({
           title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
           excludeBottomControls={excludeBottomControls}
         >
-          {mobileActiveTab === "comments" && (
+          {/* Keep both tabs mounted to preserve state; hide inactive tab */}
+          <div className={mobileActiveTab === "comments" ? "" : "hidden"}>
             <CommentsContent
               comments={battle.comments}
               onComment={onComment}
               isArchived={isArchived}
               battleStatus={battle.status}
             />
-          )}
-          {mobileActiveTab === "voting" && (
+          </div>
+          <div className={mobileActiveTab === "voting" ? "" : "hidden"}>
             <VotingContent
               battle={battle}
               onVote={onVote}
@@ -94,7 +95,7 @@ export function SidebarContainer({
               votingTimeRemaining={votingTimeRemaining}
               votingCompletedRound={votingCompletedRound}
             />
-          )}
+          </div>
         </BattleDrawer>
       )}
     </>

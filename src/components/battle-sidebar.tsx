@@ -149,26 +149,38 @@ export function BattleSidebar({
         )
       )}
 
-      {/* Content */}
+      {/* Content - keep both mounted to preserve state */}
       <div className="flex-1 min-h-0 flex flex-col">
-        {showCommenting && activeTab === "comments" && (
-          <CommentsContent
-            comments={battle.comments}
-            onComment={onComment}
-            isArchived={isArchived}
-            battleStatus={battle.status}
-          />
+        {showCommenting && (
+          <div
+            className={
+              activeTab === "comments" ? "flex flex-col flex-1 min-h-0" : "hidden"
+            }
+          >
+            <CommentsContent
+              comments={battle.comments}
+              onComment={onComment}
+              isArchived={isArchived}
+              battleStatus={battle.status}
+            />
+          </div>
         )}
 
-        {showVoting && activeTab === "voting" && (
-          <VotingContent
-            battle={battle}
-            onVote={onVote}
-            isArchived={isArchived}
-            isVotingPhase={isVotingPhase}
-            votingTimeRemaining={votingTimeRemaining}
-            votingCompletedRound={votingCompletedRound}
-          />
+        {showVoting && (
+          <div
+            className={
+              activeTab === "voting" ? "flex flex-col flex-1 min-h-0" : "hidden"
+            }
+          >
+            <VotingContent
+              battle={battle}
+              onVote={onVote}
+              isArchived={isArchived}
+              isVotingPhase={isVotingPhase}
+              votingTimeRemaining={votingTimeRemaining}
+              votingCompletedRound={votingCompletedRound}
+            />
+          </div>
         )}
       </div>
     </div>
