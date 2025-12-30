@@ -84,8 +84,8 @@ export function ScreenshotShowcaseStatic({
 
                 <div className="space-y-4 max-w-lg">
                   <p className="text-xl text-zinc-400 leading-relaxed text-pretty">
-                    Choose your AI MCs, watch the battle or stream it live, and
-                    turn the verses into a song with beats and vocals.
+                    Choose your AI MCs. Battle alone or stream it live. Turn
+                    verses into a song with beats and vocals.
                   </p>
                 </div>
               </div>
@@ -123,7 +123,7 @@ export function ScreenshotShowcaseStatic({
 
             {/* Simulation Notice & Controls */}
             <div className="relative flex items-center justify-center min-h-[24px]">
-              <span className="text-[10px] text-zinc-500 uppercase tracking-widest opacity-40">
+              <span className="text-[10px] text-zinc-300 uppercase tracking-widest opacity-40">
                 &mdash; Simulated for demonstration &mdash;
               </span>
 

@@ -2,7 +2,7 @@
 
 import { APP_TITLE } from "@/lib/constants";
 import { motion, AnimatePresence, MotionConfig } from "framer-motion";
-import { Bell, Music2, Play, Download, Pause } from "lucide-react";
+import { Bell, Music2, Play, Download, Pause, Share2 } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -60,17 +60,17 @@ const MC2: MCData = {
 };
 
 const VERSES = {
-  mc1: [
-    "Wolf Gang thinks they innovate? Man, that's a joke",
-    "Your whole crew's just cosplay, I'm the original bloke",
-    "You say my nose is fake? At least I own my disguise",
-    "While you're playing dress-up with them manufactured lies",
-  ],
   mc2: [
-    "Talk about disguise? I transform, create whole personas",
-    "Igor, Wolf Haley - each album's a new aroma",
-    "Your bathrooms and stages can't compare to my vision",
-    "I'm directing culture, you're just nostalgic transmission",
+    "I was dissing whole coasts before your blog era buzzed",
+    "Back when controversy meant something, not a marketing plug",
+    "You sell shock with pastel fits, I brought real disruption",
+    "Name rang bells off bars, not curated by consumption",
+  ],
+  mc1: [
+    "I bend shock into art, make discomfort design",
+    "Turn chaos into albums that redefine their time",
+    "You swung first for reaction, I evolved the response",
+    "I am the era shift, not a footnote in its fonts",
   ],
 };
 
@@ -85,7 +85,7 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
     mc2Lines: 0,
   },
   "mc1-streaming": {
-    duration: 3000,
+    duration: 1500,
     activeMC: "mc1",
     round: 3,
     streamingMC: "mc1",
@@ -110,7 +110,7 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
     mc2Lines: 0,
   },
   "mc2-streaming": {
-    duration: 3000,
+    duration: 1500,
     activeMC: "mc2",
     round: 3,
     streamingMC: "mc2",
@@ -134,7 +134,7 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
     mc2Lines: 4,
   },
   winner: {
-    duration: 3500,
+    duration: 3000,
     activeMC: "mc1",
     round: 3,
     showWinner: true,
@@ -272,7 +272,6 @@ function PersonaCardDemo({
   mc,
   position,
   isActive,
-  isWinner,
   isPaused,
 }: PersonaCardDemoProps) {
   const playerColor =
@@ -376,7 +375,7 @@ function VerseDemo({
   const visibleLines = lines.slice(0, visibleCount);
 
   return (
-    <div className="flex-1 p-2 sm:p-4 space-y-1.5 sm:space-y-2 overflow-hidden">
+    <div className="flex-1 p-2 sm:p-4 space-y-1.5 sm:space-y-2 overflow-hidden text-pretty">
       <AnimatePresence mode="popLayout">
         {visibleLines.map((line, index) => (
           <motion.div
@@ -1009,9 +1008,9 @@ function SongCompleteOverlay({ isPaused }: { isPaused: boolean }) {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.3, type: "spring" }}
-            className="text-green-400 text-[10px] sm:text-xs font-medium px-2 py-0.5 bg-green-500/20 rounded-full"
+            className="p-1.5 bg-green-500/20 rounded-full text-green-400 hover:bg-green-500/30 transition-colors cursor-pointer"
           >
-            Share
+            <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </motion.div>
         </div>
 
@@ -1021,18 +1020,23 @@ function SongCompleteOverlay({ isPaused }: { isPaused: boolean }) {
             <motion.div
               key={i}
               className="flex-1 rounded-t-sm bg-orange-500/60"
+              initial={{ height: "2px", opacity: 0 }}
               animate={{
-                height:
-                  isPlaying && !isPaused
-                    ? [`${height}%`, `${height * 0.6}%`, `${height}%`]
-                    : `${height}%`,
-                opacity: isPlaying && !isPaused ? [0.6, 1, 0.6] : 0.4,
+                height: [`${height}%`, `${height * 0.4}%`],
+                opacity: 1,
               }}
               transition={{
-                duration: 0.8,
-                repeat: isPlaying && !isPaused ? Infinity : 0,
-                delay: i * 0.05,
-                ease: "easeInOut",
+                height: {
+                  duration: 0.6,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  delay: i * 0.04,
+                  ease: "easeInOut",
+                },
+                opacity: {
+                  duration: 0.3,
+                  delay: i * 0.04,
+                },
               }}
             />
           ))}
@@ -1282,7 +1286,7 @@ export function HeroBattleDemo({
             <ScoringOverlay key="scoring-overlay" isPaused={isPaused} />
           )}
           {config.showWinner && (
-            <WinnerOverlay key="winner-overlay" mc={MC1} isPaused={isPaused} />
+            <WinnerOverlay key="winner-overlay" mc={MC2} isPaused={isPaused} />
           )}
           {config.showSongStyleSelect && (
             <SongStyleSelectOverlay key="song-style-overlay" />
