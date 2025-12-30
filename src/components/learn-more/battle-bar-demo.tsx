@@ -273,6 +273,9 @@ export function BattleBarDemo() {
     setStateIndex((prev) => (prev + 1) % STATE_ORDER.length);
   }, []);
 
+  // Track previous isInView value with a ref to avoid dependency loop
+  const isInViewRef = useRef(false);
+
   // Intersection Observer to detect when slide is visible
   useEffect(() => {
     const container = containerRef.current;
@@ -280,9 +283,10 @@ export function BattleBarDemo() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const wasInView = isInView;
+        const wasInView = isInViewRef.current;
         const nowInView = entry.isIntersecting;
 
+        isInViewRef.current = nowInView;
         setIsInView(nowInView);
 
         // Reset to first state when coming back into view
@@ -295,7 +299,7 @@ export function BattleBarDemo() {
 
     observer.observe(container);
     return () => observer.disconnect();
-  }, [isInView]);
+  }, []);
 
   // Only run animation when in view and not paused
   useEffect(() => {

@@ -425,6 +425,9 @@ export function GoLiveDemo() {
     setStateIndex((prev) => (prev + 1) % STATE_ORDER.length);
   }, []);
 
+  // Track previous isInView value with a ref to avoid dependency loop
+  const isInViewRef = useRef(false);
+
   // Intersection Observer
   useEffect(() => {
     const container = containerRef.current;
@@ -432,9 +435,10 @@ export function GoLiveDemo() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const wasInView = isInView;
+        const wasInView = isInViewRef.current;
         const nowInView = entry.isIntersecting;
 
+        isInViewRef.current = nowInView;
         setIsInView(nowInView);
 
         if (!wasInView && nowInView) {
@@ -446,7 +450,7 @@ export function GoLiveDemo() {
 
     observer.observe(container);
     return () => observer.disconnect();
-  }, [isInView]);
+  }, []);
 
   // Auto-advance
   useEffect(() => {
