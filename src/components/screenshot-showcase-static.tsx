@@ -1,9 +1,9 @@
-import Image from "next/image";
 import { Clock, Mic2, Music, Lightbulb } from "lucide-react";
 import { RapGPTLogo } from "./rapgpt-logo";
 import { CreateBattleCTA } from "./create-battle-cta";
 import { APP_TITLE, TAGLINE_2 } from "@/lib/constants";
 import Link from "next/link";
+import { HeroBattleDemo } from "./hero-battle-demo";
 
 interface ScreenshotShowcaseStaticProps {
   isAuthenticated?: boolean;
@@ -87,12 +87,12 @@ export function ScreenshotShowcaseStatic({
             </div>
           </div>
 
-          {/* Right Column: Static Screenshot */}
+          {/* Right Column: Animated Battle Demo */}
           <div className="lg:col-span-7">
             <Link href="/learn-more" className="block group">
               <div className="relative">
                 {/* The "Device" Frame */}
-                <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-stage-dark transition-all duration-300 group-hover:border-white/20">
+                <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-stage-dark transition-all duration-300 group-hover:border-white/20 group-hover:shadow-[0_0_60px_rgba(245,158,11,0.15)]">
                   {/* Fake Browser Header */}
                   <div className="h-10 bg-zinc-900/80 border-b border-white/5 flex items-center px-6 gap-2">
                     <div className="flex gap-1.5">
@@ -102,24 +102,12 @@ export function ScreenshotShowcaseStatic({
                     </div>
                   </div>
 
-                  {/* Screenshot Content */}
-                  <div className="relative w-full">
-                    <Image
-                      src="/marketing/rap-gpt-screenshot.webp"
-                      alt={`${APP_TITLE} Platform Screenshot`}
-                      width={1200}
-                      height={800}
-                      className="w-full h-auto transition-all duration-700 ease-in-out group-hover:scale-[1.02] group-hover:blur-[2px] group-hover:opacity-70 will-change-transform"
-                      priority
-                    />
-
-                    {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-                  </div>
+                  {/* Animated Battle Demo */}
+                  <HeroBattleDemo />
                 </div>
 
                 {/* Hover hint */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-40">
                   <div className="bg-zinc-900/95 backdrop-blur-xl border border-white/40 px-8 py-4 rounded-full text-lg text-white font-bold shadow-[0_0_40px_rgba(0,0,0,0.7),0_0_20px_rgba(255,255,255,0.1)] transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 flex items-center gap-3">
                     <div className="p-1.5 rounded-lg bg-yellow-400/10">
                       <Lightbulb className="w-5 h-5 text-yellow-400 fill-yellow-400/20" />
