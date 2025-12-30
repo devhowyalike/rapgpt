@@ -209,7 +209,7 @@ export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>
           {/* Overlays */}
           <AnimatePresence>
             {showFrostOverlay && <FrostOverlay key="frost" />}
-            {effectivePaused && <PauseOverlay key="pause" />}
+            {isPaused && !showFrostOverlay && <PauseOverlay key="pause" />}
             {config.showScoring && (
               <ScoringOverlay key="scoring" isPaused={effectivePaused} />
             )}
@@ -227,6 +227,17 @@ export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>
             )}
             {config.showSongComplete && (
               <SongCompleteOverlay key="complete" isPaused={effectivePaused} />
+            )}
+            {/* Hover frost - covers all content including state overlays */}
+            {isHovering && (
+              <motion.div
+                key="hover-frost"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm z-30 pointer-events-none"
+              />
             )}
           </AnimatePresence>
 
