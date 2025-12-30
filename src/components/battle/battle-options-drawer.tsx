@@ -20,6 +20,8 @@ interface BattleOptionsDrawerProps {
   isPausing?: boolean;
   pauseLabel?: string;
   isLive?: boolean;
+  /** Whether viewing a completed battle replay (enables voting toggle) */
+  isReplay?: boolean;
   // End broadcast controls for live battles
   onEndLive?: () => Promise<void>;
   isStoppingLive?: boolean;
@@ -36,9 +38,12 @@ export function BattleOptionsDrawer({
   isPausing,
   pauseLabel,
   isLive = false,
+  isReplay = false,
   onEndLive,
   isStoppingLive = false,
 }: BattleOptionsDrawerProps) {
+  // Voting can be toggled when live OR when viewing a replay
+  const canToggleVoting = isLive || isReplay;
   return (
     <BattleDrawer
       open={open}
@@ -69,7 +74,7 @@ export function BattleOptionsDrawer({
 
           <div
             className={`flex items-center justify-between p-3 bg-gray-800/50 rounded-lg transition-opacity ${
-              !isLive ? "opacity-50" : ""
+              !canToggleVoting ? "opacity-50" : ""
             }`}
           >
             <div className="flex items-center gap-3">
@@ -79,14 +84,18 @@ export function BattleOptionsDrawer({
               <div className="flex flex-col">
                 <span className="font-medium text-white">Voting</span>
                 <span className="text-sm text-gray-400">
-                  {isLive ? "Enable crowd judging" : "Go live to activate"}
+                  {isReplay
+                    ? "Show voting results"
+                    : isLive
+                    ? "Enable crowd judging"
+                    : "Go live to activate"}
                 </span>
               </div>
             </div>
             <Switch
-              checked={showVoting && isLive}
+              checked={showVoting}
               onCheckedChange={onToggleVoting}
-              disabled={!isLive}
+              disabled={!canToggleVoting}
             />
           </div>
         </div>

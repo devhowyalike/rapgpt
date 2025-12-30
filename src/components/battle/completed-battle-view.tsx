@@ -336,6 +336,7 @@ export function CompletedBattleView({
           onToggleCommenting={onToggleCommenting}
           onToggleVoting={onToggleVoting}
           isLive={isLive}
+          isReplay={true}
           onEndLive={onEndLive}
           isStoppingLive={isStoppingLive}
         />

@@ -174,6 +174,7 @@ export function BattleReplayControlBar({
             onToggleCommenting={onToggleCommenting}
             onToggleVoting={onToggleVoting}
             battleId={battle.id}
+            isReplay={true}
             customTrigger={<OptionsButton />}
           />
         </div>
