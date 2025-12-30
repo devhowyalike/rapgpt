@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/carousel";
 import { BattleBarDemo } from "@/components/learn-more/battle-bar-demo";
 import { GoLiveDemo } from "@/components/learn-more/go-live-demo";
+import { BrowserChrome } from "@/components/browser-chrome";
 
 type ColorKey = "red" | "yellow" | "green" | "blue" | "purple";
 
@@ -237,92 +238,72 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
               return (
                 <CarouselItem key={feature.key} className="pl-0">
                   <div className="relative">
-                    {/* Screenshot Container */}
-                    <div className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-zinc-950">
-                      {/* Browser Chrome */}
-                      <div className="h-8 md:h-10 bg-zinc-900/80 border-b border-white/5 flex items-center px-4 md:px-6">
-                        <div className="flex gap-1.5">
-                          <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-zinc-700" />
-                          <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-zinc-700" />
-                          <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-zinc-700" />
-                        </div>
-                        {/* URL Bar */}
-                        <div className="flex-1 mx-4">
-                          <div className="max-w-xs mx-auto h-5 md:h-6 bg-zinc-800/50 rounded-md flex items-center justify-center">
-                            <span className="text-[10px] md:text-xs text-zinc-500 truncate px-2">
-                              {APP_URL}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Screenshot or Interactive Demo */}
-                      <div className="relative w-full aspect-16/10 overflow-hidden bg-zinc-950">
-                        {feature.key === "admin" ? (
-                          /* Interactive Battle Bar Demo for Dynamic Interface slide */
-                          <AnimatePresence mode="wait">
-                            <motion.div
-                              key="battle-bar-demo"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              transition={{ duration: 0.4 }}
-                              className="absolute inset-0"
-                            >
-                              <BattleBarDemo />
-                            </motion.div>
-                          </AnimatePresence>
-                        ) : feature.key === "watch" ? (
-                          /* Interactive Go Live Demo for Go Live slide */
-                          <AnimatePresence mode="wait">
-                            <motion.div
-                              key="go-live-demo"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              transition={{ duration: 0.4 }}
-                              className="absolute inset-0"
-                            >
-                              <GoLiveDemo />
-                            </motion.div>
-                          </AnimatePresence>
-                        ) : (
-                          /* Static Screenshot for other slides */
-                          <AnimatePresence mode="wait">
-                            <motion.div
-                              key={feature.screenshot}
-                              initial={{ opacity: 0, scale: 1.02 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0 }}
-                              transition={{ duration: 0.4 }}
-                              className="absolute inset-0"
-                            >
-                              <Image
-                                src={feature.screenshot}
-                                alt={`${APP_TITLE} - ${feature.title}`}
-                                fill
-                                className={cn(
-                                  feature.key === "voting"
-                                    ? "object-cover object-[calc(50%-5px)_top] w-[55%]! left-[22.5%]! right-auto!"
-                                    : feature.key === "chat"
-                                    ? "object-cover object-[calc(50%-5px)_bottom] w-[55%]! left-[22.5%]! right-auto!"
-                                    : feature.key === "scoring"
-                                    ? "object-cover object-[calc(50%-5px)_bottom]"
-                                    : feature.key === "rounds"
-                                    ? "object-cover object-[calc(50%-5px)_top]"
-                                    : feature.key === "stage"
-                                    ? "object-cover object-[calc(50%-5px)_50%]"
-                                    : feature.key === "song"
-                                    ? "object-cover object-[calc(50%-5px)_bottom]"
-                                    : "object-contain"
-                                )}
-                                priority={index === 0}
-                              />
-                            </motion.div>
-                          </AnimatePresence>
-                        )}
-                      </div>
-                    </div>
+                    {/* Browser Chrome Shell */}
+                    <BrowserChrome showAddressBar={false}>
+                      {feature.key === "admin" ? (
+                        /* Interactive Battle Bar Demo for Dynamic Interface slide */
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key="battle-bar-demo"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className="absolute inset-0"
+                          >
+                            <BattleBarDemo />
+                          </motion.div>
+                        </AnimatePresence>
+                      ) : feature.key === "watch" ? (
+                        /* Interactive Go Live Demo for Go Live slide */
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key="go-live-demo"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className="absolute inset-0"
+                          >
+                            <GoLiveDemo />
+                          </motion.div>
+                        </AnimatePresence>
+                      ) : (
+                        /* Static Screenshot for other slides */
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key={feature.screenshot}
+                            initial={{ opacity: 0, scale: 1.02 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className="absolute inset-0"
+                          >
+                            <Image
+                              src={feature.screenshot}
+                              alt={`${APP_TITLE} - ${feature.title}`}
+                              fill
+                              className={cn(
+                                feature.key === "voting"
+                                  ? "object-cover object-[calc(50%-5px)_top] w-[55%]! left-[22.5%]! right-auto!"
+                                  : feature.key === "chat"
+                                  ? "object-cover object-[calc(50%-5px)_bottom] w-[55%]! left-[22.5%]! right-auto!"
+                                  : feature.key === "scoring"
+                                  ? "object-cover object-[calc(50%-5px)_bottom]"
+                                  : feature.key === "rounds"
+                                  ? "object-cover object-[calc(50%-5px)_top]"
+                                  : feature.key === "stage"
+                                  ? "object-cover object-[calc(50%-5px)_50%]"
+                                  : feature.key === "song"
+                                  ? "object-cover object-[calc(50%-5px)_bottom]"
+                                  : "object-contain"
+                              )}
+                              priority={index === 0}
+                            />
+                          </motion.div>
+                        </AnimatePresence>
+                      )}
+                    </BrowserChrome>
 
                     {/* Feature Info - Moved below the screenshot */}
                     <motion.div

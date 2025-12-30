@@ -6,6 +6,7 @@ import { CreateBattleCTA } from "./create-battle-cta";
 import { APP_TITLE, TAGLINE_2 } from "@/lib/constants";
 import Link from "next/link";
 import { HeroBattleDemo } from "./hero-battle-demo";
+import { BrowserChrome } from "./browser-chrome";
 import { useState } from "react";
 
 interface ScreenshotShowcaseStaticProps {
@@ -95,23 +96,18 @@ export function ScreenshotShowcaseStatic({
           <div className="lg:col-span-7">
             <Link href="/learn-more" className="block group mb-4">
               <div className="relative">
-                {/* The "Device" Frame */}
-                <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-stage-dark transition-all duration-300 group-hover:border-white/20 group-hover:shadow-[0_0_60px_rgba(245,158,11,0.15)]">
-                  {/* Fake Browser Header */}
-                  <div className="h-10 bg-zinc-900/80 border-b border-white/5 flex items-center px-6 gap-2">
-                    <div className="flex gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
-                    </div>
-                  </div>
-
+                {/* Browser Chrome Shell */}
+                <BrowserChrome
+                  className="group-hover:border-white/20 group-hover:shadow-[0_0_60px_rgba(245,158,11,0.15)]"
+                  contentClassName="bg-stage-dark"
+                  showAddressBar={false}
+                >
                   {/* Animated Battle Demo */}
                   <HeroBattleDemo
                     isPaused={isPaused}
                     setIsPaused={setIsPaused}
                   />
-                </div>
+                </BrowserChrome>
 
                 {/* Hover hint */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-40">
