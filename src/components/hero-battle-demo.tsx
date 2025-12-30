@@ -263,7 +263,6 @@ interface PersonaCardDemoProps {
   mc: MCData;
   position: "player1" | "player2";
   isActive: boolean;
-  isWinner?: boolean;
   isPaused: boolean;
 }
 
@@ -1390,7 +1389,6 @@ export function HeroBattleDemo({
                 isActive={
                   config.activeMC === "mc1" || config.activeMC === "both"
                 }
-                isWinner={config.showWinner}
                 isPaused={isPaused}
               />
               <VerseDemo
