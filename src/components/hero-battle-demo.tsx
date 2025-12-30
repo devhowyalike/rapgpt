@@ -821,7 +821,7 @@ function SongStyleSelectOverlay() {
         >
           <div className="flex items-center justify-center gap-2">
             <Music2 className="w-4 h-4" />
-            <span>Generate Track</span>
+            <span>Generate Song</span>
           </div>
         </div>
       </motion.div>
@@ -908,7 +908,7 @@ function SongGeneratingOverlay({ isPaused }: { isPaused: boolean }) {
         {/* Text */}
         <div className="text-center">
           <p className="text-sm sm:text-base font-bold text-white mb-1">
-            Generating Your Track
+            Generating Your Song
           </p>
           <p className="text-[10px] sm:text-xs text-gray-400">
             Boom-Bap • 90s East Coast style

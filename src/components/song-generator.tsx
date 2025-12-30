@@ -370,7 +370,7 @@ export function SongGenerator({
             ) : (
               <div className="flex items-center gap-2">
                 <Music2 className="w-5 h-5" />
-                <span>Generate Track</span>
+                <span>Generate Song</span>
               </div>
             )}
           </Button>
