@@ -113,12 +113,13 @@ export function stopCleanupInterval(): void {
 
 /**
  * Reset all live battles in database (used on server startup/shutdown)
+ * Note: We preserve liveStartedAt so battles can be identified as "formerly live"
  */
 export async function cleanupStaleLiveBattles(): Promise<void> {
   try {
     await db
       .update(battles)
-      .set({ isLive: false, liveStartedAt: null })
+      .set({ isLive: false })
       .where(eq(battles.isLive, true));
     console.log("[Cleanup] Reset stale live battles in database");
   } catch (error) {
@@ -169,10 +170,11 @@ async function endLiveBattleAndCleanup(
   console.log(`[Cleanup] Ending live battle ${battleId} due to ${reason}`);
 
   // Update database to mark battle as no longer live
+  // Note: We preserve liveStartedAt so battles can be identified as "formerly live"
   try {
     await db
       .update(battles)
-      .set({ isLive: false, liveStartedAt: null })
+      .set({ isLive: false })
       .where(eq(battles.id, battleId));
     console.log(`[Cleanup] Updated database for battle ${battleId}`);
   } catch (error) {
@@ -316,9 +318,10 @@ export async function cleanupOrphanedLiveBattles(ctx: CleanupContext): Promise<v
         );
 
         // Mark as not live in database
+        // Note: We preserve liveStartedAt so battles can be identified as "formerly live"
         await db
           .update(battles)
-          .set({ isLive: false, liveStartedAt: null })
+          .set({ isLive: false })
           .where(eq(battles.id, battle.id));
 
         // Broadcast to homepage so UI updates
