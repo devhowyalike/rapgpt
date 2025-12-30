@@ -167,7 +167,8 @@ export function MyBattleCard({
   const hasAction = isLive || isPaused || isCompleted || isPublic;
 
   const handleCardClick = () => {
-    // Always navigate to the battle when clicking the card
+    // Don't navigate if any dialog is open or an action is in progress
+    if (showDeleteDialog || isDeleting || showPublishDialog || showUnpublishDialog) return;
     router.push(`/battle/${battle.id}`);
   };
 

@@ -154,7 +154,9 @@ export function BattleSidebar({
         {showCommenting && (
           <div
             className={
-              activeTab === "comments" ? "flex flex-col flex-1 min-h-0" : "hidden"
+              activeTab === "comments"
+                ? "flex flex-col flex-1 min-h-0"
+                : "hidden"
             }
           >
             <CommentsContent
