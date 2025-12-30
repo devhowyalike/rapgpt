@@ -1,9 +1,12 @@
-import { Clock, Mic2, Music, Lightbulb } from "lucide-react";
+"use client";
+
+import { Clock, Mic2, Music, Lightbulb, Pause, Play } from "lucide-react";
 import { RapGPTLogo } from "./rapgpt-logo";
 import { CreateBattleCTA } from "./create-battle-cta";
 import { APP_TITLE, TAGLINE_2 } from "@/lib/constants";
 import Link from "next/link";
 import { HeroBattleDemo } from "./hero-battle-demo";
+import { useState } from "react";
 
 interface ScreenshotShowcaseStaticProps {
   isAuthenticated?: boolean;
@@ -12,6 +15,7 @@ interface ScreenshotShowcaseStaticProps {
 export function ScreenshotShowcaseStatic({
   isAuthenticated = false,
 }: ScreenshotShowcaseStaticProps) {
+  const [isPaused, setIsPaused] = useState(false);
   const features = [
     {
       icon: <Mic2 className="w-6 h-6" />,
@@ -89,7 +93,7 @@ export function ScreenshotShowcaseStatic({
 
           {/* Right Column: Animated Battle Demo */}
           <div className="lg:col-span-7">
-            <Link href="/learn-more" className="block group">
+            <Link href="/learn-more" className="block group mb-4">
               <div className="relative">
                 {/* The "Device" Frame */}
                 <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-stage-dark transition-all duration-300 group-hover:border-white/20 group-hover:shadow-[0_0_60px_rgba(245,158,11,0.15)]">
@@ -103,7 +107,10 @@ export function ScreenshotShowcaseStatic({
                   </div>
 
                   {/* Animated Battle Demo */}
-                  <HeroBattleDemo />
+                  <HeroBattleDemo
+                    isPaused={isPaused}
+                    setIsPaused={setIsPaused}
+                  />
                 </div>
 
                 {/* Hover hint */}
@@ -117,6 +124,31 @@ export function ScreenshotShowcaseStatic({
                 </div>
               </div>
             </Link>
+
+            {/* Simulation Notice & Controls */}
+            <div className="relative flex items-center justify-center min-h-[24px]">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-widest opacity-40">
+                &mdash; Simulated for demonstration &mdash;
+              </span>
+
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsPaused(!isPaused);
+                }}
+                className="absolute right-0 flex items-center gap-2 px-3 py-1 rounded-full border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/pause"
+              >
+                <span className="text-[10px] text-zinc-500 uppercase tracking-wider group-hover/pause:text-zinc-400 transition-colors">
+                  {isPaused ? "Resume" : "Pause"}
+                </span>
+                {isPaused ? (
+                  <Play className="w-2.5 h-2.5 text-zinc-500 fill-current group-hover/pause:text-yellow-400 transition-colors" />
+                ) : (
+                  <Pause className="w-2.5 h-2.5 text-zinc-500 fill-current group-hover/pause:text-zinc-400 transition-colors" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
 

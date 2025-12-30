@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Music2, Play, Download } from "lucide-react";
+import { motion, AnimatePresence, MotionConfig } from "framer-motion";
+import { Bell, Music2, Play, Download, Pause } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -175,9 +175,14 @@ const PLAYER2_COLOR = "239, 68, 68"; // red-500
 interface StageHeaderProps {
   currentRound: number;
   completedRounds: number[];
+  isPaused: boolean;
 }
 
-function StageHeader({ currentRound, completedRounds }: StageHeaderProps) {
+function StageHeader({
+  currentRound,
+  completedRounds,
+  isPaused,
+}: StageHeaderProps) {
   return (
     <div className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 bg-gray-900/80 backdrop-blur-sm border-b border-gray-800">
       {/* Stage Info */}
@@ -198,8 +203,9 @@ function StageHeader({ currentRound, completedRounds }: StageHeaderProps) {
       <div className="mx-2 sm:mx-4">
         <motion.div
           animate={{
-            rotate: currentRound > 0 ? [0, -15, 15, -10, 10, 0] : 0,
-            scale: currentRound > 0 ? [1, 1.1, 1] : 1,
+            rotate:
+              currentRound > 0 && !isPaused ? [0, -15, 15, -10, 10, 0] : 0,
+            scale: currentRound > 0 && !isPaused ? [1, 1.1, 1] : 1,
           }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
@@ -242,6 +248,7 @@ interface PersonaCardDemoProps {
   position: "player1" | "player2";
   isActive: boolean;
   isWinner?: boolean;
+  isPaused: boolean;
 }
 
 function PersonaCardDemo({
@@ -249,6 +256,7 @@ function PersonaCardDemo({
   position,
   isActive,
   isWinner,
+  isPaused,
 }: PersonaCardDemoProps) {
   const playerColor =
     position === "player1" ? `rgb(${PLAYER1_COLOR})` : `rgb(${PLAYER2_COLOR})`;
@@ -260,8 +268,9 @@ function PersonaCardDemo({
         <motion.div
           className="relative rounded-full"
           animate={{
-            scale: isActive ? 1.05 : 1,
-            boxShadow: isActive ? `0 0 20px ${playerColor}` : "none",
+            scale: isActive && !isPaused ? 1.05 : 1,
+            boxShadow:
+              isActive && !isPaused ? `0 0 20px ${playerColor}` : "none",
           }}
           transition={{ duration: 0.3 }}
         >
@@ -282,13 +291,17 @@ function PersonaCardDemo({
             <motion.div
               className="absolute -inset-1 rounded-full pointer-events-none"
               style={{ border: `2px solid ${playerColor}` }}
-              animate={{
-                scale: [1, 1.1, 1],
-                opacity: [0.5, 0.8, 0.5],
-              }}
+              animate={
+                isPaused
+                  ? { scale: 1, opacity: 0.5 }
+                  : {
+                      scale: [1, 1.1, 1],
+                      opacity: [0.5, 0.8, 0.5],
+                    }
+              }
               transition={{
                 duration: 2,
-                repeat: Infinity,
+                repeat: isPaused ? 0 : Infinity,
                 ease: "easeInOut",
               }}
             />
@@ -327,6 +340,7 @@ interface VerseDemoProps {
   position: "player1" | "player2";
   isStreaming?: boolean;
   mcName: string;
+  isPaused: boolean;
 }
 
 function VerseDemo({
@@ -335,6 +349,7 @@ function VerseDemo({
   position,
   isStreaming,
   mcName,
+  isPaused,
 }: VerseDemoProps) {
   const playerColor =
     position === "player1" ? `rgb(${PLAYER1_COLOR})` : `rgb(${PLAYER2_COLOR})`;
@@ -376,8 +391,8 @@ function VerseDemo({
       {isStreaming && visibleCount < lines.length && (
         <motion.div
           className="flex items-center gap-2 mt-2"
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
+          animate={isPaused ? { opacity: 0.8 } : { opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: isPaused ? 0 : Infinity }}
         >
           <div
             className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full"
@@ -408,7 +423,7 @@ function VerseDemo({
 // Scoring Overlay
 // =============================================================================
 
-function ScoringOverlay() {
+function ScoringOverlay({ isPaused }: { isPaused: boolean }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -422,13 +437,17 @@ function ScoringOverlay() {
             <motion.div
               key={i}
               className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-yellow-400"
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [0.5, 1, 0.5],
-              }}
+              animate={
+                isPaused
+                  ? { scale: 1, opacity: 0.8 }
+                  : {
+                      scale: [1, 1.5, 1],
+                      opacity: [0.5, 1, 0.5],
+                    }
+              }
               transition={{
                 duration: 0.8,
-                repeat: Infinity,
+                repeat: isPaused ? 0 : Infinity,
                 delay: i * 0.2,
               }}
             />
@@ -448,6 +467,7 @@ function ScoringOverlay() {
 
 interface WinnerOverlayProps {
   mc: MCData;
+  isPaused: boolean;
 }
 
 const CONFETTI_COLORS = [
@@ -467,9 +487,14 @@ const CONFETTI_COLORS = [
   "#ea580c",
 ];
 
-function ContainedConfetti() {
+function ContainedConfetti({ isPaused }: { isPaused: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isPausedRef = useRef(isPaused);
+
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -554,41 +579,43 @@ function ContainedConfetti() {
       const dt = Math.min(0.032, (t - prev) / 1000);
       prev = t;
 
-      ctx.clearRect(0, 0, width(), height());
+      if (!isPausedRef.current) {
+        ctx.clearRect(0, 0, width(), height());
 
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
 
-        p.vx *= 1 - drag;
-        p.vy *= 1 - drag;
-        p.vy += gravity * dt;
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-        p.rotation += p.rotationSpeed * dt;
-        p.life += dt;
+          p.vx *= 1 - drag;
+          p.vy *= 1 - drag;
+          p.vy += gravity * dt;
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.rotation += p.rotationSpeed * dt;
+          p.life += dt;
 
-        const alpha =
-          p.life < p.maxLife * 0.7
-            ? 1
-            : Math.max(0, 1 - (p.life - p.maxLife * 0.7) / (p.maxLife * 0.3));
+          const alpha =
+            p.life < p.maxLife * 0.7
+              ? 1
+              : Math.max(0, 1 - (p.life - p.maxLife * 0.7) / (p.maxLife * 0.3));
 
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = p.color;
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rotation);
-        if (p.shape === "rect") {
-          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-        } else {
-          ctx.beginPath();
-          ctx.arc(0, 0, p.size * 0.5, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        ctx.restore();
-        ctx.globalAlpha = 1;
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = p.color;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rotation);
+          if (p.shape === "rect") {
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          } else {
+            ctx.beginPath();
+            ctx.arc(0, 0, p.size * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+          ctx.globalAlpha = 1;
 
-        if (p.life > p.maxLife) {
-          particles.splice(i, 1);
+          if (p.life > p.maxLife) {
+            particles.splice(i, 1);
+          }
         }
       }
 
@@ -614,15 +641,15 @@ function ContainedConfetti() {
   );
 }
 
-function WinnerOverlay({ mc }: WinnerOverlayProps) {
+function WinnerOverlay({ mc, isPaused }: WinnerOverlayProps) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-10 overflow-hidden"
+      className="absolute inset-0 flex items-center justify-center z-10 overflow-hidden"
     >
-      <ContainedConfetti />
+      <ContainedConfetti isPaused={isPaused} />
       <motion.div
         initial={{ scale: 0.5, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -631,8 +658,12 @@ function WinnerOverlay({ mc }: WinnerOverlayProps) {
       >
         <motion.span
           className="text-3xl sm:text-4xl"
-          animate={{ rotate: [0, -10, 10, 0] }}
-          transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1 }}
+          animate={isPaused ? { rotate: 0 } : { rotate: [0, -10, 10, 0] }}
+          transition={{
+            duration: 0.5,
+            repeat: isPaused ? 0 : Infinity,
+            repeatDelay: 1,
+          }}
         >
           🏆
         </motion.span>
@@ -688,12 +719,13 @@ function SongStyleSelectOverlay() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-10"
+      transition={{ duration: 0.2 }}
+      className="absolute inset-0 flex items-center justify-center z-10"
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        transition={{ type: "spring", damping: 15 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
         className="flex flex-col gap-3 px-4 py-4 mx-4 rounded-xl bg-gray-900/95 border border-gray-700 max-w-xs w-full"
       >
         {/* Header */}
@@ -709,17 +741,14 @@ function SongStyleSelectOverlay() {
         {/* Beat Style Options */}
         <div className="flex flex-col gap-2">
           {BEAT_STYLES.map((style, index) => (
-            <motion.div
+            <div
               key={style.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
               className={`
-                relative flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all
+                relative flex items-center gap-3 p-2.5 rounded-lg cursor-pointer
                 ${
                   selectedIndex === index
                     ? `bg-linear-to-r ${style.gradient} shadow-lg`
-                    : "bg-gray-800/80 hover:bg-gray-700/80"
+                    : "bg-gray-800/80"
                 }
               `}
             >
@@ -753,28 +782,22 @@ function SongStyleSelectOverlay() {
 
               {/* Selected indicator */}
               {selectedIndex === index && (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="w-5 h-5 rounded-full bg-white flex items-center justify-center"
-                >
+                <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center">
                   <span className="text-xs">✓</span>
-                </motion.div>
+                </div>
               )}
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* Generate Button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: selectedIndex !== null ? 1 : 0.5 }}
+        <div
           className={`
-            mt-1 py-2.5 rounded-lg text-center text-sm font-bold transition-all
+            mt-1 py-2.5 rounded-lg text-center text-sm font-bold
             ${
               selectedIndex !== null
                 ? `bg-linear-to-r ${BEAT_STYLES[selectedIndex].gradient} text-white`
-                : "bg-gray-700 text-gray-400"
+                : "bg-gray-700 text-gray-400 opacity-50"
             }
           `}
         >
@@ -782,7 +805,7 @@ function SongStyleSelectOverlay() {
             <Music2 className="w-4 h-4" />
             <span>Generate Track</span>
           </div>
-        </motion.div>
+        </div>
       </motion.div>
     </motion.div>
   );
@@ -792,51 +815,72 @@ function SongStyleSelectOverlay() {
 // Song Generating Overlay
 // =============================================================================
 
-function SongGeneratingOverlay() {
+function SongGeneratingOverlay({ isPaused }: { isPaused: boolean }) {
   const [progress, setProgress] = useState(0);
+  const elapsedRef = useRef(0);
+  const rafIdRef = useRef<number | null>(null);
+  const lastTimestampRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // Animate progress from 0 to 100 over the duration
-    const startTime = performance.now();
-    const duration = 3500; // slightly less than state duration for smooth transition
+    if (isPaused) {
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+      lastTimestampRef.current = null;
+      return;
+    }
 
-    const animate = () => {
-      const elapsed = performance.now() - startTime;
-      const newProgress = Math.min(100, (elapsed / duration) * 100);
+    const duration = 3500;
+
+    const animate = (timestamp: number) => {
+      if (!lastTimestampRef.current) {
+        lastTimestampRef.current = timestamp;
+      }
+
+      const deltaTime = timestamp - lastTimestampRef.current;
+      lastTimestampRef.current = timestamp;
+
+      elapsedRef.current = Math.min(duration, elapsedRef.current + deltaTime);
+      const newProgress = (elapsedRef.current / duration) * 100;
       setProgress(newProgress);
 
-      if (newProgress < 100) {
-        requestAnimationFrame(animate);
+      if (elapsedRef.current < duration) {
+        rafIdRef.current = requestAnimationFrame(animate);
       }
     };
 
-    const rafId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafId);
-  }, []);
+    rafIdRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    };
+  }, [isPaused]);
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-10"
+      transition={{ duration: 0.2 }}
+      className="absolute inset-0 flex items-center justify-center z-10"
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", damping: 15 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
         className="flex flex-col items-center gap-4 px-6 py-5 mx-4 rounded-xl bg-gray-900/90 border border-gray-700 max-w-xs w-full"
       >
         {/* Icon */}
         <motion.div
           className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-linear-to-br from-orange-500 to-red-600 flex items-center justify-center"
-          animate={{
-            scale: [1, 1.1, 1],
-            rotate: [0, 5, -5, 0],
-          }}
+          animate={
+            isPaused
+              ? { scale: 1, rotate: 0 }
+              : {
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 5, -5, 0],
+                }
+          }
           transition={{
             duration: 1.5,
-            repeat: Infinity,
+            repeat: isPaused ? 0 : Infinity,
             ease: "easeInOut",
           }}
         >
@@ -858,7 +902,8 @@ function SongGeneratingOverlay() {
           <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
             <motion.div
               className="h-full bg-linear-to-r from-yellow-400 to-orange-500 rounded-full"
-              style={{ width: `${progress}%` }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: isPaused ? 0 : 0.1 }}
             />
           </div>
           <p className="text-[10px] sm:text-xs text-gray-500 text-center mt-2">
@@ -880,26 +925,27 @@ const WAVEFORM_HEIGHTS = [
   60,
 ];
 
-function SongCompleteOverlay() {
+function SongCompleteOverlay({ isPaused }: { isPaused: boolean }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
 
   // Auto-play animation
   useEffect(() => {
+    if (isPaused) return;
     const timer = setTimeout(() => setIsPlaying(true), 500);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isPaused]);
 
   // Simulate playback time
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || isPaused) return;
 
     const interval = setInterval(() => {
       setCurrentTime((prev) => (prev >= 45 ? 0 : prev + 1));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isPlaying]);
+  }, [isPlaying, isPaused]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -912,12 +958,13 @@ function SongCompleteOverlay() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-10"
+      transition={{ duration: 0.2 }}
+      className="absolute inset-0 flex items-center justify-center z-10"
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        transition={{ type: "spring", damping: 15 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
         className="flex flex-col gap-3 px-4 py-4 mx-4 rounded-xl bg-linear-to-br from-gray-900 to-gray-950 border border-gray-700 max-w-md w-full"
       >
         {/* Header */}
@@ -956,14 +1003,15 @@ function SongCompleteOverlay() {
               key={i}
               className="flex-1 rounded-t-sm bg-orange-500/60"
               animate={{
-                height: isPlaying
-                  ? [`${height}%`, `${height * 0.6}%`, `${height}%`]
-                  : `${height}%`,
-                opacity: isPlaying ? [0.6, 1, 0.6] : 0.4,
+                height:
+                  isPlaying && !isPaused
+                    ? [`${height}%`, `${height * 0.6}%`, `${height}%`]
+                    : `${height}%`,
+                opacity: isPlaying && !isPaused ? [0.6, 1, 0.6] : 0.4,
               }}
               transition={{
                 duration: 0.8,
-                repeat: isPlaying ? Infinity : 0,
+                repeat: isPlaying && !isPaused ? Infinity : 0,
                 delay: i * 0.05,
                 ease: "easeInOut",
               }}
@@ -993,7 +1041,8 @@ function SongCompleteOverlay() {
             <div className="flex-1 h-1 bg-gray-700 rounded-full overflow-hidden">
               <motion.div
                 className="h-full bg-white rounded-full"
-                style={{ width: `${(currentTime / 45) * 100}%` }}
+                animate={{ width: `${(currentTime / 45) * 100}%` }}
+                transition={{ duration: isPaused ? 0 : 0.1 }}
               />
             </div>
             <span className="text-[10px] sm:text-xs text-gray-400 font-mono w-8">
@@ -1018,10 +1067,25 @@ function SongCompleteOverlay() {
 // Main Component
 // =============================================================================
 
-export function HeroBattleDemo() {
+interface HeroBattleDemoProps {
+  isPaused?: boolean;
+  setIsPaused?: (paused: boolean | ((prev: boolean) => boolean)) => void;
+}
+
+export function HeroBattleDemo({
+  isPaused: externalPaused,
+  setIsPaused: setExternalPaused,
+}: HeroBattleDemoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [stateIndex, setStateIndex] = useState(0);
   const [isInView, setIsInView] = useState(false);
+  const [internalPaused, setInternalPaused] = useState(false);
+
+  // Use external state if provided, otherwise fallback to internal
+  const isPaused =
+    externalPaused !== undefined ? externalPaused : internalPaused;
+  const setIsPaused =
+    setExternalPaused !== undefined ? setExternalPaused : setInternalPaused;
 
   const currentStateName = STATE_ORDER[stateIndex];
   const config = STATE_CONFIGS[currentStateName];
@@ -1044,6 +1108,7 @@ export function HeroBattleDemo() {
 
         if (!wasInView && nowInView) {
           setStateIndex(0);
+          setIsPaused(false);
         }
       },
       { threshold: 0.3 }
@@ -1055,11 +1120,11 @@ export function HeroBattleDemo() {
 
   // Auto-advance
   useEffect(() => {
-    if (!isInView) return;
+    if (!isInView || isPaused) return;
 
     const timer = setTimeout(advanceState, config.duration);
     return () => clearTimeout(timer);
-  }, [stateIndex, isInView, config.duration, advanceState]);
+  }, [stateIndex, isInView, isPaused, config.duration, advanceState]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -1069,11 +1134,16 @@ export function HeroBattleDemo() {
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
         setStateIndex((prev) => (prev + 1) % STATE_ORDER.length);
+        setIsPaused(false);
       } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
         e.preventDefault();
         setStateIndex((prev) =>
           prev === 0 ? STATE_ORDER.length - 1 : prev - 1
         );
+        setIsPaused(false);
+      } else if (e.key === " ") {
+        e.preventDefault();
+        setIsPaused((prev) => !prev);
       }
     };
 
@@ -1090,92 +1160,154 @@ export function HeroBattleDemo() {
       : [1, 2];
 
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full aspect-16/10 overflow-hidden"
-      style={
-        {
-          "--player1-color": PLAYER1_COLOR,
-          "--player2-color": PLAYER2_COLOR,
-        } as React.CSSProperties
-      }
-    >
-      {/* Background - matching battle stage gradient */}
-      <div className="absolute inset-0 bg-linear-to-b from-gray-900 via-gray-950 to-black" />
+    <MotionConfig reducedMotion={isPaused ? "always" : "never"}>
+      <div
+        ref={containerRef}
+        className="relative w-full aspect-16/10 overflow-hidden group"
+        data-paused={isPaused}
+        style={
+          {
+            "--player1-color": PLAYER1_COLOR,
+            "--player2-color": PLAYER2_COLOR,
+          } as React.CSSProperties
+        }
+      >
+        {/* Background - matching battle stage gradient */}
+        <div className="absolute inset-0 bg-linear-to-b from-gray-900 via-gray-950 to-black" />
 
-      {/* Stage Header */}
-      <StageHeader
-        currentRound={config.round}
-        completedRounds={completedRounds}
-      />
+        {/* Stage Header */}
+        <StageHeader
+          currentRound={config.round}
+          completedRounds={completedRounds}
+          isPaused={isPaused}
+        />
 
-      {/* Split View - Two Columns */}
-      <div className="absolute top-[52px] sm:top-[68px] bottom-8 left-0 right-0 grid grid-cols-2">
-        {/* Player 1 (Left) */}
-        <div className="flex flex-col border-r border-gray-800/50 overflow-hidden">
-          <PersonaCardDemo
-            mc={MC1}
-            position="player1"
-            isActive={config.activeMC === "mc1" || config.activeMC === "both"}
-            isWinner={config.showWinner}
-          />
-          <VerseDemo
-            lines={VERSES.mc1}
-            visibleCount={config.mc1Lines || 0}
-            position="player1"
-            isStreaming={config.streamingMC === "mc1"}
-            mcName={MC1.name}
-          />
+        {/* Split View - Two Columns */}
+        <div className="absolute top-[52px] sm:top-[68px] bottom-8 left-0 right-0 grid grid-cols-2">
+          {/* Player 1 (Left) */}
+          <div className="flex flex-col border-r border-gray-800/50 overflow-hidden">
+            <PersonaCardDemo
+              mc={MC1}
+              position="player1"
+              isActive={config.activeMC === "mc1" || config.activeMC === "both"}
+              isWinner={config.showWinner}
+              isPaused={isPaused}
+            />
+            <VerseDemo
+              lines={VERSES.mc1}
+              visibleCount={config.mc1Lines || 0}
+              position="player1"
+              isStreaming={config.streamingMC === "mc1"}
+              mcName={MC1.name}
+              isPaused={isPaused}
+            />
+          </div>
+
+          {/* Player 2 (Right) */}
+          <div className="flex flex-col overflow-hidden">
+            <PersonaCardDemo
+              mc={MC2}
+              position="player2"
+              isActive={config.activeMC === "mc2" || config.activeMC === "both"}
+              isPaused={isPaused}
+            />
+            <VerseDemo
+              lines={VERSES.mc2}
+              visibleCount={config.mc2Lines || 0}
+              position="player2"
+              isStreaming={config.streamingMC === "mc2"}
+              mcName={MC2.name}
+              isPaused={isPaused}
+            />
+          </div>
         </div>
 
-        {/* Player 2 (Right) */}
-        <div className="flex flex-col overflow-hidden">
-          <PersonaCardDemo
-            mc={MC2}
-            position="player2"
-            isActive={config.activeMC === "mc2" || config.activeMC === "both"}
-          />
-          <VerseDemo
-            lines={VERSES.mc2}
-            visibleCount={config.mc2Lines || 0}
-            position="player2"
-            isStreaming={config.streamingMC === "mc2"}
-            mcName={MC2.name}
-          />
+        {/* Persistent frost overlay for post-battle states */}
+        {(config.showWinner ||
+          config.showSongStyleSelect ||
+          config.showSongGenerating ||
+          config.showSongComplete) && (
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10 pointer-events-none" />
+        )}
+
+        {/* Overlays */}
+        <AnimatePresence>
+          {isPaused && (
+            <>
+              <motion.div
+                key="pause-frost"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-40 pointer-events-none"
+              />
+              <motion.div
+                key="pause-overlay"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none"
+              >
+                <div className="bg-black/60 backdrop-blur-xl border border-white/10 px-6 py-3 rounded-2xl flex items-center gap-3 shadow-2xl">
+                  <Pause className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                  <span className="text-lg font-bold text-white font-(family-name:--font-bebas-neue) tracking-widest uppercase">
+                    Demo Paused
+                  </span>
+                </div>
+              </motion.div>
+            </>
+          )}
+          {config.showScoring && (
+            <ScoringOverlay key="scoring-overlay" isPaused={isPaused} />
+          )}
+          {config.showWinner && (
+            <WinnerOverlay key="winner-overlay" mc={MC1} isPaused={isPaused} />
+          )}
+          {config.showSongStyleSelect && (
+            <SongStyleSelectOverlay key="song-style-overlay" />
+          )}
+          {config.showSongGenerating && (
+            <SongGeneratingOverlay
+              key="song-generating-overlay"
+              isPaused={isPaused}
+            />
+          )}
+          {config.showSongComplete && (
+            <SongCompleteOverlay
+              key="song-complete-overlay"
+              isPaused={isPaused}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* State indicator pills */}
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/5">
+          <div className="flex gap-1">
+            {STATE_ORDER.map((state, idx) => (
+              <motion.button
+                key={`${state}-${idx}`}
+                onClick={() => {
+                  setStateIndex(idx);
+                  setIsPaused(false);
+                }}
+                className={`
+                  h-1 rounded-full transition-all duration-300
+                  ${idx === stateIndex ? "w-4 sm:w-6" : "w-1 sm:w-1.5"}
+                `}
+                animate={{
+                  backgroundColor:
+                    idx === stateIndex
+                      ? "#facc15" // yellow-400
+                      : "#374151", // gray-700
+                }}
+              />
+            ))}
+          </div>
         </div>
+
+        {/* Frost overlay on hover */}
+        <div className="absolute inset-0 bg-black/30 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-30" />
       </div>
-
-      {/* Overlays */}
-      <AnimatePresence>
-        {config.showScoring && <ScoringOverlay />}
-        {config.showWinner && <WinnerOverlay mc={MC1} />}
-        {config.showSongStyleSelect && <SongStyleSelectOverlay />}
-        {config.showSongGenerating && <SongGeneratingOverlay />}
-        {config.showSongComplete && <SongCompleteOverlay />}
-      </AnimatePresence>
-
-      {/* State indicator pills */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20">
-        {STATE_ORDER.map((state, idx) => (
-          <motion.button
-            key={`${state}-${idx}`}
-            onClick={() => setStateIndex(idx)}
-            className={`
-              h-1 rounded-full transition-all duration-300
-              ${idx === stateIndex ? "w-4 sm:w-6" : "w-1 sm:w-1.5"}
-            `}
-            animate={{
-              backgroundColor:
-                idx === stateIndex
-                  ? "#facc15" // yellow-400
-                  : "#374151", // gray-700
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Frost overlay on hover */}
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-30" />
-    </div>
+    </MotionConfig>
   );
 }
