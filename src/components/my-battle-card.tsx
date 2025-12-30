@@ -167,11 +167,8 @@ export function MyBattleCard({
   const hasAction = isLive || isPaused || isCompleted || isPublic;
 
   const handleCardClick = () => {
-    if (hasMenu) {
-      setMenuOpen(true);
-    } else if (hasAction) {
-      router.push(`/battle/${battle.id}`);
-    }
+    // Always navigate to the battle when clicking the card
+    router.push(`/battle/${battle.id}`);
   };
 
   const calculateFinalStats = () => {
