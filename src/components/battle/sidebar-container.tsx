@@ -47,26 +47,29 @@ export function SidebarContainer({
   // Voting is only shown if enabled AND (live OR archived)
   const effectiveShowVoting = showVoting && (battle.isLive || isArchived);
 
-  if (!showCommenting && !effectiveShowVoting) {
-    return null;
-  }
+  // Only hide desktop sidebar when both features are disabled
+  // Mobile drawer visibility is controlled by the parent via showMobileDrawer
+  const showDesktopSidebar = showCommenting || effectiveShowVoting;
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <div className="hidden xl:block w-96">
-        <BattleSidebar
-          battle={battle}
-          onVote={onVote}
-          onComment={onComment}
-          isArchived={isArchived}
-          isVotingPhase={isVotingPhase}
-          votingTimeRemaining={votingTimeRemaining}
-          votingCompletedRound={votingCompletedRound}
-        />
-      </div>
+      {/* Desktop Sidebar - only render when at least one feature is enabled */}
+      {showDesktopSidebar && (
+        <div className="hidden xl:block w-96">
+          <BattleSidebar
+            battle={battle}
+            onVote={onVote}
+            onComment={onComment}
+            isArchived={isArchived}
+            isVotingPhase={isVotingPhase}
+            votingTimeRemaining={votingTimeRemaining}
+            votingCompletedRound={votingCompletedRound}
+          />
+        </div>
+      )}
 
       {/* Mobile Drawer - single scroll container like MP3 drawer */}
+      {/* Content visibility is based on mobileActiveTab - button visibility in fan menu controls access */}
       {showMobileDrawer !== undefined && onMobileDrawerChange && (
         <BattleDrawer
           open={showMobileDrawer}
@@ -74,7 +77,7 @@ export function SidebarContainer({
           title={mobileActiveTab === "comments" ? "Comments" : "Voting"}
           excludeBottomControls={excludeBottomControls}
         >
-          {mobileActiveTab === "comments" && showCommenting && (
+          {mobileActiveTab === "comments" && (
             <CommentsContent
               comments={battle.comments}
               onComment={onComment}
@@ -82,7 +85,7 @@ export function SidebarContainer({
               battleStatus={battle.status}
             />
           )}
-          {mobileActiveTab === "voting" && effectiveShowVoting && (
+          {mobileActiveTab === "voting" && (
             <VotingContent
               battle={battle}
               onVote={onVote}

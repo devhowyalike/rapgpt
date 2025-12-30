@@ -67,6 +67,19 @@ export function BattleSidebar({
     }
   }, [isVotingPhase, defaultTab, showVoting]);
 
+  // Automatically switch tabs when a feature is disabled
+  // This ensures content is always visible when one feature is toggled off
+  useEffect(() => {
+    // If comments are disabled and we're on the comments tab, switch to voting
+    if (!showCommenting && activeTab === "comments" && showVoting) {
+      setActiveTab("voting");
+    }
+    // If voting is disabled and we're on the voting tab, switch to comments
+    if (!showVoting && activeTab === "voting" && showCommenting) {
+      setActiveTab("comments");
+    }
+  }, [showCommenting, showVoting, activeTab]);
+
   // If neither feature is enabled, don't render anything
   if (!showCommenting && !showVoting) {
     return null;

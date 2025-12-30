@@ -106,6 +106,7 @@ export function BattleReplayControlBar({
     isStoppingLive,
     onGoLiveClick: handleEndLiveClick,
     onShareClick: handleShare,
+    canManage, // Allow managers to always see comments/voting buttons to toggle back on
   });
 
   return (
