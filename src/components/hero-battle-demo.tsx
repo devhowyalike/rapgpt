@@ -23,6 +23,7 @@ type DemoState =
 
 interface MCData {
   name: string;
+  shortName?: string;
   avatar: string;
   style: string;
   bio: string;
@@ -45,6 +46,7 @@ interface StateConfig {
 
 const MC1: MCData = {
   name: "Tyler, The Creator",
+  shortName: "Tyler",
   avatar: "/avatars/tyler.webp",
   style: "GOLF le FLEUR*",
   bio: "@#$%! #$@&! %$#@!!!",
@@ -354,6 +356,7 @@ interface VerseDemoProps {
   isStreaming?: boolean;
   showIndicator?: boolean;
   mcName: string;
+  shortMcName?: string;
   isPaused: boolean;
 }
 
@@ -364,6 +367,7 @@ function VerseDemo({
   isStreaming,
   showIndicator,
   mcName,
+  shortMcName,
   isPaused,
 }: VerseDemoProps) {
   const playerColor =
@@ -504,7 +508,8 @@ function VerseDemo({
             className="text-[10px] sm:text-xs"
             style={{ color: playerColor }}
           >
-            {mcName} is spitting...
+            <span className="sm:hidden">{shortMcName || mcName}</span>
+            <span className="hidden sm:inline">{mcName}</span> is spitting...
           </span>
         </motion.div>
       )}
@@ -1339,6 +1344,7 @@ export function HeroBattleDemo({
                 visibleCount={4}
                 position="player1"
                 mcName={MC1.name}
+                shortMcName={MC1.shortName}
                 isPaused
               />
             </div>
@@ -1354,6 +1360,7 @@ export function HeroBattleDemo({
                 visibleCount={4}
                 position="player2"
                 mcName={MC2.name}
+                shortMcName={MC2.shortName}
                 isPaused
               />
             </div>
@@ -1394,6 +1401,7 @@ export function HeroBattleDemo({
                 isStreaming={config.streamingMC === "mc1"}
                 showIndicator={config.showStreamingIndicator}
                 mcName={MC1.name}
+                shortMcName={MC1.shortName}
                 isPaused={isPaused}
               />
             </div>
@@ -1415,6 +1423,7 @@ export function HeroBattleDemo({
                 isStreaming={config.streamingMC === "mc2"}
                 showIndicator={config.showStreamingIndicator}
                 mcName={MC2.name}
+                shortMcName={MC2.shortName}
                 isPaused={isPaused}
               />
             </div>
