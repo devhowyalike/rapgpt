@@ -44,6 +44,8 @@ export function useScoreRevealDelay(
   const timerRef = useRef<number | null>(null);
   // Track the round we're currently delaying for to prevent race conditions
   const delayingForRoundRef = useRef<number | null>(null);
+  // Track the previous scoresAvailableRound to detect when scores become newly available
+  const prevScoresAvailableRoundRef = useRef<number | null>(null);
 
   // Update revealed round and persist to localStorage
   const updateRevealedRound = (round: number | null) => {
@@ -60,12 +62,29 @@ export function useScoreRevealDelay(
         clearTimeout(timerRef.current);
         timerRef.current = null;
       }
+      // Track that scores are not available
+      prevScoresAvailableRoundRef.current = null;
       return;
+    }
+
+    // Detect when scores transition from unavailable to available
+    // This indicates a NEW score was just calculated (not loaded from a previous session)
+    const scoresJustBecameAvailable = prevScoresAvailableRoundRef.current === null;
+    prevScoresAvailableRoundRef.current = scoresAvailableRound;
+
+    // If scores just became available and we have stale localStorage data marking
+    // this round as already revealed, clear it so the delay animation shows
+    if (scoresJustBecameAvailable && revealedRound === scoresAvailableRound) {
+      // Clear stale revealed state - a new score was just calculated
+      setRevealedRound(null);
+      storeRevealedRound(battleId ?? null, null);
+      // Don't return - fall through to start the delay
     }
 
     // Already revealed for this round (only check React state, not localStorage)
     // This prevents race conditions between multiple hook instances sharing localStorage
-    if (revealedRound === scoresAvailableRound) {
+    // Note: We check again after potentially clearing stale state above
+    if (revealedRound === scoresAvailableRound && !scoresJustBecameAvailable) {
       setIsDelaying(false);
       delayingForRoundRef.current = null;
       return;
