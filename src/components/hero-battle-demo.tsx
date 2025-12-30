@@ -210,10 +210,6 @@ function StageHeader({
         <div className="text-sm sm:text-lg font-bold text-white truncate">
           Oakland Coliseum
         </div>
-        <div className="text-[10px] sm:text-xs text-gray-400 flex items-center gap-1">
-          <span>🇺🇸</span>
-          <span className="truncate">Oakland, CA</span>
-        </div>
       </div>
 
       {/* Bell */}
@@ -1095,6 +1091,22 @@ interface HeroBattleDemoProps {
   setIsPaused?: (paused: boolean | ((prev: boolean) => boolean)) => void;
 }
 
+// Slide animation variants
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 80 : -80,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? 80 : -80,
+    opacity: 0,
+  }),
+};
+
 export function HeroBattleDemo({
   isPaused: externalPaused,
   setIsPaused: setExternalPaused,
@@ -1103,6 +1115,11 @@ export function HeroBattleDemo({
   const [stateIndex, setStateIndex] = useState(0);
   const [isInView, setIsInView] = useState(false);
   const [internalPaused, setInternalPaused] = useState(false);
+  const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
+
+  // Touch/swipe state
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const touchStartTimeRef = useRef<number>(0);
 
   // Use external state if provided, otherwise fallback to internal
   const isPaused =
@@ -1114,6 +1131,7 @@ export function HeroBattleDemo({
   const config = STATE_CONFIGS[currentStateName];
 
   const advanceState = useCallback(() => {
+    setDirection(1);
     setStateIndex((prev) => (prev + 1) % STATE_ORDER.length);
   }, []);
 
@@ -1130,6 +1148,7 @@ export function HeroBattleDemo({
         setIsInView(nowInView);
 
         if (!wasInView && nowInView) {
+          setDirection(1);
           setStateIndex(0);
           setIsPaused(false);
         }
@@ -1156,10 +1175,12 @@ export function HeroBattleDemo({
 
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
+        setDirection(1);
         setStateIndex((prev) => (prev + 1) % STATE_ORDER.length);
         setIsPaused(false);
       } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
         e.preventDefault();
+        setDirection(-1);
         setStateIndex((prev) =>
           prev === 0 ? STATE_ORDER.length - 1 : prev - 1
         );
@@ -1174,6 +1195,53 @@ export function HeroBattleDemo({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isInView]);
 
+  // Touch/swipe navigation
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    touchStartTimeRef.current = Date.now();
+  }, []);
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (!touchStartRef.current) return;
+
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - touchStartRef.current.x;
+      const deltaY = touch.clientY - touchStartRef.current.y;
+      const deltaTime = Date.now() - touchStartTimeRef.current;
+
+      // Minimum swipe distance (px) and maximum time (ms)
+      const minSwipeDistance = 50;
+      const maxSwipeTime = 500;
+
+      // Check if it's a horizontal swipe (more horizontal than vertical)
+      const isHorizontalSwipe = Math.abs(deltaX) > Math.abs(deltaY);
+
+      if (
+        isHorizontalSwipe &&
+        Math.abs(deltaX) >= minSwipeDistance &&
+        deltaTime <= maxSwipeTime
+      ) {
+        if (deltaX < 0) {
+          // Swipe left → next slide
+          setDirection(1);
+          setStateIndex((prev) => (prev + 1) % STATE_ORDER.length);
+        } else {
+          // Swipe right → previous slide
+          setDirection(-1);
+          setStateIndex((prev) =>
+            prev === 0 ? STATE_ORDER.length - 1 : prev - 1
+          );
+        }
+        setIsPaused(false);
+      }
+
+      touchStartRef.current = null;
+    },
+    [setIsPaused]
+  );
+
   const completedRounds =
     currentStateName === "winner" ||
     currentStateName === "song-style-select" ||
@@ -1184,10 +1252,13 @@ export function HeroBattleDemo({
 
   return (
     <MotionConfig reducedMotion={isPaused ? "always" : "never"}>
+      {/* Wrapper that uses measurement container for sizing */}
       <div
         ref={containerRef}
-        className="relative w-full aspect-16/10 overflow-hidden group"
+        className="relative w-full group touch-pan-y"
         data-paused={isPaused}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         style={
           {
             "--player1-color": PLAYER1_COLOR,
@@ -1195,143 +1266,214 @@ export function HeroBattleDemo({
           } as React.CSSProperties
         }
       >
-        {/* Background - matching battle stage gradient */}
-        <div className="absolute inset-0 bg-linear-to-b from-gray-900 via-gray-950 to-black" />
-
-        {/* Stage Header */}
-        <StageHeader
-          currentRound={config.round}
-          completedRounds={completedRounds}
-          isPaused={isPaused}
-        />
-
-        {/* Split View - Two Columns */}
-        <div className="absolute top-[52px] sm:top-[68px] bottom-8 left-0 right-0 grid grid-cols-2">
-          {/* Player 1 (Left) */}
-          <div className="flex flex-col border-r border-gray-800/50 overflow-hidden">
-            <PersonaCardDemo
-              mc={MC1}
-              position="player1"
-              isActive={config.activeMC === "mc1" || config.activeMC === "both"}
-              isWinner={config.showWinner}
-              isPaused={isPaused}
-            />
-            <VerseDemo
-              lines={VERSES.mc1}
-              visibleCount={config.mc1Lines || 0}
-              position="player1"
-              isStreaming={config.streamingMC === "mc1"}
-              showIndicator={config.showStreamingIndicator}
-              mcName={MC1.name}
-              isPaused={isPaused}
-            />
+        {/* Measurement container - invisible but takes up space to define height */}
+        <div
+          aria-hidden="true"
+          className="w-full flex flex-col pointer-events-none"
+          style={{ visibility: "hidden" }}
+        >
+          <div className="shrink-0">
+            <StageHeader currentRound={3} completedRounds={[1, 2]} isPaused />
           </div>
-
-          {/* Player 2 (Right) */}
-          <div className="flex flex-col overflow-hidden">
-            <PersonaCardDemo
-              mc={MC2}
-              position="player2"
-              isActive={config.activeMC === "mc2" || config.activeMC === "both"}
-              isPaused={isPaused}
-            />
-            <VerseDemo
-              lines={VERSES.mc2}
-              visibleCount={config.mc2Lines || 0}
-              position="player2"
-              isStreaming={config.streamingMC === "mc2"}
-              showIndicator={config.showStreamingIndicator}
-              mcName={MC2.name}
-              isPaused={isPaused}
-            />
+          <div className="flex-1 grid grid-cols-2 pb-8">
+            <div className="flex flex-col border-r border-gray-800/50">
+              <PersonaCardDemo
+                mc={MC1}
+                position="player1"
+                isActive={false}
+                isPaused
+              />
+              <VerseDemo
+                lines={VERSES.mc1}
+                visibleCount={4}
+                position="player1"
+                mcName={MC1.name}
+                isPaused
+              />
+            </div>
+            <div className="flex flex-col">
+              <PersonaCardDemo
+                mc={MC2}
+                position="player2"
+                isActive={false}
+                isPaused
+              />
+              <VerseDemo
+                lines={VERSES.mc2}
+                visibleCount={4}
+                position="player2"
+                mcName={MC2.name}
+                isPaused
+              />
+            </div>
           </div>
         </div>
 
-        {/* Persistent frost overlay for post-battle states */}
-        {(config.showWinner ||
-          config.showSongStyleSelect ||
-          config.showSongGenerating ||
-          config.showSongComplete) && (
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10 pointer-events-none" />
-        )}
+        {/* Visible demo container - overlays the measurement container */}
+        <div className="absolute inset-0 flex flex-col overflow-hidden">
+          {/* Background - matching battle stage gradient */}
+          <div className="absolute inset-0 bg-linear-to-b from-gray-900 via-gray-950 to-black" />
 
-        {/* Overlays */}
-        <AnimatePresence>
-          {isPaused && (
-            <div className="absolute inset-0 z-40 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
-              <motion.div
-                key="pause-frost"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+          {/* Stage Header */}
+          <div className="relative z-10 shrink-0">
+            <StageHeader
+              currentRound={config.round}
+              completedRounds={completedRounds}
+              isPaused={isPaused}
+            />
+          </div>
+
+          {/* Split View - Two Columns with slide animation */}
+          <AnimatePresence mode="popLayout" custom={direction} initial={false}>
+            <motion.div
+              key={stateIndex}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.2 },
+              }}
+              className="relative z-10 flex-1 grid grid-cols-2 pb-8"
+            >
+              {/* Player 1 (Left) */}
+              <div className="flex flex-col border-r border-gray-800/50 overflow-hidden">
+                <PersonaCardDemo
+                  mc={MC1}
+                  position="player1"
+                  isActive={
+                    config.activeMC === "mc1" || config.activeMC === "both"
+                  }
+                  isWinner={config.showWinner}
+                  isPaused={isPaused}
+                />
+                <VerseDemo
+                  lines={VERSES.mc1}
+                  visibleCount={config.mc1Lines || 0}
+                  position="player1"
+                  isStreaming={config.streamingMC === "mc1"}
+                  showIndicator={config.showStreamingIndicator}
+                  mcName={MC1.name}
+                  isPaused={isPaused}
+                />
+              </div>
+
+              {/* Player 2 (Right) */}
+              <div className="flex flex-col overflow-hidden">
+                <PersonaCardDemo
+                  mc={MC2}
+                  position="player2"
+                  isActive={
+                    config.activeMC === "mc2" || config.activeMC === "both"
+                  }
+                  isPaused={isPaused}
+                />
+                <VerseDemo
+                  lines={VERSES.mc2}
+                  visibleCount={config.mc2Lines || 0}
+                  position="player2"
+                  isStreaming={config.streamingMC === "mc2"}
+                  showIndicator={config.showStreamingIndicator}
+                  mcName={MC2.name}
+                  isPaused={isPaused}
+                />
+              </div>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Persistent frost overlay for post-battle states */}
+          {(config.showWinner ||
+            config.showSongStyleSelect ||
+            config.showSongGenerating ||
+            config.showSongComplete) && (
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10 pointer-events-none" />
+          )}
+
+          {/* Overlays */}
+          <AnimatePresence>
+            {isPaused && (
+              <div className="absolute inset-0 z-40 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
+                <motion.div
+                  key="pause-frost"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+                />
+                <motion.div
+                  key="pause-overlay"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="absolute inset-0 flex items-center justify-center z-10"
+                >
+                  <div className="bg-black/60 backdrop-blur-xl border border-white/10 px-6 py-3 rounded-2xl flex items-center gap-3 shadow-2xl">
+                    <Pause className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                    <span className="text-lg font-bold text-white font-(family-name:--font-bebas-neue) tracking-widest uppercase">
+                      Demo Paused
+                    </span>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+            {config.showScoring && (
+              <ScoringOverlay key="scoring-overlay" isPaused={isPaused} />
+            )}
+            {config.showWinner && (
+              <WinnerOverlay
+                key="winner-overlay"
+                mc={MC2}
+                isPaused={isPaused}
               />
-              <motion.div
-                key="pause-overlay"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="absolute inset-0 flex items-center justify-center z-10"
-              >
-                <div className="bg-black/60 backdrop-blur-xl border border-white/10 px-6 py-3 rounded-2xl flex items-center gap-3 shadow-2xl">
-                  <Pause className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                  <span className="text-lg font-bold text-white font-(family-name:--font-bebas-neue) tracking-widest uppercase">
-                    Demo Paused
-                  </span>
-                </div>
-              </motion.div>
-            </div>
-          )}
-          {config.showScoring && (
-            <ScoringOverlay key="scoring-overlay" isPaused={isPaused} />
-          )}
-          {config.showWinner && (
-            <WinnerOverlay key="winner-overlay" mc={MC2} isPaused={isPaused} />
-          )}
-          {config.showSongStyleSelect && (
-            <SongStyleSelectOverlay key="song-style-overlay" />
-          )}
-          {config.showSongGenerating && (
-            <SongGeneratingOverlay
-              key="song-generating-overlay"
-              isPaused={isPaused}
-            />
-          )}
-          {config.showSongComplete && (
-            <SongCompleteOverlay
-              key="song-complete-overlay"
-              isPaused={isPaused}
-            />
-          )}
-        </AnimatePresence>
+            )}
+            {config.showSongStyleSelect && (
+              <SongStyleSelectOverlay key="song-style-overlay" />
+            )}
+            {config.showSongGenerating && (
+              <SongGeneratingOverlay
+                key="song-generating-overlay"
+                isPaused={isPaused}
+              />
+            )}
+            {config.showSongComplete && (
+              <SongCompleteOverlay
+                key="song-complete-overlay"
+                isPaused={isPaused}
+              />
+            )}
+          </AnimatePresence>
 
-        {/* State indicator pills */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/5">
-          <div className="flex gap-1">
-            {STATE_ORDER.map((state, idx) => (
-              <motion.button
-                key={`${state}-${idx}`}
-                onClick={() => {
-                  setStateIndex(idx);
-                  setIsPaused(false);
-                }}
-                className={`
+          {/* State indicator pills */}
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/5">
+            <div className="flex gap-1">
+              {STATE_ORDER.map((state, idx) => (
+                <motion.button
+                  key={`${state}-${idx}`}
+                  onClick={() => {
+                    setDirection(idx > stateIndex ? 1 : -1);
+                    setStateIndex(idx);
+                    setIsPaused(false);
+                  }}
+                  className={`
                   h-1 rounded-full transition-all duration-300
                   ${idx === stateIndex ? "w-4 sm:w-6" : "w-1 sm:w-1.5"}
                 `}
-                animate={{
-                  backgroundColor:
-                    idx === stateIndex
-                      ? "#facc15" // yellow-400
-                      : "#374151", // gray-700
-                }}
-              />
-            ))}
+                  animate={{
+                    backgroundColor:
+                      idx === stateIndex
+                        ? "#facc15" // yellow-400
+                        : "#374151", // gray-700
+                  }}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Frost overlay on hover */}
-        <div className="absolute inset-0 bg-black/30 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-30" />
+          {/* Frost overlay on hover */}
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-30" />
+        </div>
       </div>
     </MotionConfig>
   );

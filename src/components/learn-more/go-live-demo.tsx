@@ -459,7 +459,7 @@ export function GoLiveDemo() {
   return (
     <div ref={containerRef} className="w-full">
       {/* Browser mockup content area */}
-      <div className="aspect-16/10 bg-gray-900 flex flex-col relative overflow-hidden">
+      <div className="aspect-4/5 sm:aspect-16/10 bg-gray-900 flex flex-col relative overflow-hidden">
         {/* Blurred screenshot background */}
         <div className="absolute inset-0">
           <Image

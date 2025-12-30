@@ -50,10 +50,10 @@ export function ScreenshotShowcaseStatic({
       </div>
 
       <div className="max-w-7xl mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-12 gap-16 items-center">
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-16 items-center">
           {/* Left Column: Content */}
           <div className="lg:col-span-5 space-y-6 flex flex-col items-center text-center">
-            <div className="space-y-6 flex flex-col items-center">
+            <div className="space-y-4 md:space-y-6 flex flex-col items-center">
               <div className="space-y-4 flex flex-col items-center">
                 <div className="flex flex-col items-center">
                   <div className="relative w-fit mx-auto">
@@ -75,14 +75,14 @@ export function ScreenshotShowcaseStatic({
                 </div>
               </div>
 
-              <div className="space-y-4 flex flex-col items-center border-t border-white/5 pt-6">
+              <div className="space-y-4 flex flex-col items-center border-t border-white/5 pt-4 md:pt-6">
                 <div className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm">
                   <span className="text-sm font-medium text-yellow-400 tracking-wide uppercase">
                     AI Powered Freestyle Battles
                   </span>
                 </div>
 
-                <div className="space-y-4 max-w-lg">
+                <div className="space-y-2 md:space-y-4 max-w-lg">
                   <p className="text-xl text-zinc-400 leading-relaxed text-pretty">
                     Choose your AI MCs. Battle alone or stream it live. Turn
                     verses into a song with beats and vocals.
@@ -101,6 +101,26 @@ export function ScreenshotShowcaseStatic({
                   className="group-hover:border-white/20 group-hover:shadow-[0_0_60px_rgba(245,158,11,0.15)]"
                   contentClassName="bg-stage-dark"
                   showAddressBar={false}
+                  disableAspectRatio
+                  headerRight={
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsPaused(!isPaused);
+                      }}
+                      className="flex sm:hidden items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-all group/pause"
+                    >
+                      <span className="text-[9px] text-zinc-500 uppercase tracking-wider group-hover/pause:text-zinc-400 transition-colors">
+                        {isPaused ? "Resume" : "Pause"}
+                      </span>
+                      {isPaused ? (
+                        <Play className="w-2 h-2 text-zinc-500 fill-current group-hover/pause:text-yellow-400 transition-colors" />
+                      ) : (
+                        <Pause className="w-2 h-2 text-zinc-500 fill-current group-hover/pause:text-zinc-400 transition-colors" />
+                      )}
+                    </button>
+                  }
                 >
                   {/* Animated Battle Demo */}
                   <HeroBattleDemo
@@ -122,7 +142,7 @@ export function ScreenshotShowcaseStatic({
             </Link>
 
             {/* Simulation Notice & Controls */}
-            <div className="relative flex items-center justify-center min-h-[24px]">
+            <div className="flex items-center justify-center sm:relative sm:min-h-[24px]">
               <span className="text-[10px] text-zinc-300 uppercase tracking-widest opacity-40">
                 &mdash; Simulated for demonstration &mdash;
               </span>
@@ -133,7 +153,7 @@ export function ScreenshotShowcaseStatic({
                   e.stopPropagation();
                   setIsPaused(!isPaused);
                 }}
-                className="absolute right-0 flex items-center gap-2 px-3 py-1 rounded-full border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/pause"
+                className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/pause sm:absolute sm:right-0"
               >
                 <span className="text-[10px] text-zinc-500 uppercase tracking-wider group-hover/pause:text-zinc-400 transition-colors">
                   {isPaused ? "Resume" : "Pause"}

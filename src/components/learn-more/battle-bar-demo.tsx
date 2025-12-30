@@ -313,7 +313,7 @@ export function BattleBarDemo() {
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* Browser mockup content area */}
-      <div className="aspect-16/10 bg-gray-900 flex flex-col">
+      <div className="aspect-4/5 sm:aspect-16/10 bg-gray-900 flex flex-col">
         {/* Blurred screenshot background */}
         <div className="flex-1 relative overflow-hidden">
           <Image

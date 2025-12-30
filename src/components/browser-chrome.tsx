@@ -10,6 +10,9 @@ interface BrowserChromeProps {
   contentClassName?: string;
   url?: string;
   showAddressBar?: boolean;
+  headerRight?: ReactNode;
+  /** When true, content area has no fixed aspect ratio and grows with content */
+  disableAspectRatio?: boolean;
 }
 
 export function BrowserChrome({
@@ -18,6 +21,8 @@ export function BrowserChrome({
   contentClassName,
   url = APP_URL,
   showAddressBar = false,
+  headerRight,
+  disableAspectRatio = false,
 }: BrowserChromeProps) {
   return (
     <div
@@ -49,12 +54,18 @@ export function BrowserChrome({
             <div className="hidden md:block w-[42px]" aria-hidden="true" />
           </>
         )}
+
+        {/* Custom Header Right content */}
+        {!showAddressBar && headerRight && (
+          <div className="ml-auto flex items-center">{headerRight}</div>
+        )}
       </div>
 
       {/* Content Area */}
       <div
         className={cn(
-          "relative w-full aspect-16/10 overflow-hidden bg-zinc-950",
+          "relative w-full overflow-hidden bg-zinc-950",
+          !disableAspectRatio && "aspect-4/5 sm:aspect-16/10",
           contentClassName
         )}
       >
