@@ -14,7 +14,7 @@ export function AdminControls({ isAdmin, isAdminActive }: AdminControlsProps) {
   return (
     <Link
       href="/admin/dashboard"
-      className={`hidden md:flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg ${
+      className={`hidden lg:flex items-center gap-2 text-sm transition-colors px-3 py-2 rounded-lg ${
         isAdminActive
           ? "text-purple-300 bg-purple-900/30 font-medium"
           : "text-purple-400 hover:text-purple-300 hover:bg-gray-800"
@@ -22,7 +22,7 @@ export function AdminControls({ isAdmin, isAdminActive }: AdminControlsProps) {
       prefetch={false}
     >
       <Shield className="w-4 h-4" />
-      <span className="hidden lg:inline">Admin</span>
+      <span>Admin</span>
     </Link>
   );
 }

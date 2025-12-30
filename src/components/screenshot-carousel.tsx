@@ -97,7 +97,7 @@ const FEATURES = [
   {
     key: "stage",
     icon: <Map className="w-5 h-5 md:w-6 md:h-6" />,
-    title: "Pick Your Stage",
+    title: "Select Your Stage",
     description:
       "Choose the perfect backdrop for your battle, with locations from around the world.",
     color: "blue" as ColorKey,
@@ -117,7 +117,7 @@ const FEATURES = [
     icon: <Radio className="w-5 h-5 md:w-6 md:h-6" />,
     title: "Go Live",
     description:
-      "Stream your match live, or simply spectate as a fan, as verses appear word by word while the battle evolves in real time.",
+      "Stream your match live to a crowd, or simply spectate as a fan, as the battle evolves in real time.",
     color: "red" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-battle-stage.webp",
   },
