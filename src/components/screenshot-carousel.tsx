@@ -26,6 +26,7 @@ import {
 import { BattleBarDemo } from "@/components/learn-more/battle-bar-demo";
 import { GoLiveDemo } from "@/components/learn-more/go-live-demo";
 import { ScoreDemo } from "@/components/learn-more/score-demo";
+import { CommentsDemo } from "@/components/learn-more/comments-demo";
 import { BrowserChrome } from "@/components/browser-chrome";
 
 type ColorKey = "red" | "yellow" | "green" | "blue" | "purple";
@@ -243,7 +244,7 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                     <BrowserChrome
                       showAddressBar={false}
                       contentClassName={
-                        feature.key === "scoring"
+                        feature.key === "scoring" || feature.key === "chat"
                           ? "aspect-[16/14] md:aspect-16/10"
                           : "aspect-16/10"
                       }
@@ -288,6 +289,20 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                             className="absolute inset-0"
                           >
                             <ScoreDemo />
+                          </motion.div>
+                        </AnimatePresence>
+                      ) : feature.key === "chat" ? (
+                        /* Interactive Comments Demo for Comments slide */
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key="comments-demo"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className="absolute inset-0"
+                          >
+                            <CommentsDemo />
                           </motion.div>
                         </AnimatePresence>
                       ) : (
