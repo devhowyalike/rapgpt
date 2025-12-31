@@ -44,8 +44,8 @@ export function ScreenshotShowcaseStatic({
     },
     {
       icon: <Users className="w-6 h-6" />,
-      title: "Invite the crowd",
-      description: "Streaming, voting and commenting.",
+      title: "Go Live",
+      description: "Stream with voting and comments.",
       color: "blue",
     },
     {
