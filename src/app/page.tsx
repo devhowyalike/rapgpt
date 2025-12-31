@@ -5,7 +5,7 @@ import { LiveBattlesDisplay } from "@/components/live-battles-display";
 import { LiveFeaturesHighlight } from "@/components/live-features-highlight";
 import { MakeSongHighlight } from "@/components/make-song-highlight";
 import { PersonaGallery } from "@/components/persona-gallery";
-import { ScreenshotShowcaseStatic } from "@/components/screenshot-showcase-static";
+import { ScreenshotShowcaseStatic } from "@/components/product-demo";
 import { SiteHeader } from "@/components/site-header";
 import { getUserByClerkId } from "@/lib/auth/sync-user";
 import { getLiveBattles } from "@/lib/battle-storage";
