@@ -153,7 +153,7 @@ type DemoKey =
 type Feature = {
   key: string;
   icon: React.ReactNode;
-  title: string;
+  title: React.ReactNode;
   description: string;
   color: ColorKey;
   screenshot: string;
@@ -165,7 +165,11 @@ const FEATURES: Feature[] = [
   {
     key: "mcs",
     icon: <Mic2 className="w-5 h-5 md:w-6 md:h-6" />,
-    title: "Choose Your MCs",
+    title: (
+      <>
+        Choose Your MC<span className="text-[0.7em] lowercase">s</span>
+      </>
+    ),
     description:
       "Select from a roster of unique AI personas, each with their own distinct flow, style, and personality.",
     color: "red" as ColorKey,

@@ -13,7 +13,7 @@ const COLOR_CLASSES: Record<FeatureCardColor, { icon: string; bg: string }> = {
 
 interface FeatureCardProps {
   icon: ReactNode;
-  title: string;
+  title: ReactNode;
   description: string;
   color: FeatureCardColor;
   showGridBackground?: boolean;

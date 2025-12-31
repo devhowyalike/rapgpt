@@ -22,13 +22,17 @@ export function ScreenshotShowcaseStatic({
 
   const features: {
     icon: React.ReactNode;
-    title: string;
+    title: React.ReactNode;
     description: string;
     color: FeatureCardColor;
   }[] = [
     {
       icon: <Mic2 className="w-6 h-6" />,
-      title: "Choose MC's",
+      title: (
+        <>
+          Choose MC<span className="text-[0.7em] lowercase">s</span>
+        </>
+      ),
       description: "Each with distinct flows and styles.",
       color: "red",
     },
@@ -212,9 +216,9 @@ export function ScreenshotShowcaseStatic({
         {/* Features Row (Static) */}
         <div className="mt-8 pt-4 border-none w-full">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-4">
-            {features.map((feature) => (
+            {features.map((feature, index) => (
               <FeatureCard
-                key={feature.title}
+                key={index}
                 icon={feature.icon}
                 title={feature.title}
                 description={feature.description}
