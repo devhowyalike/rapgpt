@@ -412,10 +412,13 @@ function StatusLabel({ label, isLive }: { label: string; isLive: boolean }) {
 // Main Component
 // =============================================================================
 
-export function GoLiveDemo() {
+interface GoLiveDemoProps {
+  isActive?: boolean;
+}
+
+export function GoLiveDemo({ isActive = true }: GoLiveDemoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [stateIndex, setStateIndex] = useState(0);
-  const [isInView, setIsInView] = useState(false);
 
   const currentStateName = STATE_ORDER[stateIndex];
   const config = STATE_CONFIGS[currentStateName];
@@ -425,40 +428,22 @@ export function GoLiveDemo() {
     setStateIndex((prev) => (prev + 1) % STATE_ORDER.length);
   }, []);
 
-  // Track previous isInView value with a ref to avoid dependency loop
-  const isInViewRef = useRef(false);
-
-  // Intersection Observer
+  // Reset animation when becoming active
+  const wasActiveRef = useRef(isActive);
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const wasInView = isInViewRef.current;
-        const nowInView = entry.isIntersecting;
-
-        isInViewRef.current = nowInView;
-        setIsInView(nowInView);
-
-        if (!wasInView && nowInView) {
-          setStateIndex(0);
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, []);
+    if (isActive && !wasActiveRef.current) {
+      setStateIndex(0);
+    }
+    wasActiveRef.current = isActive;
+  }, [isActive]);
 
   // Auto-advance
   useEffect(() => {
-    if (!isInView) return;
+    if (!isActive) return;
 
     const timer = setTimeout(advanceState, config.duration);
     return () => clearTimeout(timer);
-  }, [stateIndex, isInView, config.duration, advanceState]);
+  }, [stateIndex, isActive, config.duration, advanceState]);
 
   return (
     <div

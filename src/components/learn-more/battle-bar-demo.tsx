@@ -260,11 +260,14 @@ function ActionButtonContent({ config }: ActionButtonContentProps) {
 // Main Component
 // =============================================================================
 
-export function BattleBarDemo() {
+interface BattleBarDemoProps {
+  isActive?: boolean;
+}
+
+export function BattleBarDemo({ isActive = true }: BattleBarDemoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [stateIndex, setStateIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [isInView, setIsInView] = useState(false);
 
   const currentStateName = STATE_ORDER[stateIndex];
   const config = STATE_CONFIGS[currentStateName];
@@ -273,41 +276,22 @@ export function BattleBarDemo() {
     setStateIndex((prev) => (prev + 1) % STATE_ORDER.length);
   }, []);
 
-  // Track previous isInView value with a ref to avoid dependency loop
-  const isInViewRef = useRef(false);
-
-  // Intersection Observer to detect when slide is visible
+  // Reset animation when becoming active
+  const wasActiveRef = useRef(isActive);
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    if (isActive && !wasActiveRef.current) {
+      setStateIndex(0);
+    }
+    wasActiveRef.current = isActive;
+  }, [isActive]);
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const wasInView = isInViewRef.current;
-        const nowInView = entry.isIntersecting;
-
-        isInViewRef.current = nowInView;
-        setIsInView(nowInView);
-
-        // Reset to first state when coming back into view
-        if (!wasInView && nowInView) {
-          setStateIndex(0);
-        }
-      },
-      { threshold: 0.5 } // Trigger when 50% visible
-    );
-
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, []);
-
-  // Only run animation when in view and not paused
+  // Only run animation when active and not paused
   useEffect(() => {
-    if (isPaused || !isInView) return;
+    if (isPaused || !isActive) return;
 
     const timer = setTimeout(advanceState, config.duration);
     return () => clearTimeout(timer);
-  }, [stateIndex, isPaused, isInView, config.duration, advanceState]);
+  }, [stateIndex, isPaused, isActive, config.duration, advanceState]);
 
   return (
     <div

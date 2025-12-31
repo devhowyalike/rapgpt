@@ -404,12 +404,12 @@ function DesktopView({ config, currentStateName }: DesktopViewProps) {
 
 interface CommentsDemoProps {
   loadingScreen?: "enabled" | "disabled";
+  isActive?: boolean;
 }
 
-export function CommentsDemo({ loadingScreen = "disabled" }: CommentsDemoProps) {
+export function CommentsDemo({ loadingScreen = "disabled", isActive = true }: CommentsDemoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [stateIndex, setStateIndex] = useState(0);
-  const [isInView, setIsInView] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   const stateOrder = loadingScreen === "enabled"
@@ -423,7 +423,14 @@ export function CommentsDemo({ loadingScreen = "disabled" }: CommentsDemoProps) 
     setStateIndex((prev) => (prev + 1) % stateOrder.length);
   }, [stateOrder.length]);
 
-  const isInViewRef = useRef(false);
+  // Reset animation when becoming active
+  const wasActiveRef = useRef(isActive);
+  useEffect(() => {
+    if (isActive && !wasActiveRef.current) {
+      setStateIndex(0);
+    }
+    wasActiveRef.current = isActive;
+  }, [isActive]);
 
   // Detect mobile based on container width
   useEffect(() => {
@@ -441,37 +448,13 @@ export function CommentsDemo({ loadingScreen = "disabled" }: CommentsDemoProps) 
     return () => resizeObserver.disconnect();
   }, []);
 
-  // Intersection Observer
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const wasInView = isInViewRef.current;
-        const nowInView = entry.isIntersecting;
-
-        isInViewRef.current = nowInView;
-        setIsInView(nowInView);
-
-        if (!wasInView && nowInView) {
-          setStateIndex(0);
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, []);
-
   // Auto-advance
   useEffect(() => {
-    if (!isInView) return;
+    if (!isActive) return;
 
     const timer = setTimeout(advanceState, config.duration);
     return () => clearTimeout(timer);
-  }, [stateIndex, isInView, config.duration, advanceState]);
+  }, [stateIndex, isActive, config.duration, advanceState]);
 
   return (
     <div

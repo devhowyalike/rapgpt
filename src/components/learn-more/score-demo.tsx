@@ -538,10 +538,13 @@ function DesktopView({ config, currentStateName }: DesktopViewProps) {
 // Main Component
 // =============================================================================
 
-export function ScoreDemo() {
+interface ScoreDemoProps {
+  isActive?: boolean;
+}
+
+export function ScoreDemo({ isActive = true }: ScoreDemoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [stateIndex, setStateIndex] = useState(0);
-  const [isInView, setIsInView] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   const currentStateName = STATE_ORDER[stateIndex];
@@ -551,8 +554,14 @@ export function ScoreDemo() {
     setStateIndex((prev) => (prev + 1) % STATE_ORDER.length);
   }, []);
 
-  // Track previous isInView value with a ref to avoid dependency loop
-  const isInViewRef = useRef(false);
+  // Reset animation when becoming active
+  const wasActiveRef = useRef(isActive);
+  useEffect(() => {
+    if (isActive && !wasActiveRef.current) {
+      setStateIndex(0);
+    }
+    wasActiveRef.current = isActive;
+  }, [isActive]);
 
   // Detect mobile based on container width
   useEffect(() => {
@@ -571,37 +580,13 @@ export function ScoreDemo() {
     return () => resizeObserver.disconnect();
   }, []);
 
-  // Intersection Observer
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const wasInView = isInViewRef.current;
-        const nowInView = entry.isIntersecting;
-
-        isInViewRef.current = nowInView;
-        setIsInView(nowInView);
-
-        if (!wasInView && nowInView) {
-          setStateIndex(0);
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, []);
-
   // Auto-advance
   useEffect(() => {
-    if (!isInView) return;
+    if (!isActive) return;
 
     const timer = setTimeout(advanceState, config.duration);
     return () => clearTimeout(timer);
-  }, [stateIndex, isInView, config.duration, advanceState]);
+  }, [stateIndex, isActive, config.duration, advanceState]);
 
   return (
     <div

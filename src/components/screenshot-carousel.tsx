@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Zap,
   Music,
@@ -31,6 +31,7 @@ import { CommentsDemo } from "@/components/learn-more/comments-demo";
 import { VotingDemo } from "@/components/learn-more/voting-demo";
 import { MakeASongDemo } from "@/components/learn-more/make-a-song-demo";
 import { SelectPlayerDemo } from "@/components/learn-more/select-player-demo";
+import { StageSelectDemo } from "@/components/learn-more/stage-select-demo";
 import { BrowserChrome } from "@/components/browser-chrome";
 
 type ColorKey = "red" | "yellow" | "green" | "blue" | "purple";
@@ -186,9 +187,15 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
 
     setCurrent(api.selectedScrollSnap());
 
-    api.on("select", () => {
+    const onSelect = () => {
       setCurrent(api.selectedScrollSnap());
-    });
+    };
+
+    api.on("select", onSelect);
+
+    return () => {
+      api.off("select", onSelect);
+    };
   }, [api]);
 
   // Global keyboard navigation
@@ -235,8 +242,7 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
             align: "center",
             loop: true,
           }}
-          className="w-full focus:outline-none"
-          tabIndex={0}
+          className="w-full"
         >
           <CarouselContent className="ml-0">
             {FEATURES.map((feature, index) => {
@@ -248,143 +254,40 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                     <BrowserChrome
                       showAddressBar={false}
                       contentClassName={
-                        feature.key === "scoring" || feature.key === "chat" || feature.key === "voting" || feature.key === "song" || feature.key === "mcs"
+                        feature.key === "scoring" || feature.key === "chat" || feature.key === "voting" || feature.key === "song" || feature.key === "mcs" || feature.key === "stage"
                           ? "aspect-[16/14] md:aspect-16/10"
                           : "aspect-16/10"
                       }
                     >
                       {feature.key === "admin" ? (
-                        /* Interactive Battle Bar Demo for Dynamic Interface slide */
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key="battle-bar-demo"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="absolute inset-0"
-                          >
-                            <BattleBarDemo />
-                          </motion.div>
-                        </AnimatePresence>
+                        <BattleBarDemo isActive={current === index} />
                       ) : feature.key === "watch" ? (
-                        /* Interactive Go Live Demo for Go Live slide */
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key="go-live-demo"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="absolute inset-0"
-                          >
-                            <GoLiveDemo />
-                          </motion.div>
-                        </AnimatePresence>
+                        <GoLiveDemo isActive={current === index} />
                       ) : feature.key === "scoring" ? (
-                        /* Interactive Score Demo for Score slide */
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key="score-demo"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="absolute inset-0"
-                          >
-                            <ScoreDemo />
-                          </motion.div>
-                        </AnimatePresence>
+                        <ScoreDemo isActive={current === index} />
                       ) : feature.key === "chat" ? (
-                        /* Interactive Comments Demo for Comments slide */
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key="comments-demo"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="absolute inset-0"
-                          >
-                            <CommentsDemo />
-                          </motion.div>
-                        </AnimatePresence>
+                        <CommentsDemo isActive={current === index} />
                       ) : feature.key === "voting" ? (
-                        /* Interactive Voting Demo for Voting slide */
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key="voting-demo"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="absolute inset-0"
-                          >
-                            <VotingDemo />
-                          </motion.div>
-                        </AnimatePresence>
+                        <VotingDemo isActive={current === index} />
                       ) : feature.key === "song" ? (
-                        /* Interactive Make a Song Demo for Song slide */
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key="song-demo"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="absolute inset-0"
-                          >
-                            <MakeASongDemo />
-                          </motion.div>
-                        </AnimatePresence>
+                        <MakeASongDemo isActive={current === index} />
                       ) : feature.key === "mcs" ? (
-                        /* Interactive Select Player Demo for MCs slide */
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key="select-player-demo"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="absolute inset-0"
-                          >
-                            <SelectPlayerDemo />
-                          </motion.div>
-                        </AnimatePresence>
+                        <SelectPlayerDemo isActive={current === index} />
+                      ) : feature.key === "stage" ? (
+                        <StageSelectDemo isActive={current === index} />
                       ) : (
                         /* Static Screenshot for other slides */
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key={feature.screenshot}
-                            initial={{ opacity: 0, scale: 1.02 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="absolute inset-0"
-                          >
-                            <Image
-                              src={feature.screenshot}
-                              alt={`${APP_TITLE} - ${feature.title}`}
-                              fill
-                              className={cn(
-                                feature.key === "voting"
-                                  ? "object-cover object-[calc(50%-5px)_top] w-[55%]! left-[22.5%]! right-auto!"
-                                  : feature.key === "chat"
-                                  ? "object-cover object-[calc(50%-5px)_bottom] w-[55%]! left-[22.5%]! right-auto!"
-                                  : feature.key === "scoring"
-                                  ? "object-cover object-[calc(50%-5px)_bottom]"
-                                  : feature.key === "rounds"
-                                  ? "object-cover object-[calc(50%-5px)_top]"
-                                  : feature.key === "stage"
-                                  ? "object-cover object-[calc(50%-5px)_50%]"
-                                  : feature.key === "song"
-                                  ? "object-cover object-[calc(50%-5px)_bottom]"
-                                  : "object-contain"
-                              )}
-                              priority={index === 0}
-                            />
-                          </motion.div>
-                        </AnimatePresence>
+                        <Image
+                          src={feature.screenshot}
+                          alt={`${APP_TITLE} - ${feature.title}`}
+                          fill
+                          className={cn(
+                            feature.key === "rounds"
+                              ? "object-cover object-[calc(50%-5px)_top]"
+                              : "object-contain"
+                          )}
+                          priority={index === 0}
+                        />
                       )}
                     </BrowserChrome>
 
