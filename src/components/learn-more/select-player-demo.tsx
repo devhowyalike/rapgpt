@@ -214,7 +214,11 @@ function PlayerCard({ player, side, isActive, isMobile }: PlayerCardProps) {
           className={`relative ${
             isMobile ? "w-14 h-14" : "w-36 h-36"
           } rounded-full border-4 ${
-            isActive ? "border-transparent" : player ? borderColor : "border-gray-700 border-dashed"
+            isActive
+              ? "border-transparent"
+              : player
+              ? borderColor
+              : "border-gray-700 border-dashed"
           } overflow-hidden bg-linear-to-br from-gray-800 to-gray-900`}
           style={{
             boxShadow: player ? `0 0 30px ${shadowColor}` : "none",
@@ -312,7 +316,7 @@ function PersonaGridItem({
       <div
         className={`${
           isMobile ? "w-10 h-10" : "w-20 h-20"
-        } rounded-lg border-2 ${borderColor} ${shadowStyle} overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900 transition-all duration-200`}
+        } rounded-lg border-2 ${borderColor} ${shadowStyle} overflow-hidden bg-linear-to-br from-gray-800 to-gray-900 transition-all duration-200`}
       >
         <Image
           src={persona.avatar}
@@ -420,19 +424,19 @@ function MobileView({ config, currentStateName }: MobileViewProps) {
             <div className="text-center mb-3">
               <h2 className="text-lg font-bold tracking-wide font-sans">
                 {config.player2Selected ? (
-                  <span className="bg-gradient-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text">
+                  <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text">
                     READY TO BATTLE
                   </span>
                 ) : config.player1Selected ? (
                   <>
-                    <span className="bg-gradient-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text">
+                    <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text">
                       SELECT{" "}
                     </span>
                     <span className="text-red-400">PLAYER 2</span>
                   </>
                 ) : (
                   <>
-                    <span className="bg-gradient-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text">
+                    <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text">
                       SELECT{" "}
                     </span>
                     <span className="text-blue-400">PLAYER 1</span>
@@ -571,19 +575,19 @@ function DesktopView({ config, currentStateName }: DesktopViewProps) {
             <div className="text-center mb-8">
               <h2 className="text-4xl font-bold tracking-wide font-sans">
                 {config.player2Selected ? (
-                  <span className="bg-gradient-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text">
+                  <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text">
                     READY TO BATTLE
                   </span>
                 ) : config.player1Selected ? (
                   <>
-                    <span className="bg-gradient-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text">
+                    <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text">
                       SELECT{" "}
                     </span>
                     <span className="text-red-400">PLAYER 2</span>
                   </>
                 ) : (
                   <>
-                    <span className="bg-gradient-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text">
+                    <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text">
                       SELECT{" "}
                     </span>
                     <span className="text-blue-400">PLAYER 1</span>
