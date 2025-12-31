@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/carousel";
 import { BattleBarDemo } from "@/components/learn-more/battle-bar-demo";
 import { GoLiveDemo } from "@/components/learn-more/go-live-demo";
+import { ScoreDemo } from "@/components/learn-more/score-demo";
 import { BrowserChrome } from "@/components/browser-chrome";
 
 type ColorKey = "red" | "yellow" | "green" | "blue" | "purple";
@@ -269,6 +270,20 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                             className="absolute inset-0"
                           >
                             <GoLiveDemo />
+                          </motion.div>
+                        </AnimatePresence>
+                      ) : feature.key === "scoring" ? (
+                        /* Interactive Score Demo for Score slide */
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key="score-demo"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className="absolute inset-0"
+                          >
+                            <ScoreDemo />
                           </motion.div>
                         </AnimatePresence>
                       ) : (
