@@ -129,7 +129,7 @@ export const PersonaCardDemo = memo(function PersonaCardDemo({
   const playerColor = getPlayerColor(position);
 
   return (
-    <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 border-b border-gray-800 bg-gray-900">
+    <div className="flex items-center gap-4 p-2 sm:p-3 border-b border-gray-800 bg-gray-900">
       {/* Avatar with active ring */}
       <PersonaAvatar
         avatar={mc.avatar}
@@ -143,16 +143,16 @@ export const PersonaCardDemo = memo(function PersonaCardDemo({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <h3
-            className="text-sm sm:text-lg font-bold font-(family-name:--font-bebas-neue) truncate"
+            className="text-lg font-bold font-(family-name:--font-bebas-neue) truncate"
             style={{ color: playerColor }}
           >
             {mc.name}
           </h3>
         </div>
-        <p className="text-[10px] sm:text-xs text-gray-400 truncate">
+        <p className="text-xs text-gray-400 truncate">
           {mc.style}
         </p>
-        <p className="text-[10px] sm:text-xs text-gray-300 truncate hidden sm:block">
+        <p className="text-xs text-gray-300 truncate hidden sm:block">
           {mc.bio}
         </p>
       </div>
@@ -189,7 +189,7 @@ function PersonaAvatar({
         transition={{ duration: 0.3 }}
       >
         <div
-          className="w-10 h-10 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 sm:border-[3px] bg-gray-800"
+          className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 sm:border-[3px] bg-gray-800"
           style={{ borderColor: playerColor }}
         >
           <Image
@@ -350,7 +350,7 @@ const VerseLine = memo(function VerseLine({
       className="flex"
     >
       <span
-        className="text-[10px] sm:text-sm w-4 sm:w-6 shrink-0 transition-opacity duration-200"
+        className="text-sm w-5 sm:w-6 shrink-0 transition-opacity duration-200"
         style={{
           color: playerColor,
           opacity: lineNumberVisible ? 0.5 : 0,
@@ -359,7 +359,7 @@ const VerseLine = memo(function VerseLine({
         {lineIndex + 1}.
       </span>
       <div
-        className="text-xs sm:text-base text-white font-medium leading-relaxed flex-1"
+        className="text-base text-white font-medium leading-relaxed flex-1"
         style={{ textShadow: `0 0 8px ${playerColor}40` }}
       >
         {words.map((word, wordIndex) => {
@@ -405,12 +405,11 @@ function StreamingIndicator({
       transition={{ duration: 1.5, repeat: isPaused ? 0 : Infinity }}
     >
       <div
-        className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full"
+        className="w-2 h-2 rounded-full"
         style={{ backgroundColor: playerColor }}
       />
-      <span className="text-[10px] sm:text-xs" style={{ color: playerColor }}>
-        <span className="sm:hidden">{shortMcName || mcName}</span>
-        <span className="hidden sm:inline">{mcName}</span> is spitting...
+      <span className="text-sm" style={{ color: playerColor }}>
+        {mcName} is spitting...
       </span>
     </motion.div>
   );

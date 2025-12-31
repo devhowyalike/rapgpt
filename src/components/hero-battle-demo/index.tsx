@@ -177,9 +177,9 @@ export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>
             />
           </div>
 
-          {/* Split View - Two Columns */}
-          <div className="relative z-10 flex-1 grid grid-cols-2 pb-8">
-            {/* Player 1 (Left) */}
+          {/* Split View - Two Columns on desktop, single MC on mobile */}
+          <div className="relative z-10 flex-1 grid md:grid-cols-2 pb-8">
+            {/* Player 1 (Left on desktop, shown on mobile only when MC1 is active) */}
             <PlayerColumn
               mc={MC1}
               verses={VERSES.mc1}
@@ -189,10 +189,11 @@ export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>
               showIndicator={config.showStreamingIndicator}
               visibleLines={config.mc1Lines || 0}
               isPaused={effectivePaused}
-              className="border-r border-gray-800/50"
+              className="md:border-r border-gray-800/50"
+              mobileVisible={config.activeMC === "mc1"}
             />
 
-            {/* Player 2 (Right) */}
+            {/* Player 2 (Right on desktop, shown on mobile when MC2 is active or during post-battle states) */}
             <PlayerColumn
               mc={MC2}
               verses={VERSES.mc2}
@@ -202,6 +203,7 @@ export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>
               showIndicator={config.showStreamingIndicator}
               visibleLines={config.mc2Lines || 0}
               isPaused={effectivePaused}
+              mobileVisible={config.activeMC !== "mc1"}
             />
           </div>
 
@@ -267,6 +269,8 @@ interface PlayerColumnProps {
   visibleLines: number;
   isPaused: boolean;
   className?: string;
+  /** Whether this column is visible on mobile (hidden if false) */
+  mobileVisible?: boolean;
 }
 
 const PlayerColumn = memo(function PlayerColumn({
@@ -279,12 +283,13 @@ const PlayerColumn = memo(function PlayerColumn({
   visibleLines,
   isPaused,
   className,
+  mobileVisible = true,
 }: PlayerColumnProps) {
   // Convert readonly array to mutable only once, memoized
   const mutableVerses = useMemo(() => [...verses], [verses]);
 
   return (
-    <div className={`flex flex-col overflow-hidden ${className || ""}`}>
+    <div className={`flex flex-col overflow-hidden ${!mobileVisible ? "hidden md:flex" : ""} ${className || ""}`}>
       <PersonaCardDemo
         mc={mc}
         position={position}
@@ -342,7 +347,18 @@ const StateIndicator = memo(function StateIndicator({
 });
 
 // Memoized measurement container - renders once to establish layout height
+// On mobile: measures single MC (since only one shows at a time)
+// On desktop: measures both MCs side by side
 const MeasurementContainer = memo(function MeasurementContainer() {
+  // Use the verse with more total characters (causes more text wrapping)
+  const mc1TotalChars = VERSES.mc1.join("").length;
+  const mc2TotalChars = VERSES.mc2.join("").length;
+  const mc2IsLonger = mc2TotalChars > mc1TotalChars;
+
+  const longerVerse = mc2IsLonger ? VERSES.mc2 : VERSES.mc1;
+  const longerMC = mc2IsLonger ? MC2 : MC1;
+  const longerPosition = mc2IsLonger ? "player2" : "player1";
+
   return (
     <div
       aria-hidden="true"
@@ -352,8 +368,28 @@ const MeasurementContainer = memo(function MeasurementContainer() {
       <div className="shrink-0">
         <StageHeader currentRound={3} completedRounds={[1, 2]} isPaused />
       </div>
-      <div className="flex-1 grid grid-cols-2 pb-8">
-        <div className="flex flex-col border-r border-gray-800/50">
+      {/* Mobile: single column with longest verse */}
+      <div className="flex-1 md:hidden pb-8">
+        <div className="flex flex-col">
+          <PersonaCardDemo
+            mc={longerMC}
+            position={longerPosition}
+            isActive={false}
+            isPaused
+          />
+          <VerseDemo
+            lines={[...longerVerse]}
+            visibleCount={4}
+            position={longerPosition}
+            mcName={longerMC.name}
+            shortMcName={longerMC.shortName}
+            isPaused
+          />
+        </div>
+      </div>
+      {/* Desktop: two columns */}
+      <div className="flex-1 hidden md:grid md:grid-cols-2 pb-8">
+        <div className="flex flex-col md:border-r border-gray-800/50">
           <PersonaCardDemo
             mc={MC1}
             position="player1"
