@@ -283,6 +283,109 @@ function renderDemoComponent(
   return DemoComponent ? <DemoComponent isActive={isActive} /> : null;
 }
 
+type FeatureSlideProps = {
+  feature: Feature;
+  index: number;
+  isActive: boolean;
+  shouldMountDemo: boolean;
+  eagerImage: boolean;
+};
+
+const FeatureSlide = React.memo(
+  function FeatureSlide({
+    feature,
+    index,
+    isActive,
+    shouldMountDemo,
+    eagerImage,
+  }: FeatureSlideProps) {
+    const featureColors = COLOR_CLASSES[feature.color];
+
+    return (
+      <CarouselItem key={feature.key} className="pl-0">
+        <div className="relative">
+          {/* Browser Chrome Shell */}
+          <BrowserChrome
+            showAddressBar={false}
+            contentClassName={feature.browserContentClassName ?? "aspect-16/10"}
+          >
+            {/* Always render the screenshot (cheap, lazy-loaded); mount the demo UI only for active/adjacent slides. */}
+            <Image
+              src={feature.screenshot}
+              alt={`${APP_TITLE} - ${feature.title}`}
+              fill
+              className={cn(
+                feature.key === "rounds"
+                  ? "object-cover object-[calc(50%-5px)_top]"
+                  : "object-contain"
+              )}
+              // `sizes` is critical here; without it Next may serve a much larger image than needed.
+              sizes="(max-width: 768px) 100vw, 896px"
+              priority={eagerImage && index < 3}
+              loading={eagerImage ? "eager" : "lazy"}
+            />
+            {shouldMountDemo && renderDemoComponent(feature.demoKey, isActive)}
+          </BrowserChrome>
+
+          {/* Feature Info - Moved below the screenshot */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mt-3 px-2 md:max-w-lg mx-auto relative z-10"
+          >
+            <div
+              className={cn(
+                "flex items-start gap-4 p-4 rounded-xl bg-zinc-900/40 border",
+                featureColors.border
+              )}
+            >
+              <div
+                className={cn(
+                  "flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-lg shrink-0 mt-1",
+                  `bg-linear-to-br ${featureColors.accent}`
+                )}
+              >
+                <span className="text-white scale-90 md:scale-100">
+                  {feature.icon}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-lg md:text-xl font-bold text-white leading-tight">
+                    {feature.title}
+                  </h3>
+                </div>
+                <p className="text-sm md:text-base text-zinc-400 mt-1 text-pretty">
+                  {feature.description}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Glow Effect */}
+          <div
+            className={cn(
+              "absolute -bottom-6 md:-bottom-10 inset-x-8 md:inset-x-16 h-12 md:h-20 blur-2xl md:blur-3xl rounded-full opacity-50 -z-10",
+              featureColors.glow
+            )}
+          />
+        </div>
+      </CarouselItem>
+    );
+  },
+  // Prevent re-rendering *all* slides whenever `current` changes.
+  // Only the active/adjacent slides should update.
+  (prev, next) => {
+    // Feature and index are stable per slide, so only check dynamic props
+    return (
+      prev.isActive === next.isActive &&
+      prev.shouldMountDemo === next.shouldMountDemo &&
+      prev.eagerImage === next.eagerImage
+    );
+  }
+);
+
 // Shared arrow button styles
 const ARROW_BUTTON_CLASSES =
   "border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300";
@@ -342,10 +445,14 @@ export function FeatureCarousel({ className }: FeatureCarouselProps) {
   React.useEffect(() => {
     if (!api) return;
 
-    setCurrent(api.selectedScrollSnap());
+    React.startTransition(() => {
+      setCurrent(api.selectedScrollSnap());
+    });
 
     const onSelect = () => {
-      setCurrent(api.selectedScrollSnap());
+      React.startTransition(() => {
+        setCurrent(api.selectedScrollSnap());
+      });
     };
 
     api.on("select", onSelect);
@@ -401,84 +508,27 @@ export function FeatureCarousel({ className }: FeatureCarouselProps) {
           }}
           className="w-full"
         >
-          <CarouselContent className="ml-0">
+          <CarouselContent className="ml-0 will-change-transform">
             {FEATURES.map((feature, index) => {
-              const featureColors = COLOR_CLASSES[feature.color];
               const shouldMountDemo = feature.demoKey
                 ? isIndexNearCurrent(index, current, FEATURES.length, 1)
                 : false;
               const isActive = current === index;
+              const eagerImage = isIndexNearCurrent(
+                index,
+                current,
+                FEATURES.length,
+                1
+              );
               return (
-                <CarouselItem key={feature.key} className="pl-0">
-                  <div className="relative">
-                    {/* Browser Chrome Shell */}
-                    <BrowserChrome
-                      showAddressBar={false}
-                      contentClassName={
-                        feature.browserContentClassName ?? "aspect-16/10"
-                      }
-                    >
-                      {/* Always render the screenshot (cheap, lazy-loaded); mount the demo UI only for active/adjacent slides. */}
-                      <Image
-                        src={feature.screenshot}
-                        alt={`${APP_TITLE} - ${feature.title}`}
-                        fill
-                        className={cn(
-                          feature.key === "rounds"
-                            ? "object-cover object-[calc(50%-5px)_top]"
-                            : "object-contain"
-                        )}
-                        priority={index === 0}
-                      />
-                      {shouldMountDemo &&
-                        renderDemoComponent(feature.demoKey, isActive)}
-                    </BrowserChrome>
-
-                    {/* Feature Info - Moved below the screenshot */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 }}
-                      className="mt-3 px-2 md:max-w-lg mx-auto relative z-10"
-                    >
-                      <div
-                        className={cn(
-                          "flex items-start gap-4 p-4 rounded-xl bg-zinc-900/40 border",
-                          featureColors.border
-                        )}
-                      >
-                        <div
-                          className={cn(
-                            "flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-lg shrink-0 mt-1",
-                            `bg-linear-to-br ${featureColors.accent}`
-                          )}
-                        >
-                          <span className="text-white scale-90 md:scale-100">
-                            {feature.icon}
-                          </span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <h3 className="text-lg md:text-xl font-bold text-white leading-tight">
-                              {feature.title}
-                            </h3>
-                          </div>
-                          <p className="text-sm md:text-base text-zinc-400 mt-1 text-pretty">
-                            {feature.description}
-                          </p>
-                        </div>
-                      </div>
-                    </motion.div>
-
-                    {/* Glow Effect */}
-                    <div
-                      className={cn(
-                        "absolute -bottom-6 md:-bottom-10 inset-x-8 md:inset-x-16 h-12 md:h-20 blur-2xl md:blur-3xl rounded-full opacity-50 -z-10",
-                        featureColors.glow
-                      )}
-                    />
-                  </div>
-                </CarouselItem>
+                <FeatureSlide
+                  key={feature.key}
+                  feature={feature}
+                  index={index}
+                  isActive={isActive}
+                  shouldMountDemo={shouldMountDemo}
+                  eagerImage={eagerImage}
+                />
               );
             })}
           </CarouselContent>
