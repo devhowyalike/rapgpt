@@ -49,7 +49,7 @@ export function PersonaGallery({
             Choose Your MC
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Select your fighters, each with their own unique flow, style, and
+            Select your lyricists, each with their own unique flow, style, and
             personality.
           </p>
         </div>

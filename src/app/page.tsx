@@ -67,7 +67,7 @@ export default async function Home() {
           <div className="flex justify-center pb-2 pt-0">
             <CreateBattleCTA
               isAuthenticated={isAuthenticated}
-              title="Select Your Fighter"
+              title="Select Your MC"
             />
           </div>
 
