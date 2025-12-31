@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 
 // =============================================================================
 // Types & Data
@@ -165,7 +165,7 @@ function StageGridItem({
       variants={gridItemVariants}
       className={`
         relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-300
-        ${isMobile ? "w-full" : "w-full"}
+        w-full
         ${
           isSelected
             ? "border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.4)] scale-105 z-10"
@@ -180,6 +180,7 @@ function StageGridItem({
         alt={stage.name}
         fill
         className="object-cover"
+        sizes={isMobile ? "20vw" : "10vw"}
       />
       {/* Overlay Gradient */}
       <div
@@ -219,6 +220,8 @@ function StageGridItem({
   );
 }
 
+const MemoStageGridItem = memo(StageGridItem);
+
 // =============================================================================
 // Random Button
 // =============================================================================
@@ -230,7 +233,7 @@ function RandomButton({ isMobile }: { isMobile: boolean }) {
       className={`
         relative aspect-square rounded-lg overflow-hidden border-2 border-purple-500/50
         bg-purple-900/30 flex flex-col items-center justify-center gap-1
-        ${isMobile ? "w-full" : "w-full"}
+        w-full
       `}
     >
       <span className={isMobile ? "text-lg" : "text-xl"}>🎲</span>
@@ -244,6 +247,8 @@ function RandomButton({ isMobile }: { isMobile: boolean }) {
     </motion.div>
   );
 }
+
+const MemoRandomButton = memo(RandomButton);
 
 // =============================================================================
 // Stage Preview
@@ -276,6 +281,7 @@ function StagePreview({ stage, isMobile }: StagePreviewProps) {
               alt={stage.name}
               fill
               className="object-cover"
+              sizes={isMobile ? "100vw" : "640px"}
             />
             <div className="absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent" />
 
@@ -327,6 +333,8 @@ function StagePreview({ stage, isMobile }: StagePreviewProps) {
   );
 }
 
+const MemoStagePreview = memo(StagePreview);
+
 // =============================================================================
 // Mobile View
 // =============================================================================
@@ -337,7 +345,11 @@ interface MobileViewProps {
   gridControls: ReturnType<typeof useAnimation>;
 }
 
-function MobileView({ config, currentStateName, gridControls }: MobileViewProps) {
+function MobileView({
+  config,
+  currentStateName,
+  gridControls,
+}: MobileViewProps) {
   const displayStage =
     config.hoveredStageIndex !== null
       ? STAGES[config.hoveredStageIndex]
@@ -383,7 +395,7 @@ function MobileView({ config, currentStateName, gridControls }: MobileViewProps)
           >
             {/* Preview Area */}
             <div className="mb-2">
-              <StagePreview stage={displayStage} isMobile={true} />
+              <MemoStagePreview stage={displayStage} isMobile={true} />
             </div>
 
             {/* Stage Grid */}
@@ -394,7 +406,7 @@ function MobileView({ config, currentStateName, gridControls }: MobileViewProps)
               animate={gridControls}
             >
               {STAGES.map((stage, index) => (
-                <StageGridItem
+                <MemoStageGridItem
                   key={stage.id}
                   stage={stage}
                   isHovered={config.hoveredStageIndex === index}
@@ -402,7 +414,7 @@ function MobileView({ config, currentStateName, gridControls }: MobileViewProps)
                   isMobile={true}
                 />
               ))}
-              <RandomButton isMobile={true} />
+              <MemoRandomButton isMobile={true} />
             </motion.div>
           </motion.div>
         )}
@@ -421,7 +433,11 @@ interface DesktopViewProps {
   gridControls: ReturnType<typeof useAnimation>;
 }
 
-function DesktopView({ config, currentStateName, gridControls }: DesktopViewProps) {
+function DesktopView({
+  config,
+  currentStateName,
+  gridControls,
+}: DesktopViewProps) {
   const displayStage =
     config.hoveredStageIndex !== null
       ? STAGES[config.hoveredStageIndex]
@@ -486,7 +502,7 @@ function DesktopView({ config, currentStateName, gridControls }: DesktopViewProp
           >
             {/* Preview Area */}
             <div className="mb-4 max-w-xl mx-auto w-full">
-              <StagePreview stage={displayStage} isMobile={false} />
+              <MemoStagePreview stage={displayStage} isMobile={false} />
             </div>
 
             {/* Stage Grid */}
@@ -497,7 +513,7 @@ function DesktopView({ config, currentStateName, gridControls }: DesktopViewProp
               animate={gridControls}
             >
               {STAGES.map((stage, index) => (
-                <StageGridItem
+                <MemoStageGridItem
                   key={stage.id}
                   stage={stage}
                   isHovered={config.hoveredStageIndex === index}
@@ -505,7 +521,7 @@ function DesktopView({ config, currentStateName, gridControls }: DesktopViewProp
                   isMobile={false}
                 />
               ))}
-              <RandomButton isMobile={false} />
+              <MemoRandomButton isMobile={false} />
             </motion.div>
           </motion.div>
         )}
@@ -540,40 +556,42 @@ export function StageSelectDemo({
   const currentStateName = stateOrder[stateIndex];
   const config = STATE_CONFIGS[currentStateName];
 
-  // Replay grid animation
-  const replayGridAnimation = useCallback(async () => {
-    await gridControls.set("hidden");
-    await gridControls.start("visible");
-  }, [gridControls]);
-
   const advanceState = useCallback(() => {
-    setStateIndex((prev) => {
-      const nextIndex = (prev + 1) % stateOrder.length;
-      // Replay animation when looping back to start
-      if (nextIndex === 0) {
-        replayGridAnimation();
-      }
-      return nextIndex;
-    });
-  }, [stateOrder.length, replayGridAnimation]);
+    setStateIndex((prev) => (prev + 1) % stateOrder.length);
+  }, [stateOrder.length]);
 
   // Reset animation when becoming active
   const wasActiveRef = useRef(isActive);
   useEffect(() => {
     if (isActive && !wasActiveRef.current) {
       setStateIndex(0);
-      replayGridAnimation();
     }
     wasActiveRef.current = isActive;
-  }, [isActive, replayGridAnimation]);
+  }, [isActive]);
 
-  // Initial animation on mount
+  // Trigger grid animation when content becomes visible OR when the slide becomes active again.
+  // (IntersectionObserver-based slide refreshes often keep this component mounted, so we must
+  // reset the animation controls when inactive to allow stagger to replay on re-activation.)
+  const prevShowContentRef = useRef(false);
   useEffect(() => {
-    if (isActive) {
-      gridControls.start("visible");
+    if (!isActive || !config.showContent) {
+      prevShowContentRef.current = false;
+      gridControls.set("hidden");
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    const wasHidden = !prevShowContentRef.current;
+    prevShowContentRef.current = true;
+
+    if (wasHidden) {
+      gridControls.set("hidden");
+      // Start animation after a brief delay to ensure the grid is mounted.
+      const timer = setTimeout(() => {
+        gridControls.start("visible");
+      }, 10);
+      return () => clearTimeout(timer);
+    }
+  }, [isActive, config.showContent, gridControls]);
 
   // Detect mobile based on container width
   useEffect(() => {
@@ -581,7 +599,8 @@ export function StageSelectDemo({
     if (!container) return;
 
     const checkMobile = () => {
-      setIsMobile(container.offsetWidth < 500);
+      const nextIsMobile = container.offsetWidth < 500;
+      setIsMobile((prev) => (prev === nextIsMobile ? prev : nextIsMobile));
     };
 
     checkMobile();
@@ -605,9 +624,17 @@ export function StageSelectDemo({
       className="absolute inset-0 bg-black flex flex-col overflow-hidden"
     >
       {isMobile ? (
-        <MobileView config={config} currentStateName={currentStateName} gridControls={gridControls} />
+        <MobileView
+          config={config}
+          currentStateName={currentStateName}
+          gridControls={gridControls}
+        />
       ) : (
-        <DesktopView config={config} currentStateName={currentStateName} gridControls={gridControls} />
+        <DesktopView
+          config={config}
+          currentStateName={currentStateName}
+          gridControls={gridControls}
+        />
       )}
     </div>
   );
