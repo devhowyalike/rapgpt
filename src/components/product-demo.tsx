@@ -1,13 +1,14 @@
 "use client";
 
-import { Clock, Mic2, Music, Pause, Play } from "lucide-react";
+import { Clock, Mic2, Music, Pause, Play, Users } from "lucide-react";
 import { RapGPTLogo } from "./rapgpt-logo";
 import { CreateBattleCTA } from "./create-battle-cta";
-import { APP_TITLE, TAGLINE_2 } from "@/lib/constants";
+import { TAGLINE_2 } from "@/lib/constants";
 import Link from "next/link";
 import { HeroBattleDemo, type HeroBattleDemoRef } from "./hero-battle-demo";
 import { BrowserChrome } from "./browser-chrome";
 import { useState, useRef } from "react";
+import { FeatureCard, type FeatureCardColor } from "./feature-card";
 
 interface ScreenshotShowcaseStaticProps {
   isAuthenticated?: boolean;
@@ -19,7 +20,12 @@ export function ScreenshotShowcaseStatic({
   const [isPaused, setIsPaused] = useState(false);
   const demoRef = useRef<HeroBattleDemoRef>(null);
 
-  const features = [
+  const features: {
+    icon: React.ReactNode;
+    title: string;
+    description: string;
+    color: FeatureCardColor;
+  }[] = [
     {
       icon: <Mic2 className="w-6 h-6" />,
       title: "Choose MC's",
@@ -31,6 +37,12 @@ export function ScreenshotShowcaseStatic({
       title: "3 Rounds",
       description: "8 bars per verse, alternating turns.",
       color: "yellow",
+    },
+    {
+      icon: <Users className="w-6 h-6" />,
+      title: "Invite the crowd",
+      description: "Streaming, voting and commenting.",
+      color: "blue",
     },
     {
       icon: <Music className="w-6 h-6" />,
@@ -86,8 +98,8 @@ export function ScreenshotShowcaseStatic({
 
                 <div className="space-y-2 md:space-y-4 max-w-lg">
                   <p className="text-xl text-zinc-400 leading-relaxed text-pretty">
-                    Choose your AI MCs. Battle alone or stream it live. Turn
-                    verses into a song with beats and vocals.
+                    Choose your AI MCs, stream the battle live. Turn verses into
+                    a song with beats and vocals.
                   </p>
                 </div>
               </div>
@@ -198,36 +210,17 @@ export function ScreenshotShowcaseStatic({
         </div>
 
         {/* Features Row (Static) */}
-        <div className="mt-8 pt-4 border-none">
-          <div className="flex flex-col md:flex-row md:flex-wrap justify-center items-center md:items-start gap-8 md:gap-x-16 md:gap-y-10">
-            {features.map((feature) => {
-              const colorClasses = {
-                red: "text-red-500",
-                yellow: "text-yellow-500",
-                green: "text-green-500",
-              };
-              const iconColor =
-                colorClasses[feature.color as keyof typeof colorClasses];
-
-              return (
-                <div
-                  key={feature.title}
-                  className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-4 max-w-sm p-3 -m-3 rounded-2xl"
-                >
-                  <div className="inline-flex p-3 rounded-xl shrink-0 bg-white/5 border border-white/10">
-                    <span className={iconColor}>{feature.icon}</span>
-                  </div>
-                  <div className="space-y-1.5">
-                    <h3 className="text-2xl font-bold font-(family-name:--font-bebas-neue) tracking-wide uppercase leading-tight text-zinc-300">
-                      {feature.title}
-                    </h3>
-                    <p className="text-base leading-relaxed text-pretty text-zinc-500">
-                      {feature.description}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+        <div className="mt-8 pt-4 border-none w-full">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-4">
+            {features.map((feature) => (
+              <FeatureCard
+                key={feature.title}
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+                color={feature.color}
+              />
+            ))}
           </div>
 
           {/* Learn More Link */}

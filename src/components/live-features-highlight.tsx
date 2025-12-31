@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { MessageSquare, Radio, Trophy, Zap } from "lucide-react";
 import { CreateBattleCTA } from "./create-battle-cta";
+import { FeatureCard, type FeatureCardColor } from "./feature-card";
 
 interface LiveFeaturesHighlightProps {
   isAuthenticated: boolean;
@@ -11,36 +12,36 @@ interface LiveFeaturesHighlightProps {
 export function LiveFeaturesHighlight({
   isAuthenticated,
 }: LiveFeaturesHighlightProps) {
-  const features = [
+  const features: {
+    icon: React.ReactNode;
+    title: string;
+    description: string;
+    color: FeatureCardColor;
+  }[] = [
     {
       icon: <Radio className="w-6 h-6" />,
       title: "Watch Together",
       description: "Verses appear word-by-word as the battle unfolds.",
-      color: "text-red-400",
-      bg: "bg-red-500/10",
+      color: "red",
     },
     {
       icon: <Zap className="w-6 h-6" />,
-      title: "Interactive Voting",
+      title: "Voting",
       description:
         "Viewers can vote after each round to impact the battle's outcome.",
-      color: "text-yellow-400",
-      bg: "bg-yellow-500/10",
+      color: "yellow",
     },
     {
       icon: <MessageSquare className="w-6 h-6" />,
-      title: "Live Chat & Reactions",
+      title: "Live Chat",
       description: "Join the crowd in the chatroom as the beef unfolds.",
-      color: "text-blue-400",
-      bg: "bg-blue-500/10",
+      color: "blue",
     },
     {
       icon: <Trophy className="w-6 h-6" />,
-      title: "Admin Control Panel",
-      description:
-        "As a host, you're in control. Start, stop, and control the battle's flow.",
-      color: "text-purple-400",
-      bg: "bg-purple-500/10",
+      title: "Admin Panel",
+      description: "As the host, you control the flow of the battle.",
+      color: "purple",
     },
   ];
 
@@ -78,32 +79,22 @@ export function LiveFeaturesHighlight({
           </motion.p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
           {features.map((feature, index) => (
             <motion.div
-              key={index}
+              key={feature.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 * index }}
-              className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors group flex flex-col items-center text-center md:items-start md:text-left relative overflow-hidden"
             >
-              {/* Grid Background */}
-              <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-10 pointer-events-none" />
-
-              <div className="flex flex-col md:flex-row items-center gap-4 mb-4 relative z-10">
-                <div
-                  className={`p-2.5 rounded-xl ${feature.bg} ${feature.color} shrink-0 group-hover:scale-110 transition-transform`}
-                >
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-bold text-white font-(family-name:--font-bebas-neue) tracking-wide uppercase">
-                  {feature.title}
-                </h3>
-              </div>
-              <p className="text-gray-400 leading-relaxed text-pretty relative z-10">
-                {feature.description}
-              </p>
+              <FeatureCard
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+                color={feature.color}
+                showGridBackground
+              />
             </motion.div>
           ))}
         </div>
