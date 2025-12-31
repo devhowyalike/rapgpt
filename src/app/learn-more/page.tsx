@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs/server";
 import { SiteHeader } from "@/components/site-header";
 import { LearnMoreHero } from "@/components/learn-more/learn-more-hero";
 import { HowItWorks } from "@/components/learn-more/how-it-works";
@@ -12,15 +11,12 @@ export const metadata = {
   description: `Learn how ${APP_TITLE} works. Create AI rap battles with unique personas, real-time lyrics, and audio.`,
 };
 
-export default async function LearnMorePage() {
-  const { sessionClaims } = await auth();
-  const isAuthenticated = !!sessionClaims;
-
+export default function LearnMorePage() {
   return (
     <>
       <SiteHeader />
 
-      <LearnMoreHero isAuthenticated={isAuthenticated} />
+      <LearnMoreHero />
 
       <HowItWorks />
 
@@ -36,7 +32,7 @@ export default async function LearnMorePage() {
           {/* Bottom CTA */}
           <div className="flex justify-center pb-2 pt-0">
             <CreateBattleCTA
-              isAuthenticated={isAuthenticated}
+              isAuthenticated={false}
               title="Start Your First Battle"
             />
           </div>

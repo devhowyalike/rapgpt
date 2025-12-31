@@ -3,15 +3,28 @@ import { PageTitle } from "@/components/page-title";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { APP_TITLE } from "@/lib/constants";
 
-interface LearnMoreHeroProps {
-  isAuthenticated?: boolean;
-}
-
-export function LearnMoreHero({ isAuthenticated = false }: LearnMoreHeroProps) {
+export function LearnMoreHero() {
   const features = [
-    { icon: Mic2, label: "Dream matchups", color: "text-red-500" },
-    { icon: Music, label: "Make it a Song", color: "text-green-500" },
-    { icon: Zap, label: "Live Events", color: "text-yellow-500" },
+    {
+      icon: Mic2,
+      label: "Dream Matchups",
+      color: "text-red-500",
+      description:
+        "Pit legendary artists against each other in epic rap battles",
+    },
+    {
+      icon: Zap,
+      label: "Live Events",
+      color: "text-yellow-500",
+      description: "Join real-time battles and vote for your favorite artists",
+    },
+    {
+      icon: Music,
+      label: "Make it a Song",
+      color: "text-green-500",
+      description:
+        "Transform any battle into a full track with AI-generated beats",
+    },
   ];
 
   return (
@@ -48,20 +61,28 @@ export function LearnMoreHero({ isAuthenticated = false }: LearnMoreHeroProps) {
 
           {/* CTA */}
           <div className="pt-2">
-            <CreateBattleCTA isAuthenticated={isAuthenticated} />
+            <CreateBattleCTA isAuthenticated={false} />
           </div>
 
-          {/* Features Row - matching homepage style */}
-          <div className="pt-6 border-t border-white/5 w-full max-w-3xl">
-            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-16">
+          {/* Features */}
+          <div className="pt-10 w-full max-w-4xl">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {features.map((item, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="inline-flex p-2 rounded-xl shrink-0 bg-white/5 border border-white/10">
-                    <item.icon className={`w-5 h-5 ${item.color}`} />
+                <div
+                  key={i}
+                  className="group p-5 rounded-xl bg-white/3 border border-white/10 hover:bg-white/6 hover:border-white/20 transition-all duration-300"
+                >
+                  <div className="flex flex-col items-center text-center space-y-3">
+                    <div className="p-3 rounded-xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform duration-300">
+                      <item.icon className={`w-6 h-6 ${item.color}`} />
+                    </div>
+                    <h3 className="text-base font-semibold text-white">
+                      {item.label}
+                    </h3>
+                    <p className="text-sm text-gray-500 leading-relaxed">
+                      {item.description}
+                    </p>
                   </div>
-                  <span className="text-sm font-bold text-gray-300 uppercase tracking-wider">
-                    {item.label}
-                  </span>
                 </div>
               ))}
             </div>

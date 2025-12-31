@@ -1,13 +1,13 @@
 "use client";
 
-import { Clock, Mic2, Music, Lightbulb, Pause, Play } from "lucide-react";
+import { Clock, Mic2, Music, Pause, Play } from "lucide-react";
 import { RapGPTLogo } from "./rapgpt-logo";
 import { CreateBattleCTA } from "./create-battle-cta";
 import { APP_TITLE, TAGLINE_2 } from "@/lib/constants";
 import Link from "next/link";
-import { HeroBattleDemo } from "./hero-battle-demo";
+import { HeroBattleDemo, type HeroBattleDemoRef } from "./hero-battle-demo";
 import { BrowserChrome } from "./browser-chrome";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 interface ScreenshotShowcaseStaticProps {
   isAuthenticated?: boolean;
@@ -17,6 +17,8 @@ export function ScreenshotShowcaseStatic({
   isAuthenticated = false,
 }: ScreenshotShowcaseStaticProps) {
   const [isPaused, setIsPaused] = useState(false);
+  const demoRef = useRef<HeroBattleDemoRef>(null);
+
   const features = [
     {
       icon: <Mic2 className="w-6 h-6" />,
@@ -94,7 +96,7 @@ export function ScreenshotShowcaseStatic({
 
           {/* Right Column: Animated Battle Demo */}
           <div className="lg:col-span-7">
-            <Link href="/learn-more" className="block group mb-4">
+            <div className="block group mb-4">
               <div className="relative">
                 {/* Browser Chrome Shell */}
                 <BrowserChrome
@@ -123,28 +125,73 @@ export function ScreenshotShowcaseStatic({
                 >
                   {/* Animated Battle Demo */}
                   <HeroBattleDemo
+                    ref={demoRef}
                     isPaused={isPaused}
                     setIsPaused={setIsPaused}
                   />
                 </BrowserChrome>
-
-                {/* Hover hint */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-40">
-                  <div className="bg-zinc-900/95 backdrop-blur-xl border border-white/40 px-8 py-4 rounded-full text-lg text-white font-bold shadow-[0_0_40px_rgba(0,0,0,0.7),0_0_20px_rgba(255,255,255,0.1)] transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 flex items-center gap-3">
-                    <div className="p-1.5 rounded-lg bg-yellow-400/10">
-                      <Lightbulb className="w-5 h-5 text-yellow-400 fill-yellow-400/20" />
-                    </div>
-                    Explore features
-                  </div>
-                </div>
               </div>
-            </Link>
+            </div>
 
             {/* Simulation Notice & Controls */}
-            <div className="flex items-center justify-center sm:relative sm:min-h-[24px]">
+            <div className="flex items-center justify-center gap-3 sm:relative sm:min-h-[24px]">
+              {/* Previous Arrow */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  demoRef.current?.goToPrev();
+                }}
+                className="flex items-center justify-center size-7 rounded-full border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/prev"
+                aria-label="Previous slide"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-zinc-500 group-hover/prev:text-zinc-400 transition-colors"
+                >
+                  <path d="m12 19-7-7 7-7" />
+                  <path d="M19 12H5" />
+                </svg>
+              </button>
+
               <span className="text-[10px] text-zinc-300 uppercase tracking-widest opacity-40">
                 &mdash; Simulated for demonstration &mdash;
               </span>
+
+              {/* Next Arrow */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  demoRef.current?.goToNext();
+                }}
+                className="flex items-center justify-center size-7 rounded-full border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/next"
+                aria-label="Next slide"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-zinc-500 group-hover/next:text-zinc-400 transition-colors"
+                >
+                  <path d="M5 12h14" />
+                  <path d="m12 5 7 7-7 7" />
+                </svg>
+              </button>
 
               <button
                 onClick={(e) => {
@@ -169,8 +216,8 @@ export function ScreenshotShowcaseStatic({
 
         {/* Features Row (Static) */}
         <div className="mt-8 pt-4 border-none">
-          <div className="grid grid-cols-2 md:flex md:flex-row md:flex-wrap justify-center items-center md:items-start gap-x-16 gap-y-10">
-            {features.map((feature, index) => {
+          <div className="flex flex-col md:flex-row md:flex-wrap justify-center items-center md:items-start gap-8 md:gap-x-16 md:gap-y-10">
+            {features.map((feature) => {
               const colorClasses = {
                 red: "text-red-500",
                 yellow: "text-yellow-500",
@@ -182,9 +229,7 @@ export function ScreenshotShowcaseStatic({
               return (
                 <div
                   key={feature.title}
-                  className={`flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-4 max-w-sm p-3 -m-3 rounded-2xl ${
-                    index === 2 ? "col-span-2 justify-self-center" : ""
-                  }`}
+                  className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-4 max-w-sm p-3 -m-3 rounded-2xl"
                 >
                   <div className="inline-flex p-3 rounded-xl shrink-0 bg-white/5 border border-white/10">
                     <span className={iconColor}>{feature.icon}</span>
