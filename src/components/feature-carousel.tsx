@@ -36,7 +36,7 @@ import { BrowserChrome } from "@/components/browser-chrome";
 
 type ColorKey = "red" | "yellow" | "green" | "blue" | "purple";
 
-interface ScreenshotCarouselProps {
+interface FeatureCarouselProps {
   isAuthenticated?: boolean;
   className?: string;
 }
@@ -178,7 +178,7 @@ const FEATURES = [
   },
 ];
 
-export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
+export function FeatureCarousel({ className }: FeatureCarouselProps) {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
 
