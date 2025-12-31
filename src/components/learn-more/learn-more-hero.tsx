@@ -3,11 +3,7 @@ import { PageTitle } from "@/components/page-title";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { APP_TITLE } from "@/lib/constants";
 
-interface LearnMoreHeroProps {
-  isAuthenticated?: boolean;
-}
-
-export function LearnMoreHero({ isAuthenticated = false }: LearnMoreHeroProps) {
+export function LearnMoreHero() {
   const features = [
     {
       icon: Mic2,
@@ -65,7 +61,7 @@ export function LearnMoreHero({ isAuthenticated = false }: LearnMoreHeroProps) {
 
           {/* CTA */}
           <div className="pt-2">
-            <CreateBattleCTA isAuthenticated={isAuthenticated} />
+            <CreateBattleCTA isAuthenticated={false} />
           </div>
 
           {/* Features */}
