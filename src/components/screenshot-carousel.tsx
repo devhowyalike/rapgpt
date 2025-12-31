@@ -29,6 +29,7 @@ import { GoLiveDemo } from "@/components/learn-more/go-live-demo";
 import { ScoreDemo } from "@/components/learn-more/score-demo";
 import { CommentsDemo } from "@/components/learn-more/comments-demo";
 import { VotingDemo } from "@/components/learn-more/voting-demo";
+import { MakeASongDemo } from "@/components/learn-more/make-a-song-demo";
 import { BrowserChrome } from "@/components/browser-chrome";
 
 type ColorKey = "red" | "yellow" | "green" | "blue" | "purple";
@@ -246,7 +247,7 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                     <BrowserChrome
                       showAddressBar={false}
                       contentClassName={
-                        feature.key === "scoring" || feature.key === "chat" || feature.key === "voting"
+                        feature.key === "scoring" || feature.key === "chat" || feature.key === "voting" || feature.key === "song"
                           ? "aspect-[16/14] md:aspect-16/10"
                           : "aspect-16/10"
                       }
@@ -319,6 +320,20 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                             className="absolute inset-0"
                           >
                             <VotingDemo />
+                          </motion.div>
+                        </AnimatePresence>
+                      ) : feature.key === "song" ? (
+                        /* Interactive Make a Song Demo for Song slide */
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key="song-demo"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className="absolute inset-0"
+                          >
+                            <MakeASongDemo />
                           </motion.div>
                         </AnimatePresence>
                       ) : (
