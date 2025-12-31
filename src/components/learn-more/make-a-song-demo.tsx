@@ -127,8 +127,18 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
   },
 };
 
-const STATE_ORDER: DemoState[] = [
+const STATE_ORDER_WITH_LOADING: DemoState[] = [
   "idle",
+  "show-beats",
+  "select-beat",
+  "generating",
+  "progress-50",
+  "progress-90",
+  "song-ready",
+  "reset",
+];
+
+const STATE_ORDER_WITHOUT_LOADING: DemoState[] = [
   "show-beats",
   "select-beat",
   "generating",
@@ -687,18 +697,26 @@ function DesktopView({ config, currentStateName }: DesktopViewProps) {
 // Main Component
 // =============================================================================
 
-export function MakeASongDemo() {
+interface MakeASongDemoProps {
+  loadingScreen?: "enabled" | "disabled";
+}
+
+export function MakeASongDemo({ loadingScreen = "disabled" }: MakeASongDemoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [stateIndex, setStateIndex] = useState(0);
   const [isInView, setIsInView] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  const currentStateName = STATE_ORDER[stateIndex];
+  const stateOrder = loadingScreen === "enabled"
+    ? STATE_ORDER_WITH_LOADING
+    : STATE_ORDER_WITHOUT_LOADING;
+
+  const currentStateName = stateOrder[stateIndex];
   const config = STATE_CONFIGS[currentStateName];
 
   const advanceState = useCallback(() => {
-    setStateIndex((prev) => (prev + 1) % STATE_ORDER.length);
-  }, []);
+    setStateIndex((prev) => (prev + 1) % stateOrder.length);
+  }, [stateOrder.length]);
 
   const isInViewRef = useRef(false);
 

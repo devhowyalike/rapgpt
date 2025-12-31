@@ -142,8 +142,17 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
   },
 };
 
-const STATE_ORDER: DemoState[] = [
+const STATE_ORDER_WITH_LOADING: DemoState[] = [
   "idle",
+  "select-p1",
+  "p1-selected",
+  "select-p2",
+  "p2-selected",
+  "vs-reveal",
+  "reset",
+];
+
+const STATE_ORDER_WITHOUT_LOADING: DemoState[] = [
   "select-p1",
   "p1-selected",
   "select-p2",
@@ -653,18 +662,26 @@ function DesktopView({ config, currentStateName }: DesktopViewProps) {
 // Main Component
 // =============================================================================
 
-export function SelectPlayerDemo() {
+interface SelectPlayerDemoProps {
+  loadingScreen?: "enabled" | "disabled";
+}
+
+export function SelectPlayerDemo({ loadingScreen = "disabled" }: SelectPlayerDemoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [stateIndex, setStateIndex] = useState(0);
   const [isInView, setIsInView] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  const currentStateName = STATE_ORDER[stateIndex];
+  const stateOrder = loadingScreen === "enabled"
+    ? STATE_ORDER_WITH_LOADING
+    : STATE_ORDER_WITHOUT_LOADING;
+
+  const currentStateName = stateOrder[stateIndex];
   const config = STATE_CONFIGS[currentStateName];
 
   const advanceState = useCallback(() => {
-    setStateIndex((prev) => (prev + 1) % STATE_ORDER.length);
-  }, []);
+    setStateIndex((prev) => (prev + 1) % stateOrder.length);
+  }, [stateOrder.length]);
 
   const isInViewRef = useRef(false);
 

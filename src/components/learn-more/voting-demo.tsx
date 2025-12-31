@@ -119,8 +119,17 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
   },
 };
 
-const STATE_ORDER: DemoState[] = [
+const STATE_ORDER_WITH_LOADING: DemoState[] = [
   "idle",
+  "voting-active",
+  "first-vote",
+  "second-vote",
+  "third-vote",
+  "winner-reveal",
+  "reset",
+];
+
+const STATE_ORDER_WITHOUT_LOADING: DemoState[] = [
   "voting-active",
   "first-vote",
   "second-vote",
@@ -560,18 +569,26 @@ function DesktopView({ config, currentStateName }: DesktopViewProps) {
 // Main Component
 // =============================================================================
 
-export function VotingDemo() {
+interface VotingDemoProps {
+  loadingScreen?: "enabled" | "disabled";
+}
+
+export function VotingDemo({ loadingScreen = "disabled" }: VotingDemoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [stateIndex, setStateIndex] = useState(0);
   const [isInView, setIsInView] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  const currentStateName = STATE_ORDER[stateIndex];
+  const stateOrder = loadingScreen === "enabled"
+    ? STATE_ORDER_WITH_LOADING
+    : STATE_ORDER_WITHOUT_LOADING;
+
+  const currentStateName = stateOrder[stateIndex];
   const config = STATE_CONFIGS[currentStateName];
 
   const advanceState = useCallback(() => {
-    setStateIndex((prev) => (prev + 1) % STATE_ORDER.length);
-  }, []);
+    setStateIndex((prev) => (prev + 1) % stateOrder.length);
+  }, [stateOrder.length]);
 
   const isInViewRef = useRef(false);
 
