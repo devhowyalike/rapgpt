@@ -70,7 +70,7 @@ export function LearnMoreHero() {
               {features.map((item, i) => (
                 <div
                   key={i}
-                  className="group p-5 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-white/20 transition-all duration-300"
+                  className="group p-5 rounded-xl bg-white/3 border border-white/10 hover:bg-white/6 hover:border-white/20 transition-all duration-300"
                 >
                   <div className="flex flex-col items-center text-center space-y-3">
                     <div className="p-3 rounded-xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform duration-300">
