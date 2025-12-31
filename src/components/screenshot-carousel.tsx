@@ -242,7 +242,11 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                     {/* Browser Chrome Shell */}
                     <BrowserChrome
                       showAddressBar={false}
-                      contentClassName="aspect-16/10"
+                      contentClassName={
+                        feature.key === "scoring"
+                          ? "aspect-[16/14] md:aspect-16/10"
+                          : "aspect-16/10"
+                      }
                     >
                       {feature.key === "admin" ? (
                         /* Interactive Battle Bar Demo for Dynamic Interface slide */

@@ -293,9 +293,10 @@ function ScoreCard({
 
 interface MobileDrawerViewProps {
   config: StateConfig;
+  currentStateName: DemoState;
 }
 
-function MobileDrawerView({ config }: MobileDrawerViewProps) {
+function MobileDrawerView({ config, currentStateName }: MobileDrawerViewProps) {
   return (
     <div className="absolute inset-0 flex flex-col">
       {/* Blurred background */}
@@ -308,6 +309,30 @@ function MobileDrawerView({ config }: MobileDrawerViewProps) {
         />
         <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-gray-900/90" />
       </div>
+
+      {/* Loading State (when calculating) */}
+      <AnimatePresence>
+        {!config.showScores && currentStateName !== "reset" && (
+          <motion.div
+            className="absolute bottom-0 left-0 right-0 p-4 bg-linear-to-t from-gray-900 via-gray-900/95 to-transparent pt-12"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="flex flex-col items-center gap-3">
+              <LoadingSpinner />
+              <motion.div
+                key={config.label}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
+              >
+                {config.label}
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Score Drawer */}
       <motion.div
@@ -590,7 +615,7 @@ export function ScoreDemo() {
       }
     >
       {isMobile ? (
-        <MobileDrawerView config={config} />
+        <MobileDrawerView config={config} currentStateName={currentStateName} />
       ) : (
         <DesktopView config={config} currentStateName={currentStateName} />
       )}
