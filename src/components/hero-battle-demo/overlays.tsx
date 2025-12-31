@@ -506,7 +506,11 @@ export function SongCompleteOverlay({ isPaused }: PausableProps) {
 // Pause Overlay (optimized - single blur layer)
 // =============================================================================
 
-export function PauseOverlay() {
+interface PauseOverlayProps {
+  onUnpause?: () => void;
+}
+
+export function PauseOverlay({ onUnpause }: PauseOverlayProps) {
   return (
     <motion.div
       key="pause-overlay"
@@ -514,7 +518,9 @@ export function PauseOverlay() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="absolute inset-0 z-40 pointer-events-none flex items-center justify-center bg-black/40 backdrop-blur-sm"
+      className="absolute inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm cursor-pointer"
+      onClick={onUnpause}
+      onTouchEnd={onUnpause}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
@@ -525,7 +531,7 @@ export function PauseOverlay() {
       >
         <Pause className="w-5 h-5 text-yellow-400 fill-yellow-400" />
         <span className="text-lg font-bold text-white font-(family-name:--font-bebas-neue) tracking-widest uppercase">
-          Demo Paused
+          Paused
         </span>
       </motion.div>
     </motion.div>

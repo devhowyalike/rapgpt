@@ -35,7 +35,6 @@ export type { DemoState, MCData, StateConfig } from "./types";
 interface HeroBattleDemoProps {
   isPaused?: boolean;
   setIsPaused?: (paused: boolean | ((prev: boolean) => boolean)) => void;
-  ignoreHoverPause?: boolean;
 }
 
 export interface HeroBattleDemoRef {
@@ -45,12 +44,11 @@ export interface HeroBattleDemoRef {
 
 export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>(
   function HeroBattleDemo(
-    { isPaused: externalPaused, setIsPaused: setExternalPaused, ignoreHoverPause },
+    { isPaused: externalPaused, setIsPaused: setExternalPaused },
     ref
   ) {
   const [stateIndex, setStateIndex] = useState(0);
   const [internalPaused, setInternalPaused] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
 
   // Use external state if provided, otherwise fallback to internal
   const isPaused =
@@ -58,8 +56,7 @@ export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>
   const setIsPaused =
     setExternalPaused !== undefined ? setExternalPaused : setInternalPaused;
 
-  // Hover pauses the demo (unless ignoreHoverPause is true)
-  const effectivePaused = isPaused || (isHovering && !ignoreHoverPause);
+  const effectivePaused = isPaused;
 
   const currentStateName = STATE_ORDER[stateIndex];
   const config = STATE_CONFIGS[currentStateName];
@@ -118,12 +115,15 @@ export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>
       } else if (e.key === " ") {
         e.preventDefault();
         setIsPaused((prev) => !prev);
+      } else if (e.key === "Escape" && isPaused) {
+        e.preventDefault();
+        setIsPaused(false);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goToNext, goToPrev, setIsPaused, isInViewRef]);
+  }, [goToNext, goToPrev, setIsPaused, isInViewRef, isPaused]);
 
   // Touch/swipe navigation
   const { handleTouchStart, handleTouchEnd } = useSwipeNavigation({
@@ -150,8 +150,6 @@ export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>
         data-paused={effectivePaused}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
         style={
           {
             "--player1-color": PLAYER_COLORS.player1,
@@ -210,7 +208,7 @@ export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>
           {/* Overlays */}
           <AnimatePresence>
             {showFrostOverlay && <FrostOverlay key="frost" />}
-            {isPaused && !showFrostOverlay && <PauseOverlay key="pause" />}
+            {isPaused && <PauseOverlay key="pause" onUnpause={() => setIsPaused(false)} />}
             {config.showScoring && (
               <ScoringOverlay key="scoring" isPaused={effectivePaused} />
             )}
@@ -228,17 +226,6 @@ export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>
             )}
             {config.showSongComplete && (
               <SongCompleteOverlay key="complete" isPaused={effectivePaused} />
-            )}
-            {/* Hover frost - only show when not explicitly paused and not ignoring hover */}
-            {isHovering && !isPaused && !ignoreHoverPause && (
-              <motion.div
-                key="hover-frost"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm z-30 pointer-events-none"
-              />
             )}
           </AnimatePresence>
 

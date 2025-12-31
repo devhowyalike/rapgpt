@@ -1,11 +1,10 @@
 "use client";
 
-import { Clock, Mic2, Music, Lightbulb, Pause, Play } from "lucide-react";
+import { Clock, Mic2, Music, Pause, Play } from "lucide-react";
 import { RapGPTLogo } from "./rapgpt-logo";
 import { CreateBattleCTA } from "./create-battle-cta";
 import { APP_TITLE, TAGLINE_2 } from "@/lib/constants";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { HeroBattleDemo, type HeroBattleDemoRef } from "./hero-battle-demo";
 import { BrowserChrome } from "./browser-chrome";
 import { useState, useRef } from "react";
@@ -18,9 +17,8 @@ export function ScreenshotShowcaseStatic({
   isAuthenticated = false,
 }: ScreenshotShowcaseStaticProps) {
   const [isPaused, setIsPaused] = useState(false);
-  const [suppressHoverOverlay, setSuppressHoverOverlay] = useState(false);
   const demoRef = useRef<HeroBattleDemoRef>(null);
-  const router = useRouter();
+
   const features = [
     {
       icon: <Mic2 className="w-6 h-6" />,
@@ -98,18 +96,7 @@ export function ScreenshotShowcaseStatic({
 
           {/* Right Column: Animated Battle Demo */}
           <div className="lg:col-span-7">
-            <div
-              className="block group mb-4 cursor-pointer"
-              onClick={() => {
-                if (isPaused) {
-                  setSuppressHoverOverlay(true);
-                  setIsPaused(false);
-                } else {
-                  router.push("/learn-more");
-                }
-              }}
-              onMouseLeave={() => setSuppressHoverOverlay(false)}
-            >
+            <div className="block group mb-4">
               <div className="relative">
                 {/* Browser Chrome Shell */}
                 <BrowserChrome
@@ -141,21 +128,8 @@ export function ScreenshotShowcaseStatic({
                     ref={demoRef}
                     isPaused={isPaused}
                     setIsPaused={setIsPaused}
-                    ignoreHoverPause={suppressHoverOverlay}
                   />
                 </BrowserChrome>
-
-                {/* Hover hint - only show when not paused and not suppressed */}
-                {!isPaused && !suppressHoverOverlay && (
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-40">
-                    <div className="bg-zinc-900/95 backdrop-blur-xl border border-white/40 px-8 py-4 rounded-full text-lg text-white font-bold shadow-[0_0_40px_rgba(0,0,0,0.7),0_0_20px_rgba(255,255,255,0.1)] transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 flex items-center gap-3">
-                      <div className="p-1.5 rounded-lg bg-yellow-400/10">
-                        <Lightbulb className="w-5 h-5 text-yellow-400 fill-yellow-400/20" />
-                      </div>
-                      Explore Features
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 
