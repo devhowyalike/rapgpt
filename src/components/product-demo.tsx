@@ -234,7 +234,7 @@ export function ScreenshotShowcaseStatic({
           <div className="text-center mt-6">
             <Link
               href="/learn-more"
-              className="text-base text-zinc-500 hover:text-zinc-400 transition-colors underline underline-offset-4"
+              className="text-white/80 font-bold text-xl font-(family-name:--font-bebas-neue) tracking-wider uppercase hover:text-white transition-colors underline underline-offset-4"
             >
               Learn More
             </Link>
