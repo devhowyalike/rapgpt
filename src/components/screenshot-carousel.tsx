@@ -12,6 +12,7 @@ import {
   Radio,
   Trophy,
   Map,
+  Vote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { APP_TITLE, APP_URL } from "@/lib/constants";
@@ -27,6 +28,7 @@ import { BattleBarDemo } from "@/components/learn-more/battle-bar-demo";
 import { GoLiveDemo } from "@/components/learn-more/go-live-demo";
 import { ScoreDemo } from "@/components/learn-more/score-demo";
 import { CommentsDemo } from "@/components/learn-more/comments-demo";
+import { VotingDemo } from "@/components/learn-more/voting-demo";
 import { BrowserChrome } from "@/components/browser-chrome";
 
 type ColorKey = "red" | "yellow" | "green" | "blue" | "purple";
@@ -155,7 +157,7 @@ const FEATURES = [
   },
   {
     key: "voting",
-    icon: <Zap className="w-5 h-5 md:w-6 md:h-6" />,
+    icon: <Vote className="w-5 h-5 md:w-6 md:h-6" />,
     title: "Voting",
     description:
       "Rock the vote after each round to impact the battle's outcome. Your voice shapes the competition.",
@@ -244,7 +246,7 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                     <BrowserChrome
                       showAddressBar={false}
                       contentClassName={
-                        feature.key === "scoring" || feature.key === "chat"
+                        feature.key === "scoring" || feature.key === "chat" || feature.key === "voting"
                           ? "aspect-[16/14] md:aspect-16/10"
                           : "aspect-16/10"
                       }
@@ -303,6 +305,20 @@ export function ScreenshotCarousel({ className }: ScreenshotCarouselProps) {
                             className="absolute inset-0"
                           >
                             <CommentsDemo />
+                          </motion.div>
+                        </AnimatePresence>
+                      ) : feature.key === "voting" ? (
+                        /* Interactive Voting Demo for Voting slide */
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key="voting-demo"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className="absolute inset-0"
+                          >
+                            <VotingDemo />
                           </motion.div>
                         </AnimatePresence>
                       ) : (
