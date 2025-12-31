@@ -1,6 +1,11 @@
 "use client";
 
-import { motion, AnimatePresence, useAnimation } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useAnimation,
+  useReducedMotion,
+} from "framer-motion";
 import Image from "next/image";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 
@@ -547,6 +552,7 @@ export function StageSelectDemo({
   const [stateIndex, setStateIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const gridControls = useAnimation();
+  const prefersReducedMotion = useReducedMotion();
 
   const stateOrder =
     loadingScreen === "enabled"
@@ -585,29 +591,41 @@ export function StageSelectDemo({
 
     if (wasHidden) {
       gridControls.set("hidden");
+      if (prefersReducedMotion) {
+        // Skip stagger/animation work when the user prefers reduced motion.
+        gridControls.set("visible");
+        return;
+      }
+
       // Start animation after a brief delay to ensure the grid is mounted.
-      const timer = setTimeout(() => {
-        gridControls.start("visible");
-      }, 10);
+      const timer = setTimeout(() => gridControls.start("visible"), 10);
       return () => clearTimeout(timer);
     }
-  }, [isActive, config.showContent, gridControls]);
+  }, [isActive, config.showContent, gridControls, prefersReducedMotion]);
 
   // Detect mobile based on container width
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
+    let rafId = 0;
     const checkMobile = () => {
-      const nextIsMobile = container.offsetWidth < 500;
-      setIsMobile((prev) => (prev === nextIsMobile ? prev : nextIsMobile));
+      // ResizeObserver can fire rapidly; batch reads/writes into a single frame.
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const nextIsMobile = container.offsetWidth < 500;
+        setIsMobile((prev) => (prev === nextIsMobile ? prev : nextIsMobile));
+      });
     };
 
     checkMobile();
     const resizeObserver = new ResizeObserver(checkMobile);
     resizeObserver.observe(container);
 
-    return () => resizeObserver.disconnect();
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      resizeObserver.disconnect();
+    };
   }, []);
 
   // Auto-advance
