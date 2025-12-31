@@ -87,52 +87,58 @@ const COLOR_CLASSES: Record<
   },
 };
 
-const LazyBattleBarDemo = dynamic(
-  () =>
-    import("@/components/learn-more/battle-bar-demo").then(
-      (m) => m.BattleBarDemo
-    ),
-  { ssr: false }
-);
-const LazyGoLiveDemo = dynamic(
-  () =>
-    import("@/components/learn-more/go-live-demo").then((m) => m.GoLiveDemo),
-  { ssr: false }
-);
-const LazyScoreDemo = dynamic(
-  () => import("@/components/learn-more/score-demo").then((m) => m.ScoreDemo),
-  { ssr: false }
-);
-const LazyCommentsDemo = dynamic(
-  () =>
-    import("@/components/learn-more/comments-demo").then((m) => m.CommentsDemo),
-  { ssr: false }
-);
-const LazyVotingDemo = dynamic(
-  () => import("@/components/learn-more/voting-demo").then((m) => m.VotingDemo),
-  { ssr: false }
-);
-const LazyMakeASongDemo = dynamic(
-  () =>
-    import("@/components/learn-more/make-a-song-demo").then(
-      (m) => m.MakeASongDemo
-    ),
-  { ssr: false }
-);
-const LazySelectPlayerDemo = dynamic(
-  () =>
-    import("@/components/learn-more/select-player-demo").then(
-      (m) => m.SelectPlayerDemo
-    ),
-  { ssr: false }
-);
-const LazyStageSelectDemo = dynamic(
-  () =>
-    import("@/components/learn-more/stage-select-demo").then(
-      (m) => m.StageSelectDemo
-    ),
-  { ssr: false }
-);
+// Demo component lazy loaders
+const DEMO_COMPONENTS = {
+  admin: dynamic(
+    () =>
+      import("@/components/learn-more/battle-bar-demo").then(
+        (m) => m.BattleBarDemo
+      ),
+    { ssr: false }
+  ),
+  watch: dynamic(
+    () =>
+      import("@/components/learn-more/go-live-demo").then((m) => m.GoLiveDemo),
+    { ssr: false }
+  ),
+  scoring: dynamic(
+    () => import("@/components/learn-more/score-demo").then((m) => m.ScoreDemo),
+    { ssr: false }
+  ),
+  chat: dynamic(
+    () =>
+      import("@/components/learn-more/comments-demo").then(
+        (m) => m.CommentsDemo
+      ),
+    { ssr: false }
+  ),
+  voting: dynamic(
+    () =>
+      import("@/components/learn-more/voting-demo").then((m) => m.VotingDemo),
+    { ssr: false }
+  ),
+  song: dynamic(
+    () =>
+      import("@/components/learn-more/make-a-song-demo").then(
+        (m) => m.MakeASongDemo
+      ),
+    { ssr: false }
+  ),
+  mcs: dynamic(
+    () =>
+      import("@/components/learn-more/select-player-demo").then(
+        (m) => m.SelectPlayerDemo
+      ),
+    { ssr: false }
+  ),
+  stage: dynamic(
+    () =>
+      import("@/components/learn-more/stage-select-demo").then(
+        (m) => m.StageSelectDemo
+      ),
+    { ssr: false }
+  ),
+} as const;
 
 type DemoKey =
   | "admin"
@@ -268,6 +274,67 @@ function isIndexNearCurrent(
   return getCyclicDistance(index, current, length) <= distance;
 }
 
+function renderDemoComponent(
+  demoKey: DemoKey | undefined,
+  isActive: boolean
+): React.ReactNode {
+  if (!demoKey) return null;
+  const DemoComponent = DEMO_COMPONENTS[demoKey];
+  return DemoComponent ? <DemoComponent isActive={isActive} /> : null;
+}
+
+// Shared arrow button styles
+const ARROW_BUTTON_CLASSES =
+  "border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300";
+
+// Mobile arrow button component
+interface MobileArrowButtonProps {
+  direction: "prev" | "next";
+  onClick: () => void;
+  ariaLabel: string;
+}
+
+function MobileArrowButton({
+  direction,
+  onClick,
+  ariaLabel,
+}: MobileArrowButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex md:hidden items-center justify-center size-9 rounded-full",
+        ARROW_BUTTON_CLASSES
+      )}
+      aria-label={ariaLabel}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        {direction === "prev" ? (
+          <>
+            <path d="m12 19-7-7 7-7" />
+            <path d="M19 12H5" />
+          </>
+        ) : (
+          <>
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+          </>
+        )}
+      </svg>
+    </button>
+  );
+}
+
 export function FeatureCarousel({ className }: FeatureCarouselProps) {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
@@ -363,25 +430,8 @@ export function FeatureCarousel({ className }: FeatureCarouselProps) {
                         )}
                         priority={index === 0}
                       />
-                      {feature.demoKey && shouldMountDemo ? (
-                        feature.demoKey === "admin" ? (
-                          <LazyBattleBarDemo isActive={isActive} />
-                        ) : feature.demoKey === "watch" ? (
-                          <LazyGoLiveDemo isActive={isActive} />
-                        ) : feature.demoKey === "scoring" ? (
-                          <LazyScoreDemo isActive={isActive} />
-                        ) : feature.demoKey === "chat" ? (
-                          <LazyCommentsDemo isActive={isActive} />
-                        ) : feature.demoKey === "voting" ? (
-                          <LazyVotingDemo isActive={isActive} />
-                        ) : feature.demoKey === "song" ? (
-                          <LazyMakeASongDemo isActive={isActive} />
-                        ) : feature.demoKey === "mcs" ? (
-                          <LazySelectPlayerDemo isActive={isActive} />
-                        ) : feature.demoKey === "stage" ? (
-                          <LazyStageSelectDemo isActive={isActive} />
-                        ) : null
-                      ) : null}
+                      {shouldMountDemo &&
+                        renderDemoComponent(feature.demoKey, isActive)}
                     </BrowserChrome>
 
                     {/* Feature Info - Moved below the screenshot */}
@@ -434,33 +484,29 @@ export function FeatureCarousel({ className }: FeatureCarouselProps) {
           </CarouselContent>
 
           {/* Desktop arrows - hidden on mobile */}
-          <CarouselPrevious className="hidden md:flex md:-left-12 lg:-left-16 md:size-10 lg:size-12 border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 md:[&_svg]:size-6 lg:[&_svg]:size-7 z-20" />
-          <CarouselNext className="hidden md:flex md:-right-12 lg:-right-16 md:size-10 lg:size-12 border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 md:[&_svg]:size-6 lg:[&_svg]:size-7 z-20" />
+          <CarouselPrevious
+            className={cn(
+              "hidden md:flex md:-left-12 lg:-left-16 md:size-10 lg:size-12",
+              ARROW_BUTTON_CLASSES,
+              "md:[&_svg]:size-6 lg:[&_svg]:size-7 z-20"
+            )}
+          />
+          <CarouselNext
+            className={cn(
+              "hidden md:flex md:-right-12 lg:-right-16 md:size-10 lg:size-12",
+              ARROW_BUTTON_CLASSES,
+              "md:[&_svg]:size-6 lg:[&_svg]:size-7 z-20"
+            )}
+          />
         </Carousel>
 
         {/* Navigation: Dots with mobile arrows on sides */}
         <div className="flex items-center justify-center gap-3 mt-6 md:mt-8">
-          {/* Mobile Previous Arrow */}
-          <button
+          <MobileArrowButton
+            direction="prev"
             onClick={() => api?.scrollPrev()}
-            className="flex md:hidden items-center justify-center size-9 rounded-full border border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300"
-            aria-label="Previous slide"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m12 19-7-7 7-7" />
-              <path d="M19 12H5" />
-            </svg>
-          </button>
+            ariaLabel="Previous slide"
+          />
 
           {/* Dot Indicators */}
           <div className="flex items-center justify-center gap-2">
@@ -490,27 +536,11 @@ export function FeatureCarousel({ className }: FeatureCarouselProps) {
             })}
           </div>
 
-          {/* Mobile Next Arrow */}
-          <button
+          <MobileArrowButton
+            direction="next"
             onClick={() => api?.scrollNext()}
-            className="flex md:hidden items-center justify-center size-9 rounded-full border border-blue-500/50 bg-black/60 backdrop-blur-sm text-white hover:bg-blue-600 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300"
-            aria-label="Next slide"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M5 12h14" />
-              <path d="m12 5 7 7-7 7" />
-            </svg>
-          </button>
+            ariaLabel="Next slide"
+          />
         </div>
 
         {/* Keyboard hint */}
