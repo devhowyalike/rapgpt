@@ -84,7 +84,7 @@ export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>
     isInView,
     isInViewRef,
   } = useInView<HTMLDivElement>({
-    threshold: 0.3,
+    threshold: 0.5,
     onEnter: () => {
       setIsPaused(false);
     },
