@@ -103,25 +103,6 @@ export function ScreenshotShowcaseStatic({
                   className="group-hover:border-white/20 group-hover:shadow-[0_0_60px_rgba(245,158,11,0.15)]"
                   contentClassName="bg-stage-dark"
                   showAddressBar={false}
-                  headerRight={
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setIsPaused(!isPaused);
-                      }}
-                      className="flex sm:hidden items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-all group/pause"
-                    >
-                      <span className="text-[9px] text-zinc-500 uppercase tracking-wider group-hover/pause:text-zinc-400 transition-colors">
-                        {isPaused ? "Resume" : "Pause"}
-                      </span>
-                      {isPaused ? (
-                        <Play className="w-2 h-2 text-zinc-500 fill-current group-hover/pause:text-yellow-400 transition-colors" />
-                      ) : (
-                        <Pause className="w-2 h-2 text-zinc-500 fill-current group-hover/pause:text-zinc-400 transition-colors" />
-                      )}
-                    </button>
-                  }
                 >
                   {/* Animated Battle Demo */}
                   <HeroBattleDemo
@@ -134,82 +115,84 @@ export function ScreenshotShowcaseStatic({
             </div>
 
             {/* Simulation Notice & Controls */}
-            <div className="flex items-center justify-center gap-3 sm:relative sm:min-h-[24px]">
-              {/* Previous Arrow */}
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  demoRef.current?.goToPrev();
-                }}
-                className="flex items-center justify-center size-7 rounded-full border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/prev"
-                aria-label="Previous slide"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-zinc-500 group-hover/prev:text-zinc-400 transition-colors"
-                >
-                  <path d="m12 19-7-7 7-7" />
-                  <path d="M19 12H5" />
-                </svg>
-              </button>
-
+            <div className="relative flex items-center justify-between sm:justify-center gap-3">
               <span className="text-[10px] text-zinc-300 uppercase tracking-widest opacity-40">
-                &mdash; Simulated for demonstration &mdash;
+                Simulated for demonstration
               </span>
 
-              {/* Next Arrow */}
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  demoRef.current?.goToNext();
-                }}
-                className="flex items-center justify-center size-7 rounded-full border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/next"
-                aria-label="Next slide"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-zinc-500 group-hover/next:text-zinc-400 transition-colors"
+              {/* Controls Group - Arrows + Play/Pause */}
+              <div className="flex items-center gap-2 sm:absolute sm:right-0">
+                {/* Previous Arrow */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    demoRef.current?.goToPrev();
+                  }}
+                  className="flex items-center justify-center size-7 rounded-full border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/prev"
+                  aria-label="Previous slide"
                 >
-                  <path d="M5 12h14" />
-                  <path d="m12 5 7 7-7 7" />
-                </svg>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-zinc-500 group-hover/prev:text-zinc-400 transition-colors"
+                  >
+                    <path d="m12 19-7-7 7-7" />
+                    <path d="M19 12H5" />
+                  </svg>
+                </button>
 
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setIsPaused(!isPaused);
-                }}
-                className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/pause sm:absolute sm:right-0"
-              >
-                <span className="text-[10px] text-zinc-500 uppercase tracking-wider group-hover/pause:text-zinc-400 transition-colors">
-                  {isPaused ? "Resume" : "Pause"}
-                </span>
-                {isPaused ? (
-                  <Play className="w-2.5 h-2.5 text-zinc-500 fill-current group-hover/pause:text-yellow-400 transition-colors" />
-                ) : (
-                  <Pause className="w-2.5 h-2.5 text-zinc-500 fill-current group-hover/pause:text-zinc-400 transition-colors" />
-                )}
-              </button>
+                {/* Next Arrow */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    demoRef.current?.goToNext();
+                  }}
+                  className="flex items-center justify-center size-7 rounded-full border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/next"
+                  aria-label="Next slide"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-zinc-500 group-hover/next:text-zinc-400 transition-colors"
+                  >
+                    <path d="M5 12h14" />
+                    <path d="m12 5 7 7-7 7" />
+                  </svg>
+                </button>
+
+                {/* Play/Pause Icon Button */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsPaused(!isPaused);
+                  }}
+                  className="flex items-center justify-center size-7 rounded-full border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/pause"
+                  aria-label={isPaused ? "Resume" : "Pause"}
+                >
+                  {isPaused ? (
+                    <Play className="w-3 h-3 text-zinc-500 fill-current group-hover/pause:text-yellow-400 transition-colors" />
+                  ) : (
+                    <Pause className="w-3 h-3 text-zinc-500 fill-current group-hover/pause:text-zinc-400 transition-colors" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
