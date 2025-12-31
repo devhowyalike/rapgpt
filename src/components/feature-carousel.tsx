@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import {
   Zap,
@@ -15,7 +16,7 @@ import {
   Vote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { APP_TITLE, APP_URL } from "@/lib/constants";
+import { APP_TITLE } from "@/lib/constants";
 import {
   Carousel,
   CarouselContent,
@@ -24,14 +25,6 @@ import {
   CarouselNext,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import { BattleBarDemo } from "@/components/learn-more/battle-bar-demo";
-import { GoLiveDemo } from "@/components/learn-more/go-live-demo";
-import { ScoreDemo } from "@/components/learn-more/score-demo";
-import { CommentsDemo } from "@/components/learn-more/comments-demo";
-import { VotingDemo } from "@/components/learn-more/voting-demo";
-import { MakeASongDemo } from "@/components/learn-more/make-a-song-demo";
-import { SelectPlayerDemo } from "@/components/learn-more/select-player-demo";
-import { StageSelectDemo } from "@/components/learn-more/stage-select-demo";
 import { BrowserChrome } from "@/components/browser-chrome";
 
 type ColorKey = "red" | "yellow" | "green" | "blue" | "purple";
@@ -94,7 +87,75 @@ const COLOR_CLASSES: Record<
   },
 };
 
-const FEATURES = [
+const LazyBattleBarDemo = dynamic(
+  () =>
+    import("@/components/learn-more/battle-bar-demo").then(
+      (m) => m.BattleBarDemo
+    ),
+  { ssr: false }
+);
+const LazyGoLiveDemo = dynamic(
+  () =>
+    import("@/components/learn-more/go-live-demo").then((m) => m.GoLiveDemo),
+  { ssr: false }
+);
+const LazyScoreDemo = dynamic(
+  () => import("@/components/learn-more/score-demo").then((m) => m.ScoreDemo),
+  { ssr: false }
+);
+const LazyCommentsDemo = dynamic(
+  () =>
+    import("@/components/learn-more/comments-demo").then((m) => m.CommentsDemo),
+  { ssr: false }
+);
+const LazyVotingDemo = dynamic(
+  () => import("@/components/learn-more/voting-demo").then((m) => m.VotingDemo),
+  { ssr: false }
+);
+const LazyMakeASongDemo = dynamic(
+  () =>
+    import("@/components/learn-more/make-a-song-demo").then(
+      (m) => m.MakeASongDemo
+    ),
+  { ssr: false }
+);
+const LazySelectPlayerDemo = dynamic(
+  () =>
+    import("@/components/learn-more/select-player-demo").then(
+      (m) => m.SelectPlayerDemo
+    ),
+  { ssr: false }
+);
+const LazyStageSelectDemo = dynamic(
+  () =>
+    import("@/components/learn-more/stage-select-demo").then(
+      (m) => m.StageSelectDemo
+    ),
+  { ssr: false }
+);
+
+type DemoKey =
+  | "admin"
+  | "watch"
+  | "scoring"
+  | "chat"
+  | "voting"
+  | "song"
+  | "mcs"
+  | "stage";
+
+type Feature = {
+  key: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  color: ColorKey;
+  screenshot: string;
+  demoKey?: DemoKey;
+  browserContentClassName?: string;
+};
+
+const FEATURES: Feature[] = [
   {
     key: "mcs",
     icon: <Mic2 className="w-5 h-5 md:w-6 md:h-6" />,
@@ -103,6 +164,8 @@ const FEATURES = [
       "Select from a roster of unique AI personas, each with their own distinct flow, style, and personality.",
     color: "red" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-player-select.webp",
+    demoKey: "mcs",
+    browserContentClassName: "aspect-[16/14] md:aspect-16/10",
   },
   {
     key: "stage",
@@ -112,6 +175,8 @@ const FEATURES = [
       "Choose the perfect backdrop for your battle, with locations from around the world.",
     color: "blue" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-select-stage.webp",
+    demoKey: "stage",
+    browserContentClassName: "aspect-[16/14] md:aspect-16/10",
   },
   {
     key: "rounds",
@@ -130,6 +195,7 @@ const FEATURES = [
       "Control the battle's flow with the adaptive Battle Bar. Adjust options and pacing on the fly.",
     color: "purple" as ColorKey,
     screenshot: "/marketing/rap-gpt-screenshot.webp",
+    demoKey: "admin",
   },
   {
     key: "scoring",
@@ -139,6 +205,8 @@ const FEATURES = [
       "See the final verdict as the scores are tallied. Detailed stats show who dominated the mic.",
     color: "green" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-scoring.webp",
+    demoKey: "scoring",
+    browserContentClassName: "aspect-[16/14] md:aspect-16/10",
   },
   {
     key: "chat",
@@ -148,6 +216,8 @@ const FEATURES = [
       "Join the crowd in the chatroom as the beef unfolds. React, comment, and hype your favorite MC.",
     color: "blue" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-comments.webp",
+    demoKey: "chat",
+    browserContentClassName: "aspect-[16/14] md:aspect-16/10",
   },
   {
     key: "watch",
@@ -157,6 +227,7 @@ const FEATURES = [
       "Stream your match live to a crowd, or simply spectate as a fan, as the battle evolves in real time.",
     color: "red" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-battle-stage.webp",
+    demoKey: "watch",
   },
   {
     key: "voting",
@@ -166,6 +237,8 @@ const FEATURES = [
       "Rock the vote after each round to impact the battle's outcome. Your voice shapes the competition.",
     color: "yellow" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-voting.webp",
+    demoKey: "voting",
+    browserContentClassName: "aspect-[16/14] md:aspect-16/10",
   },
   {
     key: "song",
@@ -175,8 +248,25 @@ const FEATURES = [
       "Transform any battle into a full track with AI-generated vocals. Choose a beat style, and share your creation.",
     color: "green" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-generate-song.webp",
+    demoKey: "song",
+    browserContentClassName: "aspect-[16/14] md:aspect-16/10",
   },
 ];
+
+function getCyclicDistance(a: number, b: number, length: number) {
+  const diff = Math.abs(a - b);
+  return Math.min(diff, length - diff);
+}
+
+function isIndexNearCurrent(
+  index: number,
+  current: number,
+  length: number,
+  distance: number
+) {
+  if (length <= 0) return false;
+  return getCyclicDistance(index, current, length) <= distance;
+}
 
 export function FeatureCarousel({ className }: FeatureCarouselProps) {
   const [api, setApi] = React.useState<CarouselApi>();
@@ -247,6 +337,10 @@ export function FeatureCarousel({ className }: FeatureCarouselProps) {
           <CarouselContent className="ml-0">
             {FEATURES.map((feature, index) => {
               const featureColors = COLOR_CLASSES[feature.color];
+              const shouldMountDemo = feature.demoKey
+                ? isIndexNearCurrent(index, current, FEATURES.length, 1)
+                : false;
+              const isActive = current === index;
               return (
                 <CarouselItem key={feature.key} className="pl-0">
                   <div className="relative">
@@ -254,41 +348,40 @@ export function FeatureCarousel({ className }: FeatureCarouselProps) {
                     <BrowserChrome
                       showAddressBar={false}
                       contentClassName={
-                        feature.key === "scoring" || feature.key === "chat" || feature.key === "voting" || feature.key === "song" || feature.key === "mcs" || feature.key === "stage"
-                          ? "aspect-[16/14] md:aspect-16/10"
-                          : "aspect-16/10"
+                        feature.browserContentClassName ?? "aspect-16/10"
                       }
                     >
-                      {feature.key === "admin" ? (
-                        <BattleBarDemo isActive={current === index} />
-                      ) : feature.key === "watch" ? (
-                        <GoLiveDemo isActive={current === index} />
-                      ) : feature.key === "scoring" ? (
-                        <ScoreDemo isActive={current === index} />
-                      ) : feature.key === "chat" ? (
-                        <CommentsDemo isActive={current === index} />
-                      ) : feature.key === "voting" ? (
-                        <VotingDemo isActive={current === index} />
-                      ) : feature.key === "song" ? (
-                        <MakeASongDemo isActive={current === index} />
-                      ) : feature.key === "mcs" ? (
-                        <SelectPlayerDemo isActive={current === index} />
-                      ) : feature.key === "stage" ? (
-                        <StageSelectDemo isActive={current === index} />
-                      ) : (
-                        /* Static Screenshot for other slides */
-                        <Image
-                          src={feature.screenshot}
-                          alt={`${APP_TITLE} - ${feature.title}`}
-                          fill
-                          className={cn(
-                            feature.key === "rounds"
-                              ? "object-cover object-[calc(50%-5px)_top]"
-                              : "object-contain"
-                          )}
-                          priority={index === 0}
-                        />
-                      )}
+                      {/* Always render the screenshot (cheap, lazy-loaded); mount the demo UI only for active/adjacent slides. */}
+                      <Image
+                        src={feature.screenshot}
+                        alt={`${APP_TITLE} - ${feature.title}`}
+                        fill
+                        className={cn(
+                          feature.key === "rounds"
+                            ? "object-cover object-[calc(50%-5px)_top]"
+                            : "object-contain"
+                        )}
+                        priority={index === 0}
+                      />
+                      {feature.demoKey && shouldMountDemo ? (
+                        feature.demoKey === "admin" ? (
+                          <LazyBattleBarDemo isActive={isActive} />
+                        ) : feature.demoKey === "watch" ? (
+                          <LazyGoLiveDemo isActive={isActive} />
+                        ) : feature.demoKey === "scoring" ? (
+                          <LazyScoreDemo isActive={isActive} />
+                        ) : feature.demoKey === "chat" ? (
+                          <LazyCommentsDemo isActive={isActive} />
+                        ) : feature.demoKey === "voting" ? (
+                          <LazyVotingDemo isActive={isActive} />
+                        ) : feature.demoKey === "song" ? (
+                          <LazyMakeASongDemo isActive={isActive} />
+                        ) : feature.demoKey === "mcs" ? (
+                          <LazySelectPlayerDemo isActive={isActive} />
+                        ) : feature.demoKey === "stage" ? (
+                          <LazyStageSelectDemo isActive={isActive} />
+                        ) : null
+                      ) : null}
                     </BrowserChrome>
 
                     {/* Feature Info - Moved below the screenshot */}
