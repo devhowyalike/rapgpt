@@ -263,7 +263,7 @@ export const VerseDemo = memo(function VerseDemo({
 
   return (
     <div className="flex-1 p-2 sm:p-4 space-y-1.5 sm:space-y-2 overflow-hidden text-pretty">
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {visibleLines.map((line, lineIndex) => (
           <VerseLine
             key={`${position}-${lineIndex}`}
