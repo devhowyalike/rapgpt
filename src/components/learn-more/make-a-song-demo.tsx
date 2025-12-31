@@ -174,9 +174,7 @@ function BeatCard({ beat, isSelected, isMobile }: BeatCardProps) {
             {beat.name}
           </div>
           <div
-            className={`text-gray-400 ${
-              isMobile ? "text-[10px]" : "text-xs"
-            }`}
+            className={`text-gray-400 ${isMobile ? "text-[10px]" : "text-xs"}`}
           >
             {beat.description}
           </div>
@@ -230,7 +228,7 @@ function ProgressDisplay({ progress, isMobile }: ProgressDisplayProps) {
 
         <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
           <motion.div
-            className="h-full bg-gradient-to-r from-yellow-400 to-orange-500"
+            className="h-full bg-linear-to-r from-yellow-400 to-orange-500"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.5 }}
@@ -265,7 +263,7 @@ function ProgressDisplay({ progress, isMobile }: ProgressDisplayProps) {
 
       <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
         <motion.div
-          className="h-full bg-gradient-to-r from-yellow-400 to-orange-500"
+          className="h-full bg-linear-to-r from-yellow-400 to-orange-500"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.5 }}
@@ -301,7 +299,7 @@ function SongPlayerDisplay({ isMobile }: SongPlayerDisplayProps) {
           <motion.div
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
-            className="w-14 h-14 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shrink-0 text-2xl"
+            className="w-14 h-14 rounded-lg bg-linear-to-br from-purple-600 to-pink-600 flex items-center justify-center shrink-0 text-2xl"
           >
             🎹
           </motion.div>
@@ -318,7 +316,7 @@ function SongPlayerDisplay({ isMobile }: SongPlayerDisplayProps) {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center shrink-0"
+            className="w-10 h-10 rounded-full bg-linear-to-r from-purple-600 to-pink-600 flex items-center justify-center shrink-0"
           >
             <Play className="w-4 h-4 text-white fill-white ml-0.5" />
           </motion.button>
@@ -357,7 +355,7 @@ function SongPlayerDisplay({ isMobile }: SongPlayerDisplayProps) {
         <motion.div
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
-          className="w-14 h-14 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shrink-0 text-2xl"
+          className="w-14 h-14 rounded-lg bg-linear-to-br from-purple-600 to-pink-600 flex items-center justify-center shrink-0 text-2xl"
         >
           🎹
         </motion.div>
@@ -374,7 +372,7 @@ function SongPlayerDisplay({ isMobile }: SongPlayerDisplayProps) {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center shrink-0"
+          className="w-10 h-10 rounded-full bg-linear-to-r from-purple-600 to-pink-600 flex items-center justify-center shrink-0"
         >
           <Play className="w-4 h-4 text-white fill-white ml-0.5" />
         </motion.button>
@@ -421,7 +419,7 @@ function MobileView({ config, currentStateName }: MobileViewProps) {
           fill
           className="object-cover object-center blur-sm scale-105 brightness-40"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-gray-900/95" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-gray-900/95" />
       </div>
 
       {/* Idle State */}
@@ -505,7 +503,10 @@ function MobileView({ config, currentStateName }: MobileViewProps) {
                     exit={{ opacity: 0 }}
                     className="w-full px-3"
                   >
-                    <ProgressDisplay progress={config.progress} isMobile={true} />
+                    <ProgressDisplay
+                      progress={config.progress}
+                      isMobile={true}
+                    />
                   </motion.div>
                 )}
 
@@ -550,7 +551,7 @@ function DesktopView({ config, currentStateName }: DesktopViewProps) {
           fill
           className="object-cover object-center blur-sm scale-105 brightness-50"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-gray-900/95" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-gray-900/95" />
       </div>
 
       {/* Idle State */}
