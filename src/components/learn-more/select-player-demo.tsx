@@ -169,10 +169,17 @@ interface PlayerCardProps {
   player: Persona | null;
   side: "left" | "right";
   isActive: boolean;
+  isLocked: boolean;
   isMobile: boolean;
 }
 
-function PlayerCard({ player, side, isActive, isMobile }: PlayerCardProps) {
+function PlayerCard({
+  player,
+  side,
+  isActive,
+  isLocked,
+  isMobile,
+}: PlayerCardProps) {
   const isPlayer1 = side === "left";
   const borderColor = isPlayer1 ? "border-blue-500" : "border-red-500";
   const glowColor = isPlayer1 ? "bg-blue-500/20" : "bg-red-500/20";
@@ -199,10 +206,14 @@ function PlayerCard({ player, side, isActive, isMobile }: PlayerCardProps) {
             className={`absolute inset-0 ${glowColor} blur-xl rounded-full animate-pulse`}
           />
         )}
-        {isActive && (
+        {(isActive || isLocked) && (
           <div className="absolute inset-0 pointer-events-none z-20">
             <svg
-              className="absolute inset-0 w-full h-full animate-[snake-ring_3s_linear_infinite]"
+              className={`absolute inset-0 w-full h-full ${
+                isActive && !isLocked
+                  ? "animate-[snake-ring_3s_linear_infinite]"
+                  : ""
+              }`}
               viewBox="0 0 100 100"
             >
               <circle
@@ -212,7 +223,7 @@ function PlayerCard({ player, side, isActive, isMobile }: PlayerCardProps) {
                 fill="none"
                 stroke={isPlayer1 ? "#3b82f6" : "#ef4444"}
                 strokeWidth="4"
-                strokeDasharray="75 225"
+                strokeDasharray={isLocked ? "none" : "75 225"}
                 strokeLinecap="round"
                 opacity="0.9"
               />
@@ -223,7 +234,7 @@ function PlayerCard({ player, side, isActive, isMobile }: PlayerCardProps) {
           className={`relative ${
             isMobile ? "w-14 h-14" : "w-36 h-36"
           } rounded-full border-4 ${
-            isActive
+            isActive || isLocked
               ? "border-transparent"
               : player
               ? borderColor
@@ -460,6 +471,7 @@ function MobileView({ config, currentStateName }: MobileViewProps) {
                 player={hoveredP1 || player1}
                 side="left"
                 isActive={config.hoveredPlayer === 1}
+                isLocked={config.player1Selected}
                 isMobile={true}
               />
 
@@ -475,6 +487,7 @@ function MobileView({ config, currentStateName }: MobileViewProps) {
                 player={hoveredP2 || player2}
                 side="right"
                 isActive={config.hoveredPlayer === 2}
+                isLocked={config.player2Selected}
                 isMobile={true}
               />
             </div>
@@ -611,6 +624,7 @@ function DesktopView({ config, currentStateName }: DesktopViewProps) {
                 player={hoveredP1 || player1}
                 side="left"
                 isActive={config.hoveredPlayer === 1}
+                isLocked={config.player1Selected}
                 isMobile={false}
               />
 
@@ -625,6 +639,7 @@ function DesktopView({ config, currentStateName }: DesktopViewProps) {
                 player={hoveredP2 || player2}
                 side="right"
                 isActive={config.hoveredPlayer === 2}
+                isLocked={config.player2Selected}
                 isMobile={false}
               />
             </div>

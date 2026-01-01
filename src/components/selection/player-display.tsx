@@ -12,6 +12,7 @@ interface PlayerDisplayProps {
   onActivate?: () => void;
   onClear?: () => void;
   isActive?: boolean;
+  isLocked?: boolean;
 }
 
 export function PlayerDisplay({
@@ -22,6 +23,7 @@ export function PlayerDisplay({
   onActivate,
   onClear,
   isActive = false,
+  isLocked = false,
 }: PlayerDisplayProps) {
   const isPlayer1 = side === "left";
   const borderColor = isPlayer1
@@ -82,11 +84,15 @@ export function PlayerDisplay({
             <div
               className={`absolute inset-0 ${glowColor} blur-2xl rounded-full animate-pulse`}
             />
-            {/* Snake Ring Animation - Visible when active */}
-            {isActive && (
+            {/* Snake Ring Animation - Visible when active or locked */}
+            {(isActive || isLocked) && (
               <div className="absolute inset-0 pointer-events-none z-20">
                 <svg
-                  className="absolute inset-0 w-full h-full animate-[snake-ring_3s_linear_infinite]"
+                  className={`absolute inset-0 w-full h-full ${
+                    isActive && !isLocked
+                      ? "animate-[snake-ring_3s_linear_infinite]"
+                      : ""
+                  }`}
                   viewBox="0 0 100 100"
                 >
                   <circle
@@ -96,7 +102,7 @@ export function PlayerDisplay({
                     fill="none"
                     stroke={`rgb(var(--player${isPlayer1 ? "1" : "2"}-color))`}
                     strokeWidth="4"
-                    strokeDasharray="75 225"
+                    strokeDasharray={isLocked ? "none" : "75 225"}
                     strokeLinecap="round"
                     opacity="0.9"
                   />
@@ -105,7 +111,7 @@ export function PlayerDisplay({
             )}
             <div
               className={`relative w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full border-4 md:border-6 ${
-                isActive ? "border-transparent" : borderColor
+                isActive || isLocked ? "border-transparent" : borderColor
               } overflow-hidden bg-linear-to-br from-gray-800 to-gray-900 shadow-2xl`}
               style={{
                 boxShadow: `0 0 40px ${shadowColor}`,
@@ -147,11 +153,15 @@ export function PlayerDisplay({
               isActive ? "opacity-100" : "opacity-40"
             }`}
           >
-            {/* Snake Ring Animation when active */}
-            {isActive && (
+            {/* Snake Ring Animation when active or locked */}
+            {(isActive || isLocked) && (
               <div className="absolute inset-0 pointer-events-none z-20">
                 <svg
-                  className="absolute inset-0 w-full h-full animate-[snake-ring_3s_linear_infinite]"
+                  className={`absolute inset-0 w-full h-full ${
+                    isActive && !isLocked
+                      ? "animate-[snake-ring_3s_linear_infinite]"
+                      : ""
+                  }`}
                   viewBox="0 0 100 100"
                 >
                   <circle
@@ -161,7 +171,7 @@ export function PlayerDisplay({
                     fill="none"
                     stroke={`rgb(var(--player${isPlayer1 ? "1" : "2"}-color))`}
                     strokeWidth="4"
-                    strokeDasharray="75 225"
+                    strokeDasharray={isLocked ? "none" : "75 225"}
                     strokeLinecap="round"
                     opacity="0.9"
                   />

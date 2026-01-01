@@ -336,6 +336,9 @@ export function CharacterSelect({
                             : undefined
                         }
                         isActive={selectionStep === "player1"}
+                        isLocked={Boolean(
+                          player1 && previewedPlayer1?.id === player1.id
+                        )}
                       />
                     </div>
 
@@ -364,6 +367,9 @@ export function CharacterSelect({
                             : undefined
                         }
                         isActive={selectionStep === "player2"}
+                        isLocked={Boolean(
+                          player2 && previewedPlayer2?.id === player2.id
+                        )}
                       />
                     </div>
                   </div>
