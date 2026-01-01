@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { VsBadge } from "../selection/vs-badge";
 
 // =============================================================================
 // Types & Data
@@ -351,43 +352,6 @@ function PersonaGridItem({
 }
 
 // =============================================================================
-// VS Badge
-// =============================================================================
-
-function VsBadge({
-  visible,
-  isMobile,
-}: {
-  visible: boolean;
-  isMobile: boolean;
-}) {
-  return (
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          exit={{ scale: 0, rotate: 180 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          className="relative"
-        >
-          <div
-            className={`absolute inset-0 bg-yellow-500/30 blur-xl rounded-full`}
-          />
-          <div
-            className={`relative ${
-              isMobile ? "w-8 h-8 text-sm" : "w-20 h-20 text-3xl"
-            } rounded-full bg-linear-to-br from-yellow-400 via-orange-500 to-red-600 flex items-center justify-center font-black text-white shadow-lg`}
-          >
-            VS
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
-
-// =============================================================================
 // Mobile View
 // =============================================================================
 
@@ -475,13 +439,17 @@ function MobileView({ config, currentStateName }: MobileViewProps) {
                 isMobile={true}
               />
 
-              <VsBadge visible={config.showVs} isMobile={true} />
+              <div className="relative w-8 h-8 flex items-center justify-center">
+                <VsBadge visible={config.showVs} size="sm" />
 
-              {!config.showVs && (
-                <div className="w-8 h-8 flex items-center justify-center text-gray-600 text-sm">
+                <div
+                  className={`text-gray-600 text-sm font-bold absolute transition-opacity duration-700 ${
+                    config.showVs ? "opacity-0" : "opacity-40"
+                  }`}
+                >
                   VS
                 </div>
-              )}
+              </div>
 
               <PlayerCard
                 player={hoveredP2 || player2}
@@ -628,11 +596,15 @@ function DesktopView({ config, currentStateName }: DesktopViewProps) {
                 isMobile={false}
               />
 
-              <div className="w-20 h-20 flex items-center justify-center">
-                <VsBadge visible={config.showVs} isMobile={false} />
-                {!config.showVs && (
-                  <span className="text-gray-600 text-2xl font-bold">VS</span>
-                )}
+              <div className="relative w-20 h-20 flex items-center justify-center">
+                <VsBadge visible={config.showVs} size="md" />
+                <span
+                  className={`text-gray-600 text-2xl font-bold absolute transition-opacity duration-700 ${
+                    config.showVs ? "opacity-0" : "opacity-40"
+                  }`}
+                >
+                  VS
+                </span>
               </div>
 
               <PlayerCard
