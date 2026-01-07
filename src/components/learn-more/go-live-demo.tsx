@@ -380,6 +380,9 @@ function ReactionBurst({ isActive }: { isActive: boolean }) {
 // =============================================================================
 
 function StatusLabel({ label, isLive }: { label: string; isLive: boolean }) {
+  const isTransitioning =
+    label === "Going live..." || label === "Ending stream...";
+
   return (
     <motion.div
       key={label}
@@ -387,7 +390,7 @@ function StatusLabel({ label, isLive }: { label: string; isLive: boolean }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       className={`
-        px-4 h-[44px] sm:h-[52px] rounded-lg text-sm font-medium flex items-center
+        px-4 h-[44px] sm:h-[52px] rounded-lg text-sm font-medium flex items-center gap-3
         ${
           isLive
             ? "bg-red-500/20 text-red-300 border border-red-500/30"
@@ -395,7 +398,8 @@ function StatusLabel({ label, isLive }: { label: string; isLive: boolean }) {
         }
       `}
     >
-      {label}
+      {isTransitioning && <LoadingSpinner size="sm" />}
+      <span className="truncate">{label}</span>
     </motion.div>
   );
 }
