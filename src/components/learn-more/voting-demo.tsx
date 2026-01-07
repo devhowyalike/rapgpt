@@ -174,7 +174,9 @@ function VotingTimer({ timerValue, isMobile }: VotingTimerProps) {
         >
           {timerValue}s
         </div>
-        <div className={`text-white/80 ${isMobile ? "text-[10px]" : "text-xs"}`}>
+        <div
+          className={`text-white/80 ${isMobile ? "text-[10px]" : "text-xs"}`}
+        >
           Vote now!
         </div>
         <div
@@ -257,7 +259,9 @@ function VoteButton({
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className={`text-yellow-400 font-bold bg-yellow-400/10 border border-yellow-400/20 rounded-sm shrink-0 uppercase tracking-tight ${
-                  isMobile ? "text-[8px] px-1 py-0.5" : "text-[10px] px-1.5 py-0.5"
+                  isMobile
+                    ? "text-[8px] px-1 py-0.5"
+                    : "text-[10px] px-1.5 py-0.5"
                 }`}
               >
                 Your Vote
@@ -365,11 +369,17 @@ function MobileView({ config, currentStateName }: MobileViewProps) {
 
             {/* Content */}
             <LayoutGroup>
-              <motion.div layout className="p-3 space-y-3">
+              <motion.div
+                layout
+                className="p-3 space-y-3 h-[240px] flex flex-col"
+              >
                 {/* Timer */}
-                <AnimatePresence mode="popLayout">
+                <AnimatePresence>
                   {config.timerValue !== null && (
-                    <VotingTimer timerValue={config.timerValue} isMobile={true} />
+                    <VotingTimer
+                      timerValue={config.timerValue}
+                      isMobile={true}
+                    />
                   )}
                 </AnimatePresence>
 
@@ -513,7 +523,10 @@ function DesktopView({ config, currentStateName }: DesktopViewProps) {
                 {/* Timer */}
                 <AnimatePresence mode="popLayout">
                   {config.timerValue !== null && (
-                    <VotingTimer timerValue={config.timerValue} isMobile={false} />
+                    <VotingTimer
+                      timerValue={config.timerValue}
+                      isMobile={false}
+                    />
                   )}
                 </AnimatePresence>
 
@@ -582,14 +595,18 @@ interface VotingDemoProps {
   isActive?: boolean;
 }
 
-export function VotingDemo({ loadingScreen = "disabled", isActive = true }: VotingDemoProps) {
+export function VotingDemo({
+  loadingScreen = "disabled",
+  isActive = true,
+}: VotingDemoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [stateIndex, setStateIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
-  const stateOrder = loadingScreen === "enabled"
-    ? STATE_ORDER_WITH_LOADING
-    : STATE_ORDER_WITHOUT_LOADING;
+  const stateOrder =
+    loadingScreen === "enabled"
+      ? STATE_ORDER_WITH_LOADING
+      : STATE_ORDER_WITHOUT_LOADING;
 
   const currentStateName = stateOrder[stateIndex];
   const config = STATE_CONFIGS[currentStateName];
