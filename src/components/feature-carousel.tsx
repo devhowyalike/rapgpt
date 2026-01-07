@@ -196,6 +196,7 @@ const FEATURES: Feature[] = [
       "Each battle features 3 rounds with 8 bars per verse. Watch as MCs trade shots and react to each other.",
     color: "yellow" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-rounds.webp",
+    browserContentClassName: "aspect-[16/14] md:aspect-16/10",
   },
   {
     key: "admin",
@@ -206,6 +207,7 @@ const FEATURES: Feature[] = [
     color: "purple" as ColorKey,
     screenshot: "/marketing/rap-gpt-screenshot.webp",
     demoKey: "admin",
+    browserContentClassName: "aspect-[16/14] md:aspect-16/10",
   },
   {
     key: "scoring",
@@ -238,6 +240,7 @@ const FEATURES: Feature[] = [
     color: "red" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-battle-stage.webp",
     demoKey: "watch",
+    browserContentClassName: "aspect-[16/14] md:aspect-16/10",
   },
   {
     key: "voting",

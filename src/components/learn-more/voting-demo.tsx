@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Vote, Trophy, Timer } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -150,9 +150,10 @@ interface VotingTimerProps {
 function VotingTimer({ timerValue, isMobile }: VotingTimerProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
+      layout
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       className={`bg-linear-to-r from-purple-600 to-blue-600 rounded-lg ${
         isMobile ? "p-3" : "p-4"
       }`}
@@ -363,53 +364,56 @@ function MobileView({ config, currentStateName }: MobileViewProps) {
             </div>
 
             {/* Content */}
-            <div className="p-3 space-y-3">
-              {/* Timer */}
-              <AnimatePresence>
-                {config.timerValue !== null && (
-                  <VotingTimer timerValue={config.timerValue} isMobile={true} />
-                )}
-              </AnimatePresence>
+            <LayoutGroup>
+              <motion.div layout className="p-3 space-y-3">
+                {/* Timer */}
+                <AnimatePresence mode="popLayout">
+                  {config.timerValue !== null && (
+                    <VotingTimer timerValue={config.timerValue} isMobile={true} />
+                  )}
+                </AnimatePresence>
 
-              {/* Vote Buttons */}
-              <div className="space-y-2">
-                {sortedPositions.map((position) => (
-                  <VoteButton
-                    key={position}
-                    position={position}
-                    votes={
-                      position === "player1"
-                        ? config.player1Votes
-                        : config.player2Votes
-                    }
-                    isUserVote={config.userVotedFor === position}
-                    isWinner={
-                      position === "player1"
-                        ? config.player1Votes > config.player2Votes
-                        : config.player2Votes > config.player1Votes
-                    }
-                    showWinner={config.showWinner}
-                    isMobile={true}
-                  />
-                ))}
-              </div>
+                {/* Vote Buttons */}
+                <motion.div layout className="space-y-2">
+                  {sortedPositions.map((position) => (
+                    <VoteButton
+                      key={position}
+                      position={position}
+                      votes={
+                        position === "player1"
+                          ? config.player1Votes
+                          : config.player2Votes
+                      }
+                      isUserVote={config.userVotedFor === position}
+                      isWinner={
+                        position === "player1"
+                          ? config.player1Votes > config.player2Votes
+                          : config.player2Votes > config.player1Votes
+                      }
+                      showWinner={config.showWinner}
+                      isMobile={true}
+                    />
+                  ))}
+                </motion.div>
 
-              {/* Winner announcement */}
-              <AnimatePresence>
-                {config.showWinner && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="text-center py-2"
-                  >
-                    <span className="text-xs font-medium text-yellow-400">
-                      Dawn wins Round 1!
-                    </span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                {/* Winner announcement */}
+                <AnimatePresence>
+                  {config.showWinner && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="text-center py-2"
+                    >
+                      <span className="text-xs font-medium text-yellow-400">
+                        Dawn wins Round 1!
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </LayoutGroup>
           </motion.div>
         )}
       </AnimatePresence>
@@ -504,60 +508,64 @@ function DesktopView({ config, currentStateName }: DesktopViewProps) {
             </div>
 
             {/* Content */}
-            <div className="flex-1 p-4 space-y-4">
-              {/* Timer */}
-              <AnimatePresence>
-                {config.timerValue !== null && (
-                  <VotingTimer timerValue={config.timerValue} isMobile={false} />
-                )}
-              </AnimatePresence>
+            <LayoutGroup>
+              <motion.div layout className="flex-1 p-4 space-y-4">
+                {/* Timer */}
+                <AnimatePresence mode="popLayout">
+                  {config.timerValue !== null && (
+                    <VotingTimer timerValue={config.timerValue} isMobile={false} />
+                  )}
+                </AnimatePresence>
 
-              {/* Vote Buttons */}
-              <div className="space-y-3">
-                {sortedPositions.map((position) => (
-                  <VoteButton
-                    key={position}
-                    position={position}
-                    votes={
-                      position === "player1"
-                        ? config.player1Votes
-                        : config.player2Votes
-                    }
-                    isUserVote={config.userVotedFor === position}
-                    isWinner={
-                      position === "player1"
-                        ? config.player1Votes > config.player2Votes
-                        : config.player2Votes > config.player1Votes
-                    }
-                    showWinner={config.showWinner}
-                    isMobile={false}
-                  />
-                ))}
-              </div>
+                {/* Vote Buttons */}
+                <motion.div layout className="space-y-3">
+                  {sortedPositions.map((position) => (
+                    <VoteButton
+                      key={position}
+                      position={position}
+                      votes={
+                        position === "player1"
+                          ? config.player1Votes
+                          : config.player2Votes
+                      }
+                      isUserVote={config.userVotedFor === position}
+                      isWinner={
+                        position === "player1"
+                          ? config.player1Votes > config.player2Votes
+                          : config.player2Votes > config.player1Votes
+                      }
+                      showWinner={config.showWinner}
+                      isMobile={false}
+                    />
+                  ))}
+                </motion.div>
 
-              {/* Winner announcement */}
-              <AnimatePresence>
-                {config.showWinner && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="text-center py-3"
-                  >
+                {/* Winner announcement */}
+                <AnimatePresence>
+                  {config.showWinner && (
                     <motion.div
-                      initial={{ scale: 0.8 }}
-                      animate={{ scale: 1 }}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/20 border border-yellow-500/30 rounded-lg"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="text-center py-3"
                     >
-                      <Trophy className="w-4 h-4 text-yellow-400" />
-                      <span className="text-sm font-medium text-yellow-400">
-                        Dawn wins Round 1!
-                      </span>
+                      <motion.div
+                        initial={{ scale: 0.8 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/20 border border-yellow-500/30 rounded-lg"
+                      >
+                        <Trophy className="w-4 h-4 text-yellow-400" />
+                        <span className="text-sm font-medium text-yellow-400">
+                          Dawn wins Round 1!
+                        </span>
+                      </motion.div>
                     </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </LayoutGroup>
           </motion.div>
         )}
       </AnimatePresence>

@@ -20,7 +20,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 type DemoState =
   | "idle"
-  | "starting"
   | "live-initial"
   | "viewers-join"
   | "chat-active"
@@ -67,16 +66,10 @@ const CHAT_POOL: ChatMessage[] = [
 
 const STATE_CONFIGS: Record<DemoState, StateConfig> = {
   idle: {
-    label: "Press Go Live to start streaming",
+    label: "Going live...",
     buttonState: "off",
     viewerCount: 0,
     duration: 2500,
-  },
-  starting: {
-    label: "Connecting to battle...",
-    buttonState: "starting",
-    viewerCount: 0,
-    duration: 1800,
   },
   "live-initial": {
     label: "You're live! Waiting for viewers...",
@@ -119,7 +112,6 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
 
 const STATE_ORDER: DemoState[] = [
   "idle",
-  "starting",
   "live-initial",
   "viewers-join",
   "chat-active",
@@ -395,7 +387,7 @@ function StatusLabel({ label, isLive }: { label: string; isLive: boolean }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       className={`
-        px-4 py-2 rounded-lg text-sm font-medium
+        px-4 h-[44px] sm:h-[52px] rounded-lg text-sm font-medium flex items-center
         ${
           isLive
             ? "bg-red-500/20 text-red-300 border border-red-500/30"
