@@ -2,26 +2,33 @@ import { Mic2, Music, Zap } from "lucide-react";
 import { PageTitle } from "@/components/page-title";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { APP_TITLE } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+import { FeatureCard, type FeatureCardColor } from "@/components/feature-card";
 
 export function LearnMoreHero() {
-  const features = [
+  const features: {
+    icon: React.ReactNode;
+    label: string;
+    color: FeatureCardColor;
+    description: string;
+  }[] = [
     {
-      icon: Mic2,
+      icon: <Mic2 />,
       label: "Dream Matchups",
-      color: "text-red-500",
+      color: "red",
       description:
         "Pit legendary artists against each other in epic rap battles",
     },
     {
-      icon: Zap,
+      icon: <Zap />,
       label: "Live Events",
-      color: "text-yellow-500",
+      color: "yellow",
       description: "Join real-time battles and vote for your favorite artists",
     },
     {
-      icon: Music,
+      icon: <Music />,
       label: "Make it a Song",
-      color: "text-green-500",
+      color: "green",
       description:
         "Transform any battle into a full track with AI-generated beats",
     },
@@ -55,7 +62,7 @@ export function LearnMoreHero() {
           </div>
 
           {/* Description */}
-          <p className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl text-pretty">
+          <p className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl text-balance">
             {APP_TITLE} is a live-streaming, community-driven AI battle arena.
           </p>
 
@@ -66,24 +73,16 @@ export function LearnMoreHero() {
 
           {/* Features */}
           <div className="pt-10 w-full max-w-4xl">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
               {features.map((item, i) => (
-                <div
+                <FeatureCard
                   key={i}
-                  className="group p-5 rounded-xl bg-white/3 border border-white/10 hover:bg-white/6 hover:border-white/20 transition-all duration-300"
-                >
-                  <div className="flex flex-col items-center text-center space-y-3">
-                    <div className="p-3 rounded-xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform duration-300">
-                      <item.icon className={`w-6 h-6 ${item.color}`} />
-                    </div>
-                    <h3 className="text-base font-semibold text-white">
-                      {item.label}
-                    </h3>
-                    <p className="text-sm text-gray-500 leading-relaxed">
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
+                  icon={item.icon}
+                  title={item.label}
+                  description={item.description}
+                  color={item.color}
+                  className={cn(i === 2 && "col-span-2 md:col-span-1")}
+                />
               ))}
             </div>
           </div>
