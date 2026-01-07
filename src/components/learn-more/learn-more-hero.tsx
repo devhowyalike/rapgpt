@@ -4,6 +4,7 @@ import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { APP_TITLE } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { FeatureCard, type FeatureCardColor } from "@/components/feature-card";
+import { GridBackground } from "@/components/grid-background";
 
 export function LearnMoreHero() {
   const features: {
@@ -40,9 +41,7 @@ export function LearnMoreHero() {
       <div className="absolute inset-0 z-0">
         <div className="absolute top-0 right-0 w-2/3 h-2/3 bg-red-600/10 rounded-full blur-[120px] animate-pulse pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-2/3 h-2/3 bg-blue-600/10 rounded-full blur-[150px] pointer-events-none" />
-
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-20 pointer-events-none" />
+        <GridBackground />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 relative z-10">

@@ -5,6 +5,7 @@ import { BarChart3, Download, Mic2, Music2, Play, Wand2 } from "lucide-react";
 import Image from "next/image";
 import { APP_TITLE } from "@/lib/constants";
 import { CreateBattleCTA } from "./create-battle-cta";
+import { GridBackground } from "./grid-background";
 
 // Deterministic waveform heights to avoid hydration mismatch (Math.random() differs between server/client)
 const WAVEFORM_HEIGHTS = [
@@ -108,8 +109,7 @@ export function MakeSongHighlight({ isAuthenticated }: MakeSongHighlightProps) {
         >
           {/* Mock Player Card */}
           <div className="relative bg-gray-900/60 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500 overflow-hidden">
-            {/* Grid Background */}
-            <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-10 pointer-events-none" />
+            <GridBackground intensity="subtle" />
 
             <div className="flex items-center gap-6 mb-6 relative z-10">
               <div className="relative w-24 h-24 rounded-lg overflow-hidden shadow-lg shrink-0 border border-white/10">

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Mic2, Music2, Play, Vote } from "lucide-react";
 import Link from "next/link";
+import { GridBackground } from "@/components/grid-background";
 
 const STEPS: {
   icon: any;
@@ -97,8 +98,7 @@ export function HowItWorks() {
               transition={{ delay: 0.1 * index }}
               className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors group flex flex-col items-center text-center md:items-start md:text-left relative overflow-hidden"
             >
-              {/* Grid Background */}
-              <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-10 pointer-events-none" />
+              <GridBackground intensity="subtle" />
 
               {/* Step Number */}
               <div className="absolute -top-2 -right-2 text-7xl font-black text-white/5 select-none font-(family-name:--font-bebas-neue)">

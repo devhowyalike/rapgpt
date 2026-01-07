@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { GridBackground } from "@/components/grid-background";
 import {
   Table,
   TableBody,
@@ -196,8 +197,7 @@ export function LiveBattlesDisplay({
 
   return (
     <div className="w-full bg-gray-900/50 border border-white/10 rounded-xl overflow-hidden backdrop-blur-md relative">
-      {/* Grid Background */}
-      <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-10 pointer-events-none" />
+      <GridBackground intensity="subtle" />
 
       <div className="p-6 border-b border-white/10 flex items-center gap-3 relative z-10">
         <div className="relative flex h-3 w-3">

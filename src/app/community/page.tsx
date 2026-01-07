@@ -11,6 +11,7 @@ import { decrypt } from "@/lib/auth/encryption";
 import { db } from "@/lib/db/client";
 import { users } from "@/lib/db/schema";
 import { APP_TITLE } from "@/lib/constants";
+import { GridBackground } from "@/components/grid-background";
 
 export const metadata = {
   title: `Community | ${APP_TITLE}`,
@@ -81,8 +82,10 @@ export default async function CommunityPage({
       </PageHero>
 
       {/* Main Content */}
-      <div className="bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center pt-2 pb-12 px-4 md:pt-4 md:pb-16 md:px-6 flex-1">
-        <div className="max-w-7xl mx-auto w-full">
+      <div className="relative bg-linear-to-b from-stage-darker to-stage-dark flex flex-col items-center pt-2 pb-12 px-4 md:pt-4 md:pb-16 md:px-6 flex-1 overflow-hidden">
+        <GridBackground intensity="subtle" />
+
+        <div className="max-w-7xl mx-auto w-full relative z-10">
           {allUsers.length === 0 ? (
             <div className="bg-gray-900/30 border border-gray-800 rounded-lg p-8 text-center max-w-md mx-auto mt-8">
               <h2 className="font-(family-name:--font-bebas-neue) text-2xl text-white mb-3">

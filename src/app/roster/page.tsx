@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/site-header";
 import { PersonaGallery } from "@/components/persona-gallery";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { APP_TITLE } from "@/lib/constants";
+import { GridBackground } from "@/components/grid-background";
 
 export const metadata = {
   title: `The Roster | ${APP_TITLE}`,
@@ -19,8 +20,7 @@ export default async function RosterPage() {
 
       {/* Hero Section */}
       <div className="bg-black pt-24 pb-8 relative overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center opacity-5 pointer-events-none" />
+        <GridBackground />
         <div className="absolute inset-0 bg-linear-to-b from-purple-900/10 via-transparent to-transparent pointer-events-none" />
 
         <div className="container mx-auto px-4 text-center relative z-10">

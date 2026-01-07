@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
+import { GridBackground } from "./grid-background";
 
 export type FeatureCardColor = "red" | "yellow" | "blue" | "green" | "purple";
 
@@ -38,9 +39,7 @@ export function FeatureCard({
         className
       )}
     >
-      {showGridBackground && (
-        <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-10 pointer-events-none" />
-      )}
+      {showGridBackground && <GridBackground intensity="subtle" />}
 
       <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 relative z-10">
         <div

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { VictoryConfetti } from "@/components/victory-confetti";
+import { GridBackground } from "@/components/grid-background";
 import {
   getAllClientPersonas,
   getPrimaryClientPersonas,
@@ -69,8 +70,7 @@ export function PersonaGallery({
                 showAllOnMobile || index < 5 ? "flex" : "hidden sm:flex"
               }`}
             >
-              {/* Grid Background */}
-              <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-10 pointer-events-none" />
+              <GridBackground intensity="subtle" />
 
               {/* Background Glow */}
               <div
