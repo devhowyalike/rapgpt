@@ -595,7 +595,7 @@ export function ScoreDemo({ isActive = true }: ScoreDemoProps) {
       style={
         {
           "--player1-color": "59 130 246", // blue-500
-          "--player2-color": "236 72 153", // pink-500
+          "--player2-color": "239 68 68", // red-500
         } as React.CSSProperties
       }
     >

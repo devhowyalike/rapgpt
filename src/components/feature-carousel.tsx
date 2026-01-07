@@ -138,6 +138,11 @@ const DEMO_COMPONENTS = {
       ),
     { ssr: false }
   ),
+  rounds: dynamic(
+    () =>
+      import("@/components/learn-more/rounds-demo").then((m) => m.RoundsDemo),
+    { ssr: false }
+  ),
 } as const;
 
 type DemoKey =
@@ -148,7 +153,8 @@ type DemoKey =
   | "voting"
   | "song"
   | "mcs"
-  | "stage";
+  | "stage"
+  | "rounds";
 
 type Feature = {
   key: string;
@@ -196,6 +202,7 @@ const FEATURES: Feature[] = [
       "Each battle features 3 rounds with 8 bars per verse. Watch as MCs trade shots and react to each other.",
     color: "yellow" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-rounds.webp",
+    demoKey: "rounds",
     browserContentClassName: "aspect-[16/14] md:aspect-16/10",
   },
   {
