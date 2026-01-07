@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
   CheckCircle,
@@ -315,21 +315,46 @@ export function BattleBarDemo({ isActive = true }: BattleBarDemoProps) {
       {/* Control Bar */}
       <div className="p-2 sm:p-3 md:p-4 bg-gray-900 border-t border-gray-800">
         <div className="flex items-center gap-2 sm:gap-3 max-w-4xl mx-auto">
-          {/* Main Action Button - fixed height container to prevent shifting */}
-          <div className="flex-1 h-[44px] sm:h-[52px]">
-            <motion.div
-              key={`${stateIndex}-${currentStateName}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.25 }}
-              className={`
-                w-full h-full px-3 sm:px-4 rounded-lg text-white font-bold
-                bg-linear-to-r ${config.gradient}
-                flex items-center justify-center
-              `}
-            >
-              <ActionButtonContent config={config} />
-            </motion.div>
+          {/* Main Action Button - fixed height container with perspective for 3D effect */}
+          <div 
+            className="flex-1 h-[44px] sm:h-[52px] relative"
+            style={{ perspective: "600px" }}
+          >
+            <AnimatePresence mode="popLayout">
+              <motion.div
+                key={`${stateIndex}-${currentStateName}`}
+                initial={{ 
+                  rotateX: 90,
+                  opacity: 0,
+                  y: "50%",
+                }}
+                animate={{ 
+                  rotateX: 0,
+                  opacity: 1,
+                  y: 0,
+                }}
+                exit={{ 
+                  rotateX: -90,
+                  opacity: 0,
+                  y: "-50%",
+                }}
+                transition={{ 
+                  duration: 0.5,
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+                style={{
+                  transformOrigin: "center center",
+                  backfaceVisibility: "hidden",
+                }}
+                className={`
+                  absolute inset-0 px-3 sm:px-4 rounded-lg text-white font-bold
+                  bg-linear-to-r ${config.gradient}
+                  flex items-center justify-center
+                `}
+              >
+                <ActionButtonContent config={config} />
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           {/* Options Button - hidden on smallest screens */}

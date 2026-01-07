@@ -193,8 +193,8 @@ function ScoreCard({
             ? `0 0 20px ${playerColor}40, 0 0 40px ${playerColor}20`
             : "none",
       }}
-      initial={{ opacity: 0, x: animationDirection }}
-      animate={{ opacity: 1, x: 0 }}
+      initial={{ x: animationDirection }}
+      animate={{ x: 0 }}
       transition={{ duration: 0.25, delay: animationDelay }}
     >
       <div className="text-center">
@@ -227,7 +227,7 @@ function ScoreCard({
             isMobile ? "text-lg" : "text-xl md:text-2xl"
           } font-bold font-(family-name:--font-bebas-neue)`}
           style={{ color: playerColor }}
-          key={`score-${highlightWinner}`}
+          initial={false}
           animate={
             highlightWinner && isWinner ? { scale: [1, 1.1, 1] } : { scale: 1 }
           }
@@ -356,7 +356,7 @@ function MobileDrawerView({ config, currentStateName }: MobileDrawerViewProps) {
 
         {/* Content */}
         <div className="p-3">
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {config.showScores ? (
               <motion.div
                 key="scores"
