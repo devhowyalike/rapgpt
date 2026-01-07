@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { MessageSquare, Radio, Trophy, Zap } from "lucide-react";
 import { CreateBattleCTA } from "./create-battle-cta";
 import { FeatureCard, type FeatureCardColor } from "./feature-card";
+import { GridBackground } from "./grid-background";
 
 interface LiveFeaturesHighlightProps {
   isAuthenticated: boolean;
@@ -107,8 +108,7 @@ export function LiveFeaturesHighlight({
           className="mt-16 text-center"
         >
           <div className="inline-flex flex-col sm:flex-row items-center gap-6 p-8 rounded-3xl bg-linear-to-r from-red-500/10 via-purple-500/10 to-blue-500/10 border border-white/10 relative overflow-hidden">
-            {/* Grid Background */}
-            <div className="absolute inset-0 bg-[url('/assets/grid.svg')] bg-center mask-[linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] opacity-10 pointer-events-none" />
+            <GridBackground intensity="subtle" />
 
             <div className="flex -space-x-4 relative z-10">
               {[

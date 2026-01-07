@@ -168,9 +168,13 @@ function GoLiveButtonDemo({ state }: GoLiveButtonDemoProps) {
   return (
     <div
       className={`
-        px-3 h-[44px] sm:h-[52px] rounded-lg flex items-center justify-center gap-2 shrink-0 transition-colors duration-300
-        min-w-[48px] sm:min-w-[110px]
-        ${state === "live" ? "bg-red-600" : "bg-red-600/80"}
+        px-3 h-(--control-button-height) sm:h-[48px] md:h-[52px] rounded-lg flex items-center justify-center gap-2 shrink-0 transition-colors duration-300
+        min-w-[42px] lg:min-w-[110px]
+        ${
+          state === "live"
+            ? "bg-red-600 hover:bg-red-700"
+            : "bg-red-600/80 hover:bg-red-700"
+        }
       `}
     >
       {state === "starting" ? (
@@ -180,7 +184,7 @@ function GoLiveButtonDemo({ state }: GoLiveButtonDemoProps) {
       ) : (
         <Radio className="w-5 h-5 text-white" />
       )}
-      <span className="hidden sm:inline text-white font-medium text-sm w-[58px]">
+      <span className="hidden lg:inline text-white font-medium text-sm">
         {state === "live" ? "End Live" : "Go Live"}
       </span>
     </div>
@@ -191,14 +195,80 @@ function GoLiveButtonDemo({ state }: GoLiveButtonDemoProps) {
 // Options Button Demo
 // =============================================================================
 
-function OptionsButtonDemo() {
+interface OptionsButtonDemoProps {
+  isActive?: boolean;
+}
+
+function OptionsButtonDemo({ isActive }: OptionsButtonDemoProps) {
   return (
-    <div className="px-3 h-[44px] sm:h-[52px] bg-gray-700 rounded-lg flex items-center justify-center gap-2 shrink-0">
+    <div
+      className={`
+        px-3 h-(--control-button-height) sm:h-[48px] md:h-[52px] rounded-lg flex items-center justify-center gap-2 shrink-0 transition-all
+        ${
+          isActive
+            ? "bg-blue-600 ring-2 ring-blue-500/50 ring-offset-2 ring-offset-gray-900"
+            : "bg-gray-700 hover:bg-gray-600"
+        }
+      `}
+    >
       <Settings className="w-5 h-5 text-white" />
-      <span className="hidden sm:inline font-medium text-sm text-white">
+      <span className="hidden lg:inline font-medium text-sm text-white">
         Options
       </span>
     </div>
+  );
+}
+
+// =============================================================================
+// Desktop Options Dropdown Demo (Simulated)
+// =============================================================================
+
+function DesktopOptionsDropdownDemo() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+      className="absolute bottom-full right-0 mb-2 w-64 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl p-3 z-50 pointer-events-none"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+          Battle Options
+        </span>
+        <div className="w-5 h-5 rounded-sm bg-gray-800 flex items-center justify-center">
+          <Settings className="w-3 h-3 text-gray-400" />
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="w-4 h-4 text-gray-400" />
+            <span className="text-sm text-gray-200">Comments</span>
+          </div>
+          <div className="w-8 h-4 bg-blue-600 rounded-full relative">
+            <div className="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full" />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ThumbsUp className="w-4 h-4 text-gray-400" />
+            <span className="text-sm text-gray-200">Voting</span>
+          </div>
+          <div className="w-8 h-4 bg-blue-600 rounded-full relative">
+            <div className="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full" />
+          </div>
+        </div>
+
+        <div className="h-px bg-gray-800 my-2" />
+
+        <div className="flex items-center gap-2 text-orange-400">
+          <StopCircle className="w-4 h-4" />
+          <span className="text-sm font-medium">Pause Battle</span>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -246,7 +316,7 @@ function MobileFanDemo({ isOpen, isLive }: MobileFanDemoProps) {
         <AnimatePresence>
           {isOpen &&
             FAN_ACTIONS.map((action, index) => {
-              const offset = 52 * (index + 1);
+              const offset = 50 * (index + 1);
               return (
                 <motion.div
                   key={action.id}
@@ -259,7 +329,7 @@ function MobileFanDemo({ isOpen, isLive }: MobileFanDemoProps) {
                     damping: 20,
                     delay: index * 0.05,
                   }}
-                  className={`absolute left-1/2 -translate-x-1/2 w-10 h-10 rounded-full border backdrop-blur-md shadow-lg flex items-center justify-center ${
+                  className={`absolute left-1/2 -translate-x-1/2 w-9 h-9 md:w-11 md:h-11 rounded-full border backdrop-blur-md shadow-lg flex items-center justify-center ${
                     action.variant === "danger"
                       ? isLive
                         ? "bg-red-600 border-red-500 text-white"
@@ -269,9 +339,9 @@ function MobileFanDemo({ isOpen, isLive }: MobileFanDemoProps) {
                       : "bg-gray-900/90 border-gray-700 text-white"
                   }`}
                 >
-                  {action.icon}
+                  <span className="scale-90 md:scale-100">{action.icon}</span>
                   {/* Label tooltip */}
-                  <span className="pointer-events-none absolute right-full mr-2 whitespace-nowrap rounded-md bg-black/80 px-2 py-1 text-[10px] text-white shadow-lg">
+                  <span className="pointer-events-none absolute right-full mr-3 whitespace-nowrap rounded-md bg-black/80 px-2 py-1 text-[10px] text-white shadow-lg">
                     {action.id === "go-live" && isLive
                       ? "End Live"
                       : action.label}
@@ -285,9 +355,9 @@ function MobileFanDemo({ isOpen, isLive }: MobileFanDemoProps) {
         <motion.div
           animate={{ rotate: isOpen ? 45 : 0 }}
           transition={{ duration: 0.2 }}
-          className="w-11 h-11 rounded-full border-2 border-gray-700 bg-gray-900 text-white shadow-xl flex items-center justify-center"
+          className="w-(--control-button-height) h-(--control-button-height) sm:w-[48px] sm:h-[48px] md:w-[52px] md:h-[52px] rounded-full border-2 border-gray-700 bg-gray-900 text-white shadow-xl flex items-center justify-center"
         >
-          <Plus className="w-5 h-5" strokeWidth={2.5} />
+          <Plus className="w-6 h-6" strokeWidth={2.5} />
         </motion.div>
       </div>
     </div>
@@ -414,12 +484,12 @@ export function BattleBarDemo({ isActive = true }: BattleBarDemoProps) {
         {/* Gradient overlay to fade toward the control bar */}
         <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-gray-900/90" />
 
-        {/* Mobile Fan Overlay (when open) */}
+        {/* Backdrop Overlay (when fan/options are open) */}
         <AnimatePresence>
           {isFanOpen && (
             <motion.div
               key="fan-overlay"
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm sm:hidden"
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -428,12 +498,12 @@ export function BattleBarDemo({ isActive = true }: BattleBarDemoProps) {
         </AnimatePresence>
       </div>
 
-      {/* Desktop Control Bar - hidden on mobile */}
-      <div className="hidden sm:block p-2 sm:p-3 md:p-4 bg-gray-900 border-t border-gray-800">
+      {/* Main Control Bar (Adaptive) */}
+      <div className="p-3 md:p-4 bg-gray-900 border-t border-gray-800">
         <div className="flex items-center gap-2 sm:gap-3 max-w-4xl mx-auto">
-          {/* Main Action Button - fixed height container with perspective for 3D effect */}
+          {/* Main Action Button - responsive height */}
           <div
-            className="flex-1 h-[44px] sm:h-[52px] relative"
+            className="flex-1 h-(--control-button-height) sm:h-[48px] md:h-[52px] relative"
             style={{ perspective: "600px" }}
           >
             <AnimatePresence mode="popLayout">
@@ -473,61 +543,23 @@ export function BattleBarDemo({ isActive = true }: BattleBarDemoProps) {
             </AnimatePresence>
           </div>
 
-          {/* Options Button */}
-          <OptionsButtonDemo />
-
-          {/* Go Live Button */}
-          <GoLiveButtonDemo state={config.goLiveState || "off"} />
-        </div>
-      </div>
-
-      {/* Mobile Control Bar - only shown on mobile */}
-      <div className="sm:hidden p-3 bg-gray-900 border-t border-gray-800">
-        <div className="flex items-center justify-between gap-3">
-          {/* Simplified action button for mobile */}
-          <div
-            className="flex-1 h-[44px] relative"
-            style={{ perspective: "600px" }}
-          >
-            <AnimatePresence mode="popLayout">
-              <motion.div
-                key={`mobile-${stateIndex}-${currentStateName}`}
-                initial={{
-                  rotateX: 90,
-                  opacity: 0,
-                  y: "50%",
-                }}
-                animate={{
-                  rotateX: 0,
-                  opacity: 1,
-                  y: 0,
-                }}
-                exit={{
-                  rotateX: -90,
-                  opacity: 0,
-                  y: "-50%",
-                }}
-                transition={{
-                  duration: 0.5,
-                  ease: [0.4, 0, 0.2, 1],
-                }}
-                style={{
-                  transformOrigin: "center center",
-                  backfaceVisibility: "hidden",
-                }}
-                className={`
-                  absolute inset-0 px-3 rounded-lg text-white font-bold text-sm
-                  bg-linear-to-r ${config.gradient}
-                  flex items-center justify-center
-                `}
-              >
-                <ActionButtonContent config={config} />
-              </motion.div>
+          {/* Options Button - hidden below xl to match battle stage */}
+          <div className="hidden xl:block relative">
+            <AnimatePresence>
+              {isFanOpen && <DesktopOptionsDropdownDemo />}
             </AnimatePresence>
+            <OptionsButtonDemo isActive={isFanOpen} />
           </div>
 
-          {/* Mobile Fan Button */}
-          <MobileFanDemo isOpen={isFanOpen} isLive={isLive} />
+          {/* Go Live Button - hidden below xl to match battle stage */}
+          <div className="hidden xl:block">
+            <GoLiveButtonDemo state={config.goLiveState || "off"} />
+          </div>
+
+          {/* Mobile Fan Button - shown below xl to match battle stage */}
+          <div className="xl:hidden">
+            <MobileFanDemo isOpen={isFanOpen} isLive={isLive} />
+          </div>
         </div>
       </div>
     </div>

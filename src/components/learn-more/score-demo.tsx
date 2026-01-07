@@ -12,7 +12,6 @@ import { APP_TITLE } from "@/lib/constants";
 
 type DemoState =
   | "idle"
-  | "calculating"
   | "scores-reveal"
   | "expanded"
   | "winner-highlight"
@@ -24,6 +23,7 @@ interface StateConfig {
   showScores: boolean;
   isExpanded: boolean;
   highlightWinner: boolean;
+  isCalculating?: boolean;
 }
 
 // Mock persona data
@@ -71,17 +71,11 @@ const MOCK_SCORES = {
 const STATE_CONFIGS: Record<DemoState, StateConfig> = {
   idle: {
     label: "Calculating scores...",
-    duration: 1200,
-    showScores: false,
+    duration: 1800,
+    showScores: true,
     isExpanded: false,
     highlightWinner: false,
-  },
-  calculating: {
-    label: "Analyzing verses...",
-    duration: 1000,
-    showScores: false,
-    isExpanded: false,
-    highlightWinner: false,
+    isCalculating: true,
   },
   "scores-reveal": {
     label: "Round 3 Complete!",
@@ -115,7 +109,6 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
 
 const STATE_ORDER: DemoState[] = [
   "idle",
-  "calculating",
   "scores-reveal",
   "expanded",
   "winner-highlight",
@@ -184,7 +177,7 @@ function ScoreCard({
     <motion.div
       className={`bg-gray-900/50 rounded-lg ${
         isMobile ? "p-2" : "p-2 md:p-4"
-      } border-2 transition-all duration-300`}
+      } border-2 transition-all duration-300 overflow-hidden`}
       style={{
         borderColor:
           highlightWinner && isWinner ? playerColor : `${playerColor}40`,
@@ -202,23 +195,25 @@ function ScoreCard({
         <div
           className={`${
             isMobile ? "text-[10px]" : "text-xs"
-          } font-medium mb-1 opacity-80 flex items-center justify-center gap-1`}
+          } font-medium mb-1 opacity-80 flex items-center justify-center`}
           style={{ color: playerColor }}
         >
-          <span>{persona.name}</span>
-          <AnimatePresence>
-            {highlightWinner && isWinner && (
-              <motion.span
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                exit={{ scale: 0 }}
-                transition={{ type: "spring", bounce: 0.5 }}
-                className="text-yellow-400"
-              >
-                👑
-              </motion.span>
-            )}
-          </AnimatePresence>
+          <span className="relative">
+            {persona.name}
+            <AnimatePresence>
+              {highlightWinner && isWinner && (
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="absolute left-full ml-1 top-1/2 -translate-y-1/2 text-yellow-400"
+                >
+                  👑
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </span>
         </div>
 
         {/* Total Score */}
@@ -228,9 +223,7 @@ function ScoreCard({
           } font-bold font-(family-name:--font-bebas-neue)`}
           style={{ color: playerColor }}
           initial={false}
-          animate={
-            highlightWinner && isWinner ? { scale: [1, 1.1, 1] } : { scale: 1 }
-          }
+          animate={{ scale: 1 }}
           transition={{ duration: 0.3 }}
         >
           {score.totalScore.toFixed(1)}
@@ -244,6 +237,7 @@ function ScoreCard({
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
+              className="overflow-hidden"
             >
               <div
                 className={`${
@@ -310,30 +304,6 @@ function MobileDrawerView({ config, currentStateName }: MobileDrawerViewProps) {
         <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-gray-900/90" />
       </div>
 
-      {/* Loading State (when calculating) */}
-      <AnimatePresence>
-        {!config.showScores && currentStateName !== "reset" && (
-          <motion.div
-            className="absolute bottom-0 left-0 right-0 p-4 bg-linear-to-t from-gray-900 via-gray-900/95 to-transparent pt-12"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div className="flex flex-col items-center gap-3">
-              <LoadingSpinner />
-              <motion.div
-                key={config.label}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
-              >
-                {config.label}
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Score Drawer */}
       <motion.div
         className="absolute bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 rounded-t-2xl shadow-2xl"
@@ -355,14 +325,28 @@ function MobileDrawerView({ config, currentStateName }: MobileDrawerViewProps) {
         </div>
 
         {/* Content */}
-        <div className="p-3">
-          <AnimatePresence>
-            {config.showScores ? (
+        <div className="p-3 min-h-[140px] flex flex-col justify-center">
+          <AnimatePresence mode="wait">
+            {config.isCalculating ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-col items-center gap-3"
+              >
+                <LoadingSpinner />
+                <div className="px-3 py-1.5 rounded-lg text-xs font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                  {config.label}
+                </div>
+              </motion.div>
+            ) : config.showScores ? (
               <motion.div
                 key="scores"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                className="w-full"
               >
                 <div className="grid grid-cols-2 gap-2">
                   <ScoreCard
@@ -399,17 +383,7 @@ function MobileDrawerView({ config, currentStateName }: MobileDrawerViewProps) {
                   )}
                 </div>
               </motion.div>
-            ) : (
-              <motion.div
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="py-4"
-              >
-                <LoadingSpinner />
-              </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
         </div>
       </motion.div>
@@ -450,82 +424,83 @@ function DesktopView({ config, currentStateName }: DesktopViewProps) {
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
           >
-            <div className="max-w-md mx-auto">
-              {/* Header */}
-              <motion.h3
-                className="text-lg md:text-xl font-(family-name:--font-bebas-neue) text-center mb-3 text-yellow-400 flex items-center justify-center gap-2"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.25, delay: 0.1 }}
-              >
-                <Trophy className="w-5 h-5" />
-                ROUND {MOCK_SCORES.round} SCORES
-              </motion.h3>
-
-              {/* Score Cards */}
-              <div className="grid grid-cols-2 gap-3">
-                <ScoreCard
-                  persona={PERSONAS.player1}
-                  score={MOCK_SCORES.positionScores.player1}
-                  position="player1"
-                  isExpanded={config.isExpanded}
-                  isWinner={MOCK_SCORES.winner === "player1"}
-                  highlightWinner={config.highlightWinner}
-                  animationDelay={0.15}
-                  isMobile={false}
-                />
-                <ScoreCard
-                  persona={PERSONAS.player2}
-                  score={MOCK_SCORES.positionScores.player2}
-                  position="player2"
-                  isExpanded={config.isExpanded}
-                  isWinner={MOCK_SCORES.winner === "player2"}
-                  highlightWinner={config.highlightWinner}
-                  animationDelay={0.2}
-                  isMobile={false}
-                />
-              </div>
-
-              {/* Toggle Button */}
-              <motion.div
-                className="flex items-center justify-center gap-2 py-2 mt-2 text-gray-400"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.25 }}
-              >
-                <span className="text-sm font-medium">
-                  {config.isExpanded ? "Hide Details" : "Show Details"}
-                </span>
-                {config.isExpanded ? (
-                  <ChevronUp className="w-4 h-4" />
+            <div className="max-w-md mx-auto min-h-[172px] flex flex-col justify-center">
+              <AnimatePresence mode="wait">
+                {config.isCalculating ? (
+                  <motion.div
+                    key="loading-desktop"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex flex-col items-center justify-center gap-4 h-[172px]"
+                  >
+                    <LoadingSpinner />
+                    <div className="px-4 py-2 rounded-lg text-sm font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                      {config.label}
+                    </div>
+                  </motion.div>
                 ) : (
-                  <ChevronDown className="w-4 h-4" />
-                )}
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                  <motion.div
+                    key="scores-desktop"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="w-full"
+                  >
+                    {/* Header */}
+                    <motion.h3
+                      className="text-lg md:text-xl font-(family-name:--font-bebas-neue) text-center mb-3 text-yellow-400 flex items-center justify-center gap-2"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.25, delay: 0.1 }}
+                    >
+                      <Trophy className="w-5 h-5" />
+                      ROUND {MOCK_SCORES.round} SCORES
+                    </motion.h3>
 
-      {/* Status Label (when calculating) */}
-      <AnimatePresence>
-        {!config.showScores && currentStateName !== "reset" && (
-          <motion.div
-            className="absolute bottom-0 left-0 right-0 p-4 bg-linear-to-t from-gray-900 via-gray-900/95 to-transparent pt-12"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div className="flex flex-col items-center gap-3">
-              <LoadingSpinner />
-              <motion.div
-                key={config.label}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="px-4 py-2 rounded-lg text-sm font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
-              >
-                {config.label}
-              </motion.div>
+                    {/* Score Cards */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <ScoreCard
+                        persona={PERSONAS.player1}
+                        score={MOCK_SCORES.positionScores.player1}
+                        position="player1"
+                        isExpanded={config.isExpanded}
+                        isWinner={MOCK_SCORES.winner === "player1"}
+                        highlightWinner={config.highlightWinner}
+                        animationDelay={0.15}
+                        isMobile={false}
+                      />
+                      <ScoreCard
+                        persona={PERSONAS.player2}
+                        score={MOCK_SCORES.positionScores.player2}
+                        position="player2"
+                        isExpanded={config.isExpanded}
+                        isWinner={MOCK_SCORES.winner === "player2"}
+                        highlightWinner={config.highlightWinner}
+                        animationDelay={0.2}
+                        isMobile={false}
+                      />
+                    </div>
+
+                    {/* Toggle Button */}
+                    <motion.div
+                      className="flex items-center justify-center gap-2 py-2 mt-2 text-gray-400"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.25 }}
+                    >
+                      <span className="text-sm font-medium">
+                        {config.isExpanded ? "Hide Details" : "Show Details"}
+                      </span>
+                      {config.isExpanded ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         )}
