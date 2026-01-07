@@ -1,7 +1,15 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Music2, Play, Download, Volume2, Zap } from "lucide-react";
+import {
+  Music2,
+  Play,
+  Download,
+  Volume2,
+  Zap,
+  Disc,
+  Loader2,
+} from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -40,7 +48,7 @@ const BEAT_STYLES: BeatStyle[] = [
   {
     id: "g-funk",
     name: "G-Funk",
-    description: "West Coast smooth vibes",
+    description: "West Coast smooth",
     icon: "🎹",
     color: "from-purple-600 to-pink-600",
   },
@@ -164,7 +172,7 @@ function BeatCard({ beat, isSelected, isMobile }: BeatCardProps) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className={`
-        relative rounded-lg border-2 transition-all text-left
+        relative rounded-lg border-2 transition-all text-left h-full
         ${isMobile ? "p-2.5" : "p-3"}
         ${
           isSelected
@@ -229,7 +237,7 @@ function ProgressDisplay({ progress, isMobile }: ProgressDisplayProps) {
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           >
-            <Music2 className="w-5 h-5 text-purple-400" />
+            <Loader2 className="w-5 h-5 text-purple-400" />
           </motion.div>
           <span className="text-white font-medium text-sm">
             Generating Song... {progress}%
@@ -264,7 +272,7 @@ function ProgressDisplay({ progress, isMobile }: ProgressDisplayProps) {
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
         >
-          <Music2 className="w-6 h-6 text-purple-400" />
+          <Loader2 className="w-6 h-6 text-purple-400" />
         </motion.div>
         <span className="text-white font-medium text-base">
           Generating Song... {progress}%
@@ -663,7 +671,7 @@ function DesktopView({ config, currentStateName }: DesktopViewProps) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="px-4"
+                    className="px-4 max-w-lg mx-auto w-full"
                   >
                     <ProgressDisplay
                       progress={config.progress}
@@ -679,7 +687,7 @@ function DesktopView({ config, currentStateName }: DesktopViewProps) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="px-4"
+                    className="px-4 max-w-lg mx-auto w-full"
                   >
                     <SongPlayerDisplay isMobile={false} />
                   </motion.div>
@@ -702,14 +710,18 @@ interface MakeASongDemoProps {
   isActive?: boolean;
 }
 
-export function MakeASongDemo({ loadingScreen = "disabled", isActive = true }: MakeASongDemoProps) {
+export function MakeASongDemo({
+  loadingScreen = "disabled",
+  isActive = true,
+}: MakeASongDemoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [stateIndex, setStateIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
-  const stateOrder = loadingScreen === "enabled"
-    ? STATE_ORDER_WITH_LOADING
-    : STATE_ORDER_WITHOUT_LOADING;
+  const stateOrder =
+    loadingScreen === "enabled"
+      ? STATE_ORDER_WITH_LOADING
+      : STATE_ORDER_WITHOUT_LOADING;
 
   const currentStateName = stateOrder[stateIndex];
   const config = STATE_CONFIGS[currentStateName];
