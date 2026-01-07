@@ -53,7 +53,7 @@ export default async function Home() {
       {/* Live Experience Highlight */}
       <LiveFeaturesHighlight isAuthenticated={isAuthenticated} />
 
-      <div className="bg-black flex flex-col items-center justify-center p-6 pt-6 pb-0">
+      <div className="bg-black flex flex-col items-center justify-center p-6 pt-6 pb-4">
         <div className="max-w-6xl mx-auto text-center space-y-4 w-full">
           {/* Persona Gallery */}
           <PersonaGallery hideAltPersonas={true} />
@@ -67,7 +67,7 @@ export default async function Home() {
           <div className="flex justify-center pb-2 pt-0">
             <CreateBattleCTA
               isAuthenticated={isAuthenticated}
-              title="Select Your Fighter"
+              title="Select Your MC"
             />
           </div>
 
@@ -94,7 +94,6 @@ export default async function Home() {
               </p>
             </div>
           )}
-
         </div>
       </div>
     </>

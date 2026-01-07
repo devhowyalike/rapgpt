@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { VictoryConfetti } from "@/components/victory-confetti";
 import {
@@ -48,7 +49,7 @@ export function PersonaGallery({
             Choose Your MC
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Select your fighters, each with their own unique flow, style, and
+            Select your lyricists, each with their own unique flow, style, and
             personality.
           </p>
         </div>
@@ -121,15 +122,18 @@ export function PersonaGallery({
       {/* "And More" Text - Only shown when hiding alt personas */}
       {hideAltPersonas && (
         <motion.div
-          className="flex justify-center pt-8 z-30 relative"
+          className="flex justify-center pt-4 z-30 relative"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: personas.length * 0.1 }}
           viewport={{ once: true }}
         >
-          <span className="text-white/80 font-bold text-xl font-(family-name:--font-bebas-neue) tracking-wider text-uppercase">
+          <Link
+            href="/roster"
+            className="text-white/80 font-bold text-xl font-(family-name:--font-bebas-neue) tracking-wider text-uppercase hover:text-white transition-colors underline underline-offset-4"
+          >
             And More!
-          </span>
+          </Link>
         </motion.div>
       )}
     </section>

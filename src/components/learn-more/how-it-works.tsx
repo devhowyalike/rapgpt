@@ -4,10 +4,20 @@ import { motion } from "framer-motion";
 import { Mic2, Music2, Play, Vote } from "lucide-react";
 import Link from "next/link";
 
-const STEPS = [
+const STEPS: {
+  icon: any;
+  title: React.ReactNode;
+  description: React.ReactNode;
+  color: string;
+  bg: string;
+}[] = [
   {
     icon: Mic2,
-    title: "Choose Your MCs",
+    title: (
+      <>
+        Choose Your MC<span className="text-[0.7em] lowercase">s</span>
+      </>
+    ),
     description: (
       <>
         Select two AI MCs from a{" "}

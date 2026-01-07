@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { PersonaGridItem } from "./selection/persona-grid-item";
 import { PlayerDisplay } from "./selection/player-display";
 import { SelectionGrid } from "./selection/selection-grid";
-import { VsGlow } from "./selection/vs-glow";
+import { VsBadge } from "./selection/vs-badge";
 import { SessionRestoreLoading } from "./session-restore-loading";
 import { StageSelect } from "./stage-select";
 
@@ -272,7 +272,7 @@ export function CharacterSelect({
           </motion.div>
         ) : (
           <motion.div
-            key={selectionStep}
+            key="character-select"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -321,7 +321,7 @@ export function CharacterSelect({
                 {/* Main Selection Area */}
                 <div className="flex flex-col items-center justify-center max-w-4xl mx-auto w-full gap-2 lg:gap-8 flex-1">
                   {/* Players Preview Area */}
-                  <div className="w-full shrink-0 flex flex-row justify-center gap-4 md:gap-12 lg:gap-16 items-center order-1 mb-2 lg:mb-0">
+                  <div className="w-full shrink-0 flex flex-row justify-center gap-4 md:gap-12 lg:gap-16 items-start order-1 mb-2 lg:mb-0">
                     {/* Player 1 Preview */}
                     <div className="w-[140px] md:w-[200px]">
                       <PlayerDisplay
@@ -336,17 +336,33 @@ export function CharacterSelect({
                             : undefined
                         }
                         isActive={selectionStep === "player1"}
+                        isLocked={Boolean(
+                          player1 && previewedPlayer1?.id === player1.id
+                        )}
                       />
                     </div>
 
                     {/* VS Badge */}
                     <div className="flex flex-col items-center">
-                      <div className="relative w-12 h-12 md:w-16 md:h-16 flex items-center justify-center">
-                        <VsGlow
+                      {/* Dummy Spacer to match Style Label height in PlayerDisplay */}
+                      <p className="text-xs md:text-sm lg:text-base font-semibold mb-1 md:mb-2 opacity-0 shrink-0 select-none pointer-events-none">
+                        Spacer
+                      </p>
+                      {/* Match portrait container dimensions to ensure vertical center alignment */}
+                      <div className="relative w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 flex items-center justify-center">
+                        <VsBadge
                           visible={Boolean(player1 && player2)}
-                          color="player2"
                           size="md"
                         />
+                        <div
+                          className={cn(
+                            "text-gray-600 font-bold absolute transition-opacity duration-700 ease-in-out",
+                            "text-sm md:text-xl lg:text-2xl",
+                            player1 && player2 ? "opacity-0" : "opacity-40"
+                          )}
+                        >
+                          VS
+                        </div>
                       </div>
                     </div>
 
@@ -364,6 +380,9 @@ export function CharacterSelect({
                             : undefined
                         }
                         isActive={selectionStep === "player2"}
+                        isLocked={Boolean(
+                          player2 && previewedPlayer2?.id === player2.id
+                        )}
                       />
                     </div>
                   </div>

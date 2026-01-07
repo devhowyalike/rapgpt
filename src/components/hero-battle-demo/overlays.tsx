@@ -518,25 +518,38 @@ export function PauseOverlay({ onUnpause }: PauseOverlayProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="absolute inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm cursor-pointer"
-      onClick={(e) => {
-        e.stopPropagation();
-        onUnpause?.();
-      }}
-      onTouchEnd={(e) => {
-        e.stopPropagation();
-        onUnpause?.();
-      }}
+      className="absolute inset-0 z-40 flex items-end justify-end p-4 sm:p-6 pointer-events-none"
     >
+      {/* Invisible overlay for click-to-unpause functionality */}
+      <div
+        className="absolute inset-0 cursor-pointer pointer-events-auto"
+        onClick={(e) => {
+          e.stopPropagation();
+          onUnpause?.();
+        }}
+        onTouchEnd={(e) => {
+          e.stopPropagation();
+          onUnpause?.();
+        }}
+      />
+
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 0, scale: 0.9, x: 10 }}
+        animate={{ opacity: 1, scale: 1, x: 0 }}
+        exit={{ opacity: 0, scale: 0.9, x: 10 }}
         transition={{ duration: 0.15, delay: 0.05 }}
-        className="bg-black/70 border border-white/10 px-6 py-3 rounded-2xl flex items-center gap-3 shadow-2xl"
+        className="relative z-10 bg-black/50 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-xl flex items-center gap-2.5 shadow-xl cursor-pointer pointer-events-auto hover:bg-black/70 transition-colors group"
+        onClick={(e) => {
+          e.stopPropagation();
+          onUnpause?.();
+        }}
+        onTouchEnd={(e) => {
+          e.stopPropagation();
+          onUnpause?.();
+        }}
       >
-        <Pause className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-        <span className="text-lg font-bold text-white font-(family-name:--font-bebas-neue) tracking-widest uppercase">
+        <Pause className="w-4 h-4 text-yellow-400 fill-yellow-400 opacity-80 group-hover:opacity-100 transition-opacity" />
+        <span className="text-sm font-bold text-white/80 group-hover:text-white font-(family-name:--font-bebas-neue) tracking-widest uppercase transition-colors">
           Paused
         </span>
       </motion.div>

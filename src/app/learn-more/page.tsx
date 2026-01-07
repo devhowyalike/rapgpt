@@ -2,7 +2,7 @@ import { SiteHeader } from "@/components/site-header";
 import { LearnMoreHero } from "@/components/learn-more/learn-more-hero";
 import { HowItWorks } from "@/components/learn-more/how-it-works";
 import { FeaturesHeader } from "@/components/learn-more/features-header";
-import { ScreenshotCarousel } from "@/components/screenshot-carousel";
+import { FeatureCarousel } from "@/components/feature-carousel";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { APP_TITLE } from "@/lib/constants";
 
@@ -23,7 +23,7 @@ export default function LearnMorePage() {
       {/* Features Section */}
       <div className="bg-black pt-8 pb-8">
         <FeaturesHeader />
-        <ScreenshotCarousel className="pb-4" />
+        <FeatureCarousel className="pb-4" />
       </div>
 
       {/* Bottom Section - matching homepage style */}

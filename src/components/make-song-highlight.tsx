@@ -60,38 +60,38 @@ export function MakeSongHighlight({ isAuthenticated }: MakeSongHighlightProps) {
           initial={{ opacity: 0, x: -20 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
-          className="space-y-8 flex flex-col items-center lg:items-start text-center lg:text-left"
-        >
-          <div className="space-y-4 w-full">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
-              <div className="p-3 rounded-lg bg-purple-500/10 text-purple-400">
-                <Mic2 className="w-6 h-6" />
-              </div>
-              <div className="flex flex-col items-center sm:items-start">
-                <h3 className="text-lg font-semibold text-white mb-1">
+        className="space-y-8 flex flex-col items-center text-center"
+      >
+        <div className="space-y-4 w-full">
+            <div className="flex flex-col items-center">
+              <div className="flex items-center gap-4 mb-2">
+                <div className="p-3 rounded-lg bg-purple-500/10 text-purple-400">
+                  <Mic2 className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">
                   From Stage to Studio
                 </h3>
-                <p className="text-gray-400">
-                  Your lyrics are transformed into professional-sounding verses.
-                </p>
               </div>
+              <p className="text-gray-400 text-center">
+                Your lyrics are transformed into professional-sounding verses.
+              </p>
             </div>
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
-              <div className="p-3 rounded-lg bg-blue-500/10 text-blue-400">
-                <Music2 className="w-6 h-6" />
-              </div>
-              <div className="flex flex-col items-center sm:items-start">
-                <h3 className="text-lg font-semibold text-white mb-1">
+            <div className="flex flex-col items-center">
+              <div className="flex items-center gap-4 mb-2">
+                <div className="p-3 rounded-lg bg-blue-500/10 text-blue-400">
+                  <Music2 className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">
                   Choose Your Style
                 </h3>
-                <p className="text-gray-400">
-                  Select from G-Funk, Boom Bap, or Trap beats to match the vibe.
-                </p>
               </div>
+              <p className="text-gray-400 text-center">
+                Select from G-Funk, Boom Bap, or Trap beats to match the vibe.
+              </p>
             </div>
           </div>
 
-          <div className="pt-4 flex justify-center lg:justify-start w-full">
+          <div className="pt-4 flex justify-center w-full">
             <CreateBattleCTA
               isAuthenticated={isAuthenticated}
               title="Create a Track"

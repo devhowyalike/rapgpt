@@ -1,13 +1,16 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
   CheckCircle,
+  MessageSquare,
   Play,
+  Plus,
   Radio,
   Settings,
   StopCircle,
+  ThumbsUp,
 } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -34,6 +37,7 @@ interface StateConfig {
   duration: number; // ms before next state
   animate?: boolean;
   goLiveState?: "off" | "starting" | "live";
+  fanOpen?: boolean; // Whether fan menu should be open in mobile view
 }
 
 const STATE_CONFIGS: Record<DemoState, StateConfig> = {
@@ -44,14 +48,16 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
     gradient: "from-green-500 to-emerald-500",
     duration: 2200,
     goLiveState: "off",
+    fanOpen: false,
   },
   generating: {
     label: "Kickin' ballistics...",
     emoji: "⚡",
     gradient: "from-teal-600 to-cyan-600",
-    duration: 2800,
+    duration: 1000,
     animate: true,
     goLiveState: "starting",
+    fanOpen: false,
   },
   reading: {
     label: "Begin Voting",
@@ -59,6 +65,7 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
     gradient: "from-cyan-600 to-blue-600",
     duration: 2000,
     goLiveState: "live",
+    fanOpen: true, // Show fan open here
   },
   voting: {
     label: "Vote Now!",
@@ -67,6 +74,7 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
     gradient: "from-purple-600 to-pink-600",
     duration: 3000,
     goLiveState: "live",
+    fanOpen: true, // Keep fan open during voting
   },
   "generate-next": {
     label: "Next:",
@@ -75,6 +83,7 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
     gradient: "from-green-500 to-emerald-500",
     duration: 2200,
     goLiveState: "live",
+    fanOpen: false,
   },
   calculating: {
     label: "Calculating Score...",
@@ -83,6 +92,7 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
     duration: 2800,
     animate: true,
     goLiveState: "live",
+    fanOpen: false,
   },
   reveal: {
     label: "Reveal Winner",
@@ -90,6 +100,7 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
     gradient: "from-amber-500 to-orange-500",
     duration: 2500,
     goLiveState: "live",
+    fanOpen: true, // Show fan open at reveal
   },
 };
 
@@ -192,6 +203,98 @@ function OptionsButtonDemo() {
 }
 
 // =============================================================================
+// Mobile Fan Demo (Non-Interactive)
+// =============================================================================
+
+interface MobileFanDemoProps {
+  isOpen: boolean;
+  isLive: boolean;
+}
+
+const FAN_ACTIONS = [
+  {
+    id: "go-live",
+    label: "Go Live",
+    icon: <Radio className="w-5 h-5" />,
+    variant: "danger" as const,
+  },
+  {
+    id: "comments",
+    label: "Comments",
+    icon: <MessageSquare className="w-5 h-5" />,
+    variant: "default" as const,
+  },
+  {
+    id: "voting",
+    label: "Voting",
+    icon: <ThumbsUp className="w-5 h-5" />,
+    variant: "active" as const,
+  },
+  {
+    id: "settings",
+    label: "Options",
+    icon: <Settings className="w-5 h-5" />,
+    variant: "default" as const,
+  },
+];
+
+function MobileFanDemo({ isOpen, isLive }: MobileFanDemoProps) {
+  return (
+    <div className="relative z-40 flex items-end justify-center">
+      <div className="relative">
+        {/* Fan action buttons */}
+        <AnimatePresence>
+          {isOpen &&
+            FAN_ACTIONS.map((action, index) => {
+              const offset = 52 * (index + 1);
+              return (
+                <motion.div
+                  key={action.id}
+                  initial={{ opacity: 0, y: -offset, scale: 0.5 }}
+                  animate={{ opacity: 1, y: -offset, scale: 1 }}
+                  exit={{ opacity: 0, y: -offset, scale: 0.5 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 260,
+                    damping: 20,
+                    delay: index * 0.05,
+                  }}
+                  className={`absolute left-1/2 -translate-x-1/2 w-10 h-10 rounded-full border backdrop-blur-md shadow-lg flex items-center justify-center ${
+                    action.variant === "danger"
+                      ? isLive
+                        ? "bg-red-600 border-red-500 text-white"
+                        : "bg-red-600/90 border-red-500 text-white"
+                      : action.variant === "active"
+                      ? "bg-blue-600 border-blue-400 text-white"
+                      : "bg-gray-900/90 border-gray-700 text-white"
+                  }`}
+                >
+                  {action.icon}
+                  {/* Label tooltip */}
+                  <span className="pointer-events-none absolute right-full mr-2 whitespace-nowrap rounded-md bg-black/80 px-2 py-1 text-[10px] text-white shadow-lg">
+                    {action.id === "go-live" && isLive
+                      ? "End Live"
+                      : action.label}
+                  </span>
+                </motion.div>
+              );
+            })}
+        </AnimatePresence>
+
+        {/* Main trigger button */}
+        <motion.div
+          animate={{ rotate: isOpen ? 45 : 0 }}
+          transition={{ duration: 0.2 }}
+          className="w-11 h-11 rounded-full border-2 border-gray-700 bg-gray-900 text-white shadow-xl flex items-center justify-center"
+        >
+          <Plus className="w-5 h-5" strokeWidth={2.5} />
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
 // Main Action Button Content
 // =============================================================================
 
@@ -260,11 +363,13 @@ function ActionButtonContent({ config }: ActionButtonContentProps) {
 // Main Component
 // =============================================================================
 
-export function BattleBarDemo() {
+interface BattleBarDemoProps {
+  isActive?: boolean;
+}
+
+export function BattleBarDemo({ isActive = true }: BattleBarDemoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [stateIndex, setStateIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [isInView, setIsInView] = useState(false);
 
   const currentStateName = STATE_ORDER[stateIndex];
   const config = STATE_CONFIGS[currentStateName];
@@ -273,48 +378,30 @@ export function BattleBarDemo() {
     setStateIndex((prev) => (prev + 1) % STATE_ORDER.length);
   }, []);
 
-  // Track previous isInView value with a ref to avoid dependency loop
-  const isInViewRef = useRef(false);
-
-  // Intersection Observer to detect when slide is visible
+  // Reset animation when becoming active
+  const wasActiveRef = useRef(isActive);
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    if (isActive && !wasActiveRef.current) {
+      setStateIndex(0);
+    }
+    wasActiveRef.current = isActive;
+  }, [isActive]);
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const wasInView = isInViewRef.current;
-        const nowInView = entry.isIntersecting;
-
-        isInViewRef.current = nowInView;
-        setIsInView(nowInView);
-
-        // Reset to first state when coming back into view
-        if (!wasInView && nowInView) {
-          setStateIndex(0);
-        }
-      },
-      { threshold: 0.5 } // Trigger when 50% visible
-    );
-
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, []);
-
-  // Only run animation when in view and not paused
+  // Only run animation when active
   useEffect(() => {
-    if (isPaused || !isInView) return;
+    if (!isActive) return;
 
     const timer = setTimeout(advanceState, config.duration);
     return () => clearTimeout(timer);
-  }, [stateIndex, isPaused, isInView, config.duration, advanceState]);
+  }, [stateIndex, isActive, config.duration, advanceState]);
+
+  const isFanOpen = config.fanOpen ?? false;
+  const isLive = config.goLiveState === "live";
 
   return (
     <div
       ref={containerRef}
       className="absolute inset-0 bg-gray-900 flex flex-col"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
     >
       {/* Blurred screenshot background */}
       <div className="flex-1 relative overflow-hidden">
@@ -326,35 +413,121 @@ export function BattleBarDemo() {
         />
         {/* Gradient overlay to fade toward the control bar */}
         <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-gray-900/90" />
-      </div>
 
-      {/* Control Bar */}
-      <div className="p-2 sm:p-3 md:p-4 bg-gray-900 border-t border-gray-800">
-        <div className="flex items-center gap-2 sm:gap-3 max-w-4xl mx-auto">
-          {/* Main Action Button - fixed height container to prevent shifting */}
-          <div className="flex-1 h-[44px] sm:h-[52px]">
+        {/* Mobile Fan Overlay (when open) */}
+        <AnimatePresence>
+          {isFanOpen && (
             <motion.div
-              key={`${stateIndex}-${currentStateName}`}
+              key="fan-overlay"
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm sm:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.25 }}
-              className={`
-                w-full h-full px-3 sm:px-4 rounded-lg text-white font-bold
-                bg-linear-to-r ${config.gradient}
-                flex items-center justify-center
-              `}
-            >
-              <ActionButtonContent config={config} />
-            </motion.div>
+              exit={{ opacity: 0 }}
+            />
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Desktop Control Bar - hidden on mobile */}
+      <div className="hidden sm:block p-2 sm:p-3 md:p-4 bg-gray-900 border-t border-gray-800">
+        <div className="flex items-center gap-2 sm:gap-3 max-w-4xl mx-auto">
+          {/* Main Action Button - fixed height container with perspective for 3D effect */}
+          <div
+            className="flex-1 h-[44px] sm:h-[52px] relative"
+            style={{ perspective: "600px" }}
+          >
+            <AnimatePresence mode="popLayout">
+              <motion.div
+                key={`${stateIndex}-${currentStateName}`}
+                initial={{
+                  rotateX: 90,
+                  opacity: 0,
+                  y: "50%",
+                }}
+                animate={{
+                  rotateX: 0,
+                  opacity: 1,
+                  y: 0,
+                }}
+                exit={{
+                  rotateX: -90,
+                  opacity: 0,
+                  y: "-50%",
+                }}
+                transition={{
+                  duration: 0.5,
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+                style={{
+                  transformOrigin: "center center",
+                  backfaceVisibility: "hidden",
+                }}
+                className={`
+                  absolute inset-0 px-3 sm:px-4 rounded-lg text-white font-bold
+                  bg-linear-to-r ${config.gradient}
+                  flex items-center justify-center
+                `}
+              >
+                <ActionButtonContent config={config} />
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-          {/* Options Button - hidden on smallest screens */}
-          <div className="hidden sm:block">
-            <OptionsButtonDemo />
-          </div>
+          {/* Options Button */}
+          <OptionsButtonDemo />
 
           {/* Go Live Button */}
           <GoLiveButtonDemo state={config.goLiveState || "off"} />
+        </div>
+      </div>
+
+      {/* Mobile Control Bar - only shown on mobile */}
+      <div className="sm:hidden p-3 bg-gray-900 border-t border-gray-800">
+        <div className="flex items-center justify-between gap-3">
+          {/* Simplified action button for mobile */}
+          <div
+            className="flex-1 h-[44px] relative"
+            style={{ perspective: "600px" }}
+          >
+            <AnimatePresence mode="popLayout">
+              <motion.div
+                key={`mobile-${stateIndex}-${currentStateName}`}
+                initial={{
+                  rotateX: 90,
+                  opacity: 0,
+                  y: "50%",
+                }}
+                animate={{
+                  rotateX: 0,
+                  opacity: 1,
+                  y: 0,
+                }}
+                exit={{
+                  rotateX: -90,
+                  opacity: 0,
+                  y: "-50%",
+                }}
+                transition={{
+                  duration: 0.5,
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+                style={{
+                  transformOrigin: "center center",
+                  backfaceVisibility: "hidden",
+                }}
+                className={`
+                  absolute inset-0 px-3 rounded-lg text-white font-bold text-sm
+                  bg-linear-to-r ${config.gradient}
+                  flex items-center justify-center
+                `}
+              >
+                <ActionButtonContent config={config} />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Mobile Fan Button */}
+          <MobileFanDemo isOpen={isFanOpen} isLive={isLive} />
         </div>
       </div>
     </div>
