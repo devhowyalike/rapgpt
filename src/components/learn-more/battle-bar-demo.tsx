@@ -54,7 +54,7 @@ const STATE_CONFIGS: Record<DemoState, StateConfig> = {
     label: "Kickin' ballistics...",
     emoji: "⚡",
     gradient: "from-teal-600 to-cyan-600",
-    duration: 2800,
+    duration: 1000,
     animate: true,
     goLiveState: "starting",
     fanOpen: false,
@@ -272,7 +272,9 @@ function MobileFanDemo({ isOpen, isLive }: MobileFanDemoProps) {
                   {action.icon}
                   {/* Label tooltip */}
                   <span className="pointer-events-none absolute right-full mr-2 whitespace-nowrap rounded-md bg-black/80 px-2 py-1 text-[10px] text-white shadow-lg">
-                    {action.id === "go-live" && isLive ? "End Live" : action.label}
+                    {action.id === "go-live" && isLive
+                      ? "End Live"
+                      : action.label}
                   </span>
                 </motion.div>
               );
@@ -430,29 +432,29 @@ export function BattleBarDemo({ isActive = true }: BattleBarDemoProps) {
       <div className="hidden sm:block p-2 sm:p-3 md:p-4 bg-gray-900 border-t border-gray-800">
         <div className="flex items-center gap-2 sm:gap-3 max-w-4xl mx-auto">
           {/* Main Action Button - fixed height container with perspective for 3D effect */}
-          <div 
+          <div
             className="flex-1 h-[44px] sm:h-[52px] relative"
             style={{ perspective: "600px" }}
           >
             <AnimatePresence mode="popLayout">
               <motion.div
                 key={`${stateIndex}-${currentStateName}`}
-                initial={{ 
+                initial={{
                   rotateX: 90,
                   opacity: 0,
                   y: "50%",
                 }}
-                animate={{ 
+                animate={{
                   rotateX: 0,
                   opacity: 1,
                   y: 0,
                 }}
-                exit={{ 
+                exit={{
                   rotateX: -90,
                   opacity: 0,
                   y: "-50%",
                 }}
-                transition={{ 
+                transition={{
                   duration: 0.5,
                   ease: [0.4, 0, 0.2, 1],
                 }}
@@ -483,29 +485,29 @@ export function BattleBarDemo({ isActive = true }: BattleBarDemoProps) {
       <div className="sm:hidden p-3 bg-gray-900 border-t border-gray-800">
         <div className="flex items-center justify-between gap-3">
           {/* Simplified action button for mobile */}
-          <div 
+          <div
             className="flex-1 h-[44px] relative"
             style={{ perspective: "600px" }}
           >
             <AnimatePresence mode="popLayout">
               <motion.div
                 key={`mobile-${stateIndex}-${currentStateName}`}
-                initial={{ 
+                initial={{
                   rotateX: 90,
                   opacity: 0,
                   y: "50%",
                 }}
-                animate={{ 
+                animate={{
                   rotateX: 0,
                   opacity: 1,
                   y: 0,
                 }}
-                exit={{ 
+                exit={{
                   rotateX: -90,
                   opacity: 0,
                   y: "-50%",
                 }}
-                transition={{ 
+                transition={{
                   duration: 0.5,
                   ease: [0.4, 0, 0.2, 1],
                 }}
