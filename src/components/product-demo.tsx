@@ -51,7 +51,7 @@ export function ScreenshotShowcaseStatic({
     {
       icon: <Music className="w-6 h-6" />,
       title: "Make it a Song",
-      description: "Select a style and generate it with AI.",
+      description: "Select a style & generate it with AI.",
       color: "green",
     },
   ];
