@@ -521,9 +521,13 @@ export function PauseOverlay({ onUnpause }: PauseOverlayProps) {
       className="absolute inset-0 z-40 flex items-end justify-end p-4 sm:p-6 pointer-events-none"
     >
       {/* Invisible overlay for click-to-unpause functionality */}
-      <div 
+      <div
         className="absolute inset-0 cursor-pointer pointer-events-auto"
         onClick={(e) => {
+          e.stopPropagation();
+          onUnpause?.();
+        }}
+        onTouchEnd={(e) => {
           e.stopPropagation();
           onUnpause?.();
         }}
@@ -536,6 +540,10 @@ export function PauseOverlay({ onUnpause }: PauseOverlayProps) {
         transition={{ duration: 0.15, delay: 0.05 }}
         className="relative z-10 bg-black/50 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-xl flex items-center gap-2.5 shadow-xl cursor-pointer pointer-events-auto hover:bg-black/70 transition-colors group"
         onClick={(e) => {
+          e.stopPropagation();
+          onUnpause?.();
+        }}
+        onTouchEnd={(e) => {
           e.stopPropagation();
           onUnpause?.();
         }}
