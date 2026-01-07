@@ -316,7 +316,7 @@ function MobileFanDemo({ isOpen, isLive }: MobileFanDemoProps) {
         <AnimatePresence>
           {isOpen &&
             FAN_ACTIONS.map((action, index) => {
-              const offset = 52 * (index + 1);
+              const offset = 50 * (index + 1);
               return (
                 <motion.div
                   key={action.id}
@@ -329,7 +329,7 @@ function MobileFanDemo({ isOpen, isLive }: MobileFanDemoProps) {
                     damping: 20,
                     delay: index * 0.05,
                   }}
-                  className={`absolute left-1/2 -translate-x-1/2 w-10 h-10 rounded-full border backdrop-blur-md shadow-lg flex items-center justify-center ${
+                  className={`absolute left-1/2 -translate-x-1/2 w-9 h-9 md:w-11 md:h-11 rounded-full border backdrop-blur-md shadow-lg flex items-center justify-center ${
                     action.variant === "danger"
                       ? isLive
                         ? "bg-red-600 border-red-500 text-white"
@@ -339,9 +339,9 @@ function MobileFanDemo({ isOpen, isLive }: MobileFanDemoProps) {
                       : "bg-gray-900/90 border-gray-700 text-white"
                   }`}
                 >
-                  {action.icon}
+                  <span className="scale-90 md:scale-100">{action.icon}</span>
                   {/* Label tooltip */}
-                  <span className="pointer-events-none absolute right-full mr-2 whitespace-nowrap rounded-md bg-black/80 px-2 py-1 text-[10px] text-white shadow-lg">
+                  <span className="pointer-events-none absolute right-full mr-3 whitespace-nowrap rounded-md bg-black/80 px-2 py-1 text-[10px] text-white shadow-lg">
                     {action.id === "go-live" && isLive
                       ? "End Live"
                       : action.label}
@@ -355,9 +355,9 @@ function MobileFanDemo({ isOpen, isLive }: MobileFanDemoProps) {
         <motion.div
           animate={{ rotate: isOpen ? 45 : 0 }}
           transition={{ duration: 0.2 }}
-          className="w-11 h-11 rounded-full border-2 border-gray-700 bg-gray-900 text-white shadow-xl flex items-center justify-center"
+          className="w-(--control-button-height) h-(--control-button-height) sm:w-[48px] sm:h-[48px] md:w-[52px] md:h-[52px] rounded-full border-2 border-gray-700 bg-gray-900 text-white shadow-xl flex items-center justify-center"
         >
-          <Plus className="w-5 h-5" strokeWidth={2.5} />
+          <Plus className="w-6 h-6" strokeWidth={2.5} />
         </motion.div>
       </div>
     </div>
