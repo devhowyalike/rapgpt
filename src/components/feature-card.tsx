@@ -34,7 +34,7 @@ export function FeatureCard({
     <div
       className={cn(
         "p-4 md:p-5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300",
-        "flex flex-col items-center text-center gap-3 w-full relative overflow-hidden group",
+        "flex flex-col items-center text-center gap-3 w-full h-full relative overflow-hidden group",
         className
       )}
     >
@@ -58,12 +58,12 @@ export function FeatureCard({
             {icon}
           </span>
         </div>
-        <h3 className="text-lg md:text-xl font-bold font-(family-name:--font-bebas-neue) tracking-wide uppercase leading-tight text-zinc-300">
+        <h3 className="text-xl md:text-2xl font-bold font-(family-name:--font-bebas-neue) tracking-wide uppercase leading-tight text-zinc-300">
           {title}
         </h3>
       </div>
 
-      <p className="text-xs md:text-sm leading-relaxed text-zinc-500 text-balance relative z-10">
+      <p className="text-sm md:text-base leading-relaxed text-zinc-500 text-balance relative z-10">
         {description}
       </p>
     </div>
