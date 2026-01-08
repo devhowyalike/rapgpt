@@ -49,6 +49,33 @@ export function BattleDrawer({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, onOpenChange]);
 
+  // Lock body scroll when drawer is open (mobile only)
+  useEffect(() => {
+    if (!open) return;
+
+    // Only lock on mobile (matches mobileOnly breakpoint)
+    const isMobile = window.matchMedia("(max-width: 1279px)").matches;
+    if (mobileOnly && !isMobile) return;
+
+    // Save current scroll position and lock body
+    const scrollY = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      // Restore scroll position when drawer closes
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.overflow = "";
+      window.scrollTo(0, scrollY);
+    };
+  }, [open, mobileOnly]);
+
   // Use padding to space above controls instead of positioning the whole drawer up.
   // This ensures the drawer background extends behind the controls, preventing gaps/peaking.
   // The controls (z-50) will sit on top of the drawer's bottom padding (z-40).
@@ -66,15 +93,19 @@ export function BattleDrawer({
       <AnimatePresence>
         {open && (
           <motion.div
-            className={`fixed left-0 right-0 bg-black/60 backdrop-blur-sm z-30 ${
+            className={`${position} left-0 right-0 bg-black/60 backdrop-blur-sm z-30 pointer-events-auto touch-none ${
               mobileOnly ? "xl:hidden" : ""
             }`}
-            style={{
-              top: "var(--header-height)",
-              ...(excludeBottomControls
-                ? { bottom: "var(--bottom-controls-height)" }
-                : { bottom: 0 }),
-            }}
+            style={
+              position === "absolute"
+                ? { top: 0, bottom: 0 }
+                : {
+                    top: "var(--header-height)",
+                    ...(excludeBottomControls
+                      ? { bottom: "var(--bottom-controls-height)" }
+                      : { bottom: 0 }),
+                  }
+            }
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -141,7 +172,11 @@ export function BattleDrawer({
           </div>
         )}
         {/* Children - always mounted but visually hidden when closed to preserve state */}
-        <div className={open ? "" : "hidden"}>{children}</div>
+        <div
+          className={`flex-1 min-h-0 flex flex-col ${open ? "" : "hidden"}`}
+        >
+          {children}
+        </div>
       </motion.div>
     </>
   );
