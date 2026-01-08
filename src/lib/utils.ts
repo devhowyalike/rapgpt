@@ -22,20 +22,40 @@ export async function copyToClipboard(text: string): Promise<boolean> {
 
   // Fallback for non-secure contexts (e.g. HTTP on local IP)
   try {
+    // Preserve scroll positions; iOS Safari can jump when focusing a textarea.
+    const windowScrollY = window.scrollY;
+    const scrollContainer = document.querySelector(
+      "[data-scroll-container]",
+    ) as HTMLElement | null;
+    const containerScrollTop = scrollContainer?.scrollTop ?? 0;
+
     const textArea = document.createElement("textarea");
     textArea.value = text;
+    textArea.setAttribute("readonly", "");
 
-    // Ensure it's not visible but part of the DOM
+    // Keep it in the viewport (but invisible) to avoid scroll jumps on focus.
+    // If it's off-screen, some mobile browsers try to scroll it into view.
     textArea.style.position = "fixed";
-    textArea.style.left = "-9999px";
+    textArea.style.left = "0";
     textArea.style.top = "0";
+    textArea.style.width = "1px";
+    textArea.style.height = "1px";
+    textArea.style.opacity = "0";
+    textArea.style.pointerEvents = "none";
+    // Prevent iOS from zooming on focus (common when font-size < 16px).
+    textArea.style.fontSize = "16px";
 
     document.body.appendChild(textArea);
     textArea.focus();
     textArea.select();
+    textArea.setSelectionRange(0, textArea.value.length);
 
     const successful = document.execCommand("copy");
     document.body.removeChild(textArea);
+
+    // Restore scroll positions.
+    if (scrollContainer) scrollContainer.scrollTop = containerScrollTop;
+    window.scrollTo(0, windowScrollY);
     return successful;
   } catch (err) {
     console.error("Fallback clipboard copy failed", err);
