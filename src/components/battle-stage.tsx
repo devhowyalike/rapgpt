@@ -127,7 +127,7 @@ export function BattleStage(props: BattleStageProps) {
   return (
     <div
       className={`flex flex-col ${
-        isReplayMode ? "min-h-0 md:h-full" : "h-full overflow-y-auto"
+        isReplayMode ? "min-h-0 md:h-full" : "flex-1 min-h-0 overflow-y-auto"
       } bg-linear-to-b from-stage-darker to-stage-dark overflow-x-hidden touch-scroll-container pb-(--mobile-bottom-padding) xl:pb-0`}
       style={{
         ["--mobile-bottom-padding" as string]: mobileBottomPadding || "0px",
