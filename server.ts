@@ -5,6 +5,7 @@
 import { createServer } from "http";
 import next from "next";
 import { parse } from "url";
+import { networkInterfaces } from "os";
 import { WebSocket, WebSocketServer } from "ws";
 import { setWebSocketServer } from "./src/lib/websocket/server";
 import {
@@ -21,6 +22,24 @@ import type { ClientMessage, WebSocketEvent } from "./src/lib/websocket/types";
 const dev = process.env.NODE_ENV !== "production";
 const hostname = process.env.HOSTNAME || "localhost";
 const port = parseInt(process.env.PORT || "3000", 10);
+
+/**
+ * Get the local network IP address
+ */
+function getLocalIP(): string | null {
+  const interfaces = networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    const nets = interfaces[name];
+    if (!nets) continue;
+    for (const net of nets) {
+      // Skip internal (loopback) and non-IPv4 addresses
+      if (net.family === "IPv4" && !net.internal) {
+        return net.address;
+      }
+    }
+  }
+  return null;
+}
 
 // Timeout configuration (configurable via environment variables)
 const WS_ROOM_INACTIVITY_TIMEOUT = parseInt(
@@ -611,8 +630,15 @@ app.prepare().then(async () => {
   process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
   server.listen(port, () => {
+    const localIP = getLocalIP();
     console.log(`> Ready on http://${hostname}:${port}`);
+    if (localIP) {
+      console.log(`> Local network: http://${localIP}:${port}`);
+    }
     console.log(`> WebSocket server ready on ws://${hostname}:${port}/ws`);
+    if (localIP) {
+      console.log(`> WebSocket local network: ws://${localIP}:${port}/ws`);
+    }
     console.log(`> WebSocket cleanup config:`);
     console.log(`>   - Heartbeat interval: ${WS_HEARTBEAT_INTERVAL / 1000}s`);
     console.log(`>   - Room inactivity timeout: ${WS_ROOM_INACTIVITY_TIMEOUT / 60000}min`);

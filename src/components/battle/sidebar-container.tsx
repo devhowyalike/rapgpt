@@ -78,7 +78,13 @@ export function SidebarContainer({
           excludeBottomControls={excludeBottomControls}
         >
           {/* Keep both tabs mounted to preserve state; hide inactive tab */}
-          <div className={mobileActiveTab === "comments" ? "" : "hidden"}>
+          <div
+            className={
+              mobileActiveTab === "comments"
+                ? "flex flex-col flex-1 min-h-0"
+                : "hidden"
+            }
+          >
             <CommentsContent
               comments={battle.comments}
               onComment={onComment}
@@ -86,7 +92,13 @@ export function SidebarContainer({
               battleStatus={battle.status}
             />
           </div>
-          <div className={mobileActiveTab === "voting" ? "" : "hidden"}>
+          <div
+            className={
+              mobileActiveTab === "voting"
+                ? "flex flex-col flex-1 min-h-0"
+                : "hidden"
+            }
+          >
             <VotingContent
               battle={battle}
               onVote={onVote}

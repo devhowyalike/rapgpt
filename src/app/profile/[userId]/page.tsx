@@ -9,6 +9,7 @@ import { GuestProfileCallout } from "@/components/guest-profile-callout";
 import { ProfileBattlesFilter } from "@/components/profile-battles-filter";
 import { ProfileHeaderMenu } from "@/components/profile-header-menu";
 import { SiteHeader } from "@/components/site-header";
+import { Footer } from "@/components/footer";
 import { PageHero } from "@/components/page-hero";
 import { PageTitle } from "@/components/page-title";
 import { decrypt } from "@/lib/auth/encryption";
@@ -269,6 +270,8 @@ export default async function ProfilePage({
           </div>
         </div>
       )}
+
+      <Footer />
     </div>
   );
 }

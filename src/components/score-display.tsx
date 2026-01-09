@@ -139,14 +139,14 @@ export function ScoreDisplay({
   const player1Score = roundScore.positionScores.player1;
   const player2Score = roundScore.positionScores.player2;
 
-  // Scroll the entire score section into view when expanded
+  // Scroll the entire score section into view when expanded (only if not already visible)
   useEffect(() => {
     if (!isExpanded) return;
     // Small delay to let the expansion animation start
     const id = window.requestAnimationFrame(() => {
       containerRef.current?.scrollIntoView({
         behavior: "smooth",
-        block: "start",
+        block: "nearest",
       });
     });
     return () => window.cancelAnimationFrame(id);

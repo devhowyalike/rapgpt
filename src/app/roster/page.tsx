@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { SiteHeader } from "@/components/site-header";
+import { Footer } from "@/components/footer";
 import { PersonaGallery } from "@/components/persona-gallery";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { APP_TITLE } from "@/lib/constants";
@@ -20,8 +21,8 @@ export default async function RosterPage() {
 
       {/* Hero Section */}
       <div className="bg-black pt-24 pb-8 relative overflow-hidden">
-        <GridBackground />
         <div className="absolute inset-0 bg-linear-to-b from-purple-900/10 via-transparent to-transparent pointer-events-none" />
+        <GridBackground intensity="strong" />
 
         <div className="container mx-auto px-4 text-center relative z-10">
           <h1 className="text-5xl md:text-7xl font-bold font-(family-name:--font-bebas-neue) text-white mb-4 uppercase tracking-tight">
@@ -38,7 +39,8 @@ export default async function RosterPage() {
       </div>
 
       {/* Persona Gallery - Show all personas including alt costumes */}
-      <div className="bg-black py-8">
+      <div className="bg-black py-8 relative overflow-hidden">
+        <GridBackground intensity="normal" />
         <PersonaGallery
           hideAltPersonas={false}
           hideHeader={true}
@@ -47,8 +49,9 @@ export default async function RosterPage() {
       </div>
 
       {/* Bottom CTA Section */}
-      <div className="bg-black flex flex-col items-center justify-center p-6 pt-0 pb-12">
-        <div className="max-w-6xl mx-auto text-center space-y-6 w-full">
+      <div className="bg-black flex flex-col items-center justify-center p-6 pt-0 pb-12 relative overflow-hidden">
+        <GridBackground intensity="normal" />
+        <div className="max-w-6xl mx-auto text-center space-y-6 w-full relative z-10">
           <div className="flex justify-center">
             <CreateBattleCTA
               isAuthenticated={isAuthenticated}
@@ -57,6 +60,7 @@ export default async function RosterPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 }

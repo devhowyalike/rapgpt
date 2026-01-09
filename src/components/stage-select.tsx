@@ -163,9 +163,8 @@ export function StageSelect({
   const displayStage = hoveredStage || selectedStage;
 
   return (
-    <>
-      <SiteHeader />
-      <div className="min-h-screen bg-black text-white selection:bg-yellow-500/30 pt-20 relative overflow-hidden flex flex-col">
+    <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+      <div className="flex-1 bg-black text-white selection:bg-yellow-500/30 pt-20 relative overflow-y-auto custom-scrollbar pb-[12rem] sm:pb-[10rem]">
         {/* Background Effects */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl z-0 pointer-events-none">
@@ -173,7 +172,7 @@ export function StageSelect({
           <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
         </div>
 
-        <div className="container mx-auto px-4 relative z-10 flex flex-col flex-1">
+        <div className="container mx-auto px-4 relative z-10 flex flex-col pb-4">
           {/* Header Section */}
           <div className="text-center mb-2 md:mb-4 animate-slide-up">
             <h1 className="text-5xl md:text-7xl font-bold tracking-wide font-(family-name:--font-bebas-neue)">
@@ -183,7 +182,7 @@ export function StageSelect({
             </h1>
           </div>
 
-          <div className="flex flex-col items-center justify-center max-w-6xl mx-auto w-full gap-8 flex-1">
+          <div className="flex flex-col items-center max-w-6xl mx-auto w-full gap-8">
             {/* Preview Area */}
             <div className="w-full max-w-4xl lg:max-w-2xl order-1">
               <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 bg-black/50 shadow-2xl group">
@@ -292,7 +291,7 @@ export function StageSelect({
         </div>
 
         {/* Bottom Actions Bar - Floating */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-linear-to-t from-black via-black/90 to-transparent pt-12 pointer-events-none">
+        <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-linear-to-t from-black via-black/90 to-transparent pt-8 pointer-events-none">
           <div className="container mx-auto max-w-4xl pointer-events-auto">
             <div className="flex flex-col gap-4 items-center">
               {/* Edit Characters & Start Battle */}
@@ -345,9 +344,7 @@ export function StageSelect({
           </div>
         </div>
 
-        {/* Spacer for bottom bar */}
-        <div className="h-64" />
       </div>
-    </>
+    </div>
   );
 }
