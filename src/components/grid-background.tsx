@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 interface GridBackgroundProps {
-  /** Opacity level: "subtle" (10%), "normal" (20%), or "strong" (40%). Defaults to "normal" */
+  /** Opacity level: "subtle" (10%), "normal" (20%), or "strong" (30%). Defaults to "normal" */
   intensity?: "subtle" | "normal" | "strong";
   className?: string;
 }

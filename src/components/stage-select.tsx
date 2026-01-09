@@ -164,7 +164,7 @@ export function StageSelect({
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-      <div className="flex-1 bg-black text-white selection:bg-yellow-500/30 pt-20 relative overflow-y-auto custom-scrollbar pb-[12rem] sm:pb-[10rem]">
+      <div className="flex-1 bg-black text-white selection:bg-yellow-500/30 pt-20 relative overflow-y-auto custom-scrollbar pb-48 sm:pb-40">
         {/* Background Effects */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl z-0 pointer-events-none">
@@ -343,7 +343,6 @@ export function StageSelect({
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );
