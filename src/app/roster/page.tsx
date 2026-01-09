@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { SiteHeader } from "@/components/site-header";
+import { Footer } from "@/components/footer";
 import { PersonaGallery } from "@/components/persona-gallery";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { APP_TITLE } from "@/lib/constants";
@@ -57,6 +58,7 @@ export default async function RosterPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 }

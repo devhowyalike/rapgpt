@@ -31,9 +31,10 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
-        <body className={`${inter.variable} ${bebasNeue.variable} antialiased min-h-screen flex flex-col`}>
+        <body
+          className={`${inter.variable} ${bebasNeue.variable} antialiased min-h-dvh flex flex-col`}
+        >
           <div className="flex-1 flex flex-col">{children}</div>
-          <Footer />
           <Toaster
             position="bottom-center"
             richColors

@@ -1,4 +1,5 @@
 import { SiteHeader } from "@/components/site-header";
+import { Footer } from "@/components/footer";
 import { LearnMoreHero } from "@/components/learn-more/learn-more-hero";
 import { HowItWorks } from "@/components/learn-more/how-it-works";
 import { FeaturesHeader } from "@/components/learn-more/features-header";
@@ -38,6 +39,7 @@ export default function LearnMorePage() {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 }

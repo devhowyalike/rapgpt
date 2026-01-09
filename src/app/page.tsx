@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { Calendar } from "lucide-react";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
+import { Footer } from "@/components/footer";
 import { LiveBattlesDisplay } from "@/components/live-battles-display";
 import { LiveFeaturesHighlight } from "@/components/live-features-highlight";
 import { MakeSongHighlight } from "@/components/make-song-highlight";
@@ -96,6 +97,7 @@ export default async function Home() {
           )}
         </div>
       </div>
+      <Footer />
     </>
   );
 }

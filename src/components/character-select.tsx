@@ -242,7 +242,8 @@ export function CharacterSelect({
   }
 
   return (
-    <div className="relative min-h-dvh flex flex-col">
+    <div className="relative h-dvh flex flex-col overflow-hidden">
+      <SiteHeader />
       <AnimatePresence initial={false} mode="wait">
         {showStageSelect && player1 && player2 ? (
           <motion.div
@@ -251,6 +252,7 @@ export function CharacterSelect({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="flex-1 flex flex-col min-h-0"
           >
             <StageSelect
               player1={player1}
@@ -277,10 +279,9 @@ export function CharacterSelect({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="flex-1 flex flex-col"
+            className="flex-1 flex flex-col min-h-0"
           >
-            <SiteHeader />
-            <div className="min-h-screen bg-black text-white selection:bg-yellow-500/30 pt-20 relative overflow-hidden flex flex-col">
+            <div className="flex-1 bg-black text-white selection:bg-yellow-500/30 pt-20 relative overflow-y-auto flex flex-col custom-scrollbar">
               {/* Background Effects */}
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0" />
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl z-0 pointer-events-none">
@@ -288,7 +289,7 @@ export function CharacterSelect({
                 <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
               </div>
 
-              <div className="container mx-auto px-4 relative z-10 flex flex-col flex-1">
+              <div className="container mx-auto px-4 relative z-10 flex flex-col flex-1 pb-12">
                 {/* Header Section */}
                 <div className="text-center mb-3 lg:mb-8 animate-slide-up">
                   <h1 className="text-5xl md:text-7xl font-bold tracking-wide font-(family-name:--font-bebas-neue)">
@@ -388,7 +389,7 @@ export function CharacterSelect({
                   </div>
 
                   {/* Character Grid */}
-                  <div className="w-full order-2 flex-1">
+                  <div className="w-full order-2 pb-8">
                     <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-4 md:p-6">
                       <SelectionGrid gap="normal">
                         {primaryPersonas.map((persona) => {
@@ -554,7 +555,7 @@ export function CharacterSelect({
               </div>
 
               {/* Spacer for bottom bar */}
-              <div className="h-48" />
+              <div className="h-64 md:h-72" />
             </div>
           </motion.div>
         )}

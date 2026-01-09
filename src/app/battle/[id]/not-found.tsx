@@ -12,7 +12,7 @@ import {
 
 export default function BattleNotFound() {
   return (
-    <div className="container flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] py-12 mx-auto gap-8 bg-black">
+    <div className="container flex flex-col items-center justify-center min-h-[calc(100dvh-4rem)] py-12 mx-auto gap-8 bg-black">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0 pointer-events-none" />
 
       <div className="relative z-10 flex flex-col items-center gap-8 w-full">
