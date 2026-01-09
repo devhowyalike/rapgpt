@@ -35,35 +35,35 @@ interface Comment {
 const COMMENTS: Comment[] = [
   {
     id: 1,
-    user: "DJ_Spinz",
+    user: "lowbeezy",
     message: "That bar was crazy! 🔥",
     avatar: "🎧",
     color: "text-purple-400",
   },
   {
     id: 2,
-    user: "BeatMaster",
+    user: "GoodieGoodie",
     message: "Dawn going OFF right now",
     avatar: "🎹",
     color: "text-blue-400",
   },
   {
     id: 3,
-    user: "RhymeTime",
+    user: "Jack Boog",
     message: "The wordplay is insane",
     avatar: "📝",
     color: "text-green-400",
   },
   {
     id: 4,
-    user: "HipHopHead",
+    user: "Stef Tataz",
     message: "Shock G needs to step it up!",
     avatar: "🎤",
     color: "text-orange-400",
   },
   {
     id: 5,
-    user: "VerseFiend",
+    user: "DJ Mickey",
     message: "THIS IS A BODY BAG 💀",
     avatar: "💯",
     color: "text-red-400",
@@ -407,14 +407,18 @@ interface CommentsDemoProps {
   isActive?: boolean;
 }
 
-export function CommentsDemo({ loadingScreen = "disabled", isActive = true }: CommentsDemoProps) {
+export function CommentsDemo({
+  loadingScreen = "disabled",
+  isActive = true,
+}: CommentsDemoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [stateIndex, setStateIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
-  const stateOrder = loadingScreen === "enabled"
-    ? STATE_ORDER_WITH_LOADING
-    : STATE_ORDER_WITHOUT_LOADING;
+  const stateOrder =
+    loadingScreen === "enabled"
+      ? STATE_ORDER_WITH_LOADING
+      : STATE_ORDER_WITHOUT_LOADING;
 
   const currentStateName = stateOrder[stateIndex];
   const config = STATE_CONFIGS[currentStateName];
