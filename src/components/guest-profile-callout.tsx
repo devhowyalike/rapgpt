@@ -11,7 +11,7 @@ export function GuestProfileCallout() {
             Ready to Create Your Own Battles?
           </h3>
           <p className="text-purple-200 text-base sm:text-md text-pretty">
-            Sign up to start cooking your own AI e-Beef
+            Try it for free
           </p>
         </div>
 
