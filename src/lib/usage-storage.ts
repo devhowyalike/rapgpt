@@ -258,11 +258,11 @@ export async function getMonthlyTokenTotals(
   month: number,
   year: number,
 ): Promise<MonthlyTokenTotals> {
-  // Get first day of target month
-  const startOfMonth = new Date(year, month - 1, 1);
+  // Get first day of target month (use UTC to avoid timezone issues)
+  const startOfMonth = new Date(Date.UTC(year, month - 1, 1));
 
   // Get first day of next month
-  const startOfNextMonth = new Date(year, month, 1);
+  const startOfNextMonth = new Date(Date.UTC(year, month, 1));
 
   const [result] = await db
     .select({
@@ -273,7 +273,7 @@ export async function getMonthlyTokenTotals(
     })
     .from(battleTokenUsage)
     .where(
-      sql`${battleTokenUsage.createdAt} >= ${startOfMonth} AND ${battleTokenUsage.createdAt} < ${startOfNextMonth}`,
+      sql`${battleTokenUsage.createdAt} >= ${startOfMonth.toISOString()} AND ${battleTokenUsage.createdAt} < ${startOfNextMonth.toISOString()}`,
     );
 
   // Format month name
@@ -357,11 +357,11 @@ export async function getMonthlyBattleStats(
   month: number,
   year: number
 ): Promise<MonthlyBattleStats> {
-  // Get first day of target month
-  const startOfMonth = new Date(year, month - 1, 1);
+  // Get first day of target month (use UTC to avoid timezone issues)
+  const startOfMonth = new Date(Date.UTC(year, month - 1, 1));
 
   // Get first day of next month
-  const startOfNextMonth = new Date(year, month, 1);
+  const startOfNextMonth = new Date(Date.UTC(year, month, 1));
 
   // Get battle counts for the month
   const [result] = await db
@@ -374,7 +374,7 @@ export async function getMonthlyBattleStats(
     })
     .from(battles)
     .where(
-      sql`${battles.createdAt} >= ${startOfMonth} AND ${battles.createdAt} < ${startOfNextMonth}`
+      sql`${battles.createdAt} >= ${startOfMonth.toISOString()} AND ${battles.createdAt} < ${startOfNextMonth.toISOString()}`
     );
 
   // Format month name
@@ -556,8 +556,9 @@ export async function getMonthlySongCreationTotals(
   month: number,
   year: number,
 ): Promise<SongCreationTotals> {
-  const startOfMonth = new Date(year, month - 1, 1);
-  const startOfNextMonth = new Date(year, month, 1);
+  // Use UTC to avoid timezone issues
+  const startOfMonth = new Date(Date.UTC(year, month - 1, 1));
+  const startOfNextMonth = new Date(Date.UTC(year, month, 1));
 
   // 1. Get usage from the tracking table for this month
   const [usageResult] = await db
@@ -567,15 +568,15 @@ export async function getMonthlySongCreationTotals(
     })
     .from(songCreationUsage)
     .where(
-      sql`${songCreationUsage.createdAt} >= ${startOfMonth} AND ${songCreationUsage.createdAt} < ${startOfNextMonth}`,
+      sql`${songCreationUsage.createdAt} >= ${startOfMonth.toISOString()} AND ${songCreationUsage.createdAt} < ${startOfNextMonth.toISOString()}`,
     );
 
   // 2. Get songs from battles table for this month (historical fallback)
   const [battleResult] = await db
     .select({
       totalSongs: sql<number>`count(*) filter (where ${battles.generatedSong}->>'audioUrl' is not null 
-          AND to_timestamp((${battles.generatedSong}->>'generatedAt')::bigint / 1000) >= ${startOfMonth}
-          AND to_timestamp((${battles.generatedSong}->>'generatedAt')::bigint / 1000) < ${startOfNextMonth})::int`,
+          AND to_timestamp((${battles.generatedSong}->>'generatedAt')::bigint / 1000) >= ${startOfMonth.toISOString()}::timestamp
+          AND to_timestamp((${battles.generatedSong}->>'generatedAt')::bigint / 1000) < ${startOfNextMonth.toISOString()}::timestamp)::int`,
     })
     .from(battles);
 
