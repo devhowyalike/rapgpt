@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 import { checkRole } from "@/lib/auth/roles";
 import { db } from "@/lib/db/client";
 import { battles } from "@/lib/db/schema";
+import { getWebSocketStats, isWebSocketAvailable } from "@/lib/websocket/server";
 
 export const dynamic = "force-dynamic";
 
@@ -15,12 +16,19 @@ const INTERNAL_BROADCAST_SECRET = process.env.INTERNAL_BROADCAST_SECRET ||
   (process.env.NODE_ENV === "production" ? "" : "dev-secret-insecure");
 
 /**
- * Fetch WebSocket stats from the custom server via internal endpoint
+ * Fetch WebSocket stats - tries direct access first, then HTTP fallback
+ * This mirrors the pattern in broadcast-helper.ts for consistency
  */
 async function fetchWebSocketStats() {
+  // Try direct access first (works when running in same process as server.ts)
+  if (isWebSocketAvailable()) {
+    console.log("[Admin Stats] Using direct WebSocket stats access");
+    return getWebSocketStats();
+  }
+
+  // Fallback to HTTP (for dev mode where API routes run separately)
+  console.log("[Admin Stats] Falling back to HTTP for WebSocket stats");
   try {
-    // In development, the custom server runs on the same port
-    // In production, this might need adjustment based on deployment
     const baseUrl = process.env.INTERNAL_SERVER_URL || "http://localhost:3000";
     
     const response = await fetch(`${baseUrl}/__internal/ws-stats`, {
