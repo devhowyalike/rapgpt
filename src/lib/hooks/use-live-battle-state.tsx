@@ -148,7 +148,8 @@ export function useLiveBattleState({
 
         case "verse:complete":
           setStreamingVerse(null, null, null);
-          if (battle) {
+          // Only add verse if we have text (don't add empty verses from failed generations)
+          if (battle && event.verseText && event.verseText.trim()) {
             addVerse(event.personaId, event.verseText);
           }
           break;

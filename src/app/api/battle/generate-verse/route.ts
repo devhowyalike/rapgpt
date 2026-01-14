@@ -198,115 +198,128 @@ export async function POST(req: Request) {
     // Trust the isLive parameter from the client (admin might send stale battle object)
     if (isLive) {
       console.log("[Generate Verse] Using live broadcast mode");
-      let fullText = "";
-      let lastBroadcastTime = 0;
-      const BROADCAST_THROTTLE_MS = 100; // Broadcast every 100ms max
+      
+      // In live mode, run generation in background and return immediately
+      // This prevents the client from getting stuck waiting for streaming response
+      // which can be buffered/blocked by proxies in production
+      (async () => {
+        let fullText = "";
+        let lastBroadcastTime = 0;
+        const BROADCAST_THROTTLE_MS = 100; // Broadcast every 100ms max
 
-      const stream = new ReadableStream({
-        async start(controller) {
-          try {
-            for await (const chunk of result.textStream) {
-              fullText += chunk;
+        try {
+          for await (const chunk of result.textStream) {
+            fullText += chunk;
 
-              const now = Date.now();
-              const shouldBroadcast =
-                now - lastBroadcastTime >= BROADCAST_THROTTLE_MS;
+            const now = Date.now();
+            const shouldBroadcast =
+              now - lastBroadcastTime >= BROADCAST_THROTTLE_MS;
 
-              // Throttle broadcasts to prevent overwhelming clients
-              if (shouldBroadcast) {
-                lastBroadcastTime = now;
-                await broadcastEvent(battle.id, {
-                  type: "verse:streaming",
-                  battleId: battle.id,
-                  timestamp: now,
-                  personaId,
-                  text: fullText,
-                  isComplete: false,
-                } as VerseStreamingEvent);
-              }
-
-              // Send to client
-              controller.enqueue(new TextEncoder().encode(chunk));
+            // Throttle broadcasts to prevent overwhelming clients
+            if (shouldBroadcast) {
+              lastBroadcastTime = now;
+              await broadcastEvent(battle.id, {
+                type: "verse:streaming",
+                battleId: battle.id,
+                timestamp: now,
+                personaId,
+                text: fullText,
+                isComplete: false,
+              } as VerseStreamingEvent);
             }
+          }
 
-            // Broadcast final streaming update with complete text
-            await broadcastEvent(battle.id, {
-              type: "verse:streaming",
+          // Broadcast final streaming update with complete text
+          await broadcastEvent(battle.id, {
+            type: "verse:streaming",
+            battleId: battle.id,
+            timestamp: Date.now(),
+            personaId,
+            text: fullText,
+            isComplete: false,
+          } as VerseStreamingEvent);
+
+          // Small delay before completion
+          await new Promise((resolve) => setTimeout(resolve, 200));
+
+          // Broadcast completion
+          await broadcastEvent(battle.id, {
+            type: "verse:complete",
+            battleId: battle.id,
+            timestamp: Date.now(),
+            personaId,
+            verseText: fullText,
+            round: battle.currentRound,
+          } as VerseCompleteEvent);
+
+          // Save verse to database (important for voting to work)
+          try {
+            const latestBattle = await getBattleById(battle.id);
+            if (latestBattle) {
+              const updatedBattle = addVerseToBattle(
+                latestBattle,
+                personaId,
+                fullText,
+              );
+              await saveBattle(updatedBattle);
+              console.log(
+                "[Generate Verse] Saved verse to database for battle:",
+                battle.id,
+              );
+            }
+          } catch (saveErr) {
+            console.error(
+              "[Generate Verse] Failed to save verse to database:",
+              saveErr,
+            );
+          }
+
+          // Record usage after streaming completes
+          try {
+            const usage = await result.getUsage();
+            await recordBattleTokenUsage({
+              id: crypto.randomUUID(),
               battleId: battle.id,
-              timestamp: Date.now(),
+              round: battle.currentRound,
               personaId,
-              text: fullText,
-              isComplete: false,
-            } as VerseStreamingEvent);
-
-            // Small delay before completion
-            await new Promise((resolve) => setTimeout(resolve, 200));
-
-            // Broadcast completion
+              provider: modelConfig.provider,
+              model: modelConfig.modelName,
+              inputTokens: usage.inputTokens,
+              outputTokens: usage.outputTokens,
+              totalTokens: usage.totalTokens,
+              cachedInputTokens: usage.cachedInputTokens,
+              status: "completed",
+            });
+          } catch (err) {
+            console.error(
+              "[Generate Verse] Failed to record token usage:",
+              err,
+            );
+          }
+        } catch (error) {
+          console.error("[Generate Verse] Error in live broadcast:", error);
+          // Broadcast verse:complete to clear client streaming state
+          // Always send empty string on error - partial verses should NOT be added
+          // Client validation checks for non-empty text, so empty string gets skipped
+          try {
             await broadcastEvent(battle.id, {
               type: "verse:complete",
               battleId: battle.id,
               timestamp: Date.now(),
               personaId,
-              verseText: fullText,
+              verseText: "", // Always empty on error - prevents partial verses from being added
               round: battle.currentRound,
             } as VerseCompleteEvent);
-
-            // Save verse to database (important for voting to work)
-            try {
-              const latestBattle = await getBattleById(battle.id);
-              if (latestBattle) {
-                const updatedBattle = addVerseToBattle(
-                  latestBattle,
-                  personaId,
-                  fullText,
-                );
-                await saveBattle(updatedBattle);
-                console.log(
-                  "[Generate Verse] Saved verse to database for battle:",
-                  battle.id,
-                );
-              }
-            } catch (saveErr) {
-              console.error(
-                "[Generate Verse] Failed to save verse to database:",
-                saveErr,
-              );
-            }
-
-            // Record usage after streaming completes
-            try {
-              const usage = await result.getUsage();
-              await recordBattleTokenUsage({
-                id: crypto.randomUUID(),
-                battleId: battle.id,
-                round: battle.currentRound,
-                personaId,
-                provider: modelConfig.provider,
-                model: modelConfig.modelName,
-                inputTokens: usage.inputTokens,
-                outputTokens: usage.outputTokens,
-                totalTokens: usage.totalTokens,
-                cachedInputTokens: usage.cachedInputTokens,
-                status: "completed",
-              });
-            } catch (err) {
-              console.error(
-                "[Generate Verse] Failed to record token usage:",
-                err,
-              );
-            }
-
-            controller.close();
-          } catch (error) {
-            controller.error(error);
+          } catch (broadcastErr) {
+            console.error("[Generate Verse] Failed to broadcast error state:", broadcastErr);
           }
-        },
-      });
+        }
+      })();
 
-      return new Response(stream, {
+      // Return immediately - WebSocket handles all UI updates
+      return new Response(JSON.stringify({ success: true, mode: "live" }), {
         headers: {
-          "Content-Type": "text/plain; charset=utf-8",
+          "Content-Type": "application/json",
         },
       });
     }

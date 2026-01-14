@@ -370,9 +370,15 @@ export function BattleController({
       if (!response.ok) throw new Error("Failed to generate verse");
 
       if (battleIsLive) {
-        // For live mode, just wait for server to finish - WebSocket handles UI updates
+        // For live mode, server returns immediately and broadcasts via WebSocket
         // The server broadcasts verse:streaming and verse:complete events to all viewers
-        await response.text();
+        // We don't need to wait for anything - WebSocket events will update the UI
+        const result = await response.json();
+        if (!result.success) {
+          throw new Error("Failed to start verse generation");
+        }
+        // Don't set isGenerating to false here - wait for WebSocket verse:complete event
+        return;
       } else {
         // For non-live mode, handle local streaming display
         const reader = response.body?.getReader();
@@ -499,8 +505,9 @@ export function BattleController({
 
   const nextPerformer = getNextPerformer(battle);
   const roundComplete = isRoundComplete(battle, battle.currentRound);
+  // Prevent generating while already generating or streaming (live mode)
   const canGenerate =
-    nextPerformer && !isGenerating && battle.status === "paused";
+    nextPerformer && !isGenerating && !streamingPersonaId && battle.status === "paused";
   const canAdvance =
     roundComplete &&
     !nextPerformer &&
@@ -597,7 +604,7 @@ export function BattleController({
             {battle.status === "paused" && (
               <BattleControlBar
                 battle={battle}
-                isGenerating={isGenerating}
+                isGenerating={isGenerating || !!streamingPersonaId}
                 isCanceling={isCanceling}
                 canGenerate={!!canGenerate}
                 canAdvance={!!canAdvance}
