@@ -1,12 +1,19 @@
+import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { getActiveModelConfig } from "@/lib/ai/model-config";
 import { generateVerse } from "@/lib/ai/verse-generator";
+import { canManageBattle } from "@/lib/auth/roles";
 import { addVerseToBattle } from "@/lib/battle-engine";
 import { getBattleById, saveBattle } from "@/lib/battle-storage";
 import {
   buildSystemPrompt,
   getFirstVerseMessage,
 } from "@/lib/context-overrides";
+import {
+  checkRateLimit,
+  createRateLimitResponse,
+  RATE_LIMITS,
+} from "@/lib/rate-limit";
 import type { Verse } from "@/lib/shared";
 import { getPersona } from "@/lib/shared/personas";
 import { recordBattleTokenUsage } from "@/lib/usage-storage";
@@ -20,13 +27,37 @@ import type {
 export const maxDuration = 30;
 
 const generateVerseRequestSchema = z.object({
-  battle: z.any(), // Accept any battle object - type checking is done at runtime
+  battleId: z.string(), // Only accept battle ID - fetch battle from DB for security
   personaId: z.string(),
   isLive: z.boolean().optional(),
 });
 
 export async function POST(req: Request) {
   try {
+    // Require authentication
+    const { userId: clerkUserId } = await auth();
+
+    if (!clerkUserId) {
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized: You must be signed in to generate verses",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    // Rate limiting - expensive AI operation
+    const rateLimitResult = checkRateLimit(
+      `verse:${clerkUserId}`,
+      RATE_LIMITS.generateVerse
+    );
+    if (!rateLimitResult.success) {
+      return createRateLimitResponse(rateLimitResult);
+    }
+
     const body = await req.json();
 
     // Validate input with Zod
@@ -49,7 +80,25 @@ export async function POST(req: Request) {
       );
     }
 
-    const { battle, personaId, isLive } = validation.data;
+    const { battleId, personaId, isLive } = validation.data;
+
+    // Verify user can manage this battle (owner or admin)
+    const authCheck = await canManageBattle(battleId);
+    if (!authCheck.authorized) {
+      return new Response(JSON.stringify({ error: authCheck.error }), {
+        status: authCheck.status,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Fetch battle from database (don't trust client-provided battle object)
+    const battle = await getBattleById(battleId);
+    if (!battle) {
+      return new Response(JSON.stringify({ error: "Battle not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
     const persona = getPersona(personaId);
     if (!persona) {

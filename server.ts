@@ -2,6 +2,12 @@
  * Custom Next.js server with WebSocket support
  */
 
+// Load environment variables from .env.local (Next.js style)
+import { loadEnvConfig } from "@next/env";
+loadEnvConfig(process.cwd());
+
+import { createClerkClient, verifyToken } from "@clerk/backend";
+import { createPool, type VercelPool } from "@vercel/postgres";
 import { createServer } from "http";
 import next from "next";
 import { parse } from "url";
@@ -22,6 +28,68 @@ import type { ClientMessage, WebSocketEvent } from "./src/lib/websocket/types";
 const dev = process.env.NODE_ENV !== "production";
 const hostname = process.env.HOSTNAME || "localhost";
 const port = parseInt(process.env.PORT || "3000", 10);
+
+// SECURITY: Require CLERK_SECRET_KEY for WebSocket admin verification
+if (!dev && !process.env.CLERK_SECRET_KEY) {
+  console.error("FATAL: CLERK_SECRET_KEY must be set in production for WebSocket admin verification");
+  process.exit(1);
+}
+
+// Clerk client for token verification (unused but keeping for potential future use)
+const clerkClient = createClerkClient({
+  secretKey: process.env.CLERK_SECRET_KEY,
+});
+
+// Database pool for admin verification (lazy initialized)
+let dbPool: VercelPool | null = null;
+
+function getDbPool(): VercelPool {
+  if (!dbPool) {
+    dbPool = createPool({
+      connectionString: process.env.POSTGRES_URL,
+    });
+  }
+  return dbPool;
+}
+
+/**
+ * Verify a Clerk JWT token and check if the user is an admin
+ * Returns true if the token is valid and the user has admin role
+ */
+async function verifyAdminToken(authToken: string): Promise<boolean> {
+  try {
+    // Verify the JWT token with Clerk
+    const verifiedToken = await verifyToken(authToken, {
+      secretKey: process.env.CLERK_SECRET_KEY!,
+    });
+
+    if (!verifiedToken || !verifiedToken.sub) {
+      console.log("[WS Auth] Token verification failed: no subject");
+      return false;
+    }
+
+    const clerkUserId = verifiedToken.sub;
+
+    // Query database to check if user has admin role
+    const pool = getDbPool();
+    const result = await pool.query(
+      'SELECT role FROM users WHERE clerk_id = $1',
+      [clerkUserId]
+    );
+
+    if (result.rows.length === 0) {
+      console.log("[WS Auth] User not found in database:", clerkUserId);
+      return false;
+    }
+
+    const isAdmin = result.rows[0].role === "admin";
+    console.log(`[WS Auth] User ${clerkUserId} admin status: ${isAdmin}`);
+    return isAdmin;
+  } catch (error) {
+    console.error("[WS Auth] Token verification error:", error);
+    return false;
+  }
+}
 
 /**
  * Get the local network IP address
@@ -63,8 +131,18 @@ const WS_WARNING_BEFORE_CLOSE = 60000; // 1 minute warning before auto-close
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
-const INTERNAL_BROADCAST_SECRET =
-  process.env.INTERNAL_BROADCAST_SECRET || "dev-secret";
+// SECURITY: Require INTERNAL_BROADCAST_SECRET in production
+// This secret protects internal WebSocket broadcast endpoints
+const INTERNAL_BROADCAST_SECRET = process.env.INTERNAL_BROADCAST_SECRET;
+if (!dev && !INTERNAL_BROADCAST_SECRET) {
+  console.error("FATAL: INTERNAL_BROADCAST_SECRET must be set in production");
+  process.exit(1);
+}
+// In development, use a default secret but warn
+if (dev && !INTERNAL_BROADCAST_SECRET) {
+  console.warn("[SECURITY WARNING] INTERNAL_BROADCAST_SECRET not set, using dev default");
+}
+const BROADCAST_SECRET = INTERNAL_BROADCAST_SECRET || "dev-secret-insecure";
 
 // Types imported from ./src/lib/websocket/cleanup
 
@@ -385,7 +463,7 @@ app.prepare().then(async () => {
       console.log("[Server] Matched internal broadcast endpoint");
       // Verify internal secret
       const secret = req.headers["x-internal-secret"];
-      if (secret !== INTERNAL_BROADCAST_SECRET) {
+      if (secret !== BROADCAST_SECRET) {
         res.writeHead(403, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "Forbidden" }));
         return;
@@ -418,7 +496,7 @@ app.prepare().then(async () => {
     if (url.startsWith("/__internal/ws-stats") && req.method === "GET") {
       // Verify internal secret
       const secret = req.headers["x-internal-secret"];
-      if (secret !== INTERNAL_BROADCAST_SECRET) {
+      if (secret !== BROADCAST_SECRET) {
         res.writeHead(403, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "Forbidden" }));
         return;
@@ -484,7 +562,7 @@ app.prepare().then(async () => {
     clients.set(ws, connection);
 
     // Handle incoming messages
-    ws.on("message", (data: Buffer) => {
+    ws.on("message", async (data: Buffer) => {
       try {
         const message: ClientMessage = JSON.parse(data.toString());
 
@@ -500,7 +578,17 @@ app.prepare().then(async () => {
             // Join new room
             connection.battleId = message.battleId;
             connection.clientId = message.clientId || `client-${Date.now()}`;
-            connection.isAdmin = message.isAdmin || false;
+            
+            // SECURITY: Verify admin status server-side if client claims to be admin
+            // Don't trust client-provided isAdmin flag without verification
+            let isVerifiedAdmin = false;
+            if (message.isAdmin && message.authToken) {
+              isVerifiedAdmin = await verifyAdminToken(message.authToken);
+              if (!isVerifiedAdmin) {
+                console.warn(`[WS] Client ${connection.clientId} claimed admin but verification failed`);
+              }
+            }
+            connection.isAdmin = isVerifiedAdmin;
 
             joinBattleRoom(message.battleId, connection);
 
@@ -518,7 +606,7 @@ app.prepare().then(async () => {
             // Broadcast viewer count update
             broadcastViewerCount(message.battleId);
 
-            // Notify if admin joined
+            // Notify if admin joined (only for verified admins)
             if (connection.isAdmin) {
               broadcast(message.battleId, {
                 type: "admin:connected",

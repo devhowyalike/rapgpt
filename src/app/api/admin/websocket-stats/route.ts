@@ -10,8 +10,9 @@ import { battles } from "@/lib/db/schema";
 
 export const dynamic = "force-dynamic";
 
-const INTERNAL_BROADCAST_SECRET =
-  process.env.INTERNAL_BROADCAST_SECRET || "dev-secret";
+// SECURITY: Get broadcast secret from environment (must be set in production)
+const INTERNAL_BROADCAST_SECRET = process.env.INTERNAL_BROADCAST_SECRET || 
+  (process.env.NODE_ENV === "production" ? "" : "dev-secret-insecure");
 
 /**
  * Fetch WebSocket stats from the custom server via internal endpoint

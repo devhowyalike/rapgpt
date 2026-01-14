@@ -4,6 +4,7 @@
 
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ClientMessage, ConnectionStatus, WebSocketEvent } from "./types";
 import { generateClientId, isWebSocketActive, isWebSocketConnected } from "./utils";
@@ -54,6 +55,9 @@ export function useWebSocket({
   );
   const isMountedRef = useRef(true);
   const onEventRef = useRef(onEvent);
+  
+  // Get auth token for admin verification
+  const { getToken } = useAuth();
 
   // Keep the ref updated with the latest onEvent callback
   useEffect(() => {
@@ -134,12 +138,22 @@ export function useWebSocket({
       const ws = new WebSocket(getWebSocketUrl());
       wsRef.current = ws;
 
-      ws.onopen = () => {
+      ws.onopen = async () => {
         if (!isMountedRef.current) return;
 
         console.log("[WS Client] Connected");
         setStatusDebounced("connected", true);
         reconnectAttemptsRef.current = 0;
+
+        // Get auth token for admin verification (only if claiming admin)
+        let authToken: string | null = null;
+        if (isAdmin) {
+          try {
+            authToken = await getToken();
+          } catch (err) {
+            console.warn("[WS Client] Failed to get auth token:", err);
+          }
+        }
 
         // Join the battle room
         sendMessage({
@@ -147,6 +161,7 @@ export function useWebSocket({
           battleId,
           clientId: clientIdRef.current,
           isAdmin,
+          ...(authToken && { authToken }),
         });
       };
 
@@ -247,7 +262,7 @@ export function useWebSocket({
       console.error("[WS Client] Failed to connect:", error);
       setStatusDebounced("error");
     }
-  }, [enabled, battleId, isAdmin, getWebSocketUrl, sendMessage, setStatusDebounced]);
+  }, [enabled, battleId, isAdmin, getWebSocketUrl, sendMessage, setStatusDebounced, getToken]);
 
   const reconnect = useCallback(() => {
     reconnectAttemptsRef.current = 0;
