@@ -10,6 +10,21 @@ import type { Battle } from "@/lib/shared";
 import { broadcastEvent } from "@/lib/websocket/broadcast-helper";
 import type { StateSyncEvent, RoundAdvancedEvent, BattleCompletedEvent } from "@/lib/websocket/types";
 
+/**
+ * Filter out admin-only fields from battle data for public viewing
+ * Admin/owner users get the full battle object
+ */
+function filterBattleForPublicView(battle: Battle): Partial<Battle> {
+  // Remove admin configuration fields that shouldn't be exposed publicly
+  const {
+    adminControlMode,
+    autoPlayConfig,
+    ...publicBattle
+  } = battle;
+  
+  return publicBattle;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -25,7 +40,34 @@ export async function GET(
       });
     }
 
-    return new Response(JSON.stringify(battle), {
+    // Check if user is authenticated and is owner/admin
+    const { userId: clerkUserId } = await auth();
+    let isAuthorizedUser = false;
+    
+    if (clerkUserId) {
+      try {
+        const user = await getOrCreateUser(clerkUserId);
+        const battleRecord = await db.query.battles.findFirst({
+          where: eq(battles.id, id),
+        });
+        
+        if (battleRecord) {
+          const isOwner = battleRecord.createdBy === user.id;
+          const isAdmin = user.role === "admin";
+          isAuthorizedUser = isOwner || isAdmin;
+        }
+      } catch {
+        // If user lookup fails, treat as unauthorized
+        isAuthorizedUser = false;
+      }
+    }
+
+    // Return full battle data for authorized users, filtered data for public
+    const responseData = isAuthorizedUser 
+      ? battle 
+      : filterBattleForPublicView(battle);
+
+    return new Response(JSON.stringify(responseData), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });

@@ -11,6 +11,13 @@ const BROADCAST_URL =
   process.env.BROADCAST_INTERNAL_URL ||
   `http://127.0.0.1:${PORT}/__internal/ws-broadcast`;
 
+// SECURITY: Get broadcast secret from environment
+// In production, this must be set. In development, we allow a fallback but warn.
+const BROADCAST_SECRET = process.env.INTERNAL_BROADCAST_SECRET;
+if (!BROADCAST_SECRET && process.env.NODE_ENV === "production") {
+  console.error("[Broadcast Helper] INTERNAL_BROADCAST_SECRET not set in production!");
+}
+
 /**
  * Broadcast a WebSocket event to all clients in a battle room
  * This works in both dev and production
@@ -39,8 +46,7 @@ export async function broadcastEvent(
       headers: {
         "Content-Type": "application/json",
         // Internal secret to prevent external access
-        "X-Internal-Secret":
-          process.env.INTERNAL_BROADCAST_SECRET || "dev-secret",
+        "X-Internal-Secret": BROADCAST_SECRET || "dev-secret-insecure",
       },
       body: JSON.stringify({ battleId, event }),
     });

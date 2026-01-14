@@ -170,6 +170,7 @@ export interface ClientMessage {
   battleId: string;
   clientId?: string;
   isAdmin?: boolean;
+  authToken?: string; // Clerk session token for server-side admin verification
 }
 
 export type ConnectionStatus =

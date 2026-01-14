@@ -13,6 +13,38 @@ import { ROUNDS_PER_BATTLE } from "@/lib/shared/battle-types";
 const SUNO_API_BASE_URL =
   process.env.SUNO_API_BASE_URL || "https://api.sunoapi.org";
 const SUNO_API_KEY = process.env.SUNO_API_KEY;
+const SUNO_CALLBACK_SECRET = process.env.SUNO_CALLBACK_SECRET;
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
+
+/**
+ * Build the callback URL with authentication token
+ * Suno API requires a callback URL, so we provide a dummy one if not configured
+ * (we use polling anyway, so callbacks are optional for functionality)
+ */
+function buildCallbackUrl(): string {
+  // If APP_URL is not configured, use a dummy URL (Suno requires one but we poll anyway)
+  if (!APP_URL) {
+    console.warn("[Suno] NEXT_PUBLIC_APP_URL not set, using dummy callback URL");
+    return "https://example.com/callback";
+  }
+  
+  // Build callback URL with secret token for verification
+  const baseUrl = `${APP_URL}/api/suno-callback`;
+  
+  if (SUNO_CALLBACK_SECRET) {
+    return `${baseUrl}?token=${encodeURIComponent(SUNO_CALLBACK_SECRET)}`;
+  }
+  
+  // In development, allow callback without secret
+  if (process.env.NODE_ENV !== "production") {
+    console.warn("[Suno] SUNO_CALLBACK_SECRET not set, callback will be unverified");
+    return baseUrl;
+  }
+  
+  // In production without secret, use dummy URL (polling will still work)
+  console.warn("[Suno] SUNO_CALLBACK_SECRET not set in production, using dummy callback URL");
+  return "https://example.com/callback";
+}
 
 interface SunoCreditsResponse {
   code: number;
@@ -261,6 +293,9 @@ export async function generateSong(
     battle.personas.player2,
   );
 
+  // Build callback URL (optional - we poll instead but callback can provide faster updates)
+  const callbackUrl = buildCallbackUrl();
+
   const requestBody: SunoGenerateRequest = {
     prompt: lyrics,
     style: style,
@@ -268,7 +303,7 @@ export async function generateSong(
     customMode: true,
     instrumental: false,
     model: "V4_5", // V4.5 model - good balance of quality and speed
-    callBackUrl: "https://example.com/callback", // Dummy callback - we poll instead
+    callBackUrl: callbackUrl, // Secure callback URL with token, or undefined to use polling only
     vocalGender: vocalGender,
   };
 

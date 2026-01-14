@@ -1,8 +1,14 @@
 import { auth } from "@clerk/nextjs/server";
+import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { saveBattle } from "@/lib/battle-storage";
+import {
+  checkRateLimit,
+  createRateLimitResponse,
+  RATE_LIMITS,
+} from "@/lib/rate-limit";
 import type { Battle } from "@/lib/shared";
 import { getPersona } from "@/lib/shared/personas";
 import { createBattleRequestSchema } from "@/lib/validations/battle";
@@ -28,6 +34,15 @@ export async function POST(request: NextRequest) {
         { error: "Unauthorized: You must be signed in to create battles" },
         { status: 401 },
       );
+    }
+
+    // Rate limiting
+    const rateLimitResult = checkRateLimit(
+      `create:${clerkUserId}`,
+      RATE_LIMITS.createBattle
+    );
+    if (!rateLimitResult.success) {
+      return createRateLimitResponse(rateLimitResult);
     }
 
     // Get or create user from database (syncs from Clerk if needed)
@@ -75,8 +90,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate battle ID and metadata
+    // SECURITY: Use cryptographic random ID to prevent enumeration attacks
     const now = Date.now();
-    const battleId = `battle-${player1PersonaId}-vs-${player2PersonaId}-${now}`;
+    const battleId = nanoid(16);
     const month = new Date().toLocaleDateString("en-US", { month: "long" });
     const year = new Date().getFullYear();
 

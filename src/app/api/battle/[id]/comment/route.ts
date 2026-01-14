@@ -8,6 +8,11 @@ import { isBattleArchived } from "@/lib/battle-engine";
 import { getBattleById, saveBattle } from "@/lib/battle-storage";
 import { db } from "@/lib/db/client";
 import { comments } from "@/lib/db/schema";
+import {
+  checkRateLimit,
+  createRateLimitResponse,
+  RATE_LIMITS,
+} from "@/lib/rate-limit";
 import { commentRequestSchema } from "@/lib/validations/battle";
 import { createArchivedBattleResponse } from "@/lib/validations/utils";
 import { broadcastEvent } from "@/lib/websocket/broadcast-helper";
@@ -31,6 +36,15 @@ export async function POST(
           headers: { "Content-Type": "application/json" },
         },
       );
+    }
+
+    // Rate limiting
+    const rateLimitResult = checkRateLimit(
+      `comment:${clerkUserId}`,
+      RATE_LIMITS.comment
+    );
+    if (!rateLimitResult.success) {
+      return createRateLimitResponse(rateLimitResult);
     }
 
     // Get or create user from database (syncs from Clerk if needed)

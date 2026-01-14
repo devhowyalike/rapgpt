@@ -1,5 +1,39 @@
 import type { NextConfig } from "next";
 
+// Security headers for all responses
+const securityHeaders = [
+  {
+    // Prevent clickjacking attacks by disallowing embedding in frames
+    key: "X-Frame-Options",
+    value: "SAMEORIGIN",
+  },
+  {
+    // Prevent MIME type sniffing
+    key: "X-Content-Type-Options",
+    value: "nosniff",
+  },
+  {
+    // Enable XSS filter in older browsers
+    key: "X-XSS-Protection",
+    value: "1; mode=block",
+  },
+  {
+    // Control how much referrer information is shared
+    key: "Referrer-Policy",
+    value: "strict-origin-when-cross-origin",
+  },
+  {
+    // Restrict powerful browser features
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), payment=()",
+  },
+  {
+    // Strict Transport Security - force HTTPS
+    key: "Strict-Transport-Security",
+    value: "max-age=31536000; includeSubDomains",
+  },
+];
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -21,6 +55,16 @@ const nextConfig: NextConfig = {
             exclude: ["error"],
           }
         : false,
+  },
+  // Apply security headers to all routes
+  async headers() {
+    return [
+      {
+        // Apply to all routes
+        source: "/:path*",
+        headers: securityHeaders,
+      },
+    ];
   },
 };
 

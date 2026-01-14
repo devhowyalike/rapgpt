@@ -361,7 +361,7 @@ export function BattleController({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          battle: latestBattle,
+          battleId: latestBattle.id,
           personaId,
           isLive: battleIsLive, // Pass live flag to enable WebSocket broadcasting
         }),
