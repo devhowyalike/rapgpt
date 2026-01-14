@@ -2,9 +2,16 @@
  * Custom Next.js server with WebSocket support
  */
 
-// Load environment variables from .env.local (Next.js style)
-import { loadEnvConfig } from "@next/env";
-loadEnvConfig(process.cwd());
+// Load environment variables from .env and .env.local
+import { config } from "dotenv";
+import { existsSync } from "fs";
+import { resolve } from "path";
+
+// Load .env first, then .env.local (overrides)
+config({ path: resolve(process.cwd(), ".env") });
+if (existsSync(resolve(process.cwd(), ".env.local"))) {
+  config({ path: resolve(process.cwd(), ".env.local"), override: true });
+}
 
 import { createClerkClient, verifyToken } from "@clerk/backend";
 import { createPool, type VercelPool } from "@vercel/postgres";
