@@ -5,9 +5,6 @@
 import type { WebSocket } from "ws";
 import type { WebSocketEvent } from "./types";
 
-// Global WebSocket server instance (will be set by the custom server)
-let wsServer: WebSocketServer | null = null;
-
 export interface BattleRoomStats {
   battleId: string;
   viewerCount: number;
@@ -37,15 +34,27 @@ export interface WebSocketServer {
   getStats?: () => WebSocketStats;
 }
 
+// Use globalThis to ensure the WebSocket server reference is truly global
+// across all module instances (including separately bundled Next.js API routes)
+declare global {
+  // eslint-disable-next-line no-var
+  var __rapgpt_wsServer: WebSocketServer | null | undefined;
+}
+
+function getWsServer(): WebSocketServer | null {
+  return globalThis.__rapgpt_wsServer ?? null;
+}
+
 export function setWebSocketServer(server: WebSocketServer) {
-  wsServer = server;
+  globalThis.__rapgpt_wsServer = server;
 }
 
 export function getWebSocketServer(): WebSocketServer | null {
-  return wsServer;
+  return getWsServer();
 }
 
 export function broadcast(battleId: string, event: WebSocketEvent) {
+  const wsServer = getWsServer();
   if (!wsServer) {
     console.warn(
       "WebSocket server not initialized. Event not broadcasted:",
@@ -57,6 +66,7 @@ export function broadcast(battleId: string, event: WebSocketEvent) {
 }
 
 export function getViewerCount(battleId: string): number {
+  const wsServer = getWsServer();
   if (!wsServer) {
     return 0;
   }
@@ -67,6 +77,7 @@ export function getViewerCount(battleId: string): number {
  * Get WebSocket server statistics
  */
 export function getWebSocketStats(): WebSocketStats | null {
+  const wsServer = getWsServer();
   if (!wsServer?.getStats) {
     return null;
   }
@@ -77,5 +88,5 @@ export function getWebSocketStats(): WebSocketStats | null {
  * Helper to check if WebSocket server is available
  */
 export function isWebSocketAvailable(): boolean {
-  return wsServer !== null;
+  return getWsServer() !== null;
 }
