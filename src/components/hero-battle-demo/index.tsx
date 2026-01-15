@@ -1,12 +1,13 @@
 "use client";
 
-import { motion, AnimatePresence, MotionConfig } from "framer-motion";
+import { AnimatePresence, MotionConfig } from "framer-motion";
 import {
   memo,
   useCallback,
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
   forwardRef,
 } from "react";
@@ -52,12 +53,43 @@ export const HeroBattleDemo = forwardRef<
 ) {
   const [stateIndex, setStateIndex] = useState(0);
   const [internalPaused, setInternalPaused] = useState(false);
+  const pausedByModalRef = useRef(false);
 
   // Use external state if provided, otherwise fallback to internal
   const isPaused =
     externalPaused !== undefined ? externalPaused : internalPaused;
   const setIsPaused =
     setExternalPaused !== undefined ? setExternalPaused : setInternalPaused;
+
+  // Pause demo when modals (like Clerk) are open, resume when they close
+  useEffect(() => {
+    const checkModalState = () => {
+      const modalOpen = isModalOpen();
+      if (modalOpen && !pausedByModalRef.current) {
+        // Modal just opened - pause the demo
+        pausedByModalRef.current = true;
+        setIsPaused(true);
+      } else if (!modalOpen && pausedByModalRef.current) {
+        // Modal just closed - resume the demo
+        pausedByModalRef.current = false;
+        setIsPaused(false);
+      }
+    };
+
+    // Check immediately
+    checkModalState();
+
+    // Use MutationObserver to detect modal DOM changes
+    const observer = new MutationObserver(checkModalState);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["role", "aria-modal"],
+    });
+
+    return () => observer.disconnect();
+  }, [setIsPaused]);
 
   const effectivePaused = isPaused;
 
