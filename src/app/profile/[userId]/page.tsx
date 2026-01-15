@@ -98,15 +98,15 @@ export default async function ProfilePage({
           className="pt-24 pb-0 md:pt-32 md:pb-0 flex-1"
           containerClassName="flex flex-col items-center justify-center"
         >
-          <div className="bg-gray-900/50 border border-red-500/20 rounded-xl p-8 text-center max-w-md mx-auto">
-            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <UserX className="w-8 h-8 text-red-400" />
+          <div className="bg-gray-900/50 border border-gray-500/20 rounded-xl p-8 text-center max-w-md mx-auto">
+            <div className="w-16 h-16 bg-gray-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <UserX className="w-8 h-8 text-gray-400" />
             </div>
             <h3 className="font-bebas text-2xl text-white mb-2">
-              Account Deleted
+              Account Inactive
             </h3>
             <p className="text-gray-400 text-sm text-pretty">
-              This user account has been deleted and is no longer available.
+              This user account has been deactivated and is no longer available.
             </p>
           </div>
         </PageHero>
