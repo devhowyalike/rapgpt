@@ -110,11 +110,13 @@ export default async function AdminDashboardPage({
       let email = "Unknown";
 
       try {
-        displayName = user.encryptedDisplayName
-          ? decrypt(user.encryptedDisplayName)
-          : user.encryptedName
-          ? decrypt(user.encryptedName)
-          : "Anonymous";
+        displayName =
+          user.username ||
+          (user.encryptedDisplayName
+            ? decrypt(user.encryptedDisplayName)
+            : null) ||
+          (user.encryptedName ? decrypt(user.encryptedName) : null) ||
+          "Anonymous";
 
         email = decrypt(user.encryptedEmail);
       } catch (error) {

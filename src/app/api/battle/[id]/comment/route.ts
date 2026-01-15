@@ -85,12 +85,14 @@ export async function POST(
       return createArchivedBattleResponse("comment");
     }
 
-    // Get display name for comment (use displayName or fallback to name)
-    const username = user.encryptedDisplayName
-      ? decrypt(user.encryptedDisplayName)
-      : user.encryptedName
-        ? decrypt(user.encryptedName)
-        : "Anonymous";
+    // Get display name for comment (priority: username > displayName > name)
+    const username =
+      user.username ||
+      (user.encryptedDisplayName
+        ? decrypt(user.encryptedDisplayName)
+        : null) ||
+      (user.encryptedName ? decrypt(user.encryptedName) : null) ||
+      "Anonymous";
 
     // Insert comment into database
     const commentId = nanoid();
