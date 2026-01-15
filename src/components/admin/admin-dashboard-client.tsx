@@ -219,7 +219,7 @@ export function AdminDashboardClient({
                                         </span>
                                       )}
                                     </div>
-                                    <div className="flex items-center gap-3 text-sm text-gray-400">
+                                    <div className="flex items-center gap-3 text-sm text-gray-400 flex-wrap">
                                       <span>{selectedUser.email}</span>
                                       <span className="w-1 h-1 bg-gray-600 rounded-full" />
                                       <span className="capitalize">{selectedUser.role}</span>
@@ -231,6 +231,9 @@ export function AdminDashboardClient({
                                           </span>
                                         </>
                                       )}
+                                    </div>
+                                    <div className="text-xs text-gray-500 font-mono mt-1">
+                                      Clerk: {selectedUser.clerkId}
                                     </div>
                                   </div>
                 </div>

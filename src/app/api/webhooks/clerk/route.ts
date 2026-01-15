@@ -160,22 +160,22 @@ export async function POST(req: Request) {
 
         // Mark user as deleted (soft delete) instead of removing from database
         // This preserves battle history and user data for admin review
-        // Anonymize public-facing fields while keeping encrypted email for admin reference
+        // Only clear username (to free for reuse) and public fields
+        // Keep encrypted name fields so admins can still identify the user
         await db
           .update(users)
           .set({
             isDeleted: true,
             deletedAt: new Date(),
             username: null, // Free up for reuse
-            encryptedDisplayName: null, // Anonymize
-            encryptedName: null, // Anonymize
             imageUrl: null, // Remove profile picture
             isProfilePublic: false, // Hide profile
             updatedAt: new Date(),
+            // Note: encryptedEmail, encryptedName, encryptedDisplayName are kept for admin reference
           })
           .where(eq(users.clerkId, id));
 
-        console.log(`✅ User marked as deleted and anonymized: ${id}`);
+        console.log(`✅ User marked as deleted: ${id}`);
         break;
       }
 
