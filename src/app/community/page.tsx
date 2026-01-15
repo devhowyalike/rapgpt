@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { ChevronLeft, ChevronRight, Users as UsersIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -40,7 +40,7 @@ export default async function CommunityPage({
   const { sessionClaims } = await auth();
   const isAuthenticated = !!sessionClaims;
 
-  // Fetch users with pagination and only needed fields (only public profiles)
+  // Fetch users with pagination and only needed fields (only public, non-deleted profiles)
   const [allUsers, totalCountResult] = await Promise.all([
     db
       .select({
@@ -52,14 +52,24 @@ export default async function CommunityPage({
         createdAt: users.createdAt,
       })
       .from(users)
-      .where(eq(users.isProfilePublic, true))
+      .where(
+        and(
+          eq(users.isProfilePublic, true),
+          eq(users.isDeleted, false)
+        )
+      )
       .orderBy(desc(users.createdAt))
       .limit(PAGE_SIZE)
       .offset(offset),
     db
       .select({ count: sql<number>`count(*)::int` })
       .from(users)
-      .where(eq(users.isProfilePublic, true)),
+      .where(
+        and(
+          eq(users.isProfilePublic, true),
+          eq(users.isDeleted, false)
+        )
+      ),
   ]);
 
   const totalUsers = totalCountResult[0]?.count || 0;

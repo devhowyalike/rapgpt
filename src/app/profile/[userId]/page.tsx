@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { and, desc, eq } from "drizzle-orm";
-import { Globe, Lock, Swords, User as UserIcon } from "lucide-react";
+import { Globe, Lock, Swords, User as UserIcon, UserX } from "lucide-react";
 import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
@@ -74,10 +74,38 @@ export default async function ProfilePage({
   const { userId: clerkUserId } = await auth();
   let isOwnProfile = false;
   let currentUser = null;
+  let isAdmin = false;
 
   if (clerkUserId) {
     currentUser = await getOrCreateUser(clerkUserId);
     isOwnProfile = currentUser.id === profileUserId;
+    isAdmin = currentUser.role === "admin";
+  }
+
+  // If user has been deleted and viewer is not an admin, show deleted account page
+  if (profileUser.isDeleted && !isAdmin) {
+    return (
+      <div className="flex flex-col flex-1">
+        <SiteHeader />
+        <PageHero
+          className="pt-24 pb-0 md:pt-32 md:pb-0 flex-1"
+          containerClassName="flex flex-col items-center justify-center"
+        >
+          <div className="bg-gray-900/50 border border-red-500/20 rounded-xl p-8 text-center max-w-md mx-auto">
+            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <UserX className="w-8 h-8 text-red-400" />
+            </div>
+            <h3 className="font-bebas text-2xl text-white mb-2">
+              Account Deleted
+            </h3>
+            <p className="text-gray-400 text-sm text-pretty">
+              This user account has been deleted and is no longer available.
+            </p>
+          </div>
+        </PageHero>
+        <Footer />
+      </div>
+    );
   }
 
   const displayName = getDisplayNameFromDbUser(profileUser, "Anonymous User");
@@ -87,6 +115,13 @@ export default async function ProfilePage({
   let userBattles: BattleDB[];
   if (isOwnProfile && !isViewingAsPublic) {
     // Show all battles for own profile (normal view)
+    userBattles = await db
+      .select()
+      .from(battles)
+      .where(eq(battles.createdBy, profileUserId))
+      .orderBy(desc(battles.createdAt));
+  } else if (isAdmin) {
+    // Admins can see all battles (for reviewing deleted accounts, etc.)
     userBattles = await db
       .select()
       .from(battles)
@@ -178,6 +213,21 @@ export default async function ProfilePage({
               month: "long",
             })}
           </p>
+
+          {/* Admin viewing deleted profile warning */}
+          {profileUser.isDeleted && isAdmin && (
+            <div className="flex items-center gap-2 justify-center flex-wrap">
+              <span className="px-3 py-1 rounded-full border border-red-500/30 bg-red-500/10 text-red-300 flex items-center gap-1.5 text-sm">
+                <UserX className="w-3.5 h-3.5" />
+                Account Deleted
+                {profileUser.deletedAt && (
+                  <span className="text-red-400/70">
+                    · {new Date(profileUser.deletedAt).toLocaleDateString()}
+                  </span>
+                )}
+              </span>
+            </div>
+          )}
 
           {isOwnProfile && (
             <div className="flex items-center gap-2 justify-center flex-wrap">

@@ -158,10 +158,24 @@ export async function POST(req: Request) {
           return new Response("Error: No user ID provided", { status: 400 });
         }
 
-        // Delete user from database (will cascade to comments and votes)
-        await db.delete(users).where(eq(users.clerkId, id));
+        // Mark user as deleted (soft delete) instead of removing from database
+        // This preserves battle history and user data for admin review
+        // Anonymize public-facing fields while keeping encrypted email for admin reference
+        await db
+          .update(users)
+          .set({
+            isDeleted: true,
+            deletedAt: new Date(),
+            username: null, // Free up for reuse
+            encryptedDisplayName: null, // Anonymize
+            encryptedName: null, // Anonymize
+            imageUrl: null, // Remove profile picture
+            isProfilePublic: false, // Hide profile
+            updatedAt: new Date(),
+          })
+          .where(eq(users.clerkId, id));
 
-        console.log(`✅ User deleted: ${id}`);
+        console.log(`✅ User marked as deleted and anonymized: ${id}`);
         break;
       }
 

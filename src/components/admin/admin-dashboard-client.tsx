@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, EyeOff, Music, Search, Shield, Swords, User, X } from "lucide-react";
+import { Eye, EyeOff, Music, Search, Shield, Swords, User, UserX, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
@@ -134,25 +134,37 @@ export function AdminDashboardClient({
                         </div>
                       )}
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <div
-                          className={`font-semibold truncate ${
-                            isSelected ? "text-purple-400" : "text-white"
-                          }`}
-                        >
-                          {user.displayName}
-                        </div>
-                        {user.id === currentUserId && (
-                          <span className="text-[10px] bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">
-                            You
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-gray-500 text-xs truncate">
-                        {user.email}
-                      </div>
-                    </div>
+                                <div className="min-w-0 flex-1">
+                                      <div className="flex items-center justify-between gap-2">
+                                        <div
+                                          className={`font-semibold truncate ${
+                                            user.isDeleted
+                                              ? "text-red-400 line-through"
+                                              : isSelected
+                                                ? "text-purple-400"
+                                                : "text-white"
+                                          }`}
+                                        >
+                                          {user.displayName}
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                          {user.isDeleted && (
+                                            <span className="flex items-center gap-1 text-[10px] bg-red-900/50 text-red-400 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider border border-red-500/30">
+                                              <UserX size={10} />
+                                              Deleted
+                                            </span>
+                                          )}
+                                          {user.id === currentUserId && (
+                                            <span className="text-[10px] bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">
+                                              You
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div className="text-gray-500 text-xs truncate">
+                                        {user.email}
+                                      </div>
+                                    </div>
                   </button>
                 );
               })
@@ -196,15 +208,31 @@ export function AdminDashboardClient({
                     )}
                   </div>
                   <div>
-                    <h2 className="text-3xl font-bebas text-white">
-                      {selectedUser.displayName}
-                    </h2>
-                    <div className="flex items-center gap-3 text-sm text-gray-400">
-                      <span>{selectedUser.email}</span>
-                      <span className="w-1 h-1 bg-gray-600 rounded-full" />
-                      <span className="capitalize">{selectedUser.role}</span>
-                    </div>
-                  </div>
+                                    <div className="flex items-center gap-3">
+                                      <h2 className={`text-3xl font-bebas ${selectedUser.isDeleted ? "text-red-400 line-through" : "text-white"}`}>
+                                        {selectedUser.displayName}
+                                      </h2>
+                                      {selectedUser.isDeleted && (
+                                        <span className="flex items-center gap-1.5 text-xs bg-red-900/50 text-red-400 px-2 py-1 rounded uppercase font-bold tracking-wider border border-red-500/30">
+                                          <UserX size={12} />
+                                          Account Deleted
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-3 text-sm text-gray-400">
+                                      <span>{selectedUser.email}</span>
+                                      <span className="w-1 h-1 bg-gray-600 rounded-full" />
+                                      <span className="capitalize">{selectedUser.role}</span>
+                                      {selectedUser.isDeleted && selectedUser.deletedAt && (
+                                        <>
+                                          <span className="w-1 h-1 bg-gray-600 rounded-full" />
+                                          <span className="text-red-400">
+                                            Deleted {new Date(selectedUser.deletedAt).toLocaleDateString()}
+                                          </span>
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
                 </div>
 
                 <div className="flex items-center gap-3">
