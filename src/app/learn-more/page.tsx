@@ -5,12 +5,12 @@ import { HowItWorks } from "@/components/learn-more/how-it-works";
 import { FeaturesHeader } from "@/components/learn-more/features-header";
 import { FeatureCarousel } from "@/components/feature-carousel";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
-import { APP_TITLE } from "@/lib/constants";
+import { createMetadata } from "@/lib/metadata";
 
-export const metadata = {
-  title: `Learn More | ${APP_TITLE}`,
-  description: `Learn how ${APP_TITLE} works. Create AI rap battles with unique personas, real-time lyrics, and audio.`,
-};
+export const metadata = createMetadata({
+  title: "Learn More",
+  description: "Learn how RapGPT works. Create AI rap battles with unique personas, real-time lyrics, and audio.",
+});
 
 export default function LearnMorePage() {
   return (
