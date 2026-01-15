@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { SiteHeader } from "@/components/site-header";
+import { useEffect, useMemo, useState } from "react";
+import { usePreloadImages } from "@/lib/hooks/use-preload-images";
 import type { ClientPersona } from "@/lib/shared/personas/client";
 import { getAllStages, type Stage } from "@/lib/shared/stages";
 import { cn } from "@/lib/utils";
@@ -56,12 +56,11 @@ export function StageSelect({
   const stages = getAllStages();
 
   // Preload all stage background images for instant hover previews
-  useEffect(() => {
-    for (const stage of stages) {
-      const img = new window.Image();
-      img.src = stage.backgroundImage;
-    }
-  }, [stages]);
+  const stageSrcs = useMemo(
+    () => stages.map((s) => s.backgroundImage),
+    [stages]
+  );
+  usePreloadImages({ srcs: stageSrcs, type: "fill" });
 
   // Load stage from sessionStorage on mount
   useEffect(() => {
