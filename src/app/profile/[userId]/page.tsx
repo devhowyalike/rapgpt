@@ -1,6 +1,13 @@
 import { auth } from "@clerk/nextjs/server";
 import { and, desc, eq } from "drizzle-orm";
-import { Globe, Lock, Swords, User as UserIcon, UserX } from "lucide-react";
+import {
+  Globe,
+  Lock,
+  Shield,
+  Swords,
+  User as UserIcon,
+  UserX,
+} from "lucide-react";
 import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
@@ -217,6 +224,10 @@ export default async function ProfilePage({
           {/* Admin viewing deleted profile warning */}
           {profileUser.isDeleted && isAdmin && (
             <div className="flex items-center gap-2 justify-center flex-wrap">
+              <span className="px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-300 flex items-center gap-1.5 text-sm">
+                <Shield className="w-3.5 h-3.5" />
+                Admin View
+              </span>
               <span className="px-3 py-1 rounded-full border border-red-500/30 bg-red-500/10 text-red-300 flex items-center gap-1.5 text-sm">
                 <UserX className="w-3.5 h-3.5" />
                 Account Deleted
