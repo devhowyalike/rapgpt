@@ -5,6 +5,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/**
+ * Checks if a modal/dialog is currently open in the DOM.
+ * Useful for preventing global keyboard handlers from firing when modals are open.
+ */
+export function isModalOpen(): boolean {
+  return !!document.querySelector('[role="dialog"], [aria-modal="true"]');
+}
+
 export async function copyToClipboard(text: string): Promise<boolean> {
   if (typeof navigator === "undefined" || typeof document === "undefined") {
     return false;

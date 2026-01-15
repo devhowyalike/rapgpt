@@ -15,7 +15,7 @@ import {
   Map,
   Vote,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, isModalOpen } from "@/lib/utils";
 import { APP_TITLE } from "@/lib/constants";
 import {
   Carousel,
@@ -531,6 +531,9 @@ export function FeatureCarousel({ className }: FeatureCarouselProps) {
       ) {
         return;
       }
+
+      // Don't handle keyboard events if a modal/dialog is open (e.g., Clerk sign-in modal)
+      if (isModalOpen()) return;
 
       if (e.key === "ArrowLeft") {
         e.preventDefault();

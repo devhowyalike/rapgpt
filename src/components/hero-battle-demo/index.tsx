@@ -24,6 +24,7 @@ import {
   FrostOverlay,
 } from "./overlays";
 import { PLAYER_COLORS } from "./utils";
+import { isModalOpen } from "@/lib/utils";
 
 // Re-export for backwards compatibility
 export type { DemoState, MCData, StateConfig } from "./types";
@@ -42,11 +43,13 @@ export interface HeroBattleDemoRef {
   goToPrev: () => void;
 }
 
-export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>(
-  function HeroBattleDemo(
-    { isPaused: externalPaused, setIsPaused: setExternalPaused },
-    ref
-  ) {
+export const HeroBattleDemo = forwardRef<
+  HeroBattleDemoRef,
+  HeroBattleDemoProps
+>(function HeroBattleDemo(
+  { isPaused: externalPaused, setIsPaused: setExternalPaused },
+  ref
+) {
   const [stateIndex, setStateIndex] = useState(0);
   const [internalPaused, setInternalPaused] = useState(false);
 
@@ -73,10 +76,14 @@ export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>
   }, [setIsPaused]);
 
   // Expose navigation methods to parent via ref
-  useImperativeHandle(ref, () => ({
-    goToNext,
-    goToPrev,
-  }), [goToNext, goToPrev]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      goToNext,
+      goToPrev,
+    }),
+    [goToNext, goToPrev]
+  );
 
   // Intersection Observer - pause when scrolled away, resume when back in view
   const {
@@ -105,6 +112,9 @@ export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isInViewRef.current) return;
+
+      // Don't handle keyboard events if a modal/dialog is open (e.g., Clerk sign-in modal)
+      if (isModalOpen()) return;
 
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
@@ -210,7 +220,9 @@ export const HeroBattleDemo = forwardRef<HeroBattleDemoRef, HeroBattleDemoProps>
           {/* Overlays */}
           <AnimatePresence>
             {showFrostOverlay && <FrostOverlay key="frost" />}
-            {isPaused && <PauseOverlay key="pause" onUnpause={() => setIsPaused(false)} />}
+            {isPaused && (
+              <PauseOverlay key="pause" onUnpause={() => setIsPaused(false)} />
+            )}
             {config.showScoring && (
               <ScoringOverlay key="scoring" isPaused={effectivePaused} />
             )}
@@ -289,7 +301,11 @@ const PlayerColumn = memo(function PlayerColumn({
   const mutableVerses = useMemo(() => [...verses], [verses]);
 
   return (
-    <div className={`flex flex-col overflow-hidden ${!mobileVisible ? "hidden md:flex" : ""} ${className || ""}`}>
+    <div
+      className={`flex flex-col overflow-hidden ${
+        !mobileVisible ? "hidden md:flex" : ""
+      } ${className || ""}`}
+    >
       <PersonaCardDemo
         mc={mc}
         position={position}
