@@ -452,6 +452,9 @@ function MobileArrowButton({
   );
 }
 
+// Extract image URLs for preloading
+const FEATURE_IMAGE_URLS = FEATURES.map((f) => f.screenshot);
+
 export function FeatureCarousel({ className }: FeatureCarouselProps) {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
@@ -475,6 +478,45 @@ export function FeatureCarousel({ className }: FeatureCarouselProps) {
       api.off("select", onSelect);
     };
   }, [api]);
+
+  // Preload all carousel images after initial render using requestIdleCallback.
+  // This ensures they don't block the critical rendering path but are ready
+  // when the user starts scrolling.
+  React.useEffect(() => {
+    // Skip first image (already priority-loaded) and preload the rest
+    const imagesToPreload = FEATURE_IMAGE_URLS.slice(1);
+
+    const preloadImage = (src: string) => {
+      const img = new window.Image();
+      img.src = src;
+    };
+
+    // Use requestIdleCallback for non-blocking preload, with setTimeout fallback
+    const schedulePreload = (callback: () => void): number => {
+      if (typeof window.requestIdleCallback === "function") {
+        return window.requestIdleCallback(callback, { timeout: 2000 });
+      }
+      // Fallback: use setTimeout with a small delay to let initial render complete
+      return window.setTimeout(callback, 100) as unknown as number;
+    };
+
+    const cancelPreload = (id: number) => {
+      if (typeof window.cancelIdleCallback === "function") {
+        window.cancelIdleCallback(id);
+      } else {
+        window.clearTimeout(id);
+      }
+    };
+
+    // Schedule preloading of all remaining images during idle time
+    const idleId = schedulePreload(() => {
+      for (const url of imagesToPreload) {
+        preloadImage(url);
+      }
+    });
+
+    return () => cancelPreload(idleId);
+  }, []);
 
   // Global keyboard navigation
   React.useEffect(() => {
