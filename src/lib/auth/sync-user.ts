@@ -63,6 +63,7 @@ export async function getOrCreateUser(clerkUserId: string) {
   const newUser = {
     id: nanoid(),
     clerkId: clerkUser.id,
+    username: clerkUser.username || null,
     encryptedEmail,
     encryptedName,
     encryptedDisplayName: encryptedName,

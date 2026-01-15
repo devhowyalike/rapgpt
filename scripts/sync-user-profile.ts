@@ -36,7 +36,7 @@ async function syncUserProfile(clerkUserId: string) {
     }
 
     console.log(
-      `✅ Found Clerk user: ${clerkUser.firstName} ${clerkUser.lastName}`,
+      `✅ Found Clerk user: ${clerkUser.username || `${clerkUser.firstName} ${clerkUser.lastName}`}`,
     );
 
     // Get primary email
@@ -61,6 +61,7 @@ async function syncUserProfile(clerkUserId: string) {
     await db
       .update(users)
       .set({
+        username: clerkUser.username || null,
         encryptedEmail,
         encryptedName,
         encryptedDisplayName: encryptedName, // Sync display name with current name
@@ -70,6 +71,7 @@ async function syncUserProfile(clerkUserId: string) {
       .where(eq(users.clerkId, clerkUserId));
 
     console.log(`✅ User profile synced successfully!`);
+    console.log(`   Username: ${clerkUser.username || "None"}`);
     console.log(`   Name: ${fullName}`);
     console.log(`   Email: ${primaryEmail.emailAddress}`);
     console.log(`   Image: ${clerkUser.imageUrl || "None"}`);

@@ -44,11 +44,13 @@ export async function getBattleById(id: string): Promise<Battle | null> {
 
         // Only populate display details if profile is public
         if (creator.isProfilePublic) {
-          creatorInfo.displayName = creator.encryptedDisplayName
-            ? decrypt(creator.encryptedDisplayName)
-            : creator.encryptedName
-              ? decrypt(creator.encryptedName)
-              : "Anonymous";
+          creatorInfo.displayName =
+            creator.username ||
+            (creator.encryptedDisplayName
+              ? decrypt(creator.encryptedDisplayName)
+              : null) ||
+            (creator.encryptedName ? decrypt(creator.encryptedName) : null) ||
+            "Anonymous";
           creatorInfo.imageUrl = creator.imageUrl;
         }
       } catch (error) {
@@ -213,11 +215,13 @@ export async function getAllBattles(): Promise<Battle[]> {
         const isPublic = creator.isProfilePublic ?? false;
         try {
           if (isPublic) {
-            const displayName = creator.encryptedDisplayName
-              ? decrypt(creator.encryptedDisplayName)
-              : creator.encryptedName
-                ? decrypt(creator.encryptedName)
-                : "Anonymous";
+            const displayName =
+              creator.username ||
+              (creator.encryptedDisplayName
+                ? decrypt(creator.encryptedDisplayName)
+                : null) ||
+              (creator.encryptedName ? decrypt(creator.encryptedName) : null) ||
+              "Anonymous";
 
             creatorInfo = {
               userId: creator.id,
@@ -310,11 +314,13 @@ export async function getFeaturedBattles(): Promise<Battle[]> {
         const isPublic = creator.isProfilePublic ?? false;
         try {
           if (isPublic) {
-            const displayName = creator.encryptedDisplayName
-              ? decrypt(creator.encryptedDisplayName)
-              : creator.encryptedName
-                ? decrypt(creator.encryptedName)
-                : "Anonymous";
+            const displayName =
+              creator.username ||
+              (creator.encryptedDisplayName
+                ? decrypt(creator.encryptedDisplayName)
+                : null) ||
+              (creator.encryptedName ? decrypt(creator.encryptedName) : null) ||
+              "Anonymous";
 
             creatorInfo = {
               userId: creator.id,
@@ -416,11 +422,13 @@ export async function getLiveBattles(): Promise<Battle[]> {
         const isPublic = creator.isProfilePublic ?? false;
         try {
           if (isPublic) {
-            const displayName = creator.encryptedDisplayName
-              ? decrypt(creator.encryptedDisplayName)
-              : creator.encryptedName
-                ? decrypt(creator.encryptedName)
-                : "Anonymous";
+            const displayName =
+              creator.username ||
+              (creator.encryptedDisplayName
+                ? decrypt(creator.encryptedDisplayName)
+                : null) ||
+              (creator.encryptedName ? decrypt(creator.encryptedName) : null) ||
+              "Anonymous";
 
             creatorInfo = {
               userId: creator.id,

@@ -60,8 +60,14 @@ export async function POST(req: Request) {
   try {
     switch (eventType) {
       case "user.created": {
-        const { id, email_addresses, first_name, last_name, image_url } =
-          evt.data;
+        const {
+          id,
+          email_addresses,
+          first_name,
+          last_name,
+          image_url,
+          username,
+        } = evt.data;
 
         // Get primary email
         const primaryEmail = email_addresses.find(
@@ -87,6 +93,7 @@ export async function POST(req: Request) {
         await db.insert(users).values({
           id: nanoid(),
           clerkId: id,
+          username: username || null,
           encryptedEmail,
           encryptedName,
           encryptedDisplayName: encryptedName, // Initially same as name
@@ -102,8 +109,14 @@ export async function POST(req: Request) {
       }
 
       case "user.updated": {
-        const { id, email_addresses, first_name, last_name, image_url } =
-          evt.data;
+        const {
+          id,
+          email_addresses,
+          first_name,
+          last_name,
+          image_url,
+          username,
+        } = evt.data;
 
         // Get primary email
         const primaryEmail = email_addresses.find(
@@ -125,6 +138,7 @@ export async function POST(req: Request) {
         await db
           .update(users)
           .set({
+            username: username || null,
             encryptedEmail,
             encryptedName,
             encryptedDisplayName: encryptedName, // Sync display name with updated name

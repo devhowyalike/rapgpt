@@ -45,6 +45,7 @@ export default async function CommunityPage({
     db
       .select({
         id: users.id,
+        username: users.username,
         encryptedDisplayName: users.encryptedDisplayName,
         encryptedName: users.encryptedName,
         imageUrl: users.imageUrl,
@@ -99,11 +100,13 @@ export default async function CommunityPage({
           ) : (
             <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
               {allUsers.map((user) => {
-                const displayName = user.encryptedDisplayName
-                  ? decrypt(user.encryptedDisplayName)
-                  : user.encryptedName
-                  ? decrypt(user.encryptedName)
-                  : "Anonymous User";
+                const displayName =
+                  user.username ||
+                  (user.encryptedDisplayName
+                    ? decrypt(user.encryptedDisplayName)
+                    : null) ||
+                  (user.encryptedName ? decrypt(user.encryptedName) : null) ||
+                  "Anonymous User";
 
                 return (
                   <Link

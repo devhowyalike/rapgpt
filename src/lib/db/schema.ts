@@ -27,6 +27,7 @@ import type {
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
   clerkId: text("clerk_id").notNull().unique(),
+  username: text("username"), // Public username from Clerk (not encrypted)
   encryptedEmail: text("encrypted_email").notNull(), // Encrypted email
   encryptedName: text("encrypted_name"), // Encrypted real name from Clerk
   encryptedDisplayName: text("encrypted_display_name"), // Encrypted user-set display name

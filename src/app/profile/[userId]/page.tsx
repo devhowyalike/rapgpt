@@ -35,11 +35,14 @@ export async function generateMetadata({
     };
   }
 
-  const displayName = profileUser.encryptedDisplayName
-    ? decrypt(profileUser.encryptedDisplayName)
-    : profileUser.encryptedName
-      ? decrypt(profileUser.encryptedName)
-      : "Anonymous User";
+  // Priority: username > encryptedDisplayName > encryptedName > fallback
+  const displayName =
+    profileUser.username ||
+    (profileUser.encryptedDisplayName
+      ? decrypt(profileUser.encryptedDisplayName)
+      : null) ||
+    (profileUser.encryptedName ? decrypt(profileUser.encryptedName) : null) ||
+    "Anonymous User";
 
   return {
     title: `${displayName}'s Profile | ${APP_TITLE}`,
@@ -84,11 +87,14 @@ export default async function ProfilePage({
     isOwnProfile = currentUser.id === profileUserId;
   }
 
-  const displayName = profileUser.encryptedDisplayName
-    ? decrypt(profileUser.encryptedDisplayName)
-    : profileUser.encryptedName
-    ? decrypt(profileUser.encryptedName)
-    : "Anonymous User";
+  // Priority: username > encryptedDisplayName > encryptedName > fallback
+  const displayName =
+    profileUser.username ||
+    (profileUser.encryptedDisplayName
+      ? decrypt(profileUser.encryptedDisplayName)
+      : null) ||
+    (profileUser.encryptedName ? decrypt(profileUser.encryptedName) : null) ||
+    "Anonymous User";
 
   // Determine what battles to show
   const isViewingAsPublic = viewAs === "public";
