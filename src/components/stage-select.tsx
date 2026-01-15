@@ -55,6 +55,14 @@ export function StageSelect({
 
   const stages = getAllStages();
 
+  // Preload all stage background images for instant hover previews
+  useEffect(() => {
+    for (const stage of stages) {
+      const img = new window.Image();
+      img.src = stage.backgroundImage;
+    }
+  }, [stages]);
+
   // Load stage from sessionStorage on mount
   useEffect(() => {
     if (isHydrated) return;

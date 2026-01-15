@@ -12,6 +12,7 @@ import {
 } from "@/lib/persona-selection-utils";
 import {
   type ClientPersona,
+  getAllClientPersonas,
   getClientPersona,
   getPrimaryClientPersonas,
 } from "@/lib/shared/personas/client";
@@ -85,6 +86,15 @@ export function CharacterSelect({
   // Detect touch device
   useEffect(() => {
     setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
+  }, []);
+
+  // Preload all persona avatar images for instant hover previews
+  useEffect(() => {
+    const allPersonas = getAllClientPersonas();
+    for (const persona of allPersonas) {
+      const img = new window.Image();
+      img.src = persona.avatar;
+    }
   }, []);
 
   // Check admin status from database
