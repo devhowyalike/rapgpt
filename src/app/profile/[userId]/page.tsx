@@ -12,8 +12,8 @@ import { SiteHeader } from "@/components/site-header";
 import { Footer } from "@/components/footer";
 import { PageHero } from "@/components/page-hero";
 import { PageTitle } from "@/components/page-title";
-import { decrypt } from "@/lib/auth/encryption";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
+import { getDisplayNameFromDbUser } from "@/lib/get-display-name";
 import { db } from "@/lib/db/client";
 import { type BattleDB, battles, users } from "@/lib/db/schema";
 import { APP_TITLE } from "@/lib/constants";
@@ -35,14 +35,7 @@ export async function generateMetadata({
     };
   }
 
-  // Priority: username > encryptedDisplayName > encryptedName > fallback
-  const displayName =
-    profileUser.username ||
-    (profileUser.encryptedDisplayName
-      ? decrypt(profileUser.encryptedDisplayName)
-      : null) ||
-    (profileUser.encryptedName ? decrypt(profileUser.encryptedName) : null) ||
-    "Anonymous User";
+  const displayName = getDisplayNameFromDbUser(profileUser, "Anonymous User");
 
   return {
     title: `${displayName}'s Profile | ${APP_TITLE}`,
@@ -87,14 +80,7 @@ export default async function ProfilePage({
     isOwnProfile = currentUser.id === profileUserId;
   }
 
-  // Priority: username > encryptedDisplayName > encryptedName > fallback
-  const displayName =
-    profileUser.username ||
-    (profileUser.encryptedDisplayName
-      ? decrypt(profileUser.encryptedDisplayName)
-      : null) ||
-    (profileUser.encryptedName ? decrypt(profileUser.encryptedName) : null) ||
-    "Anonymous User";
+  const displayName = getDisplayNameFromDbUser(profileUser, "Anonymous User");
 
   // Determine what battles to show
   const isViewingAsPublic = viewAs === "public";
