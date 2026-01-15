@@ -265,21 +265,11 @@ The first user to sign up automatically gets the `admin` role. This is handled i
 
 ### Promoting Users to Admin
 
-Currently, role management is manual. To promote a user to admin:
-
-**Option 1: Directly in Database**
+Currently, role management is manual. To promote a user to admin, update the database directly:
 
 ```sql
 UPDATE users SET role = 'admin' WHERE clerk_id = 'user_xxxxx';
 ```
-
-**Option 2: Via Clerk Dashboard Public Metadata**
-
-1. Go to **Users** in Clerk Dashboard
-2. Select the user
-3. Edit **Public metadata**
-4. Add: `{ "role": "admin" }`
-5. The webhook will sync this on next user update
 
 ### Future Enhancement
 
