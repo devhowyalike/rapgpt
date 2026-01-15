@@ -6,7 +6,7 @@ export const APP_TITLE = "RapGPT";
 export const TAGLINE = "Don't Matter Just Don't Byte It";
 export const TAGLINE_2 = "No Byting";
 export const TAGLINE_3 = "Don't Byte";
-export const MADE_BY = "Good At Coding";
+export const MADE_BY = "YAMEEN";
 export const YEAR = new Date().getFullYear();
 export const APP_URL = "rapgpt.app";
 
