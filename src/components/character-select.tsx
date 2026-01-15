@@ -2,9 +2,10 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { usePersonaSelection } from "@/hooks/use-persona-selection";
+import { usePreloadImages } from "@/lib/hooks/use-preload-images";
 import {
   getHoverPreviewPersona,
   getVariantIndex,
@@ -89,13 +90,11 @@ export function CharacterSelect({
   }, []);
 
   // Preload all persona avatar images for instant hover previews
-  useEffect(() => {
-    const allPersonas = getAllClientPersonas();
-    for (const persona of allPersonas) {
-      const img = new window.Image();
-      img.src = persona.avatar;
-    }
-  }, []);
+  const avatarSrcs = useMemo(
+    () => getAllClientPersonas().map((p) => p.avatar),
+    []
+  );
+  usePreloadImages({ srcs: avatarSrcs, type: "fixed", baseWidth: 144 });
 
   // Check admin status from database
   useEffect(() => {
