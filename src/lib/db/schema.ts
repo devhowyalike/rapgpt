@@ -34,6 +34,8 @@ export const users = pgTable("users", {
   imageUrl: text("image_url"), // Not encrypted (public profile picture URL)
   role: text("role").notNull().default("user"), // 'admin' | 'user'
   isProfilePublic: boolean("is_profile_public").notNull().default(false), // Profile visibility
+  isDeleted: boolean("is_deleted").notNull().default(false), // User deleted their Clerk account
+  deletedAt: timestamp("deleted_at", { mode: "date" }), // When the user was marked as deleted
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
 });
