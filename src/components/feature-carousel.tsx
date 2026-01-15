@@ -8,7 +8,6 @@ import {
   Zap,
   Music,
   Mic2,
-  Clock,
   MessageSquare,
   Radio,
   Trophy,
@@ -138,11 +137,6 @@ const DEMO_COMPONENTS = {
       ),
     { ssr: false }
   ),
-  rounds: dynamic(
-    () =>
-      import("@/components/learn-more/rounds-demo").then((m) => m.RoundsDemo),
-    { ssr: false }
-  ),
 } as const;
 
 type DemoKey =
@@ -153,8 +147,7 @@ type DemoKey =
   | "voting"
   | "song"
   | "mcs"
-  | "stage"
-  | "rounds";
+  | "stage";
 
 type Feature = {
   key: string;
@@ -192,17 +185,6 @@ const FEATURES: Feature[] = [
     color: "blue" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-select-stage.webp",
     demoKey: "stage",
-    browserContentClassName: "aspect-[16/14] md:aspect-16/10",
-  },
-  {
-    key: "rounds",
-    icon: <Clock className="w-5 h-5 md:w-6 md:h-6" />,
-    title: "3 Rounds, 8 Bars",
-    description:
-      "Each battle features 3 rounds with 8 bars per verse. Watch as MCs trade shots and react to each other.",
-    color: "yellow" as ColorKey,
-    screenshot: "/marketing/battle-system/rapgpt-rounds.webp",
-    demoKey: "rounds",
     browserContentClassName: "aspect-[16/14] md:aspect-16/10",
   },
   {
@@ -328,11 +310,7 @@ const FeatureSlide = React.memo(
               src={feature.screenshot}
               alt={`${APP_TITLE} - ${feature.title}`}
               fill
-              className={cn(
-                feature.key === "rounds"
-                  ? "object-cover object-[calc(50%-5px)_top]"
-                  : "object-contain"
-              )}
+              className="object-contain"
               // `sizes` is critical here; without it Next may serve a much larger image than needed.
               sizes="(max-width: 768px) 100vw, 896px"
               priority={eagerImage && index < 3}
