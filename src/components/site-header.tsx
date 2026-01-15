@@ -13,6 +13,7 @@ import { LiveStatusBadge } from "@/components/live-status-badge";
 import { useLiveBattles } from "@/lib/hooks/use-live-battles";
 import { UserButton } from "./auth/user-button";
 import { RapGPTLogo } from "./rapgpt-logo";
+import { getDisplayNameFromClerkUser } from "@/lib/get-display-name";
 import type { ConnectionStatus } from "@/lib/websocket/types";
 
 // Cache admin status in memory to prevent flickering
@@ -130,10 +131,7 @@ export function SiteHeader({ activeBattleState }: SiteHeaderProps) {
   // Use custom hook to manage live battles (only enabled for admins)
   const { liveBattles } = useLiveBattles({ enabled: isAdmin });
 
-  const firstName = user?.firstName || "";
-  const lastName = user?.lastName || "";
-  const displayName =
-    [firstName, lastName].filter(Boolean).join(" ") || user?.username || "User";
+  const displayName = getDisplayNameFromClerkUser(user);
 
   return (
     <div

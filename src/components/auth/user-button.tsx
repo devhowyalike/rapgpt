@@ -17,6 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getDisplayNameFromClerkUser } from "@/lib/get-display-name";
 
 export function UserButton() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -44,10 +45,7 @@ export function UserButton() {
     );
   }
 
-  const firstName = user?.firstName || "";
-  const lastName = user?.lastName || "";
-  const displayName =
-    [firstName, lastName].filter(Boolean).join(" ") || user?.username || "User";
+  const displayName = getDisplayNameFromClerkUser(user);
 
   return (
     <DropdownMenu>

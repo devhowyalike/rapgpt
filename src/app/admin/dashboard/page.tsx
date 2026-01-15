@@ -12,6 +12,7 @@ import { WebSocketStats } from "@/components/admin/websocket-stats";
 import { SiteHeader } from "@/components/site-header";
 import { decrypt } from "@/lib/auth/encryption";
 import { checkRole } from "@/lib/auth/roles";
+import { getDisplayNameFromDbUser } from "@/lib/get-display-name";
 import { db } from "@/lib/db/client";
 import { users } from "@/lib/db/schema";
 import {
@@ -110,14 +111,7 @@ export default async function AdminDashboardPage({
       let email = "Unknown";
 
       try {
-        displayName =
-          user.username ||
-          (user.encryptedDisplayName
-            ? decrypt(user.encryptedDisplayName)
-            : null) ||
-          (user.encryptedName ? decrypt(user.encryptedName) : null) ||
-          "Anonymous";
-
+        displayName = getDisplayNameFromDbUser(user);
         email = decrypt(user.encryptedEmail);
       } catch (error) {
         console.error("Error decrypting user data:", error);

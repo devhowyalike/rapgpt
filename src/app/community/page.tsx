@@ -8,8 +8,8 @@ import { SiteHeader } from "@/components/site-header";
 import { Footer } from "@/components/footer";
 import { PageHero } from "@/components/page-hero";
 import { PageTitle } from "@/components/page-title";
-import { decrypt } from "@/lib/auth/encryption";
 import { db } from "@/lib/db/client";
+import { getDisplayNameFromDbUser } from "@/lib/get-display-name";
 import { users } from "@/lib/db/schema";
 import { APP_TITLE } from "@/lib/constants";
 import { GridBackground } from "@/components/grid-background";
@@ -100,13 +100,10 @@ export default async function CommunityPage({
           ) : (
             <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
               {allUsers.map((user) => {
-                const displayName =
-                  user.username ||
-                  (user.encryptedDisplayName
-                    ? decrypt(user.encryptedDisplayName)
-                    : null) ||
-                  (user.encryptedName ? decrypt(user.encryptedName) : null) ||
-                  "Anonymous User";
+                const displayName = getDisplayNameFromDbUser(
+                  user,
+                  "Anonymous User"
+                );
 
                 return (
                   <Link

@@ -2,8 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { nanoid } from "nanoid";
 import { revalidatePath } from "next/cache";
 import { NextRequest } from "next/server";
-import { decrypt } from "@/lib/auth/encryption";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
+import { getDisplayNameFromDbUser } from "@/lib/get-display-name";
 import { isBattleArchived } from "@/lib/battle-engine";
 import { getBattleById, saveBattle } from "@/lib/battle-storage";
 import { db } from "@/lib/db/client";
@@ -85,14 +85,8 @@ export async function POST(
       return createArchivedBattleResponse("comment");
     }
 
-    // Get display name for comment (priority: username > displayName > name)
-    const username =
-      user.username ||
-      (user.encryptedDisplayName
-        ? decrypt(user.encryptedDisplayName)
-        : null) ||
-      (user.encryptedName ? decrypt(user.encryptedName) : null) ||
-      "Anonymous";
+    // Get display name for comment
+    const username = getDisplayNameFromDbUser(user);
 
     // Insert comment into database
     const commentId = nanoid();

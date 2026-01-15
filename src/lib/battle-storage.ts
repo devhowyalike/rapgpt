@@ -3,8 +3,8 @@
  */
 
 import { desc, eq } from "drizzle-orm";
-import { decrypt } from "@/lib/auth/encryption";
 import { db } from "@/lib/db/client";
+import { getDisplayNameFromDbUser } from "@/lib/get-display-name";
 import { battles, users } from "@/lib/db/schema";
 import type { Battle } from "@/lib/shared";
 
@@ -44,13 +44,7 @@ export async function getBattleById(id: string): Promise<Battle | null> {
 
         // Only populate display details if profile is public
         if (creator.isProfilePublic) {
-          creatorInfo.displayName =
-            creator.username ||
-            (creator.encryptedDisplayName
-              ? decrypt(creator.encryptedDisplayName)
-              : null) ||
-            (creator.encryptedName ? decrypt(creator.encryptedName) : null) ||
-            "Anonymous";
+          creatorInfo.displayName = getDisplayNameFromDbUser(creator);
           creatorInfo.imageUrl = creator.imageUrl;
         }
       } catch (error) {
@@ -215,17 +209,9 @@ export async function getAllBattles(): Promise<Battle[]> {
         const isPublic = creator.isProfilePublic ?? false;
         try {
           if (isPublic) {
-            const displayName =
-              creator.username ||
-              (creator.encryptedDisplayName
-                ? decrypt(creator.encryptedDisplayName)
-                : null) ||
-              (creator.encryptedName ? decrypt(creator.encryptedName) : null) ||
-              "Anonymous";
-
             creatorInfo = {
               userId: creator.id,
-              displayName,
+              displayName: getDisplayNameFromDbUser(creator),
               imageUrl: creator.imageUrl,
               isProfilePublic: true,
             };
@@ -314,17 +300,9 @@ export async function getFeaturedBattles(): Promise<Battle[]> {
         const isPublic = creator.isProfilePublic ?? false;
         try {
           if (isPublic) {
-            const displayName =
-              creator.username ||
-              (creator.encryptedDisplayName
-                ? decrypt(creator.encryptedDisplayName)
-                : null) ||
-              (creator.encryptedName ? decrypt(creator.encryptedName) : null) ||
-              "Anonymous";
-
             creatorInfo = {
               userId: creator.id,
-              displayName,
+              displayName: getDisplayNameFromDbUser(creator),
               imageUrl: creator.imageUrl,
               isProfilePublic: true,
             };
@@ -422,17 +400,9 @@ export async function getLiveBattles(): Promise<Battle[]> {
         const isPublic = creator.isProfilePublic ?? false;
         try {
           if (isPublic) {
-            const displayName =
-              creator.username ||
-              (creator.encryptedDisplayName
-                ? decrypt(creator.encryptedDisplayName)
-                : null) ||
-              (creator.encryptedName ? decrypt(creator.encryptedName) : null) ||
-              "Anonymous";
-
             creatorInfo = {
               userId: creator.id,
-              displayName,
+              displayName: getDisplayNameFromDbUser(creator),
               imageUrl: creator.imageUrl,
               isProfilePublic: true,
             };
