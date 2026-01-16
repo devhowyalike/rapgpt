@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { APP_TITLE } from "./constants";
 
-export const DEFAULT_IMAGE = "/marketing/rap-gpt-screenshot.webp";
+export const DEFAULT_IMAGE = "/social/rapgpt-social-graph.webp";
 export const DEFAULT_DESCRIPTION =
   "Create dream matchups and stream them live as MCs battle in real time. Turn battles into full tracks with AI-generated beats and vocals.";
 
