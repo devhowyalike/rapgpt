@@ -24,8 +24,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     });
   }
 
-  const persona1 = battle.persona1?.name ?? "Unknown";
-  const persona2 = battle.persona2?.name ?? "Unknown";
+  const persona1 = battle.personas.player1.name ?? "Unknown";
+  const persona2 = battle.personas.player2.name ?? "Unknown";
 
   return createMetadata({
     title: `${persona1} vs ${persona2}`,
