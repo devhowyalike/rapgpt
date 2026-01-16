@@ -13,10 +13,11 @@ import { getDisplayNameFromDbUser } from "@/lib/get-display-name";
 import { users } from "@/lib/db/schema";
 import { GridBackground } from "@/components/grid-background";
 import { createMetadata } from "@/lib/metadata";
+import { APP_TITLE } from "@/lib/constants";
 
 export const metadata = createMetadata({
   title: "Community",
-  description: "See what e-beef others have been cooking. Browse public profiles and battles from the RapGPT community.",
+  description: `See who's been cooking up the hottest battles and songs from the ${APP_TITLE} community.`,
 });
 
 // Revalidate every 5 minutes
@@ -52,24 +53,14 @@ export default async function CommunityPage({
         createdAt: users.createdAt,
       })
       .from(users)
-      .where(
-        and(
-          eq(users.isProfilePublic, true),
-          eq(users.isDeleted, false)
-        )
-      )
+      .where(and(eq(users.isProfilePublic, true), eq(users.isDeleted, false)))
       .orderBy(desc(users.createdAt))
       .limit(PAGE_SIZE)
       .offset(offset),
     db
       .select({ count: sql<number>`count(*)::int` })
       .from(users)
-      .where(
-        and(
-          eq(users.isProfilePublic, true),
-          eq(users.isDeleted, false)
-        )
-      ),
+      .where(and(eq(users.isProfilePublic, true), eq(users.isDeleted, false))),
   ]);
 
   const totalUsers = totalCountResult[0]?.count || 0;

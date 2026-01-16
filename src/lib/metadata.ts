@@ -3,7 +3,7 @@ import { APP_TITLE } from "./constants";
 
 export const DEFAULT_IMAGE = "/social/rapgpt-social-graph.webp";
 export const DEFAULT_DESCRIPTION =
-  "Create dream matchups and stream them live as MCs battle in real time. Turn battles into full tracks with AI-generated beats and vocals.";
+  "Create dream matchups as AI-powered MCs battle live in an arena. Stream, vote, and comment with your audience. Turn each battle into a song with beats, vocals, and cover art.";
 
 type MetadataOptions = {
   title: string;

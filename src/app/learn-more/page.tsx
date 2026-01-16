@@ -6,10 +6,11 @@ import { FeaturesHeader } from "@/components/learn-more/features-header";
 import { FeatureCarousel } from "@/components/feature-carousel";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { createMetadata } from "@/lib/metadata";
+import { APP_TITLE } from "@/lib/constants";
 
 export const metadata = createMetadata({
   title: "Learn More",
-  description: "Learn how RapGPT works. Create AI rap battles with unique personas, real-time lyrics, and audio.",
+  description: `Explore the interface and features of ${APP_TITLE}. Choose your MCs, set the stage, and watch the battle unfold.`,
 });
 
 export default function LearnMorePage() {

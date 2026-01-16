@@ -17,7 +17,7 @@ const bebasNeue = Bebas_Neue({
   subsets: ["latin"],
 });
 
-const defaultTitle = `${APP_TITLE} - AI Freestyle Battle Platform`;
+const defaultTitle = `${APP_TITLE} - AI Freestyle Battles + Music Generator`;
 
 export const metadata: Metadata = {
   title: {

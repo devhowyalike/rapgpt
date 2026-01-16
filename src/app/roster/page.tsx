@@ -5,10 +5,11 @@ import { PersonaGallery } from "@/components/persona-gallery";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
 import { GridBackground } from "@/components/grid-background";
 import { createMetadata } from "@/lib/metadata";
+import { APP_TITLE } from "@/lib/constants";
 
 export const metadata = createMetadata({
   title: "The Roster",
-  description: "Meet the MCs of RapGPT. Each AI rapper has their own unique flow, style, and personality.",
+  description: `Explore the roster of AI MCs in ${APP_TITLE}. Each persona has their own unique flow, style, and personality.`,
 });
 
 export default async function RosterPage() {
