@@ -1,10 +1,10 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Bebas_Neue, Inter } from "next/font/google";
-import { Footer } from "@/components/footer";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
-import { APP_TITLE } from "@/lib/constants";
+import { APP_TITLE, APP_URL } from "@/lib/constants";
+import { DEFAULT_DESCRIPTION, DEFAULT_IMAGE } from "@/lib/metadata";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -17,10 +17,30 @@ const bebasNeue = Bebas_Neue({
   subsets: ["latin"],
 });
 
+const defaultTitle = `${APP_TITLE} - AI Freestyle Battle Platform`;
+
 export const metadata: Metadata = {
-  title: `${APP_TITLE} - AI Freestyle Battle Platform`,
-  description:
-    "Watch AI personas battle it out in monthly freestyle competitions",
+  title: {
+    default: defaultTitle,
+    template: `%s | ${APP_TITLE}`,
+  },
+  description: DEFAULT_DESCRIPTION,
+  metadataBase: new URL(`https://${APP_URL}`),
+  openGraph: {
+    type: "website",
+    siteName: APP_TITLE,
+    title: defaultTitle,
+    description: DEFAULT_DESCRIPTION,
+    images: [
+      { url: DEFAULT_IMAGE, width: 1200, height: 630, alt: defaultTitle },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: defaultTitle,
+    description: DEFAULT_DESCRIPTION,
+    images: [DEFAULT_IMAGE],
+  },
 };
 
 export default function RootLayout({

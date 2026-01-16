@@ -11,13 +11,13 @@ import { PageTitle } from "@/components/page-title";
 import { db } from "@/lib/db/client";
 import { getDisplayNameFromDbUser } from "@/lib/get-display-name";
 import { users } from "@/lib/db/schema";
-import { APP_TITLE } from "@/lib/constants";
 import { GridBackground } from "@/components/grid-background";
+import { createMetadata } from "@/lib/metadata";
 
-export const metadata = {
-  title: `Community | ${APP_TITLE}`,
-  description: `See what e-beef others have been cooking. Browse public profiles and battles from the ${APP_TITLE} community.`,
-};
+export const metadata = createMetadata({
+  title: "Community",
+  description: "See what e-beef others have been cooking. Browse public profiles and battles from the RapGPT community.",
+});
 
 // Revalidate every 5 minutes
 export const revalidate = 300;

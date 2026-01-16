@@ -3,13 +3,13 @@ import { SiteHeader } from "@/components/site-header";
 import { Footer } from "@/components/footer";
 import { PersonaGallery } from "@/components/persona-gallery";
 import { CreateBattleCTA } from "@/components/create-battle-cta";
-import { APP_TITLE } from "@/lib/constants";
 import { GridBackground } from "@/components/grid-background";
+import { createMetadata } from "@/lib/metadata";
 
-export const metadata = {
-  title: `The Roster | ${APP_TITLE}`,
-  description: `Meet the MCs of ${APP_TITLE}. Each AI rapper has their own unique flow, style, and personality.`,
-};
+export const metadata = createMetadata({
+  title: "The Roster",
+  description: "Meet the MCs of RapGPT. Each AI rapper has their own unique flow, style, and personality.",
+});
 
 export default async function RosterPage() {
   const { sessionClaims } = await auth();
