@@ -38,6 +38,7 @@ const port = parseInt(process.env.PORT || "3000", 10);
 
 // SECURITY: Allowed origins for WebSocket connections
 // In production, restrict to your domain(s). In dev, allow localhost.
+// Priority: ALLOWED_WS_ORIGINS > NEXT_PUBLIC_APP_URL > localhost (dev only)
 const ALLOWED_WS_ORIGINS = process.env.ALLOWED_WS_ORIGINS
   ? process.env.ALLOWED_WS_ORIGINS.split(",").map((o) => o.trim())
   : dev
@@ -48,6 +49,19 @@ const ALLOWED_WS_ORIGINS = process.env.ALLOWED_WS_ORIGINS
       "http://127.0.0.1:3000",
     ]
     : [];
+
+// SECURITY: Validate WebSocket origin configuration at startup
+// In production, at least one origin source must be configured
+if (!dev && ALLOWED_WS_ORIGINS.length === 0 && !process.env.NEXT_PUBLIC_APP_URL) {
+  console.error(
+    "FATAL: WebSocket origin validation is misconfigured in production.\n" +
+    "All WebSocket connections will be rejected without proper origin configuration.\n" +
+    "Please set one of the following environment variables:\n" +
+    "  - NEXT_PUBLIC_APP_URL (recommended): Your app's public URL (e.g., https://rapgpt.app)\n" +
+    "  - ALLOWED_WS_ORIGINS: Comma-separated list of allowed origins\n"
+  );
+  process.exit(1);
+}
 
 /**
  * Validate WebSocket connection origin to prevent cross-site WebSocket hijacking
