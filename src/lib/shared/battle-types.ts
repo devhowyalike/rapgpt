@@ -22,6 +22,11 @@ export interface Persona {
   musicStyleDescription?: string; // Platform-agnostic music generation descriptors (no copyrighted artist names)
   vocalGender?: "m" | "f"; // Vocal gender for music generation APIs
   isHoopla?: boolean;
+  /**
+   * Optional: User-provided custom context for the battle (e.g., "rap about the Eagles", "diss their sneakers").
+   * This is encrypted when stored in the database. Max 120 characters.
+   */
+  encryptedCustomContext?: string;
 }
 
 export interface Bar {

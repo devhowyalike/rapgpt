@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { getActiveModelConfig } from "@/lib/ai/model-config";
 import { generateVerse } from "@/lib/ai/verse-generator";
+import { decrypt } from "@/lib/auth/encryption";
 import { canManageBattle } from "@/lib/auth/roles";
 import { addVerseToBattle } from "@/lib/battle-engine";
 import { getBattleById, saveBattle } from "@/lib/battle-storage";
@@ -16,7 +17,6 @@ import {
   RATE_LIMITS,
 } from "@/lib/rate-limit";
 import type { Verse } from "@/lib/shared";
-import { getPersona } from "@/lib/shared/personas";
 import { recordBattleTokenUsage } from "@/lib/usage-storage";
 import { broadcastEvent } from "@/lib/websocket/broadcast-helper";
 import type {
@@ -101,12 +101,30 @@ export async function POST(req: Request) {
       });
     }
 
-    const persona = getPersona(personaId);
-    if (!persona) {
-      return new Response(JSON.stringify({ error: "Persona not found" }), {
+    // Get persona from battle (contains encrypted custom context if provided)
+    const battlePersona =
+      battle.personas.player1.id === personaId
+        ? battle.personas.player1
+        : battle.personas.player2.id === personaId
+          ? battle.personas.player2
+          : null;
+
+    if (!battlePersona) {
+      return new Response(JSON.stringify({ error: "Persona not found in battle" }), {
         status: 404,
         headers: { "Content-Type": "application/json" },
       });
+    }
+
+    // Decrypt custom context if present
+    let customContext: string | undefined;
+    if (battlePersona.encryptedCustomContext) {
+      try {
+        customContext = decrypt(battlePersona.encryptedCustomContext);
+      } catch (err) {
+        logError("Decrypt Custom Context", err);
+        // Continue without custom context if decryption fails
+      }
     }
 
     // Build context from previous verses
@@ -165,12 +183,17 @@ export async function POST(req: Request) {
     userMessage += `\n\nRemember: EXACTLY 8 bars, no more, no less. Make it count.`;
 
     // Build dynamic system prompt with opponent-specific context and overrides
-    const systemPrompt = buildSystemPrompt(
-      persona.systemPrompt,
+    let systemPrompt = buildSystemPrompt(
+      battlePersona.systemPrompt,
       personaId,
       opponentPersona.id,
       opponentPersona.name,
     );
+
+    // Append user-provided custom context if present
+    if (customContext) {
+      systemPrompt += `\n\nUSER CONTEXT: The user who created this battle wants you to: ${customContext}`;
+    }
 
     // Get active model configuration
     const modelConfig = getActiveModelConfig();
@@ -228,6 +251,23 @@ export async function POST(req: Request) {
                 isComplete: false,
               } as VerseStreamingEvent);
             }
+          }
+
+          // Check for content refusal before broadcasting completion
+          const finishReason = await result.getFinishReason();
+          if (finishReason === "refusal" || finishReason === "content-filter" || finishReason === "content_filter") {
+            console.log("[Generate Verse] Content refusal detected:", finishReason);
+            // Broadcast error to client
+            await broadcastEvent(battle.id, {
+              type: "verse:complete",
+              battleId: battle.id,
+              timestamp: Date.now(),
+              personaId,
+              verseText: "", // Empty text to indicate error
+              round: battle.currentRound,
+              error: "The AI couldn't generate this verse. Try adjusting your custom context.",
+            } as VerseCompleteEvent & { error?: string });
+            return;
           }
 
           // Broadcast final streaming update with complete text
@@ -328,6 +368,14 @@ export async function POST(req: Request) {
         try {
           for await (const chunk of result.textStream) {
             controller.enqueue(new TextEncoder().encode(chunk));
+          }
+
+          // Check for content refusal after streaming completes
+          const finishReason = await result.getFinishReason();
+          if (finishReason === "refusal" || finishReason === "content-filter" || finishReason === "content_filter") {
+            console.log("[Generate Verse] Content refusal detected:", finishReason);
+            // Send error marker that client can detect
+            controller.enqueue(new TextEncoder().encode("\n\n[CONTENT_REFUSAL]"));
           }
 
           // Record usage after streaming completes

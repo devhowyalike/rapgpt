@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 interface StageSelectProps {
   player1: ClientPersona;
   player2: ClientPersona;
+  player1CustomContext?: string;
+  player2CustomContext?: string;
   isAdmin: boolean;
   votingEnabled: boolean;
   commentsEnabled: boolean;
@@ -33,6 +35,8 @@ interface StageSelections {
 export function StageSelect({
   player1,
   player2,
+  player1CustomContext,
+  player2CustomContext,
   isAdmin,
   votingEnabled,
   commentsEnabled,
@@ -122,6 +126,8 @@ export function StageSelect({
         body: JSON.stringify({
           player1PersonaId: player1.id,
           player2PersonaId: player2.id,
+          player1CustomContext: player1CustomContext?.trim() || undefined,
+          player2CustomContext: player2CustomContext?.trim() || undefined,
           stageId: selectedStage.id,
           isFeatured: false, // Only admins can create featured battles
           votingEnabled,

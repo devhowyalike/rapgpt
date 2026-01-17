@@ -12,6 +12,13 @@ import {
 } from "@/components/ui/collapsible";
 import { type BattleDB } from "@/lib/db/schema";
 
+interface DecryptedContexts {
+  [battleId: string]: {
+    player1CustomContext?: string;
+    player2CustomContext?: string;
+  };
+}
+
 interface CollapsibleBattleSectionProps {
   title: string;
   battles: BattleDB[];
@@ -20,6 +27,7 @@ interface CollapsibleBattleSectionProps {
   shareUrl: string;
   isOwnProfile: boolean;
   userIsProfilePublic: boolean;
+  decryptedContexts?: DecryptedContexts;
 }
 
 function CollapsibleBattleSection({
@@ -30,6 +38,7 @@ function CollapsibleBattleSection({
   shareUrl,
   isOwnProfile,
   userIsProfilePublic,
+  decryptedContexts,
 }: CollapsibleBattleSectionProps) {
   if (battles.length === 0) return null;
 
@@ -47,16 +56,21 @@ function CollapsibleBattleSection({
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="flex flex-col gap-3">
-          {battles.map((battle) => (
-            <MyBattleCard
-              key={battle.id}
-              battle={battle}
-              shareUrl={shareUrl}
-              showManagement={isOwnProfile}
-              userIsProfilePublic={userIsProfilePublic}
-              variant="horizontal"
-            />
-          ))}
+          {battles.map((battle) => {
+            const contexts = decryptedContexts?.[battle.id];
+            return (
+              <MyBattleCard
+                key={battle.id}
+                battle={battle}
+                shareUrl={shareUrl}
+                showManagement={isOwnProfile}
+                userIsProfilePublic={userIsProfilePublic}
+                variant="horizontal"
+                player1CustomContext={contexts?.player1CustomContext}
+                player2CustomContext={contexts?.player2CustomContext}
+              />
+            );
+          })}
         </div>
       </CollapsibleContent>
     </Collapsible>
@@ -67,6 +81,7 @@ interface ProfileBattlesFilterProps {
   battles: BattleDB[];
   shareUrl: string;
   isOwnProfile: boolean;
+  decryptedContexts?: DecryptedContexts;
   userIsProfilePublic: boolean;
 }
 
@@ -86,6 +101,7 @@ export function ProfileBattlesFilter({
   shareUrl,
   isOwnProfile,
   userIsProfilePublic,
+  decryptedContexts,
 }: ProfileBattlesFilterProps) {
   const [showFilters, setShowFilters] = useState(false);
   const [isLiveOpen, setIsLiveOpen] = useState(true);
@@ -307,6 +323,7 @@ export function ProfileBattlesFilter({
             shareUrl={shareUrl}
             isOwnProfile={isOwnProfile}
             userIsProfilePublic={userIsProfilePublic}
+            decryptedContexts={decryptedContexts}
           />
 
           {/* Published Battles Section */}
@@ -318,6 +335,7 @@ export function ProfileBattlesFilter({
             shareUrl={shareUrl}
             isOwnProfile={isOwnProfile}
             userIsProfilePublic={userIsProfilePublic}
+            decryptedContexts={decryptedContexts}
           />
 
           {/* Paused Battles Section */}
@@ -329,6 +347,7 @@ export function ProfileBattlesFilter({
             shareUrl={shareUrl}
             isOwnProfile={isOwnProfile}
             userIsProfilePublic={userIsProfilePublic}
+            decryptedContexts={decryptedContexts}
           />
 
           {/* Completed Battles Section */}
@@ -340,6 +359,7 @@ export function ProfileBattlesFilter({
             shareUrl={shareUrl}
             isOwnProfile={isOwnProfile}
             userIsProfilePublic={userIsProfilePublic}
+            decryptedContexts={decryptedContexts}
           />
         </div>
       )}
