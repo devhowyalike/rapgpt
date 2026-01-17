@@ -61,8 +61,8 @@ export function PersonaContextInput({
         {/* Header Section */}
         <div className="text-center mb-6 lg:mb-8 animate-slide-up">
           <h1 className="text-4xl md:text-6xl font-bold tracking-wide font-(family-name:--font-bebas-neue)">
-            <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text pr-2">
-              CUSTOM CONTEXT
+            <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text pr-2 uppercase">
+              CHECK THE RHIME
             </span>
           </h1>
           <p className="text-gray-400 mt-2 text-sm md:text-base">
@@ -111,30 +111,30 @@ export function PersonaContextInput({
 
           {/* Context Input */}
           <div className="w-full animate-slide-up [animation-delay:200ms]">
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-4 md:p-6">
-              <label className="block text-sm font-semibold text-gray-300 mb-2">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-4 md:p-6 shadow-2xl">
+              <label className="block text-sm font-bold text-white mb-2 uppercase tracking-wider">
                 Battle Context{" "}
-                <span className="text-gray-500 font-normal">(optional)</span>
+                <span className="text-gray-400 font-normal lowercase">(optional)</span>
               </label>
               <Textarea
                 value={customContext}
                 onChange={handleContextChange}
                 placeholder={`e.g., "Rap about the Philadelphia Eagles" or "Diss their sneakers"`}
                 className={cn(
-                  "w-full bg-black/50 border-white/20 text-white placeholder:text-gray-500 resize-none min-h-[100px]",
+                  "w-full bg-black/20 border-white/30 text-white placeholder:text-white/40 resize-none min-h-[120px] text-lg md:text-xl p-4 transition-all duration-200",
                   focusBorderClass,
-                  "focus:ring-0 focus-visible:ring-0"
+                  "focus:ring-1 focus:ring-white/20 focus-visible:ring-0"
                 )}
                 maxLength={MAX_CONTEXT_LENGTH}
               />
-              <div className="flex justify-between items-center mt-2">
-                <p className="text-xs text-gray-500">
+              <div className="flex justify-between items-center mt-3">
+                <p className="text-sm text-gray-300 italic">
                   This context will be used to guide the AI during the battle
                 </p>
                 <span
                   className={cn(
-                    "text-xs font-mono",
-                    isNearLimit ? "text-yellow-500" : "text-gray-500",
+                    "text-sm font-mono font-bold",
+                    isNearLimit ? "text-yellow-400" : "text-gray-400",
                     charactersRemaining === 0 && "text-red-500"
                   )}
                 >
@@ -146,7 +146,7 @@ export function PersonaContextInput({
 
           {/* Example Prompts */}
           <div className="w-full animate-slide-up [animation-delay:300ms]">
-            <p className="text-xs text-gray-500 mb-2 text-center">Example prompts:</p>
+            <p className="text-sm text-gray-400 mb-3 text-center font-medium">Try these prompts:</p>
             <div className="flex flex-wrap justify-center gap-2">
               {[
                 "Rap about tech startups",
@@ -161,7 +161,7 @@ export function PersonaContextInput({
                       onContextChange(example);
                     }
                   }}
-                  className="px-3 py-1.5 text-xs bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-full text-gray-400 hover:text-white transition-all"
+                  className="px-4 py-2 text-sm bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-full text-gray-300 hover:text-white transition-all shadow-sm"
                 >
                   {example}
                 </button>
