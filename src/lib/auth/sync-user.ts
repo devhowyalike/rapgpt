@@ -19,18 +19,38 @@ import { encrypt } from "./encryption";
  * Priority order:
  * 1. If INITIAL_ADMIN_EMAIL is set, only that email gets admin (most secure)
  * 2. If INITIAL_ADMIN_EMAIL is not set, falls back to first-user-is-admin (dev convenience)
+ * 
+ * In production, ALWAYS set INITIAL_ADMIN_EMAIL to prevent unauthorized admin access.
  */
 async function shouldBeAdmin(email: string): Promise<boolean> {
   const initialAdminEmail = process.env.INITIAL_ADMIN_EMAIL;
-  
+
   // If INITIAL_ADMIN_EMAIL is configured, use strict matching
   if (initialAdminEmail) {
-    return email.toLowerCase() === initialAdminEmail.toLowerCase();
+    const isMatch = email.toLowerCase() === initialAdminEmail.toLowerCase();
+    if (isMatch) {
+      console.log(`[Auth] Admin role granted via INITIAL_ADMIN_EMAIL match: ${email}`);
+    }
+    return isMatch;
   }
-  
-  // Fallback: first user becomes admin
+
+  // Fallback: first user becomes admin (only if INITIAL_ADMIN_EMAIL not set)
+  // This is less secure but convenient for development
+  if (process.env.NODE_ENV === "production") {
+    console.warn(
+      "[SECURITY WARNING] INITIAL_ADMIN_EMAIL not set in production. " +
+      "First user will become admin. Set INITIAL_ADMIN_EMAIL for explicit admin control."
+    );
+  }
+
   const existingUsers = await db.select({ id: users.id }).from(users).limit(1);
-  return existingUsers.length === 0;
+  const isFirstUser = existingUsers.length === 0;
+
+  if (isFirstUser) {
+    console.log(`[Auth] Admin role granted to first user: ${email}`);
+  }
+
+  return isFirstUser;
 }
 
 /**
