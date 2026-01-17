@@ -1,18 +1,40 @@
 /**
  * Simple in-memory rate limiter using sliding window algorithm
- * For production with multiple instances, consider using Upstash Redis
+ * 
+ * Note: Rate limits reset on server restart and are not shared across
+ * multiple server instances. For production with multiple instances,
+ * consider implementing a Redis-backed solution.
  */
+
+// ============================================================================
+// Types
+// ============================================================================
+
+export interface RateLimitConfig {
+  /** Maximum number of requests allowed in the window */
+  maxRequests: number;
+  /** Time window in milliseconds */
+  windowMs: number;
+}
+
+export interface RateLimitResult {
+  success: boolean;
+  remaining: number;
+  resetAt: number;
+  retryAfterMs?: number;
+}
 
 interface RateLimitEntry {
   count: number;
   resetAt: number;
 }
 
-// In-memory store for rate limit tracking
-const rateLimitStore = new Map<string, RateLimitEntry>();
+// ============================================================================
+// In-Memory Store
+// ============================================================================
 
-// Cleanup old entries periodically (every 5 minutes)
-const CLEANUP_INTERVAL = 5 * 60 * 1000;
+const rateLimitStore = new Map<string, RateLimitEntry>();
+const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
 let cleanupTimer: NodeJS.Timeout | null = null;
 
 function startCleanup() {
@@ -31,23 +53,14 @@ function startCleanup() {
   }
 }
 
-export interface RateLimitConfig {
-  /** Maximum number of requests allowed in the window */
-  maxRequests: number;
-  /** Time window in milliseconds */
-  windowMs: number;
-}
-
-export interface RateLimitResult {
-  success: boolean;
-  remaining: number;
-  resetAt: number;
-  retryAfterMs?: number;
-}
+// ============================================================================
+// Public API
+// ============================================================================
 
 /**
  * Check if a request should be rate limited
- * @param identifier - Unique identifier for the client (e.g., IP address, user ID)
+ * 
+ * @param identifier - Unique identifier for the client (e.g., user ID, IP)
  * @param config - Rate limit configuration
  * @returns Result indicating if request is allowed
  */
@@ -134,7 +147,6 @@ export function getClientIdentifier(
   // Get IP from common proxy headers
   const forwardedFor = request.headers.get("x-forwarded-for");
   if (forwardedFor) {
-    // x-forwarded-for can be comma-separated, take the first (client) IP
     return `ip:${forwardedFor.split(",")[0].trim()}`;
   }
 
@@ -143,7 +155,6 @@ export function getClientIdentifier(
     return `ip:${realIp}`;
   }
 
-  // Fallback (shouldn't happen in production)
   return "ip:unknown";
 }
 

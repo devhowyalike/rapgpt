@@ -36,6 +36,67 @@ const dev = process.env.NODE_ENV !== "production";
 const hostname = process.env.HOSTNAME || "localhost";
 const port = parseInt(process.env.PORT || "3000", 10);
 
+// SECURITY: Allowed origins for WebSocket connections
+// In production, restrict to your domain(s). In dev, allow localhost.
+const ALLOWED_WS_ORIGINS = process.env.ALLOWED_WS_ORIGINS
+  ? process.env.ALLOWED_WS_ORIGINS.split(",").map((o) => o.trim())
+  : dev
+    ? [
+      `http://localhost:${port}`,
+      `http://127.0.0.1:${port}`,
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+    ]
+    : [];
+
+/**
+ * Validate WebSocket connection origin to prevent cross-site WebSocket hijacking
+ * Returns true if origin is allowed, false otherwise
+ */
+function isValidWebSocketOrigin(origin: string | undefined): boolean {
+  // In development, be more permissive
+  if (dev) {
+    // Allow connections without origin (e.g., from curl/postman for testing)
+    if (!origin) return true;
+    // Allow localhost variants
+    if (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
+      return true;
+    }
+    // Allow ngrok for local testing
+    if (origin.includes(".ngrok.app") || origin.includes(".ngrok.io")) {
+      return true;
+    }
+  }
+
+  // In production, require origin and validate against allowlist
+  if (!origin) {
+    console.warn("[WS Security] Connection rejected: no origin header");
+    return false;
+  }
+
+  // Check against allowed origins
+  if (ALLOWED_WS_ORIGINS.length > 0 && ALLOWED_WS_ORIGINS.includes(origin)) {
+    return true;
+  }
+
+  // Check environment variable for app URL
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (appUrl) {
+    // Allow the configured app URL and common variations
+    const allowedFromEnv = [
+      appUrl,
+      appUrl.replace("https://", "http://"),
+      appUrl.replace("http://", "https://"),
+    ];
+    if (allowedFromEnv.includes(origin)) {
+      return true;
+    }
+  }
+
+  console.warn(`[WS Security] Connection rejected: invalid origin "${origin}"`);
+  return false;
+}
+
 // SECURITY: Require CLERK_SECRET_KEY for WebSocket admin verification
 if (!dev && !process.env.CLERK_SECRET_KEY) {
   console.error("FATAL: CLERK_SECRET_KEY must be set in production for WebSocket admin verification");
@@ -214,7 +275,7 @@ function joinBattleRoom(battleId: string, client: ClientConnection) {
   console.log(
     `[WS] Client ${client.clientId} joined battle ${battleId}. Room size: ${battleRooms.get(battleId)?.size}`,
   );
-  
+
   // Start cleanup interval when first battle room is created
   if (isNewRoom && !battleId.startsWith("__")) {
     startCleanupIntervalIfNeeded();
@@ -242,7 +303,7 @@ function leaveBattleRoom(battleId: string, client: ClientConnection) {
       battleRooms.delete(battleId);
       battleRoomMetadata.delete(battleId);
       console.log(`[WS] Room ${battleId} is empty, removed (including metadata)`);
-      
+
       // Stop cleanup interval if no active battle rooms remain
       if (!battleId.startsWith("__")) {
         stopCleanupIntervalIfEmpty();
@@ -545,6 +606,15 @@ app.prepare().then(async () => {
     const { pathname } = parse(request.url || "", true);
 
     if (pathname === "/ws") {
+      // SECURITY: Validate origin header to prevent cross-site WebSocket hijacking
+      const origin = request.headers.origin;
+      if (!isValidWebSocketOrigin(origin)) {
+        console.warn(`[WS Security] Rejected upgrade from origin: ${origin || "none"}`);
+        socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
+        socket.destroy();
+        return;
+      }
+
       // Handle our custom WebSocket endpoint
       wss.handleUpgrade(request, socket, head, (ws) => {
         wss.emit("connection", ws, request);
@@ -585,7 +655,7 @@ app.prepare().then(async () => {
             // Join new room
             connection.battleId = message.battleId;
             connection.clientId = message.clientId || `client-${Date.now()}`;
-            
+
             // SECURITY: Verify admin status server-side if client claims to be admin
             // Don't trust client-provided isAdmin flag without verification
             let isVerifiedAdmin = false;

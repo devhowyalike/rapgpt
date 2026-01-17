@@ -6,6 +6,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { getBattleById, saveBattle } from "@/lib/battle-storage";
+import { logError, logErrorWithContext } from "@/lib/error-utils";
 import type { SongGenerationBeatStyle } from "@/lib/shared/battle-types";
 import { generateSong } from "@/lib/suno/client";
 import { recordSongCreationUsage } from "@/lib/usage-storage";
@@ -134,14 +135,10 @@ export async function POST(
         console.log("[API] Recorded song creation usage for battle:", id);
       } catch (usageError) {
         // Log but don't fail the request if usage recording fails
-        console.error("[API] Failed to record song creation usage:", usageError);
+        logError("API Song Usage", usageError);
       }
     } catch (error) {
-      console.error("[API] Error initiating song generation:", error);
-      console.error("[API] Error details:", {
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
+      logErrorWithContext("API Song Generation", error, { battleId: id, beatStyle });
       return NextResponse.json(
         {
           error:
@@ -177,14 +174,9 @@ export async function POST(
       message: "Song generation started. Polling for completion...",
     });
   } catch (error) {
-    console.error("Unexpected error generating song:", error);
+    logError("API Song Generation", error);
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "An unexpected error occurred",
-      },
+      { error: "An unexpected error occurred" },
       { status: 500 },
     );
   }

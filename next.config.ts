@@ -1,7 +1,48 @@
 import type { NextConfig } from "next";
 
+// Derive WebSocket URL from app URL for CSP
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+const wsUrl = appUrl ? appUrl.replace("https://", "wss://").replace("http://", "ws://") : "";
+
+// Content Security Policy configuration
+// Allows necessary resources while blocking potentially malicious content
+const cspDirectives = [
+  // Default to self only
+  "default-src 'self'",
+  // Scripts: self, Clerk, inline scripts (needed for Next.js), and eval in dev
+  `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === "development" ? "'unsafe-eval'" : ""} https://*.clerk.com https://*.clerk.accounts.dev`,
+  // Styles: self, inline styles (needed for dynamic styling), Clerk
+  "style-src 'self' 'unsafe-inline' https://*.clerk.com",
+  // Images: self, data URIs, Clerk, and blob URLs for generated content
+  "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com https://images.clerk.dev https://*.sunoapi.org",
+  // Fonts: self and data URIs
+  "font-src 'self' data:",
+  // Connect: self, Clerk APIs, WebSocket, and Suno API
+  // Note: WebSocket URL derived from NEXT_PUBLIC_APP_URL since 'self' doesn't cover wss:
+  `connect-src 'self' ${wsUrl} https://*.clerk.com https://*.clerk.accounts.dev wss://*.clerk.com https://api.sunoapi.org ws://localhost:* wss://localhost:*`,
+  // Media: self and Suno audio URLs
+  "media-src 'self' https://*.sunoapi.org https://*.suno.ai blob:",
+  // Frames: self and Clerk (for auth popups)
+  "frame-src 'self' https://*.clerk.com https://*.clerk.accounts.dev",
+  // Frame ancestors: self only (prevents clickjacking)
+  "frame-ancestors 'self'",
+  // Form actions: self only
+  "form-action 'self'",
+  // Base URI: self only
+  "base-uri 'self'",
+  // Object sources: none (prevents plugins like Flash)
+  "object-src 'none'",
+  // Upgrade insecure requests in production
+  process.env.NODE_ENV === "production" ? "upgrade-insecure-requests" : "",
+].filter(Boolean).join("; ");
+
 // Security headers for all responses
 const securityHeaders = [
+  {
+    // Content Security Policy - restricts resource loading
+    key: "Content-Security-Policy",
+    value: cspDirectives,
+  },
   {
     // Prevent clickjacking attacks by disallowing embedding in frames
     key: "X-Frame-Options",
@@ -52,8 +93,8 @@ const nextConfig: NextConfig = {
     removeConsole:
       process.env.NODE_ENV === "production"
         ? {
-            exclude: ["error"],
-          }
+          exclude: ["error"],
+        }
         : false,
   },
   // Apply security headers to all routes
