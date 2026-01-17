@@ -73,6 +73,8 @@ function generateCspHeader(): string {
     "default-src 'self'",
     // Scripts: self, Clerk (including proxy domain), Cloudflare Insights, inline scripts (needed for Next.js), and eval ONLY in dev
     `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""} https://*.clerk.com https://*.clerk.accounts.dev https://clerk.rapgpt.app https://static.cloudflareinsights.com`,
+    // Workers: self and blob URLs (needed for Clerk's web workers)
+    "worker-src 'self' blob:",
     // Styles: self, inline styles (needed for dynamic styling), Clerk
     "style-src 'self' 'unsafe-inline' https://*.clerk.com https://clerk.rapgpt.app",
     // Images: self, data URIs, Clerk, and blob URLs for generated content
