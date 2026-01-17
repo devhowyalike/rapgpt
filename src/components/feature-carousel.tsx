@@ -8,6 +8,7 @@ import {
   Zap,
   Music,
   Mic2,
+  Mic,
   MessageSquare,
   Radio,
   Trophy,
@@ -47,7 +48,7 @@ const COLOR_CLASSES: Record<
   red: {
     icon: "text-red-500",
     bg: "bg-red-500/10",
-    border: "border-red-500/30",
+    border: "border-red-500/20",
     glow: "bg-red-500/30",
     text: "text-red-400",
     accent: "from-red-500 to-orange-500",
@@ -55,7 +56,7 @@ const COLOR_CLASSES: Record<
   yellow: {
     icon: "text-yellow-500",
     bg: "bg-yellow-500/10",
-    border: "border-yellow-500/30",
+    border: "border-yellow-500/20",
     glow: "bg-yellow-500/30",
     text: "text-yellow-400",
     accent: "from-yellow-500 to-amber-500",
@@ -63,7 +64,7 @@ const COLOR_CLASSES: Record<
   green: {
     icon: "text-green-500",
     bg: "bg-green-500/10",
-    border: "border-green-500/30",
+    border: "border-green-500/20",
     glow: "bg-green-500/30",
     text: "text-green-400",
     accent: "from-green-500 to-emerald-500",
@@ -71,7 +72,7 @@ const COLOR_CLASSES: Record<
   blue: {
     icon: "text-blue-500",
     bg: "bg-blue-500/10",
-    border: "border-blue-500/30",
+    border: "border-blue-500/20",
     glow: "bg-blue-500/30",
     text: "text-blue-400",
     accent: "from-blue-500 to-cyan-500",
@@ -79,7 +80,7 @@ const COLOR_CLASSES: Record<
   purple: {
     icon: "text-purple-500",
     bg: "bg-purple-500/10",
-    border: "border-purple-500/30",
+    border: "border-purple-500/20",
     glow: "bg-purple-500/30",
     text: "text-purple-400",
     accent: "from-purple-500 to-fuchsia-500",
@@ -137,6 +138,13 @@ const DEMO_COMPONENTS = {
       ),
     { ssr: false }
   ),
+  personaContext: dynamic(
+    () =>
+      import("@/components/learn-more/persona-context-demo").then(
+        (m) => m.PersonaContextDemo
+      ),
+    { ssr: false }
+  ),
 } as const;
 
 type DemoKey =
@@ -147,7 +155,8 @@ type DemoKey =
   | "voting"
   | "song"
   | "mcs"
-  | "stage";
+  | "stage"
+  | "personaContext";
 
 type Feature = {
   key: string;
@@ -174,6 +183,17 @@ const FEATURES: Feature[] = [
     color: "red" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-player-select.webp",
     demoKey: "mcs",
+    browserContentClassName: "aspect-[16/14] md:aspect-16/10",
+  },
+  {
+    key: "persona-context",
+    icon: <Mic className="w-5 h-5 md:w-6 md:h-6" />,
+    title: "Check the Rhime",
+    description:
+      "Give your MCs specific instructions. Tell them what to rap about, things to diss, or even what style to use.",
+    color: "yellow" as ColorKey,
+    screenshot: "/marketing/battle-system/rapgpt-player-select.webp",
+    demoKey: "personaContext",
     browserContentClassName: "aspect-[16/14] md:aspect-16/10",
   },
   {
@@ -328,7 +348,7 @@ const FeatureSlide = React.memo(
           >
             <div
               className={cn(
-                "flex items-start gap-4 p-4 rounded-xl bg-zinc-900/40 border",
+                "flex items-start gap-4 p-4 rounded-xl bg-zinc-950/80 backdrop-blur-md border",
                 featureColors.border
               )}
             >
@@ -353,15 +373,15 @@ const FeatureSlide = React.memo(
                 </p>
               </div>
             </div>
-          </motion.div>
 
-          {/* Glow Effect */}
-          <div
-            className={cn(
-              "absolute -bottom-6 md:-bottom-10 inset-x-8 md:inset-x-16 h-12 md:h-20 blur-2xl md:blur-3xl rounded-full opacity-50 -z-10",
-              featureColors.glow
-            )}
-          />
+            {/* Glow Effect - Moved inside for better containment */}
+            <div
+              className={cn(
+                "absolute -inset-4 blur-2xl md:blur-3xl rounded-full opacity-30 md:opacity-20 -z-10",
+                featureColors.glow
+              )}
+            />
+          </motion.div>
         </div>
       </CarouselItem>
     );
@@ -398,7 +418,7 @@ function MobileArrowButton({
     <button
       onClick={onClick}
       className={cn(
-        "flex md:hidden items-center justify-center size-9 rounded-full",
+        "flex lg:hidden items-center justify-center size-9 rounded-full",
         ARROW_BUTTON_CLASSES
       )}
       aria-label={ariaLabel}
@@ -570,19 +590,19 @@ export function FeatureCarousel({ className }: FeatureCarouselProps) {
             })}
           </CarouselContent>
 
-          {/* Desktop arrows - hidden on mobile */}
+          {/* Desktop arrows - hidden until lg breakpoint */}
           <CarouselPrevious
             className={cn(
-              "hidden md:flex md:-left-12 lg:-left-16 md:size-10 lg:size-12",
+              "hidden lg:flex lg:-left-12 xl:-left-16 lg:size-10 xl:size-12",
               ARROW_BUTTON_CLASSES,
-              "md:[&_svg]:size-6 lg:[&_svg]:size-7 z-20"
+              "lg:[&_svg]:size-6 xl:[&_svg]:size-7 z-20"
             )}
           />
           <CarouselNext
             className={cn(
-              "hidden md:flex md:-right-12 lg:-right-16 md:size-10 lg:size-12",
+              "hidden lg:flex lg:-right-12 xl:-right-16 lg:size-10 xl:size-12",
               ARROW_BUTTON_CLASSES,
-              "md:[&_svg]:size-6 lg:[&_svg]:size-7 z-20"
+              "lg:[&_svg]:size-6 xl:[&_svg]:size-7 z-20"
             )}
           />
         </Carousel>

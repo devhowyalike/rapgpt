@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Mic2, Music2, Play, Vote } from "lucide-react";
+import { Mic2, Music2, Sliders, Vote } from "lucide-react";
 import Link from "next/link";
 import { GridBackground } from "@/components/grid-background";
 
@@ -32,10 +32,9 @@ const STEPS: {
     bg: "bg-red-500/10",
   },
   {
-    icon: Play,
-    title: "Set the Stage",
-    description:
-      "Choose an iconic location to battle in. Watch the bars stream in real-time.",
+    icon: Sliders,
+    title: "Customize the Rhimes",
+    description: "Choose what the MCs rap about: pick topics, add context, or simply let them freestyle.",
     color: "text-blue-400",
     bg: "bg-blue-500/10",
   },

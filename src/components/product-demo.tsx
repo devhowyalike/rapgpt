@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Mic2, Music, Pause, Play, Users } from "lucide-react";
+import { Mic2, Music, Pause, Play, Sliders, Users } from "lucide-react";
 import { RapGPTLogo } from "./rapgpt-logo";
 import { CreateBattleCTA } from "./create-battle-cta";
 import { TAGLINE_2 } from "@/lib/constants";
@@ -38,9 +38,9 @@ export function ScreenshotShowcaseStatic({
       color: "red",
     },
     {
-      icon: <Clock className="w-6 h-6" />,
-      title: "3 Rounds",
-      description: "8 bars per verse, alternating turns.",
+      icon: <Sliders className="w-6 h-6" />,
+      title: "Customize",
+      description: "Set topics. You're in control.",
       color: "yellow",
     },
     {
