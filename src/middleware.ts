@@ -31,9 +31,7 @@ function generateCspHeader(): string {
   // Normalize to remove trailing slashes before converting to WebSocket URL
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
   const normalizedAppUrl = appUrl ? normalizeToOrigin(appUrl) : "";
-  // Use conditional to avoid corrupting URL - sequential .replace() would turn
-  // "https://example.com" -> "wss://example.com" -> "ws://s://example.com"
-  // because "http" is a substring of "wss://"
+  // Convert HTTP(S) URL to WebSocket URL (wss:// for https://, ws:// for http://)
   const wsUrl = normalizedAppUrl
     ? normalizedAppUrl.startsWith("https://")
       ? normalizedAppUrl.replace("https://", "wss://")

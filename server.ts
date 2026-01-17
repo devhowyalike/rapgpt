@@ -105,11 +105,13 @@ function isValidWebSocketOrigin(origin: string | undefined): boolean {
     const normalizedAppUrl = normalizeToOrigin(appUrl);
     // Skip if URL normalization failed (returns empty string for invalid URLs)
     if (normalizedAppUrl) {
-      const allowedFromEnv = [
-        normalizedAppUrl,
-        normalizedAppUrl.replace("https://", "http://"),
-        normalizedAppUrl.replace("http://", "https://"),
-      ];
+      // Build allowed origins list: the configured URL plus its http/https counterpart
+      const allowedFromEnv = [normalizedAppUrl];
+      if (normalizedAppUrl.startsWith("https://")) {
+        allowedFromEnv.push(normalizedAppUrl.replace("https://", "http://"));
+      } else if (normalizedAppUrl.startsWith("http://")) {
+        allowedFromEnv.push(normalizedAppUrl.replace("http://", "https://"));
+      }
       if (allowedFromEnv.includes(origin)) {
         return true;
       }
