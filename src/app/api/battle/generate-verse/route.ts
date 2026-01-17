@@ -222,7 +222,7 @@ export async function POST(req: Request) {
     // Trust the isLive parameter from the client (admin might send stale battle object)
     if (isLive) {
       console.log("[Generate Verse] Using live broadcast mode");
-      
+
       // In live mode, run generation in background and return immediately
       // This prevents the client from getting stuck waiting for streaming response
       // which can be buffered/blocked by proxies in production
@@ -267,6 +267,26 @@ export async function POST(req: Request) {
               round: battle.currentRound,
               error: "The AI couldn't generate this verse. Try adjusting your custom context.",
             } as VerseCompleteEvent & { error?: string });
+
+            // Record token usage even for refused content (tokens were still consumed)
+            try {
+              const usage = await result.getUsage();
+              await recordBattleTokenUsage({
+                id: crypto.randomUUID(),
+                battleId: battle.id,
+                round: battle.currentRound,
+                personaId,
+                provider: modelConfig.provider,
+                model: modelConfig.modelName,
+                inputTokens: usage.inputTokens,
+                outputTokens: usage.outputTokens,
+                totalTokens: usage.totalTokens,
+                cachedInputTokens: usage.cachedInputTokens,
+                status: "error",
+              });
+            } catch (err) {
+              logError("Generate Verse Token Usage (refused)", err);
+            }
             return;
           }
 
