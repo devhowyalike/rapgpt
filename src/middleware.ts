@@ -78,14 +78,14 @@ function generateCspHeader(): string {
     // Styles: self, inline styles (needed for dynamic styling), Clerk
     "style-src 'self' 'unsafe-inline' https://*.clerk.com https://clerk.rapgpt.app",
     // Images: self, data URIs, Clerk, and blob URLs for generated content
-    "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com https://images.clerk.dev https://clerk.rapgpt.app https://*.sunoapi.org",
+    "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com https://images.clerk.dev https://clerk.rapgpt.app https://*.sunoapi.org https://musicfile.api.box",
     // Fonts: self and data URIs
     "font-src 'self' data:",
     // Connect: self, Clerk APIs (including proxy domain), WebSocket, Suno API, and Cloudflare Insights
     // SECURITY: localhost WebSocket origins only allowed in development
     `connect-src 'self' ${wsUrlsString} https://*.clerk.com https://*.clerk.accounts.dev https://clerk.rapgpt.app wss://*.clerk.com https://api.sunoapi.org https://cloudflareinsights.com${isDev ? " ws://localhost:* wss://localhost:*" : ""}`,
     // Media: self and Suno audio URLs
-    "media-src 'self' https://*.sunoapi.org https://*.suno.ai blob:",
+    "media-src 'self' https://*.sunoapi.org https://*.suno.ai https://musicfile.api.box blob:",
     // Frames: self and Clerk (for auth popups)
     "frame-src 'self' https://*.clerk.com https://*.clerk.accounts.dev https://clerk.rapgpt.app",
     // Frame ancestors: self only (prevents clickjacking)
