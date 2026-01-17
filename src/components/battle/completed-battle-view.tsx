@@ -112,6 +112,20 @@ export function CompletedBattleView({
   const showSongPlayer =
     battle.status === "completed" && battle.generatedSong?.audioUrl;
 
+  // Auto-open song drawer if #song fragment is present in URL
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const hash = window.location.hash;
+    if (hash === "#song" && showSongPlayer) {
+      // Open the song drawer
+      setActiveTab("song");
+      setIsDrawerOpen(true);
+      // Clear the hash from URL without triggering a navigation
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, [showSongPlayer]);
+
   // Handle audio ended event at parent level (in case drawer is closed when song ends)
   useEffect(() => {
     const audio = audioRef.current;
