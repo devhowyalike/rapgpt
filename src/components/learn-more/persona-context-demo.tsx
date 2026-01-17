@@ -61,34 +61,36 @@ function DemoContent({ isMobile, text, isListening, interimText }: DemoContentPr
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0" />
       
       <div className={cn(
-        "relative z-10 flex flex-col flex-1 items-center w-full",
-        isMobile ? "p-4 pt-8" : "p-8 pt-12"
+        "relative z-10 flex flex-col flex-1 items-center justify-center w-full",
+        isMobile ? "p-4" : "p-8"
       )}>
         {/* Header Section */}
-        <div className="text-center mb-6 animate-slide-up">
-          <h1 className={cn(
-            "font-bold tracking-wide uppercase font-(family-name:--font-bebas-neue)",
-            isMobile ? "text-3xl" : "text-5xl"
-          )}>
-            <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text pr-2">
-              CHECK THE RHIME
-            </span>
-          </h1>
-          <p className="text-gray-400 mt-1 text-xs md:text-sm">
-            Give {persona.name} specific battle instructions
-          </p>
-        </div>
+        {!isMobile && (
+          <div className="text-center mb-6 animate-slide-up w-full">
+            <h1 className={cn(
+              "font-bold tracking-wide uppercase font-(family-name:--font-bebas-neue)",
+              "text-4xl lg:text-5xl"
+            )}>
+              <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text pr-2">
+                CHECK THE RHIME
+              </span>
+            </h1>
+            <p className="text-gray-400 mt-1 text-xs md:text-sm hidden lg:block">
+              Give {persona.name} specific battle instructions
+            </p>
+          </div>
+        )}
 
         {/* Main Content Area */}
         <div className={cn(
-          "flex flex-col items-center justify-start w-full gap-4 md:gap-6 flex-1 max-w-lg mx-auto",
+          "flex flex-col items-center justify-center w-full gap-4 md:gap-6 max-w-lg mx-auto",
         )}>
           {/* Persona Preview */}
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-1.5 md:gap-2">
             <div
               className={cn(
                 "relative rounded-full border-2 overflow-hidden",
-                isMobile ? "w-16 h-16" : "w-24 h-24",
+                isMobile ? "w-12 h-12" : "w-24 h-24",
                 borderColorClass
               )}
               style={{
