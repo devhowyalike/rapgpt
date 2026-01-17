@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import { SiteHeader } from "@/components/site-header";
 import { Footer } from "@/components/footer";
 import { LearnMoreHero } from "@/components/learn-more/learn-more-hero";
@@ -14,12 +15,15 @@ export const metadata = createMetadata({
   path: "/learn-more",
 });
 
-export default function LearnMorePage() {
+export default async function LearnMorePage() {
+  const { userId } = await auth();
+  const isAuthenticated = !!userId;
+
   return (
     <>
       <SiteHeader />
 
-      <LearnMoreHero />
+      <LearnMoreHero isAuthenticated={isAuthenticated} />
 
       <HowItWorks />
 
@@ -35,7 +39,7 @@ export default function LearnMorePage() {
           {/* Bottom CTA */}
           <div className="flex justify-center pb-2 pt-0">
             <CreateBattleCTA
-              isAuthenticated={false}
+              isAuthenticated={isAuthenticated}
               title="Start Your First Battle"
             />
           </div>

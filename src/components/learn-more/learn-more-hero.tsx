@@ -6,7 +6,11 @@ import { cn } from "@/lib/utils";
 import { FeatureCard, type FeatureCardColor } from "@/components/feature-card";
 import { GridBackground } from "@/components/grid-background";
 
-export function LearnMoreHero() {
+interface LearnMoreHeroProps {
+  isAuthenticated?: boolean;
+}
+
+export function LearnMoreHero({ isAuthenticated = false }: LearnMoreHeroProps) {
   const features: {
     icon: React.ReactNode;
     label: string;
@@ -67,7 +71,7 @@ export function LearnMoreHero() {
 
           {/* CTA */}
           <div className="pt-2">
-            <CreateBattleCTA isAuthenticated={false} />
+            <CreateBattleCTA isAuthenticated={isAuthenticated} />
           </div>
 
           {/* Features */}
