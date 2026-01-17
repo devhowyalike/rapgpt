@@ -22,6 +22,7 @@ export interface VerseGenerationResult {
     totalTokens: number;
     cachedInputTokens: number;
   }>;
+  getFinishReason: () => Promise<string | null>;
 }
 
 /**
@@ -77,7 +78,12 @@ async function generateWithAnthropicSDK(
     };
   };
 
-  return { textStream, getUsage };
+  const getFinishReason = async () => {
+    const finalMessage = await stream.finalMessage();
+    return finalMessage.stop_reason;
+  };
+
+  return { textStream, getUsage, getFinishReason };
 }
 
 /**
@@ -128,7 +134,12 @@ async function generateWithVercelSDK(
     };
   };
 
-  return { textStream, getUsage };
+  const getFinishReason = async () => {
+    const finishReason = await result.finishReason;
+    return finishReason;
+  };
+
+  return { textStream, getUsage, getFinishReason };
 }
 
 /**

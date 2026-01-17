@@ -15,7 +15,15 @@ export const personaSchema = z.object({
   avatar: z.string(),
   accentColor: z.string(),
   systemPrompt: z.string(),
+  encryptedCustomContext: z.string().optional(),
 });
+
+// Custom context validation (for user input before encryption)
+export const customContextSchema = z
+  .string()
+  .max(120, "Custom context must be 120 characters or less")
+  .optional()
+  .transform((val) => (val ? sanitizeText(val) : val));
 
 // Bar validation
 export const barSchema = z.object({

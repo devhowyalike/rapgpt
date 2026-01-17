@@ -24,18 +24,21 @@ import { SelectionGrid } from "./selection/selection-grid";
 import { VsBadge } from "./selection/vs-badge";
 import { SessionRestoreLoading } from "./session-restore-loading";
 import { StageSelect } from "./stage-select";
+import { PersonaContextInput } from "./selection/persona-context-input";
 
 const SESSION_STORAGE_KEY = "rapgpt_battle_selections";
 
 interface BattleSelections {
   player1Id?: string;
   player2Id?: string;
+  player1CustomContext?: string;
+  player2CustomContext?: string;
   createAsLive: boolean;
   votingEnabled: boolean;
   commentsEnabled: boolean;
   showStageSelect: boolean;
   autoStartOnAdvance: boolean;
-  selectionStep?: "player1" | "player2" | "complete";
+  selectionStep?: "player1" | "player1-context" | "player2" | "player2-context" | "complete";
   editPlayer?: boolean;
   fromStage?: boolean;
 }
@@ -74,6 +77,10 @@ export function CharacterSelect({
   const [autoStartOnAdvance, setAutoStartOnAdvance] = useState(true);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  
+  // Custom context state for each player (max 120 characters)
+  const [player1CustomContext, setPlayer1CustomContext] = useState("");
+  const [player2CustomContext, setPlayer2CustomContext] = useState("");
 
   // Check if features are globally enabled via env flags
   const isVotingGloballyEnabled =
@@ -149,6 +156,10 @@ export function CharacterSelect({
           setShowStageSelect(selections.showStageSelect);
           setAutoStartOnAdvance(selections.autoStartOnAdvance ?? true);
           setSelectionStep(selections.selectionStep ?? "player1");
+          
+          // Restore custom contexts
+          setPlayer1CustomContext(selections.player1CustomContext ?? "");
+          setPlayer2CustomContext(selections.player2CustomContext ?? "");
 
           // Add a minimum delay so the loading screen is visible to users
           // This provides visual feedback that the session is being restored
@@ -182,6 +193,8 @@ export function CharacterSelect({
         ...previous,
         player1Id: player1?.id,
         player2Id: player2?.id,
+        player1CustomContext,
+        player2CustomContext,
         createAsLive,
         votingEnabled,
         commentsEnabled,
@@ -196,6 +209,8 @@ export function CharacterSelect({
   }, [
     player1,
     player2,
+    player1CustomContext,
+    player2CustomContext,
     createAsLive,
     votingEnabled,
     commentsEnabled,
@@ -240,10 +255,12 @@ export function CharacterSelect({
   };
 
   // Compute hover previews based on active selection step
+  const isSelectingPlayer1 = selectionStep === "player1";
+  const isSelectingPlayer2 = selectionStep === "player2";
   const previewedPlayer1 =
-    selectionStep === "player1" ? hoveredPersona || player1 : player1;
+    isSelectingPlayer1 ? hoveredPersona || player1 : player1;
   const previewedPlayer2 =
-    selectionStep === "player2" ? hoveredPersona || player2 : player2;
+    isSelectingPlayer2 ? hoveredPersona || player2 : player2;
 
   // Show loading screen while hydrating from sessionStorage
   if (!isHydrated) {
@@ -266,6 +283,8 @@ export function CharacterSelect({
             <StageSelect
               player1={player1}
               player2={player2}
+              player1CustomContext={player1CustomContext}
+              player2CustomContext={player2CustomContext}
               isAdmin={isAdmin}
               votingEnabled={votingEnabled}
               commentsEnabled={commentsEnabled}
@@ -279,6 +298,45 @@ export function CharacterSelect({
               autoStartOnAdvance={autoStartOnAdvance}
               onAutoStartOnAdvanceChange={setAutoStartOnAdvance}
               sessionStorageKey={SESSION_STORAGE_KEY}
+            />
+          </motion.div>
+        ) : selectionStep === "player1-context" && player1 ? (
+          <motion.div
+            key="player1-context"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="flex-1 flex flex-col min-h-0"
+          >
+            <PersonaContextInput
+              persona={player1}
+              playerNumber={1}
+              customContext={player1CustomContext}
+              onContextChange={setPlayer1CustomContext}
+              onContinue={() => setSelectionStep("player2")}
+              onBack={() => setSelectionStep("player1")}
+            />
+          </motion.div>
+        ) : selectionStep === "player2-context" && player2 ? (
+          <motion.div
+            key="player2-context"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="flex-1 flex flex-col min-h-0"
+          >
+            <PersonaContextInput
+              persona={player2}
+              playerNumber={2}
+              customContext={player2CustomContext}
+              onContextChange={setPlayer2CustomContext}
+              onContinue={() => {
+                setSelectionStep("complete");
+                handleProceedToStageSelect();
+              }}
+              onBack={() => setSelectionStep("player2")}
             />
           </motion.div>
         ) : (
@@ -493,8 +551,8 @@ export function CharacterSelect({
                           } catch (error) {
                             console.error("Failed to check edit flags:", error);
                           }
-                          // Normal flow: proceed to player 2
-                          setSelectionStep("player2");
+                          // Normal flow: proceed to custom context for player 1
+                          setSelectionStep("player1-context");
                         }
                       }}
                       disabled={!player1}
@@ -507,7 +565,7 @@ export function CharacterSelect({
                     >
                       CONFIRM PLAYER 1
                     </button>
-                  ) : (
+                  ) : selectionStep === "player2" ? (
                     <button
                       onClick={() => {
                         if (player2) {
@@ -545,8 +603,8 @@ export function CharacterSelect({
                           } catch (error) {
                             console.error("Failed to check edit flags:", error);
                           }
-                          setSelectionStep("complete");
-                          handleProceedToStageSelect();
+                          // Normal flow: proceed to custom context for player 2
+                          setSelectionStep("player2-context");
                         }
                       }}
                       disabled={!player2}
@@ -559,7 +617,7 @@ export function CharacterSelect({
                     >
                       CONFIRM PLAYER 2
                     </button>
-                  )}
+                  ) : null}
                 </div>
               </div>
 

@@ -20,11 +20,35 @@ import { SiteHeader } from "@/components/site-header";
 import { Footer } from "@/components/footer";
 import { PageHero } from "@/components/page-hero";
 import { PageTitle } from "@/components/page-title";
+import { decrypt } from "@/lib/auth/encryption";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { getDisplayNameFromDbUser } from "@/lib/get-display-name";
 import { db } from "@/lib/db/client";
 import { type BattleDB, battles, users } from "@/lib/db/schema";
 import { APP_TITLE } from "@/lib/constants";
+
+/** Safely decrypt a string, returning undefined if decryption fails */
+function safeDecrypt(encrypted: string | undefined): string | undefined {
+  if (!encrypted) return undefined;
+  try {
+    return decrypt(encrypted);
+  } catch {
+    return undefined;
+  }
+}
+
+/** Extract decrypted custom contexts from battle personas */
+function getDecryptedContexts(battle: BattleDB): {
+  player1CustomContext?: string;
+  player2CustomContext?: string;
+} {
+  const p1Context = (battle.player1Persona as any)?.encryptedCustomContext;
+  const p2Context = (battle.player2Persona as any)?.encryptedCustomContext;
+  return {
+    player1CustomContext: safeDecrypt(p1Context),
+    player2CustomContext: safeDecrypt(p2Context),
+  };
+}
 
 export async function generateMetadata({
   params,
@@ -313,6 +337,13 @@ export default async function ProfilePage({
               shareUrl={shareUrl}
               isOwnProfile={isOwnProfile}
               userIsProfilePublic={profileUser.isProfilePublic}
+              decryptedContexts={
+                isOwnProfile && !isViewingAsPublic
+                  ? Object.fromEntries(
+                      userBattles.map((b) => [b.id, getDecryptedContexts(b)])
+                    )
+                  : undefined
+              }
             />
           )}
         </div>

@@ -68,6 +68,10 @@ interface MyBattleCardProps {
   showManagement?: boolean;
   userIsProfilePublic?: boolean;
   variant?: CardVariant;
+  /** Decrypted custom context for player 1 (only shown to battle owner) */
+  player1CustomContext?: string;
+  /** Decrypted custom context for player 2 (only shown to battle owner) */
+  player2CustomContext?: string;
 }
 
 export function MyBattleCard({
@@ -76,6 +80,8 @@ export function MyBattleCard({
   showManagement = false,
   userIsProfilePublic = true,
   variant = "original",
+  player1CustomContext,
+  player2CustomContext,
 }: MyBattleCardProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -979,63 +985,83 @@ export function MyBattleCard({
               </div>
 
               {/* Names */}
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span
-                  className={cn(
-                    "font-semibold text-sm truncate",
-                    winnerPosition === "player1"
-                      ? "text-yellow-400"
-                      : "text-white"
-                  )}
-                >
-                  {personas.player1.name}
-                </span>
-                {winnerPosition === "player1" && (
-                  <span className="text-sm shrink-0">👑</span>
-                )}
-
-                {/* Score or VS */}
-                {isCompleted ? (
-                  <div className="flex items-center gap-1.5 font-mono text-sm font-bold px-2 shrink-0">
-                    <span
-                      className={
-                        winnerPosition === "player1"
-                          ? "text-yellow-400"
-                          : "text-white/60"
-                      }
-                    >
-                      {finalStats?.player1TotalScore}
-                    </span>
-                    <span className="text-white/20">-</span>
-                    <span
-                      className={
-                        winnerPosition === "player2"
-                          ? "text-yellow-400"
-                          : "text-white/60"
-                      }
-                    >
-                      {finalStats?.player2TotalScore}
-                    </span>
-                  </div>
-                ) : (
-                  <span className="text-xs font-bold text-white/25 uppercase tracking-widest px-2 shrink-0">
-                    vs
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className={cn(
+                      "font-semibold text-sm truncate",
+                      winnerPosition === "player1"
+                        ? "text-yellow-400"
+                        : "text-white"
+                    )}
+                  >
+                    {personas.player1.name}
                   </span>
-                )}
-
-                {winnerPosition === "player2" && (
-                  <span className="text-sm shrink-0">👑</span>
-                )}
-                <span
-                  className={cn(
-                    "font-semibold text-sm truncate",
-                    winnerPosition === "player2"
-                      ? "text-yellow-400"
-                      : "text-white"
+                  {winnerPosition === "player1" && (
+                    <span className="text-sm shrink-0">👑</span>
                   )}
-                >
-                  {personas.player2.name}
-                </span>
+
+                  {/* Score or VS */}
+                  {isCompleted ? (
+                    <div className="flex items-center gap-1.5 font-mono text-sm font-bold px-2 shrink-0">
+                      <span
+                        className={
+                          winnerPosition === "player1"
+                            ? "text-yellow-400"
+                            : "text-white/60"
+                        }
+                      >
+                        {finalStats?.player1TotalScore}
+                      </span>
+                      <span className="text-white/20">-</span>
+                      <span
+                        className={
+                          winnerPosition === "player2"
+                            ? "text-yellow-400"
+                            : "text-white/60"
+                        }
+                      >
+                        {finalStats?.player2TotalScore}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-xs font-bold text-white/25 uppercase tracking-widest px-2 shrink-0">
+                      vs
+                    </span>
+                  )}
+
+                  {winnerPosition === "player2" && (
+                    <span className="text-sm shrink-0">👑</span>
+                  )}
+                  <span
+                    className={cn(
+                      "font-semibold text-sm truncate",
+                      winnerPosition === "player2"
+                        ? "text-yellow-400"
+                        : "text-white"
+                    )}
+                  >
+                    {personas.player2.name}
+                  </span>
+                </div>
+                {/* Custom context display (owner only) */}
+                {(player1CustomContext || player2CustomContext) && (
+                  <div className="flex items-center gap-2 text-[10px] text-white/40 italic">
+                    {player1CustomContext && (
+                      <span className="truncate max-w-[120px]" title={player1CustomContext}>
+                        "{player1CustomContext}"
+                      </span>
+                    )}
+                    {player1CustomContext && player2CustomContext && (
+                      <span className="text-white/20">|</span>
+                    )}
+                    {player2CustomContext && (
+                      <span className="truncate max-w-[120px]" title={player2CustomContext}>
+                        "{player2CustomContext}"
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 

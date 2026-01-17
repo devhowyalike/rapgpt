@@ -47,7 +47,7 @@ export function getVariantIndex(personaId: string, primaryId: string): number {
  */
 export function getHoverPreviewPersona(
   primary: ClientPersona,
-  selectionStep: "player1" | "player2" | "complete",
+  selectionStep: "player1" | "player1-context" | "player2" | "player2-context" | "complete",
   player1: ClientPersona | null,
   player2: ClientPersona | null,
 ): ClientPersona {
@@ -60,7 +60,8 @@ export function getHoverPreviewPersona(
     return player1;
   } else if (selectionStep === "player2" && p2InGroup && player2) {
     return player2;
-  } else if (selectionStep === "complete") {
+  } else if (selectionStep === "complete" || selectionStep === "player1-context" || selectionStep === "player2-context") {
+    // Context steps and complete step: show selected variants
     if (p1InGroup && player1) {
       return player1;
     } else if (p2InGroup && player2) {

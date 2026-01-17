@@ -9,7 +9,7 @@ import { getPersonaGroups } from "@/lib/shared/personas/client";
 
 const personaGroups = getPersonaGroups();
 
-type SelectionStep = "player1" | "player2" | "complete";
+type SelectionStep = "player1" | "player1-context" | "player2" | "player2-context" | "complete";
 
 interface UsePersonaSelectionReturn {
   player1: ClientPersona | null;

@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { encrypt } from "@/lib/auth/encryption";
 import { getOrCreateUser } from "@/lib/auth/sync-user";
 import { saveBattle } from "@/lib/battle-storage";
 import {
@@ -9,11 +10,12 @@ import {
   createRateLimitResponse,
   RATE_LIMITS,
 } from "@/lib/rate-limit";
+import { sanitizeText } from "@/lib/sanitization";
 import type { Battle } from "@/lib/shared";
 import { getPersona } from "@/lib/shared/personas";
 import { createBattleRequestSchema } from "@/lib/validations/battle";
 
-// Extended schema to include isFeatured, votingEnabled, and commentsEnabled
+// Extended schema to include isFeatured, votingEnabled, commentsEnabled, and custom contexts
 // Use .merge() instead of .extend() because createBattleRequestSchema contains refinements
 const extendedBattleRequestSchema = createBattleRequestSchema.merge(
   z.object({
@@ -21,6 +23,9 @@ const extendedBattleRequestSchema = createBattleRequestSchema.merge(
     votingEnabled: z.boolean().optional().default(false),
     commentsEnabled: z.boolean().optional().default(true),
     autoStartOnAdvance: z.boolean().optional().default(true),
+    // Custom context for personas (max 120 characters, optional)
+    player1CustomContext: z.string().max(120).optional(),
+    player2CustomContext: z.string().max(120).optional(),
   }),
 );
 
@@ -68,6 +73,8 @@ export async function POST(request: NextRequest) {
       votingEnabled,
       commentsEnabled,
       autoStartOnAdvance,
+      player1CustomContext,
+      player2CustomContext,
     } = validation.data;
 
     // If creating a featured battle, verify user is admin
@@ -79,15 +86,33 @@ export async function POST(request: NextRequest) {
     }
 
     // Get personas
-    const player1Persona = getPersona(player1PersonaId);
-    const player2Persona = getPersona(player2PersonaId);
+    const player1PersonaBase = getPersona(player1PersonaId);
+    const player2PersonaBase = getPersona(player2PersonaId);
 
-    if (!player1Persona || !player2Persona) {
+    if (!player1PersonaBase || !player2PersonaBase) {
       return NextResponse.json(
         { error: "Invalid persona ID(s)" },
         { status: 400 },
       );
     }
+
+    // Sanitize and encrypt custom contexts if provided
+    const player1EncryptedContext = player1CustomContext
+      ? encrypt(sanitizeText(player1CustomContext.trim()))
+      : undefined;
+    const player2EncryptedContext = player2CustomContext
+      ? encrypt(sanitizeText(player2CustomContext.trim()))
+      : undefined;
+
+    // Create persona objects with optional encrypted custom context
+    const player1Persona = {
+      ...player1PersonaBase,
+      ...(player1EncryptedContext && { encryptedCustomContext: player1EncryptedContext }),
+    };
+    const player2Persona = {
+      ...player2PersonaBase,
+      ...(player2EncryptedContext && { encryptedCustomContext: player2EncryptedContext }),
+    };
 
     // Generate battle ID and metadata
     // SECURITY: Use cryptographic random ID to prevent enumeration attacks
@@ -99,7 +124,7 @@ export async function POST(request: NextRequest) {
     // Create new battle
     const battle: Battle = {
       id: battleId,
-      title: `${player1Persona.name} vs. ${player2Persona.name}`,
+      title: `${player1PersonaBase.name} vs. ${player2PersonaBase.name}`,
       month,
       year,
       status: "paused",
