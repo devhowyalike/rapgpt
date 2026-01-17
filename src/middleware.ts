@@ -52,7 +52,8 @@ function generateCspHeader(): string {
     // Fonts: self and data URIs
     "font-src 'self' data:",
     // Connect: self, Clerk APIs, WebSocket, and Suno API
-    `connect-src 'self' ${wsUrl} https://*.clerk.com https://*.clerk.accounts.dev wss://*.clerk.com https://api.sunoapi.org ws://localhost:* wss://localhost:*`,
+    // SECURITY: localhost WebSocket origins only allowed in development
+    `connect-src 'self' ${wsUrl} https://*.clerk.com https://*.clerk.accounts.dev wss://*.clerk.com https://api.sunoapi.org${isDev ? " ws://localhost:* wss://localhost:*" : ""}`,
     // Media: self and Suno audio URLs
     "media-src 'self' https://*.sunoapi.org https://*.suno.ai blob:",
     // Frames: self and Clerk (for auth popups)
