@@ -8,6 +8,7 @@ import {
   Zap,
   Music,
   Mic2,
+  Mic,
   MessageSquare,
   Radio,
   Trophy,
@@ -137,6 +138,13 @@ const DEMO_COMPONENTS = {
       ),
     { ssr: false }
   ),
+  personaContext: dynamic(
+    () =>
+      import("@/components/learn-more/persona-context-demo").then(
+        (m) => m.PersonaContextDemo
+      ),
+    { ssr: false }
+  ),
 } as const;
 
 type DemoKey =
@@ -147,7 +155,8 @@ type DemoKey =
   | "voting"
   | "song"
   | "mcs"
-  | "stage";
+  | "stage"
+  | "personaContext";
 
 type Feature = {
   key: string;
@@ -174,6 +183,17 @@ const FEATURES: Feature[] = [
     color: "red" as ColorKey,
     screenshot: "/marketing/battle-system/rapgpt-player-select.webp",
     demoKey: "mcs",
+    browserContentClassName: "aspect-[16/14] md:aspect-16/10",
+  },
+  {
+    key: "persona-context",
+    icon: <Mic className="w-5 h-5 md:w-6 md:h-6" />,
+    title: "Check the Rhime",
+    description:
+      "Give your MCs specific instructions. Tell them what to rap about, things to diss, or even what style to use.",
+    color: "yellow" as ColorKey,
+    screenshot: "/marketing/battle-system/rapgpt-player-select.webp",
+    demoKey: "personaContext",
     browserContentClassName: "aspect-[16/14] md:aspect-16/10",
   },
   {
