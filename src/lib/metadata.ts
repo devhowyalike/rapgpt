@@ -11,6 +11,8 @@ type MetadataOptions = {
   image?: string;
   noIndex?: boolean;
   type?: "website" | "article";
+  /** Path for og:url (e.g. "/battle/abc123"). Next.js resolves against metadataBase. */
+  path?: string;
 };
 
 /**
@@ -18,9 +20,9 @@ type MetadataOptions = {
  *
  * Works for both static and dynamic pages:
  *
- * Static: `export const metadata = createMetadata({ title: "Roster", ... })`
+ * Static: `export const metadata = createMetadata({ title: "Roster", path: "/roster", ... })`
  *
- * Dynamic: `export async function generateMetadata() { return createMetadata({ ... }) }`
+ * Dynamic: `export async function generateMetadata() { return createMetadata({ path: `/battle/${id}`, ... }) }`
  */
 export function createMetadata({
   title,
@@ -28,6 +30,7 @@ export function createMetadata({
   image = DEFAULT_IMAGE,
   noIndex = false,
   type = "website",
+  path,
 }: MetadataOptions): Metadata {
   const fullTitle = `${title} | ${APP_TITLE}`;
 
@@ -38,6 +41,7 @@ export function createMetadata({
       title: fullTitle,
       description,
       type,
+      url: path,
       images: [{ url: image, width: 1200, height: 630, alt: fullTitle }],
     },
     twitter: {

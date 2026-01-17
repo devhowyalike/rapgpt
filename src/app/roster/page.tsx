@@ -10,6 +10,7 @@ import { APP_TITLE } from "@/lib/constants";
 export const metadata = createMetadata({
   title: "The Roster",
   description: `Explore the roster of AI MCs in ${APP_TITLE}. Each persona has their own unique flow, style, and personality.`,
+  path: "/roster",
 });
 
 export default async function RosterPage() {

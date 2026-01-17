@@ -31,6 +31,7 @@ export const metadata: Metadata = {
     siteName: APP_TITLE,
     title: defaultTitle,
     description: DEFAULT_DESCRIPTION,
+    url: "/",
     images: [
       { url: DEFAULT_IMAGE, width: 1200, height: 630, alt: defaultTitle },
     ],

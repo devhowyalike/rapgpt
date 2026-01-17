@@ -36,6 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: `Watch the AI freestyle battle between ${persona1} and ${persona2}`,
     type: "article",
     image: stage?.backgroundImage,
+    path: `/battle/${id}`,
   });
 }
 

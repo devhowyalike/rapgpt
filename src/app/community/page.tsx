@@ -18,6 +18,7 @@ import { APP_TITLE } from "@/lib/constants";
 export const metadata = createMetadata({
   title: "Community",
   description: `See who's been cooking up the hottest battles and songs from the ${APP_TITLE} community.`,
+  path: "/community",
 });
 
 // Revalidate every 5 minutes

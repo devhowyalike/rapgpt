@@ -11,6 +11,7 @@ import { APP_TITLE } from "@/lib/constants";
 export const metadata = createMetadata({
   title: "Learn More",
   description: `Explore the interface and features of ${APP_TITLE}. Choose your MCs, set the stage, and watch the battle unfold.`,
+  path: "/learn-more",
 });
 
 export default function LearnMorePage() {
