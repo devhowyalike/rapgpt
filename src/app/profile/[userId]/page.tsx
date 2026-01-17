@@ -12,6 +12,7 @@ import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ClientDate } from "@/components/client-date";
 import { GuestProfileCallout } from "@/components/guest-profile-callout";
 import { ProfileBattlesFilter } from "@/components/profile-battles-filter";
 import { ProfileHeaderMenu } from "@/components/profile-header-menu";
@@ -215,10 +216,11 @@ export default async function ProfilePage({
         <div className="flex flex-col items-center gap-3 animate-slide-up [animation-delay:200ms]">
           <p className="text-gray-400 text-lg">
             Member since{" "}
-            {new Date(profileUser.createdAt).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-            })}
+            <ClientDate
+              date={profileUser.createdAt}
+              locale="en-US"
+              options={{ year: "numeric", month: "long" }}
+            />
           </p>
 
           {/* Admin viewing deleted profile warning */}
@@ -233,7 +235,8 @@ export default async function ProfilePage({
                 Account Deleted
                 {profileUser.deletedAt && (
                   <span className="text-red-400/70">
-                    · {new Date(profileUser.deletedAt).toLocaleDateString()}
+                    ·{" "}
+                    <ClientDate date={profileUser.deletedAt} />
                   </span>
                 )}
               </span>

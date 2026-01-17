@@ -8,6 +8,7 @@
 import { motion } from "framer-motion";
 import { Download, Music2, Pause, Play, Volume2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { ClientDate } from "@/components/client-date";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
@@ -259,8 +260,8 @@ export function SongPlayer({
 
         {/* Generated Info */}
         <div className="text-xs text-gray-500 text-center pt-2 border-t border-gray-800">
-          Generated on {new Date(song.generatedAt).toLocaleDateString()} •
-          Quality Matters&trade;
+          Generated on <ClientDate date={song.generatedAt} /> • Quality
+          Matters&trade;
         </div>
       </CardContent>
     </Card>

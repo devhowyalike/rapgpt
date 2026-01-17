@@ -6,6 +6,7 @@ import Link from "next/link";
 import * as React from "react";
 import { DeleteBattleButton } from "@/components/admin/delete-battle-button";
 import { DeleteUserButton } from "@/components/admin/delete-user-button";
+import { ClientDate } from "@/components/client-date";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import type { BattleDB, UserDB } from "@/lib/db/schema";
 
@@ -227,7 +228,10 @@ export function AdminDashboardClient({
                                         <>
                                           <span className="w-1 h-1 bg-gray-600 rounded-full" />
                                           <span className="text-red-400">
-                                            Deleted {new Date(selectedUser.deletedAt).toLocaleDateString()}
+                                            Deleted{" "}
+                                            <ClientDate
+                                              date={selectedUser.deletedAt}
+                                            />
                                           </span>
                                         </>
                                       )}
@@ -353,11 +357,10 @@ export function AdminDashboardClient({
                               </div>
 
                               <div className="flex items-center gap-3 mt-4 flex-wrap">
-                                <span className="text-gray-500 text-xs">
-                                  {new Date(
-                                    battle.createdAt
-                                  ).toLocaleDateString()}
-                                </span>
+                                <ClientDate
+                                  date={battle.createdAt}
+                                  className="text-gray-500 text-xs"
+                                />
                                 <span className="w-1 h-1 bg-gray-700 rounded-full" />
                                 <div
                                   className={`flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border ${

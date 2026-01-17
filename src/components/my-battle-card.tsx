@@ -19,6 +19,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
+import { ClientDate } from "@/components/client-date";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { useBattleShare } from "@/hooks/use-battle-share";
 import { getWinnerPosition } from "@/lib/battle-engine";
@@ -472,12 +473,10 @@ export function MyBattleCard({
               {stage.flag} {stage.name}
             </span>
             <span>·</span>
-            <span>
-              {battle.createdAt.toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-              })}
-            </span>
+            <ClientDate
+              date={battle.createdAt}
+              options={{ month: "short", day: "numeric" }}
+            />
             {isPaused && (
               <>
                 <span>·</span>
@@ -655,13 +654,10 @@ export function MyBattleCard({
 
           {/* Bottom Bar */}
           <div className="flex items-center justify-between px-4 py-2 bg-zinc-800/50 text-xs text-zinc-400 border-t border-zinc-700">
-            <span>
-              {battle.createdAt.toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </span>
+            <ClientDate
+              date={battle.createdAt}
+              options={{ month: "short", day: "numeric", year: "numeric" }}
+            />
             <div className="flex items-center gap-2">
               {battle.generatedSong?.audioUrl && (
                 <Music2 size={12} className="text-green-400" />
@@ -880,12 +876,10 @@ export function MyBattleCard({
                 {stage.flag} {stage.name}
               </span>
               <span>•</span>
-              <span>
-                {battle.createdAt.toLocaleDateString(undefined, {
-                  month: "short",
-                  day: "numeric",
-                })}
-              </span>
+              <ClientDate
+                date={battle.createdAt}
+                options={{ month: "short", day: "numeric" }}
+              />
             </div>
 
             {(isLive || isPaused) && (
@@ -1051,12 +1045,10 @@ export function MyBattleCard({
                 {stage.flag} {stage.name}
               </span>
               <span className="text-white/20">·</span>
-              <span>
-                {battle.createdAt.toLocaleDateString(undefined, {
-                  month: "short",
-                  day: "numeric",
-                })}
-              </span>
+              <ClientDate
+                date={battle.createdAt}
+                options={{ month: "short", day: "numeric" }}
+              />
               {isPaused && (
                 <>
                   <span className="text-white/20">·</span>
@@ -1131,12 +1123,10 @@ export function MyBattleCard({
               {stage.flag} {stage.name}
             </span>
             <span className="text-white/20">·</span>
-            <span>
-              {battle.createdAt.toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-              })}
-            </span>
+            <ClientDate
+              date={battle.createdAt}
+              options={{ month: "short", day: "numeric" }}
+            />
             {isPaused && (
               <>
                 <span className="text-white/20">·</span>
@@ -1260,13 +1250,11 @@ export function MyBattleCard({
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="whitespace-nowrap">
-                  {battle.createdAt.toLocaleDateString(undefined, {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </span>
+                <ClientDate
+                  date={battle.createdAt}
+                  options={{ month: "short", day: "numeric", year: "numeric" }}
+                  className="whitespace-nowrap"
+                />
                 {/* Feature Icons - Inline */}
                 {(battle.generatedSong?.audioUrl ||
                   battle.votingEnabled ||
