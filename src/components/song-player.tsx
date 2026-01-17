@@ -260,7 +260,12 @@ export function SongPlayer({
 
         {/* Generated Info */}
         <div className="text-xs text-gray-500 text-center pt-2 border-t border-gray-800">
-          Generated on <ClientDate date={song.generatedAt} /> • Quality
+          Generated on{" "}
+          <ClientDate
+            date={song.generatedAt}
+            options={{ month: "long", day: "numeric", year: "numeric" }}
+          />{" "}
+          • Quality
           Matters&trade;
         </div>
       </CardContent>
