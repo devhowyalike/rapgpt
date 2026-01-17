@@ -71,21 +71,21 @@ function generateCspHeader(): string {
   const directives = [
     // Default to self only
     "default-src 'self'",
-    // Scripts: self, Clerk, inline scripts (needed for Next.js), and eval ONLY in dev
-    `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""} https://*.clerk.com https://*.clerk.accounts.dev`,
+    // Scripts: self, Clerk (including proxy domain), Cloudflare Insights, inline scripts (needed for Next.js), and eval ONLY in dev
+    `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""} https://*.clerk.com https://*.clerk.accounts.dev https://clerk.rapgpt.app https://static.cloudflareinsights.com`,
     // Styles: self, inline styles (needed for dynamic styling), Clerk
-    "style-src 'self' 'unsafe-inline' https://*.clerk.com",
+    "style-src 'self' 'unsafe-inline' https://*.clerk.com https://clerk.rapgpt.app",
     // Images: self, data URIs, Clerk, and blob URLs for generated content
-    "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com https://images.clerk.dev https://*.sunoapi.org",
+    "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com https://images.clerk.dev https://clerk.rapgpt.app https://*.sunoapi.org",
     // Fonts: self and data URIs
     "font-src 'self' data:",
-    // Connect: self, Clerk APIs, WebSocket, and Suno API
+    // Connect: self, Clerk APIs (including proxy domain), WebSocket, Suno API, and Cloudflare Insights
     // SECURITY: localhost WebSocket origins only allowed in development
-    `connect-src 'self' ${wsUrlsString} https://*.clerk.com https://*.clerk.accounts.dev wss://*.clerk.com https://api.sunoapi.org${isDev ? " ws://localhost:* wss://localhost:*" : ""}`,
+    `connect-src 'self' ${wsUrlsString} https://*.clerk.com https://*.clerk.accounts.dev https://clerk.rapgpt.app wss://*.clerk.com https://api.sunoapi.org https://cloudflareinsights.com${isDev ? " ws://localhost:* wss://localhost:*" : ""}`,
     // Media: self and Suno audio URLs
     "media-src 'self' https://*.sunoapi.org https://*.suno.ai blob:",
     // Frames: self and Clerk (for auth popups)
-    "frame-src 'self' https://*.clerk.com https://*.clerk.accounts.dev",
+    "frame-src 'self' https://*.clerk.com https://*.clerk.accounts.dev https://clerk.rapgpt.app",
     // Frame ancestors: self only (prevents clickjacking)
     "frame-ancestors 'self'",
     // Form actions: self only
