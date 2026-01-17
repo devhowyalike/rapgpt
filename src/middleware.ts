@@ -24,19 +24,49 @@ const isPublicRoute = createRouteMatcher([
  * - Middleware runs at REQUEST time, using actual runtime environment
  * - This prevents dev CSP from being deployed to production (or vice versa)
  */
+/**
+ * Convert an HTTP(S) origin to its WebSocket equivalent
+ * https://example.com -> wss://example.com
+ * http://example.com -> ws://example.com
+ */
+function toWebSocketUrl(origin: string): string {
+  if (origin.startsWith("https://")) {
+    return origin.replace("https://", "wss://");
+  }
+  if (origin.startsWith("http://")) {
+    return origin.replace("http://", "ws://");
+  }
+  return "";
+}
+
 function generateCspHeader(): string {
   const isDev = process.env.NODE_ENV === "development";
 
-  // Derive WebSocket URL from app URL for CSP
-  // Normalize to remove trailing slashes before converting to WebSocket URL
+  // Collect WebSocket URLs from all configured sources
+  // This must match the origins accepted by server.ts isValidWebSocketOrigin()
+  const wsUrls: string[] = [];
+
+  // 1. From NEXT_PUBLIC_APP_URL
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
   const normalizedAppUrl = appUrl ? normalizeToOrigin(appUrl) : "";
-  // Convert HTTP(S) URL to WebSocket URL (wss:// for https://, ws:// for http://)
-  const wsUrl = normalizedAppUrl
-    ? normalizedAppUrl.startsWith("https://")
-      ? normalizedAppUrl.replace("https://", "wss://")
-      : normalizedAppUrl.replace("http://", "ws://")
-    : "";
+  if (normalizedAppUrl) {
+    wsUrls.push(toWebSocketUrl(normalizedAppUrl));
+  }
+
+  // 2. From ALLOWED_WS_ORIGINS (must match server.ts configuration)
+  const allowedWsOrigins = process.env.ALLOWED_WS_ORIGINS;
+  if (allowedWsOrigins) {
+    const origins = allowedWsOrigins
+      .split(",")
+      .map((o) => normalizeToOrigin(o.trim()))
+      .filter((o) => o !== "");
+    for (const origin of origins) {
+      wsUrls.push(toWebSocketUrl(origin));
+    }
+  }
+
+  // Deduplicate and join
+  const wsUrlsString = [...new Set(wsUrls)].filter(Boolean).join(" ");
 
   const directives = [
     // Default to self only
@@ -51,7 +81,7 @@ function generateCspHeader(): string {
     "font-src 'self' data:",
     // Connect: self, Clerk APIs, WebSocket, and Suno API
     // SECURITY: localhost WebSocket origins only allowed in development
-    `connect-src 'self' ${wsUrl} https://*.clerk.com https://*.clerk.accounts.dev wss://*.clerk.com https://api.sunoapi.org${isDev ? " ws://localhost:* wss://localhost:*" : ""}`,
+    `connect-src 'self' ${wsUrlsString} https://*.clerk.com https://*.clerk.accounts.dev wss://*.clerk.com https://api.sunoapi.org${isDev ? " ws://localhost:* wss://localhost:*" : ""}`,
     // Media: self and Suno audio URLs
     "media-src 'self' https://*.sunoapi.org https://*.suno.ai blob:",
     // Frames: self and Clerk (for auth popups)

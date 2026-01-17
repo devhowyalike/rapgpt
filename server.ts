@@ -44,8 +44,8 @@ const port = parseInt(process.env.PORT || "3000", 10);
 // Invalid URLs are filtered out (normalizeToOrigin returns empty string for invalid URLs)
 const ALLOWED_WS_ORIGINS = process.env.ALLOWED_WS_ORIGINS
   ? process.env.ALLOWED_WS_ORIGINS.split(",")
-      .map((o) => normalizeToOrigin(o.trim()))
-      .filter((o) => o !== "") // Filter out invalid URLs
+    .map((o) => normalizeToOrigin(o.trim()))
+    .filter((o) => o !== "") // Filter out invalid URLs
   : dev
     ? [
       `http://localhost:${port}`,
@@ -73,18 +73,10 @@ if (!dev && ALLOWED_WS_ORIGINS.length === 0 && !process.env.NEXT_PUBLIC_APP_URL)
  * Returns true if origin is allowed, false otherwise
  */
 function isValidWebSocketOrigin(origin: string | undefined): boolean {
-  // In development, be more permissive
+  // In development, allow all origins for easier testing
+  // (LAN devices, proxies, different ports, etc.)
   if (dev) {
-    // Allow connections without origin (e.g., from curl/postman for testing)
-    if (!origin) return true;
-    // Allow localhost variants
-    if (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
-      return true;
-    }
-    // Allow ngrok for local testing
-    if (origin.includes(".ngrok.app") || origin.includes(".ngrok.io")) {
-      return true;
-    }
+    return true;
   }
 
   // In production, require origin and validate against allowlist
