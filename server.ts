@@ -41,8 +41,11 @@ const port = parseInt(process.env.PORT || "3000", 10);
 // In production, restrict to your domain(s). In dev, allow localhost.
 // Priority: ALLOWED_WS_ORIGINS > NEXT_PUBLIC_APP_URL > localhost (dev only)
 // Note: Origins are normalized to remove trailing slashes (browser Origin headers never include them)
+// Invalid URLs are filtered out (normalizeToOrigin returns empty string for invalid URLs)
 const ALLOWED_WS_ORIGINS = process.env.ALLOWED_WS_ORIGINS
-  ? process.env.ALLOWED_WS_ORIGINS.split(",").map((o) => normalizeToOrigin(o.trim()))
+  ? process.env.ALLOWED_WS_ORIGINS.split(",")
+      .map((o) => normalizeToOrigin(o.trim()))
+      .filter((o) => o !== "") // Filter out invalid URLs
   : dev
     ? [
       `http://localhost:${port}`,
@@ -100,13 +103,16 @@ function isValidWebSocketOrigin(origin: string | undefined): boolean {
   if (appUrl) {
     // Normalize to origin format and allow both http/https variations
     const normalizedAppUrl = normalizeToOrigin(appUrl);
-    const allowedFromEnv = [
-      normalizedAppUrl,
-      normalizedAppUrl.replace("https://", "http://"),
-      normalizedAppUrl.replace("http://", "https://"),
-    ];
-    if (allowedFromEnv.includes(origin)) {
-      return true;
+    // Skip if URL normalization failed (returns empty string for invalid URLs)
+    if (normalizedAppUrl) {
+      const allowedFromEnv = [
+        normalizedAppUrl,
+        normalizedAppUrl.replace("https://", "http://"),
+        normalizedAppUrl.replace("http://", "https://"),
+      ];
+      if (allowedFromEnv.includes(origin)) {
+        return true;
+      }
     }
   }
 
