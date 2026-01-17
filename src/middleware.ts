@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { normalizeToOrigin } from "@/lib/url-utils";
 
 // Define public routes that don't require authentication
 const isPublicRoute = createRouteMatcher([
@@ -25,11 +26,13 @@ const isPublicRoute = createRouteMatcher([
  */
 function generateCspHeader(): string {
   const isDev = process.env.NODE_ENV === "development";
-  
+
   // Derive WebSocket URL from app URL for CSP
+  // Normalize to remove trailing slashes before converting to WebSocket URL
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
-  const wsUrl = appUrl
-    ? appUrl.replace("https://", "wss://").replace("http://", "ws://")
+  const normalizedAppUrl = appUrl ? normalizeToOrigin(appUrl) : "";
+  const wsUrl = normalizedAppUrl
+    ? normalizedAppUrl.replace("https://", "wss://").replace("http://", "ws://")
     : "";
 
   const directives = [

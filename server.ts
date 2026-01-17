@@ -20,6 +20,7 @@ import next from "next";
 import { parse } from "url";
 import { networkInterfaces } from "os";
 import { WebSocket, WebSocketServer } from "ws";
+import { normalizeToOrigin } from "./src/lib/url-utils";
 import { setWebSocketServer } from "./src/lib/websocket/server";
 import {
   cleanupStaleLiveBattles,
@@ -39,8 +40,9 @@ const port = parseInt(process.env.PORT || "3000", 10);
 // SECURITY: Allowed origins for WebSocket connections
 // In production, restrict to your domain(s). In dev, allow localhost.
 // Priority: ALLOWED_WS_ORIGINS > NEXT_PUBLIC_APP_URL > localhost (dev only)
+// Note: Origins are normalized to remove trailing slashes (browser Origin headers never include them)
 const ALLOWED_WS_ORIGINS = process.env.ALLOWED_WS_ORIGINS
-  ? process.env.ALLOWED_WS_ORIGINS.split(",").map((o) => o.trim())
+  ? process.env.ALLOWED_WS_ORIGINS.split(",").map((o) => normalizeToOrigin(o.trim()))
   : dev
     ? [
       `http://localhost:${port}`,
@@ -96,11 +98,12 @@ function isValidWebSocketOrigin(origin: string | undefined): boolean {
   // Check environment variable for app URL
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
   if (appUrl) {
-    // Allow the configured app URL and common variations
+    // Normalize to origin format and allow both http/https variations
+    const normalizedAppUrl = normalizeToOrigin(appUrl);
     const allowedFromEnv = [
-      appUrl,
-      appUrl.replace("https://", "http://"),
-      appUrl.replace("http://", "https://"),
+      normalizedAppUrl,
+      normalizedAppUrl.replace("https://", "http://"),
+      normalizedAppUrl.replace("http://", "https://"),
     ];
     if (allowedFromEnv.includes(origin)) {
       return true;
