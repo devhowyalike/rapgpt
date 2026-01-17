@@ -57,21 +57,21 @@ export function PersonaContextInput({
         <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 relative z-10 flex flex-col flex-1 pb-48">
+      <div className="container mx-auto px-4 relative z-10 flex flex-col flex-1 pb-44 md:pb-48">
         {/* Header Section */}
-        <div className="text-center mb-6 lg:mb-8 animate-slide-up">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-wide font-(family-name:--font-bebas-neue)">
+        <div className="text-center mb-4 md:mb-8 animate-slide-up">
+          <h1 className="text-3xl md:text-6xl font-bold tracking-wide font-(family-name:--font-bebas-neue)">
             <span className="bg-linear-to-r from-white via-gray-200 to-gray-400 text-transparent bg-clip-text pr-2 uppercase">
               CHECK THE RHIME
             </span>
           </h1>
           <p className="text-gray-400 mt-2 text-sm md:text-base">
-            Optional: Give {persona.name} specific battle instructions
+            Give {persona.name} specific battle instructions
           </p>
         </div>
 
         {/* Main Content Area */}
-        <div className="flex flex-col items-center justify-start max-w-2xl mx-auto w-full gap-6 flex-1">
+        <div className="flex flex-col items-center justify-start max-w-2xl mx-auto w-full gap-4 md:gap-6 flex-1">
           {/* Persona Preview */}
           <div className="flex flex-col items-center gap-3 animate-slide-up [animation-delay:100ms]">
             {/* Avatar */}
@@ -113,28 +113,29 @@ export function PersonaContextInput({
           <div className="w-full animate-slide-up [animation-delay:200ms]">
             <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-4 md:p-6 shadow-2xl">
               <label className="block text-sm font-bold text-white mb-2 uppercase tracking-wider">
-                Battle Context{" "}
-                <span className="text-gray-400 font-normal lowercase">(optional)</span>
+                Customize their Lyrics{" "}
+                <span className="text-white/40 font-normal lowercase">(optional)</span>
               </label>
               <Textarea
                 value={customContext}
                 onChange={handleContextChange}
-                placeholder={`e.g., "Rap about the Philadelphia Eagles" or "Diss their sneakers"`}
+                placeholder={`e.g., "Diss their sneakers" or "Rap about the Philadelphia Eagles"`}
                 className={cn(
-                  "w-full bg-black/20 border-white/30 text-white placeholder:text-white/40 resize-none min-h-[120px] text-lg md:text-xl p-4 transition-all duration-200",
+                  "w-full bg-black/60 border-white/10 text-white placeholder:text-white/50 resize-none min-h-[120px] text-lg md:text-xl p-4 transition-all duration-200",
                   focusBorderClass,
                   "focus:ring-1 focus:ring-white/20 focus-visible:ring-0"
                 )}
                 maxLength={MAX_CONTEXT_LENGTH}
               />
-              <div className="flex justify-between items-center mt-3">
-                <p className="text-sm text-gray-300 italic">
-                  This context will be used to guide the AI during the battle
+              <div className="flex justify-between items-start gap-4 mt-3">
+                <p className="text-[10px] md:text-xs text-white/50 flex items-start gap-1.5 italic leading-tight">
+                  <span className="text-sm not-italic shrink-0">⚠️</span> 
+                  <span>Inappropriate or explicit content will be automatically filtered.</span>
                 </p>
                 <span
                   className={cn(
-                    "text-sm font-mono font-bold",
-                    isNearLimit ? "text-yellow-400" : "text-gray-400",
+                    "text-xs md:text-sm font-mono font-bold whitespace-nowrap pt-0.5",
+                    isNearLimit ? "text-yellow-400" : "text-white/60",
                     charactersRemaining === 0 && "text-red-500"
                   )}
                 >
@@ -146,13 +147,13 @@ export function PersonaContextInput({
 
           {/* Example Prompts */}
           <div className="w-full animate-slide-up [animation-delay:300ms]">
-            <p className="text-sm text-gray-400 mb-3 text-center font-medium">Try these prompts:</p>
-            <div className="flex flex-wrap justify-center gap-2">
+            <p className="text-xs md:text-sm text-white/50 mb-3 text-center font-medium">Try these prompts:</p>
+            <div className="flex flex-wrap justify-center gap-1.5 md:gap-2">
               {[
-                "Rap about tech startups",
                 "Diss their fashion sense",
                 "Focus on their hometown",
                 "Make it about food",
+                "Rhyme in metaphors about Hanna-Barbera cartoons",
               ].map((example) => (
                 <button
                   key={example}
@@ -161,7 +162,7 @@ export function PersonaContextInput({
                       onContextChange(example);
                     }
                   }}
-                  className="px-4 py-2 text-sm bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-full text-gray-300 hover:text-white transition-all shadow-sm"
+                  className="px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm bg-white/10 hover:bg-white/20 border border-white/5 hover:border-white/20 rounded-full text-white/90 hover:text-white transition-all shadow-sm"
                 >
                   {example}
                 </button>
@@ -177,7 +178,7 @@ export function PersonaContextInput({
           <div className="flex flex-col gap-3">
             <button
               onClick={onContinue}
-              className="w-full px-8 md:px-12 py-4 rounded-lg font-black text-lg tracking-wider transition-all duration-300 transform bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.8)] text-white shadow-lg shadow-yellow-500/20"
+              className="w-full px-8 md:px-12 py-3.5 md:py-4 rounded-lg font-black text-lg tracking-wider transition-all duration-300 transform bg-linear-to-r from-yellow-400 via-orange-500 to-red-600 hover:scale-105 hover:shadow-[0_0_40px_rgba(251,191,36,0.8)] text-white shadow-lg shadow-yellow-500/20"
             >
               {customContext.trim() ? "CONTINUE" : "SKIP & CONTINUE"}
             </button>
