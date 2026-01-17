@@ -6,13 +6,16 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Download, Music2, Pause, Play, Volume2 } from "lucide-react";
+import { Download, Pause, Play, Share2, Volume2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { ClientDate } from "@/components/client-date";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
+import { APP_TITLE } from "@/lib/constants";
 import type { SongGenerationBeatStyle } from "@/lib/shared/battle-types";
+import { copyToClipboard } from "@/lib/utils";
 
 interface SongPlayerProps {
   song: {
@@ -145,6 +148,48 @@ export function SongPlayer({
     link.click();
   };
 
+  const handleShare = async () => {
+    // Build share URL with #song fragment to auto-open song drawer
+    const shareUrl = `${window.location.origin}${window.location.pathname}#song`;
+
+    // Prefer native share sheet on supported devices (mobile Safari/Chrome)
+    const isSecure = typeof window !== "undefined" ? window.isSecureContext : false;
+
+    if (
+      typeof navigator !== "undefined" &&
+      typeof window !== "undefined" &&
+      "share" in navigator &&
+      isSecure
+    ) {
+      try {
+        const shareData = {
+          title: `${song.title} - ${APP_TITLE}`,
+          url: shareUrl,
+        };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const canShare = (navigator as any).canShare
+          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (navigator as any).canShare(shareData)
+          : true;
+        if (!canShare) throw new Error("canShare returned false");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (navigator as any).share(shareData);
+        return;
+      } catch (err) {
+        // User canceled the sheet — no further action
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        // Fall through to clipboard copy
+      }
+    }
+
+    const ok = await copyToClipboard(shareUrl);
+    if (ok) {
+      toast.success("Link copied to clipboard");
+    } else {
+      toast.error("Couldn't copy link—please copy it manually from the address bar.");
+    }
+  };
+
   const beatStyleColors: Record<SongGenerationBeatStyle, string> = {
     "g-funk": "from-purple-600 to-pink-600",
     "boom-bap": "from-orange-600 to-red-600",
@@ -159,13 +204,7 @@ export function SongPlayer({
 
   return (
     <Card className="border-gray-800 bg-gray-900/50 backdrop-blur-sm">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl text-white">
-          <Music2 className="w-5 h-5 text-green-400" />
-          Generated Song
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pt-0">
         {/* Album Art & Info */}
         <div className="flex gap-4 items-center">
           {song.imageUrl ? (
@@ -234,33 +273,53 @@ export function SongPlayer({
               className="cursor-pointer"
             />
           </div>
-
-          {/* Download Button */}
-          <Button
-            onClick={handleDownload}
-            variant="outline"
-            size="lg"
-            className="w-16 h-16 rounded-full border-gray-700 hover:bg-gray-800"
-          >
-            <Download className="w-6 h-6" />
-          </Button>
         </div>
 
-        {/* Volume Control */}
-        <div className="flex items-center gap-3 pt-2">
-          <Volume2 className="w-4 h-4 text-gray-400" />
-          <Slider
-            value={[volume * 100]}
-            max={100}
-            step={1}
-            onValueChange={(value) => setVolume(value[0] / 100)}
-            className="w-24 cursor-pointer [&_[data-slot=slider-range]]:bg-white [&_[data-slot=slider-track]]:bg-gray-700"
-          />
+        {/* Volume Control & Actions */}
+        <div className="flex items-center justify-between gap-3 pt-2">
+          <div className="flex items-center gap-3">
+            <Volume2 className="w-4 h-4 text-gray-400" />
+            <Slider
+              value={[volume * 100]}
+              max={100}
+              step={1}
+              onValueChange={(value) => setVolume(value[0] / 100)}
+              className="w-24 cursor-pointer **:data-[slot=slider-range]:bg-white **:data-[slot=slider-track]:bg-gray-700"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Download Button */}
+            <Button
+              onClick={handleDownload}
+              variant="outline"
+              size="sm"
+              className="w-9 h-9 rounded-full bg-blue-600 border-blue-500 hover:bg-blue-700 hover:border-blue-400 text-white"
+              title="Download song"
+            >
+              <Download className="w-4 h-4" />
+            </Button>
+            {/* Share Button */}
+            <Button
+              onClick={handleShare}
+              variant="outline"
+              size="sm"
+              className="w-9 h-9 rounded-full bg-green-600 border-green-500 hover:bg-green-700 hover:border-green-400 text-white"
+              title="Share song"
+            >
+              <Share2 className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Generated Info */}
         <div className="text-xs text-gray-500 text-center pt-2 border-t border-gray-800">
-          Generated on <ClientDate date={song.generatedAt} /> • Quality
+          Generated on{" "}
+          <ClientDate
+            date={song.generatedAt}
+            options={{ month: "long", day: "numeric", year: "numeric" }}
+          />{" "}
+          • Quality
           Matters&trade;
         </div>
       </CardContent>

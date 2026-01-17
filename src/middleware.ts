@@ -78,7 +78,7 @@ function generateCspHeader(): string {
     // Styles: self, inline styles (needed for dynamic styling), Clerk
     "style-src 'self' 'unsafe-inline' https://*.clerk.com https://clerk.rapgpt.app",
     // Images: self, data URIs, Clerk, and blob URLs for generated content
-    "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com https://images.clerk.dev https://clerk.rapgpt.app https://*.sunoapi.org https://musicfile.api.box",
+    "img-src 'self' data: blob: https://*.clerk.com https://img.clerk.com https://images.clerk.dev https://clerk.rapgpt.app https://*.sunoapi.org https://musicfile.api.box https://*.aiquickdraw.com",
     // Fonts: self and data URIs
     "font-src 'self' data:",
     // Connect: self, Clerk APIs (including proxy domain), WebSocket, Suno API, and Cloudflare Insights
