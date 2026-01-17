@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
-// Security headers for all responses
+/**
+ * Security headers for all responses
+ * 
+ * NOTE: Content-Security-Policy is NOT included here because it requires
+ * runtime evaluation of NODE_ENV. CSP is set in middleware.ts instead.
+ * See: src/middleware.ts generateCspHeader()
+ */
 const securityHeaders = [
   {
     // Prevent clickjacking attacks by disallowing embedding in frames
@@ -52,8 +58,8 @@ const nextConfig: NextConfig = {
     removeConsole:
       process.env.NODE_ENV === "production"
         ? {
-            exclude: ["error"],
-          }
+          exclude: ["error"],
+        }
         : false,
   },
   // Apply security headers to all routes

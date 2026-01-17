@@ -9,6 +9,7 @@ import {
   buildSystemPrompt,
   getFirstVerseMessage,
 } from "@/lib/context-overrides";
+import { logError } from "@/lib/error-utils";
 import {
   checkRateLimit,
   createRateLimitResponse,
@@ -291,13 +292,10 @@ export async function POST(req: Request) {
               status: "completed",
             });
           } catch (err) {
-            console.error(
-              "[Generate Verse] Failed to record token usage:",
-              err,
-            );
+            logError("Generate Verse Token Usage", err);
           }
         } catch (error) {
-          console.error("[Generate Verse] Error in live broadcast:", error);
+          logError("Generate Verse Live Broadcast", error);
           // Broadcast verse:complete to clear client streaming state
           // Always send empty string on error - partial verses should NOT be added
           // Client validation checks for non-empty text, so empty string gets skipped
@@ -311,7 +309,7 @@ export async function POST(req: Request) {
               round: battle.currentRound,
             } as VerseCompleteEvent);
           } catch (broadcastErr) {
-            console.error("[Generate Verse] Failed to broadcast error state:", broadcastErr);
+            logError("Generate Verse Broadcast Error", broadcastErr);
           }
         }
       })();
@@ -349,10 +347,7 @@ export async function POST(req: Request) {
               status: "completed",
             });
           } catch (err) {
-            console.error(
-              "[Generate Verse] Failed to record token usage:",
-              err,
-            );
+            logError("Generate Verse Token Usage", err);
           }
 
           controller.close();
@@ -368,7 +363,7 @@ export async function POST(req: Request) {
       },
     });
   } catch (error) {
-    console.error("Error generating verse:", error);
+    logError("Generate Verse", error);
     return new Response(JSON.stringify({ error: "Failed to generate verse" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

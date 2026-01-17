@@ -20,6 +20,7 @@ import next from "next";
 import { parse } from "url";
 import { networkInterfaces } from "os";
 import { WebSocket, WebSocketServer } from "ws";
+import { normalizeToOrigin } from "./src/lib/url-utils";
 import { setWebSocketServer } from "./src/lib/websocket/server";
 import {
   cleanupStaleLiveBattles,
@@ -35,6 +36,83 @@ import type { ClientMessage, WebSocketEvent } from "./src/lib/websocket/types";
 const dev = process.env.NODE_ENV !== "production";
 const hostname = process.env.HOSTNAME || "localhost";
 const port = parseInt(process.env.PORT || "3000", 10);
+
+// SECURITY: Allowed origins for WebSocket connections
+// In production, restrict to your domain(s). In dev, allow localhost.
+// Priority: ALLOWED_WS_ORIGINS > NEXT_PUBLIC_APP_URL > localhost (dev only)
+// Note: Origins are normalized to remove trailing slashes (browser Origin headers never include them)
+// Invalid URLs are filtered out (normalizeToOrigin returns empty string for invalid URLs)
+const ALLOWED_WS_ORIGINS = process.env.ALLOWED_WS_ORIGINS
+  ? process.env.ALLOWED_WS_ORIGINS.split(",")
+    .map((o) => normalizeToOrigin(o.trim()))
+    .filter((o) => o !== "") // Filter out invalid URLs
+  : dev
+    ? [
+      `http://localhost:${port}`,
+      `http://127.0.0.1:${port}`,
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+    ]
+    : [];
+
+// SECURITY: Validate WebSocket origin configuration at startup
+// In production, at least one origin source must be configured
+if (!dev && ALLOWED_WS_ORIGINS.length === 0 && !process.env.NEXT_PUBLIC_APP_URL) {
+  console.error(
+    "FATAL: WebSocket origin validation is misconfigured in production.\n" +
+    "All WebSocket connections will be rejected without proper origin configuration.\n" +
+    "Please set one of the following environment variables:\n" +
+    "  - NEXT_PUBLIC_APP_URL (recommended): Your app's public URL (e.g., https://rapgpt.app)\n" +
+    "  - ALLOWED_WS_ORIGINS: Comma-separated list of allowed origins\n"
+  );
+  process.exit(1);
+}
+
+/**
+ * Validate WebSocket connection origin to prevent cross-site WebSocket hijacking
+ * Returns true if origin is allowed, false otherwise
+ */
+function isValidWebSocketOrigin(origin: string | undefined): boolean {
+  // In development, allow all origins for easier testing
+  // (LAN devices, proxies, different ports, etc.)
+  if (dev) {
+    return true;
+  }
+
+  // In production, require origin and validate against allowlist
+  if (!origin) {
+    console.warn("[WS Security] Connection rejected: no origin header");
+    return false;
+  }
+
+  // Check against allowed origins
+  if (ALLOWED_WS_ORIGINS.length > 0 && ALLOWED_WS_ORIGINS.includes(origin)) {
+    return true;
+  }
+
+  // Check environment variable for app URL
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (appUrl) {
+    // Normalize to origin format and allow both http/https variations
+    const normalizedAppUrl = normalizeToOrigin(appUrl);
+    // Skip if URL normalization failed (returns empty string for invalid URLs)
+    if (normalizedAppUrl) {
+      // Build allowed origins list: the configured URL plus its http/https counterpart
+      const allowedFromEnv = [normalizedAppUrl];
+      if (normalizedAppUrl.startsWith("https://")) {
+        allowedFromEnv.push(normalizedAppUrl.replace("https://", "http://"));
+      } else if (normalizedAppUrl.startsWith("http://")) {
+        allowedFromEnv.push(normalizedAppUrl.replace("http://", "https://"));
+      }
+      if (allowedFromEnv.includes(origin)) {
+        return true;
+      }
+    }
+  }
+
+  console.warn(`[WS Security] Connection rejected: invalid origin "${origin}"`);
+  return false;
+}
 
 // SECURITY: Require CLERK_SECRET_KEY for WebSocket admin verification
 if (!dev && !process.env.CLERK_SECRET_KEY) {
@@ -214,7 +292,7 @@ function joinBattleRoom(battleId: string, client: ClientConnection) {
   console.log(
     `[WS] Client ${client.clientId} joined battle ${battleId}. Room size: ${battleRooms.get(battleId)?.size}`,
   );
-  
+
   // Start cleanup interval when first battle room is created
   if (isNewRoom && !battleId.startsWith("__")) {
     startCleanupIntervalIfNeeded();
@@ -242,7 +320,7 @@ function leaveBattleRoom(battleId: string, client: ClientConnection) {
       battleRooms.delete(battleId);
       battleRoomMetadata.delete(battleId);
       console.log(`[WS] Room ${battleId} is empty, removed (including metadata)`);
-      
+
       // Stop cleanup interval if no active battle rooms remain
       if (!battleId.startsWith("__")) {
         stopCleanupIntervalIfEmpty();
@@ -545,6 +623,15 @@ app.prepare().then(async () => {
     const { pathname } = parse(request.url || "", true);
 
     if (pathname === "/ws") {
+      // SECURITY: Validate origin header to prevent cross-site WebSocket hijacking
+      const origin = request.headers.origin;
+      if (!isValidWebSocketOrigin(origin)) {
+        console.warn(`[WS Security] Rejected upgrade from origin: ${origin || "none"}`);
+        socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
+        socket.destroy();
+        return;
+      }
+
       // Handle our custom WebSocket endpoint
       wss.handleUpgrade(request, socket, head, (ws) => {
         wss.emit("connection", ws, request);
@@ -585,7 +672,7 @@ app.prepare().then(async () => {
             // Join new room
             connection.battleId = message.battleId;
             connection.clientId = message.clientId || `client-${Date.now()}`;
-            
+
             // SECURITY: Verify admin status server-side if client claims to be admin
             // Don't trust client-provided isAdmin flag without verification
             let isVerifiedAdmin = false;
